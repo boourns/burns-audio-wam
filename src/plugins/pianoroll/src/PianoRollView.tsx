@@ -1,5 +1,5 @@
 import { Component, h } from 'preact';
-import { svg_rectangle, svg_text, svg_line } from '../../../src/views/svg'
+import { svg_rectangle, svg_text, svg_line } from '../../shared/ui/svg'
 //import { ClipSettingsView } from './ClipSettingsView'
 import { NoteDefinition } from '../../extensions/notes/NoteExtension';
 import PianoRollModule from '.';

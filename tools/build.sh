@@ -2,6 +2,9 @@
 
 set -e
 
+echo "===== Submodules ====="
+git submodule update --init --recursive
+
 echo "===== Building SDK ===="
 cd src/plugins/sdk
 yarn install
