@@ -1,0 +1,27 @@
+{
+  "name": "burns-audio-wam",
+  "version": "0.1.0",
+  "description": "My collection of Web Audio Modules (WAMs)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boourns/burns-audio-wam.git"
+  },
+  "keywords": [
+    "audio",
+    "wam",
+    "web-audio-module",
+    "music",
+    "synthesizer",
+    "effects"
+  ],
+  "author": "Tom Burns",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/boourns/burns-audio-wam/issues"
+  },
+  "homepage": "https://github.com/boourns/burns-audio-wam#readme"
+}

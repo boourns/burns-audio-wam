@@ -1,0 +1,11 @@
+{
+    "name": "DrumSampler",
+    "vendor": "Tom Burns",
+    "description": "DrumSampler WAM2 MIDI Instrument",
+    "version": "1.0.0",
+    "sdkVersion": "1.0.0",
+    "thumbnail": "",
+    "keywords": ["drum-machine"],
+    "isInstrument": true,
+    "website": ""
+}

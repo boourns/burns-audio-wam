@@ -1,0 +1,11 @@
+{
+    "name": "Step Sequencing Modulator",
+    "vendor": "Tom Burns",
+    "description": "WAM2 Step Modulator",
+    "version": "1.0.0",
+    "sdkVersion": "1.0.0",
+    "thumbnail": "",
+    "keywords": ["sequencer", "modulator"],
+    "isInstrument": false,
+    "website": ""
+}

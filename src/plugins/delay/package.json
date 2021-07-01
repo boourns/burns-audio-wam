@@ -1,0 +1,37 @@
+{
+  "name": "delay",
+  "version": "0.0.0",
+  "description": "> TODO: description",
+  "author": "Tom Burns <tom@burns.ca>",
+  "homepage": "https://github.com/53js/webaudiomodule#readme",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "del dist",
+    "build": "./node_modules/.bin/rollup -c"
+  },
+  "dependencies": {
+    "@babel/core": "^7.12.16",
+    "@babel/plugin-proposal-class-properties": "^7.13.0",
+    "@babel/plugin-syntax-import-meta": "^7.10.4",
+    "@babel/preset-env": "^7.13.10",
+    "@babel/preset-typescript": "^7.13.0",
+    "@rollup/plugin-babel": "^5.3.0",
+    "@rollup/plugin-commonjs": "^17.1.0",
+    "@rollup/plugin-node-resolve": "^11.2.0",
+    "@rollup/plugin-replace": "^2.4.1",
+    "@surma/rollup-plugin-off-main-thread": "^2.1.0",
+    "preact": "^10.5.5",
+    "rollup": "^2.42.1",
+    "rollup-plugin-copy": "^3.4.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "sdk": "^0.0.0"
+  },
+  "devDependencies": {
+    "@babel/preset-react": "^7.12.13",
+    "ts-loader": "^8.0.12",
+    "typescript": "^4.0.2",
+    "webpack": "^5.11.1",
+    "webpack-cli": "^4.3.0"
+  }
+}

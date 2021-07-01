@@ -1,0 +1,11 @@
+{
+    "name": "Piano Roll",
+    "vendor": "Tom Burns",
+    "description": "WAM2 Piano Roll",
+    "version": "1.0.0",
+    "sdkVersion": "1.0.0",
+    "thumbnail": "",
+    "keywords": ["sequencer", "midi"],
+    "isInstrument": false,
+    "website": ""
+}

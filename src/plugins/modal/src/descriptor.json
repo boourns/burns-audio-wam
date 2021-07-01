@@ -1,0 +1,11 @@
+{
+    "name": "Spectrum: Modal",
+    "vendor": "TomBurns",
+    "description": "Port of a popular eurorack modal synthesizer",
+    "version": "1.0.0",
+    "sdkVersion": "1.0.0",
+    "thumbnail": "",
+    "keywords": ["synthesizer", "modal", "instrument"],
+    "isInstrument": true,
+    "website": ""
+}

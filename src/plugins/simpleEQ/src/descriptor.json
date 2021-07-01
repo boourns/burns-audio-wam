@@ -1,0 +1,11 @@
+{
+    "name": "SimpleEQ",
+    "vendor": "Tom",
+    "description": "SimpleEQ WAM2 Three-band EQ",
+    "version": "1.0.0",
+    "sdkVersion": "1.0.0",
+    "thumbnail": "",
+    "keywords": ["effect", "eq"],
+    "isInstrument": false,
+    "website": ""
+}

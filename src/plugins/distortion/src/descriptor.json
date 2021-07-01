@@ -1,0 +1,11 @@
+{
+    "name": "Distortion",
+    "vendor": "Tom Burns",
+    "description": "WAM2 Distortion",
+    "version": "1.0.0",
+    "sdkVersion": "1.0.0",
+    "thumbnail": "",
+    "keywords": ["effect", "distortion"],
+    "isInstrument": false,
+    "website": ""
+}
