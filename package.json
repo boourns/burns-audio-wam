@@ -23,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/boourns/burns-audio-wam/issues"
   },
-  "homepage": "https://github.com/boourns/burns-audio-wam#readme"
+  "homepage": "https://github.com/boourns/burns-audio-wam#readme",
+  "dependencies": {
+    "sdk": "53js/webaudiomodule#workspace=sdk"
+  }
 }
