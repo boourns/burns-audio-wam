@@ -5,12 +5,6 @@ set -e
 echo "===== Submodules ====="
 git submodule update --init --recursive
 
-echo "===== Building SDK ===="
-cd src/plugins/sdk
-yarn install
-yarn build
-cd ../../../
-
 plugins=()
 
 echo "===== Building ==== "
@@ -21,7 +15,7 @@ for i in *; do
       echo "Building $i"
 
       cd $i
-      npm i && npm run build
+      yarn install && yarn build
       plugins+=($i)
 
       cd ..

@@ -1466,6 +1466,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/debug@npm:^4.1.6":
+  version: 4.1.6
+  resolution: "@types/debug@npm:4.1.6"
+  checksum: f2816703a81f2cecb9fe575ed73f69378f190f92e49aab01b5b1832166cd89b19d4e85999c955f8993d3dba36e78ffd1ac5f697449eff13a6a13de309dc6e0f5
+  languageName: node
+  linkType: hard
+
 "@types/eslint-scope@npm:^3.7.0":
   version: 3.7.0
   resolution: "@types/eslint-scope@npm:3.7.0"
@@ -4062,12 +4069,13 @@ fsevents@~2.3.2:
     "@rollup/plugin-node-resolve": ^11.2.0
     "@rollup/plugin-replace": ^2.4.1
     "@surma/rollup-plugin-off-main-thread": ^2.1.0
+    "@types/debug": ^4.1.6
     debug: ^4.3.1
     preact: ^10.5.5
     rollup: ^2.42.1
     rollup-plugin-copy: ^3.4.0
     rollup-plugin-node-builtins: ^2.1.2
-    sdk: ^0.0.0
+    sdk: "53js/webaudiomodule#workspace=sdk"
     ts-loader: ^8.0.12
     typescript: ^4.0.2
     webpack: ^5.11.1
@@ -4464,10 +4472,10 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"sdk@npm:^0.0.0":
-  version: 0.0.0
-  resolution: "sdk@npm:0.0.0"
-  checksum: a07fc8cdac35c09aa64c5fe952b08f5e28291282350bf7cb16523bf5d3f6be2687968a538e38aa5324b683195fc131cad582a5babe179d51496108579438f32f
+"sdk@53js/webaudiomodule#workspace=sdk":
+  version: 0.0.1
+  resolution: "sdk@https://github.com/53js/webaudiomodule.git#workspace=sdk&commit=be4f89fa4f2800a39d2a743d5a9ac3947e04b3cc"
+  checksum: 19786a601c47dad27c34f53541350436a8be144545ea67063717f4c53d83013b3bbcc1d7fe4d6838de573185ceede440d8a12bdde8497edddd8a4469da33a3d7
   languageName: node
   linkType: hard
 
