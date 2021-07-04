@@ -2534,7 +2534,6 @@ __metadata:
     rollup: ^2.42.1
     rollup-plugin-copy: ^3.4.0
     rollup-plugin-node-builtins: ^2.1.2
-    sdk: "boourns/webaudiomodule#workspace=sdk"
     ts-loader: ^8.0.12
     typescript: ^4.0.2
     wam-extensions: ^0.1.1
@@ -4461,13 +4460,6 @@ fsevents@~2.3.2:
     ajv: ^6.12.5
     ajv-keywords: ^3.5.2
   checksum: a084f593f222560c412a4d8f40c92386c01c1c709f27c0672c2f02927a4d4d475f57f8b8e91198d0defb452add160476a03f07a05b26200a64b5124fa874e158
-  languageName: node
-  linkType: hard
-
-"sdk@boourns/webaudiomodule#workspace=sdk":
-  version: 0.0.1
-  resolution: "sdk@https://github.com/boourns/webaudiomodule.git#workspace=sdk&commit=01f0b14240d23724b2fc64166eecddd171db6b8c"
-  checksum: ddd5ec867f8383b2405061d5d4b09e745db296a4483b23381d477d3043a699dde01da1fc1f82fbcf310838334827b8e4ca1dd9ba56c0221a6e28442b0e92a41c
   languageName: node
   linkType: hard
 

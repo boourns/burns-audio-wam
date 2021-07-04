@@ -2450,7 +2450,6 @@ __metadata:
     rollup: ^2.52.2
     rollup-plugin-copy: ^3.4.0
     rollup-plugin-node-builtins: 2.1.2
-    sdk: "boourns/webaudiomodule#workspace=sdk"
     typescript: ^4.3.4
   languageName: unknown
   linkType: soft
@@ -4278,13 +4277,6 @@ fsevents@~2.3.2:
   version: 2.1.2
   resolution: "safer-buffer@npm:2.1.2"
   checksum: 549ba83f5b314b59898efe3422120ce1ca7987a6eae5925a5fa5db930dc414d4a9dde0a5594f89638cd6ea60b6840ea961872908933ac2428d1726489db46fa5
-  languageName: node
-  linkType: hard
-
-"sdk@boourns/webaudiomodule#workspace=sdk":
-  version: 0.0.1
-  resolution: "sdk@https://github.com/boourns/webaudiomodule.git#workspace=sdk&commit=01f0b14240d23724b2fc64166eecddd171db6b8c"
-  checksum: ddd5ec867f8383b2405061d5d4b09e745db296a4483b23381d477d3043a699dde01da1fc1f82fbcf310838334827b8e4ca1dd9ba56c0221a6e28442b0e92a41c
   languageName: node
   linkType: hard
 

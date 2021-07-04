@@ -23,7 +23,7 @@ __metadata:
 
 "sdk@boourns/webaudiomodule#workspace=sdk":
   version: 0.0.1
-  resolution: "sdk@https://github.com/boourns/webaudiomodule.git#workspace=sdk&commit=01f0b14240d23724b2fc64166eecddd171db6b8c"
-  checksum: ddd5ec867f8383b2405061d5d4b09e745db296a4483b23381d477d3043a699dde01da1fc1f82fbcf310838334827b8e4ca1dd9ba56c0221a6e28442b0e92a41c
+  resolution: "sdk@https://github.com/boourns/webaudiomodule.git#workspace=sdk&commit=ebc2ee1297c395a2afc73259ec1918d066290507"
+  checksum: 059c0b3f541fac9f5a0d023179a76dc932eac26f1cd9908990e6a8917267e005c0570131f2b7862b4035c5746bc20fcec80046744695c047fd4fa56af48e5da2
   languageName: node
   linkType: hard

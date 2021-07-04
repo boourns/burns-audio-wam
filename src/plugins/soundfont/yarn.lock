@@ -4482,13 +4482,6 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"sdk@boourns/webaudiomodule#workspace=sdk":
-  version: 0.0.1
-  resolution: "sdk@https://github.com/boourns/webaudiomodule.git#workspace=sdk&commit=01f0b14240d23724b2fc64166eecddd171db6b8c"
-  checksum: ddd5ec867f8383b2405061d5d4b09e745db296a4483b23381d477d3043a699dde01da1fc1f82fbcf310838334827b8e4ca1dd9ba56c0221a6e28442b0e92a41c
-  languageName: node
-  linkType: hard
-
 "semver@npm:7.0.0":
   version: 7.0.0
   resolution: "semver@npm:7.0.0"
@@ -4641,7 +4634,6 @@ fsevents@~2.3.2:
     rollup: ^2.42.1
     rollup-plugin-copy: ^3.4.0
     rollup-plugin-node-builtins: ^2.1.2
-    sdk: "boourns/webaudiomodule#workspace=sdk"
     soundfont-player: ^0.12.0
     ts-loader: ^8.0.12
     typescript: ^4.0.2
