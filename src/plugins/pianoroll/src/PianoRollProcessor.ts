@@ -1,4 +1,4 @@
-import { WamTransportEvent, WamTransportEvent2 } from "../../sdk/src/api/types";
+import { WamTransportEvent, WamTransportEvent2 } from "sdk/src/api/types";
 import { MIDI } from "../../shared/midi";
 import { Clip, PPQN } from "./Clip";
 

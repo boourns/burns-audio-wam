@@ -1,4 +1,4 @@
-import { WamParameterInfo, WamTransportEvent, WamTransportEvent2 } from "../../sdk/src/api/types";
+import { WamParameterInfo, WamTransportEvent, WamTransportEvent2 } from "sdk/src/api/types";
 import { Clip, PPQN } from "./Clip";
 import {debug} from "debug"
 import { StepModulatorView } from "./StepModulatorView";

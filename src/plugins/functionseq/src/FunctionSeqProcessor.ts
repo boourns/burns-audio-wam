@@ -1,25 +1,17 @@
 import { MIDI } from "../../shared/midi";
 
 import {debug} from "debug"
-import { WamMidiEvent, WamTransportEvent2 } from "../../sdk/src/api/types";
+import { WamMidiEvent, WamTransportEvent2 } from "sdk/src/api/types";
 
-import WamParameterInterpolator from "../../sdk/src/WamParameterInterpolator"
-import {WamParameterNoSab, WamParameterSab} from "../../sdk/src/WamParameter"
-import WamProcessor from "../../sdk/src/WamProcessor";
-
-// @ts-ignore
-import wamEnvProcessor from "../../sdk/src/WamEnv.js";
+import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
+import WamProcessor from "sdk/src/WamProcessor";
 
 const PPQN = 96
 
 // @ts-ignore
-globalThis.WamParameterNoSab = WamParameterNoSab
-// @ts-ignore
-globalThis.WamParameterSab = WamParameterSab
-// @ts-ignore
 globalThis.WamParameterInterpolator = WamParameterInterpolator
 
-import WamParameterInfo from "../../sdk/src/WamParameterInfo";
+import WamParameterInfo from "sdk/src/WamParameterInfo";
 
 var logger = debug("plugin:functionSeq:processor")
 

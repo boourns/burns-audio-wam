@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-import { CompositeAudioNode, ParamMgrNode } from '../../sdk';
+import { CompositeAudioNode, ParamMgrNode } from 'sdk';
 import { constantSource, noiseSource } from '../../shared/util'
 import { MIDI, ScheduledMIDIEvent } from '../../shared/midi'
 

@@ -4283,8 +4283,8 @@ fsevents@~2.3.2:
 
 "sdk@boourns/webaudiomodule#workspace=sdk":
   version: 0.0.1
-  resolution: "sdk@https://github.com/boourns/webaudiomodule.git#workspace=sdk&commit=8c6baeaa654babed3c0819b6361f7fb566ac9ddd"
-  checksum: 8a6cb629535d321629abbe5302c6dc0e0d58da86437895ea02a09ada6b832546339d515a536bff654c9e57b3ff34f806f2052d6fc3adea7cc453c38aedc4762b
+  resolution: "sdk@https://github.com/boourns/webaudiomodule.git#workspace=sdk&commit=01f0b14240d23724b2fc64166eecddd171db6b8c"
+  checksum: ddd5ec867f8383b2405061d5d4b09e745db296a4483b23381d477d3043a699dde01da1fc1f82fbcf310838334827b8e4ca1dd9ba56c0221a6e28442b0e92a41c
   languageName: node
   linkType: hard
 

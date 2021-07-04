@@ -1,5 +1,3 @@
-import { MIDI } from "../../shared/midi";
-
 import {debug} from "debug"
 import { WamMidiEvent } from "sdk/src/api/types";
 
@@ -8,7 +6,7 @@ import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
 import WamProcessor from "sdk/src/WamProcessor";
 
 // @ts-ignore
-import wamEnvProcessor from "../../sdk/src/WamEnv.js";
+import wamEnvProcessor from "sdk/src/WamEnv.js";
 
 // @ts-ignore
 //globalThis.WamParameterNoSab = WamParameterNoSab

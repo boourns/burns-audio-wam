@@ -4,7 +4,7 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
-import { WebAudioModule, ParamMgrFactory, CompositeAudioNode, ParamMgrNode, WamParameterInfo } from '../../sdk/src';
+import { WebAudioModule, ParamMgrFactory, CompositeAudioNode, ParamMgrNode, WamParameterInfo } from 'sdk/src';
 import { h, render } from 'preact';
 import { StepModulatorView } from './StepModulatorView';
 import { getBaseUrl } from '../../shared/getBaseUrl';

@@ -3535,7 +3535,7 @@ fsevents@~2.3.2:
     rollup: ^2.42.1
     rollup-plugin-copy: ^3.4.0
     rollup-plugin-node-builtins: ^2.1.2
-    sdk: "53js/webaudiomodule#workspace=sdk"
+    sdk: "boourns/webaudiomodule#workspace=sdk"
     ts-loader: ^8.0.12
     typescript: ^4.0.2
     webpack: ^5.11.1
@@ -4463,10 +4463,10 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"sdk@53js/webaudiomodule#workspace=sdk":
+"sdk@boourns/webaudiomodule#workspace=sdk":
   version: 0.0.1
-  resolution: "sdk@https://github.com/53js/webaudiomodule.git#workspace=sdk&commit=be4f89fa4f2800a39d2a743d5a9ac3947e04b3cc"
-  checksum: 19786a601c47dad27c34f53541350436a8be144545ea67063717f4c53d83013b3bbcc1d7fe4d6838de573185ceede440d8a12bdde8497edddd8a4469da33a3d7
+  resolution: "sdk@https://github.com/boourns/webaudiomodule.git#workspace=sdk&commit=01f0b14240d23724b2fc64166eecddd171db6b8c"
+  checksum: ddd5ec867f8383b2405061d5d4b09e745db296a4483b23381d477d3043a699dde01da1fc1f82fbcf310838334827b8e4ca1dd9ba56c0221a6e28442b0e92a41c
   languageName: node
   linkType: hard
 

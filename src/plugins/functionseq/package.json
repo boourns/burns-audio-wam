@@ -22,11 +22,12 @@
     "@rollup/plugin-replace": "^2.4.1",
     "@surma/rollup-plugin-off-main-thread": "^2.1.0",
     "debug": "^4.3.1",
+    "monaco-editor": "^0.25.2",
     "preact": "^10.5.5",
     "rollup": "^2.42.1",
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-node-builtins": "^2.1.2",
-    "sdk": "53js/webaudiomodule#workspace=sdk"
+    "sdk": "boourns/webaudiomodule#workspace=sdk"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.12.13",
