@@ -36,7 +36,7 @@ class FunctionSeqNode extends WamNode {
 		}});
 
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
-		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi']);
+		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
 	}
 
 	upload(source: string) {
@@ -98,8 +98,6 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 		const descriptor = await response.json();
 		Object.assign(this.descriptor, descriptor);
 	}
-
-	functionProcessor: AudioWorkletNode
 
 	async initialize(state: any) {
 		await this._loadDescriptor();
