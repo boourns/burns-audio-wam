@@ -196,7 +196,7 @@ class StepModulatorProcessor extends AudioWorkletProcessor {
             return true
         }
         
-		if (this.transportData!.runFlags) {
+		if (this.transportData!.playing) {
 			var timeElapsed = currentTime - this.transportData!.currentBarStarted
             var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
             var tickPosition = Math.floor(beatPosition * PPQN)
