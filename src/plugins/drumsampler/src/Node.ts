@@ -1,10 +1,9 @@
 /* eslint-disable no-underscore-dangle */
-import { CompositeAudioNode, ParamMgrNode, WamParameterInfo } from '../../sdk';
+import { CompositeAudioNode, ParamMgrNode, WamParameterInfo } from 'sdk';
 import { MIDI, ScheduledMIDIEvent } from '../../shared/midi'
-import { NoteDefinition, NoteExtension } from '../../extensions'
+import { NoteDefinition, NoteExtension } from 'wam-extensions'
 
 import { AudioPool } from './AudioPool'
-import { WamParameterInfoMap } from '../../sdk/src/api/types';
 
 export const NUM_VOICES = 12
 

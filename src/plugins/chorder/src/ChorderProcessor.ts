@@ -1,23 +1,21 @@
-import { MIDI } from "../../shared/midi";
-
 import {debug} from "debug"
-import { WamMidiEvent } from "../../sdk/src/api/types";
+import { WamMidiEvent } from "sdk/src/api/types";
 
-import WamParameterInterpolator from "../../sdk/src/WamParameterInterpolator"
-import {WamParameterNoSab, WamParameterSab} from "../../sdk/src/WamParameter"
-import WamProcessor from "../../sdk/src/WamProcessor";
-
-// @ts-ignore
-import wamEnvProcessor from "../../sdk/src/WamEnv.js";
+import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
+//import {WamParameterNoSab, WamParameterSab} from "sdk/src/WamParameter"
+import WamProcessor from "sdk/src/WamProcessor";
 
 // @ts-ignore
-globalThis.WamParameterNoSab = WamParameterNoSab
+import wamEnvProcessor from "sdk/src/WamEnv.js";
+
 // @ts-ignore
-globalThis.WamParameterSab = WamParameterSab
+//globalThis.WamParameterNoSab = WamParameterNoSab
+// @ts-ignore
+//globalThis.WamParameterSab = WamParameterSab
 // @ts-ignore
 globalThis.WamParameterInterpolator = WamParameterInterpolator
 
-import WamParameterInfo from "../../sdk/src/WamParameterInfo";
+import WamParameterInfo from "sdk/src/WamParameterInfo";
 
 var logger = debug("plugin:chorder:processor")
 
@@ -184,7 +182,7 @@ class ChorderProcessor extends WamProcessor {
         
         default: { 
             this.emitEvents(
-                {type:"midi", time: currentTime, data: midiData}
+                {type:"wam-midi", time: currentTime, data: midiData}
             )
          } break;
         }
@@ -204,7 +202,7 @@ class ChorderProcessor extends WamProcessor {
         }
 
         let events: WamMidiEvent[] = notes.map(n => {
-            return {type:"midi", time: currentTime, data: {bytes: [0x90, n, velocity]}}
+            return {type:"wam-midi", time: currentTime, data: {bytes: [0x90, n, velocity]}}
         })
 
         this.emitEvents(
@@ -221,7 +219,7 @@ class ChorderProcessor extends WamProcessor {
         let notes = this.heldNotes[note]
 
         let events: WamMidiEvent[] = notes.map(n => {
-            return {type:"midi", time: currentTime, data: {bytes: [0x80, n, velocity]}}
+            return {type:"wam-midi", time: currentTime, data: {bytes: [0x80, n, velocity]}}
         })
 
         this.emitEvents(

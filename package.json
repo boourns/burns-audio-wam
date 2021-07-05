@@ -1,6 +1,6 @@
 {
   "name": "burns-audio-wam",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "My collection of Web Audio Modules (WAMs)",
   "main": "index.js",
   "scripts": {
@@ -23,5 +23,9 @@
   "bugs": {
     "url": "https://github.com/boourns/burns-audio-wam/issues"
   },
-  "homepage": "https://github.com/boourns/burns-audio-wam#readme"
+  "homepage": "https://github.com/boourns/burns-audio-wam#readme",
+  "dependencies": {
+    "preact": "^10.5.5",
+    "sdk": "boourns/webaudiomodule#workspace=sdk"
+  }
 }

@@ -4,10 +4,10 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
-import { WebAudioModule, ParamMgrFactory, CompositeAudioNode, WamNode } from '../../sdk/src';
-import AudioWorkletRegister from '../../sdk/src/ParamMgr/AudioWorkletRegister'
+import { WebAudioModule, ParamMgrFactory, CompositeAudioNode, WamNode } from 'sdk/src';
+import AudioWorkletRegister from 'sdk/src/ParamMgr/AudioWorkletRegister'
 // @ts-ignore
-import wamEnvProcessor from '../../sdk/src/WamEnv.js'
+import wamEnvProcessor from 'sdk/src/WamEnv.js'
 
 import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';

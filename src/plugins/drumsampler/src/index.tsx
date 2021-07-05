@@ -4,7 +4,7 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
-import { WebAudioModule, ParamMgrFactory, CompositeAudioNode } from '../../sdk';
+import { WebAudioModule, ParamMgrFactory, CompositeAudioNode } from 'sdk';
 import { DrumSamplerNode } from './Node';
 import { h, render } from 'preact';
 import { DrumSamplerView } from './DrumSamplerView'

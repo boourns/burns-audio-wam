@@ -27,10 +27,7 @@ const common = {
             extensions: [".js", ".jsx", ".ts", ".tsx"]
         }),
         commonjs({
-            include: /node_modules/,
-            namedExports: {
-                "node_modules/preact/dist/preact.js": ["h", "Component", "render"],
-            }
+            include: /node_modules/
         }),
         replace({
             "process.env.NODE_ENV": JSON.stringify("production")

@@ -4,13 +4,13 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
-import { WebAudioModule, ParamMgrFactory, CompositeAudioNode } from '../../sdk';
+import { WebAudioModule, ParamMgrFactory, CompositeAudioNode } from 'sdk';
 import { h, render } from 'preact';
 import { PianoRollView } from './PianoRollView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 import { Clip } from './Clip';
 import { PianoRoll } from './PianoRoll';
-import { PatternDelegate } from '../../extensions';
+import { PatternDelegate } from 'wam-extensions';
 
 import {debug} from "debug"
 var logger = debug("plugin:pianoroll")
