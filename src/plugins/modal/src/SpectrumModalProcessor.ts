@@ -1,25 +1,20 @@
 import { MIDI } from "../../shared/midi";
 
-import {debug} from "debug"
-import { WamMidiEvent } from "src/api/types";
+import WamParameter from "sdk/src/WamParameter.js"
+// @ts-ignore
+globalThis.WamParameter = WamParameter;
 
 import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
-//import {WamParameterNoSab, WamParameterSab} from "sdk/src/WamParameter"
 import WamProcessor from "sdk/src/WamProcessor";
 
-// @ts-ignore
-import wamEnvProcessor from "sdk/src/WamEnv.js";
 
-// // @ts-ignore
-// globalThis.WamParameterNoSab = WamParameterNoSab
-// // @ts-ignore
-// globalThis.WamParameterSab = WamParameterSab
+
+const PPQN = 96
+
 // @ts-ignore
 globalThis.WamParameterInterpolator = WamParameterInterpolator
 
 import WamParameterInfo from "sdk/src/WamParameterInfo";
-
-var logger = debug("plugin:chorder:processor")
 
 interface AudioWorkletProcessor {
     readonly port: MessagePort;
