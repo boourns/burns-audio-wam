@@ -101,7 +101,7 @@ class FunctionSequencerProcessor extends WamProcessor {
 
         // @ts-ignore
         const { webAudioModules, currentTime } = audioWorkletGlobalScope;
-
+        
         if (!this.transportData) {
             return true
         }
@@ -109,8 +109,8 @@ class FunctionSequencerProcessor extends WamProcessor {
         if (!this.function) {
             return true
         }
-		
-		if (this.transportData!.runFlags) {
+
+		if (this.transportData!.playing) {
             var timeElapsed = currentTime - this.transportData!.currentBarStarted
             var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
             var tickPosition = Math.floor(beatPosition * PPQN)
@@ -121,7 +121,7 @@ class FunctionSequencerProcessor extends WamProcessor {
                 try {
                     if (this.function.onTick) {
                         var notes = this.function.onTick(this.ticks)
-
+                        
                         if (notes) {
                             for (let note of notes) {
                                 this.emitEvents(
