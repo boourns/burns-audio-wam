@@ -1,9 +1,6 @@
-import { WamTransportEvent, WamTransportEvent2 } from "sdk/src/api/types";
+import { WamTransportData } from "sdk/src/api/types";
 import { MIDI } from "../../shared/midi";
 import { Clip, PPQN } from "./Clip";
-
-import {debug} from "debug"
-var logger = debug("plugin:pianoroll:processor")
 
 interface AudioWorkletProcessor {
     readonly port: MessagePort;
@@ -51,6 +48,7 @@ class PianoRollProcessor extends AudioWorkletProcessor {
     proxyId: string
     lastBPM: number
     secondsPerTick: number
+    transportData?: WamTransportData
 
     clips: Map<string, Clip>
     pendingClipChange?: {id: string, timestamp: number} 
@@ -67,8 +65,6 @@ class PianoRollProcessor extends AudioWorkletProcessor {
         this.currentClipId = ""
 
         this.port.onmessage = (ev) => {
-            logger("Received message %o", ev.data)
-
             if (ev.data.action == "clip") {
                 let clip = new Clip(ev.data.id, ev.data.state)
                 this.clips.set(ev.data.id, clip)
@@ -110,30 +106,25 @@ class PianoRollProcessor extends AudioWorkletProcessor {
         let clip = this.clips.get(this.currentClipId)
         if (!clip) return true;
 
-        var transportEvents = webAudioModules.getTransportEvents(currentTime, currentTime) as WamTransportEvent2[]
-		if (transportEvents.length == 0) {
-			return true
-		}
-
-		var transport = transportEvents[0]
+        if (!this.transportData) {
+            return true
+        }
 		
-		if (transport.playing) {
-			var barPosition = webAudioModules.getBarPosition(currentTime)
-			var beatPosition = barPosition * transport.beatsPerBar
-
+		if (this.transportData!.runFlags) {
+			var timeElapsed = currentTime - this.transportData!.currentBarStarted
+            var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
             var tickPosition = Math.floor(beatPosition * PPQN)
+
             let clipPosition = tickPosition % clip.state.length;
 
             if (this.ticks != clipPosition) {
-                let secondsPerTick = 1.0 / ((transport.start.bpm / 60.0) * PPQN);
+                let secondsPerTick = 1.0 / ((this.transportData!.tempo / 60.0) * PPQN);
 
                 this.ticks = clipPosition;
                 clip.notesForTick(clipPosition).forEach(note => {
-                    logger("sending MIDI: %o", note)
-
                     this.proxy.emitEvents(
-                        { type: 'midi', time: currentTime, data: { bytes: [MIDI.NOTE_ON, note.number, note.velocity] } },
-                        { type: 'midi', time: currentTime+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF, note.number, note.velocity] } }
+                        { type: 'wam-midi', time: currentTime, data: { bytes: [MIDI.NOTE_ON, note.number, note.velocity] } },
+                        { type: 'wam-midi', time: currentTime+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF, note.number, note.velocity] } }
                     )
                 })
             }
@@ -141,6 +132,10 @@ class PianoRollProcessor extends AudioWorkletProcessor {
 		
 		return true;
 	}
+
+    _onTransport(transportData: WamTransportData) {
+        this.transportData = transportData
+    }
 }
 
 try {

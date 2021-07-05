@@ -1,7 +1,6 @@
 import { MIDI } from "../../shared/midi";
 
-import {debug} from "debug"
-import { WamMidiEvent, WamTransportEvent2 } from "sdk/src/api/types";
+import { WamTransportData } from "sdk/src/api/types";
 
 import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
 import WamProcessor from "sdk/src/WamProcessor";
@@ -12,8 +11,6 @@ const PPQN = 96
 globalThis.WamParameterInterpolator = WamParameterInterpolator
 
 import WamParameterInfo from "sdk/src/WamParameterInfo";
-
-var logger = debug("plugin:functionSeq:processor")
 
 interface AudioWorkletProcessor {
     readonly port: MessagePort;
@@ -59,6 +56,7 @@ class FunctionSequencerProcessor extends WamProcessor {
     destroyed: boolean
     ticks: number
     function: FunctionSequencer
+    transportData?: WamTransportData
 
 	constructor(options: any) {
 		super(options);
@@ -104,25 +102,21 @@ class FunctionSequencerProcessor extends WamProcessor {
         // @ts-ignore
         const { webAudioModules, currentTime } = audioWorkletGlobalScope;
 
-        var transportEvents = webAudioModules.getTransportEvents(currentTime, currentTime) as WamTransportEvent2[]
-		if (transportEvents.length == 0) {
-			return true
-		}
+        if (!this.transportData) {
+            return true
+        }
 
         if (!this.function) {
             return true
         }
-
-		var transport = transportEvents[0]
 		
-		if (transport.playing) {
-			var barPosition = webAudioModules.getBarPosition(currentTime)
-			var beatPosition = barPosition * transport.beatsPerBar
-
+		if (this.transportData!.runFlags) {
+            var timeElapsed = currentTime - this.transportData!.currentBarStarted
+            var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
             var tickPosition = Math.floor(beatPosition * PPQN)
 
             if (this.ticks != tickPosition) {
-                let secondsPerTick = 1.0 / ((transport.start.bpm / 60.0) * PPQN);
+                let secondsPerTick = 1.0 / ((this.transportData!.tempo / 60.0) * PPQN);
                 this.ticks = tickPosition;
                 try {
                     if (this.function.onTick) {
@@ -131,8 +125,8 @@ class FunctionSequencerProcessor extends WamProcessor {
                         if (notes) {
                             for (let note of notes) {
                                 this.emitEvents(
-                                    { type: 'midi', time: currentTime, data: { bytes: [MIDI.NOTE_ON, note.note, note.velocity] } },
-                                    { type: 'midi', time: currentTime+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF, note.note, note.velocity] } }
+                                    { type: 'wam-midi', time: currentTime, data: { bytes: [MIDI.NOTE_ON, note.note, note.velocity] } },
+                                    { type: 'wam-midi', time: currentTime+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF, note.note, note.velocity] } }
                                 )
                             }
                         }
@@ -154,7 +148,7 @@ class FunctionSequencerProcessor extends WamProcessor {
 	 * Messages from main thread appear here.
 	 * @param {MessageEvent} message
 	 */
-     _onMessage(message: any) {
+     async _onMessage(message: any): Promise<void> {
          if (message.data && message.data.action == "function") {
              try {
                  this.function = new Function(message.data.code)()
@@ -167,6 +161,10 @@ class FunctionSequencerProcessor extends WamProcessor {
              super._onMessage(message)
          }
      }
+
+    _onTransport(transportData: WamTransportData) {
+        this.transportData = transportData
+    }
 
     destroy() {
 		this.destroyed = true;

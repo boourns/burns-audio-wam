@@ -1,8 +1,6 @@
-import { WamParameterInfo, WamTransportEvent, WamTransportEvent2 } from "sdk/src/api/types";
+import { WamParameterInfo, WamTransportData, WamTransportEvent, WamTransportEvent2 } from "sdk/src/api/types";
 import { Clip, PPQN } from "./Clip";
-import {debug} from "debug"
 import { StepModulatorView } from "./StepModulatorView";
-var logger = debug("plugin:stepModulator:processor")
 
 interface AudioWorkletProcessor {
     readonly port: MessagePort;
@@ -133,6 +131,7 @@ class StepModulatorProcessor extends AudioWorkletProcessor {
     secondsPerTick: number
     lastValue: number
     targetParam?: WamParameterInfo
+    transportData?: WamTransportData
 
     clips: Map<string, Clip>
     pendingClipChange?: {id: string, timestamp: number} 
@@ -148,8 +147,6 @@ class StepModulatorProcessor extends AudioWorkletProcessor {
         this.lastValue = 0
 
         this.port.onmessage = (ev) => {
-            logger("Received message %o", ev.data)
-
             if (ev.data.action == "clip") {
                 let clip = new Clip(ev.data.id, ev.data.state)
                 this.clips.set(ev.data.id, clip)
@@ -195,23 +192,18 @@ class StepModulatorProcessor extends AudioWorkletProcessor {
 
         if (!this.targetParam) return true
 
-        var transportEvents = webAudioModules.getTransportEvents(currentTime, currentTime) as WamTransportEvent2[]
-		if (transportEvents.length == 0) {
-			return true
-		}
-
-		var transport = transportEvents[0]
-
-		if (transport.playing) {
-			var barPosition = webAudioModules.getBarPosition(currentTime)
-			var beatPosition = barPosition * transport.beatsPerBar
-
+        if (!this.transportData) {
+            return true
+        }
+        
+		if (this.transportData!.runFlags) {
+			var timeElapsed = currentTime - this.transportData!.currentBarStarted
+            var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
             var tickPosition = Math.floor(beatPosition * PPQN)
+
             let clipPosition = tickPosition % (clip.state.length * clip.state.speed);
 
             if (this.ticks != clipPosition) {
-                let secondsPerTick = 1.0 / ((transport.start.bpm / 60.0) * PPQN);
-
                 this.ticks = clipPosition;
             }
 		}
@@ -277,6 +269,10 @@ class StepModulatorProcessor extends AudioWorkletProcessor {
 
 		return true;
 	}
+
+    _onTransport(transportData: WamTransportData) {
+        this.transportData = transportData
+    }
 }
 
 try {
