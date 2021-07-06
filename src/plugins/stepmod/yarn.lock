@@ -4069,6 +4069,7 @@ fsevents@~2.3.2:
     rollup-plugin-node-builtins: ^2.1.2
     ts-loader: ^8.0.12
     typescript: ^4.0.2
+    wam-extensions: ^0.1.2
     webpack: ^5.11.1
     webpack-cli: ^4.3.0
   languageName: unknown
@@ -4460,6 +4461,13 @@ fsevents@~2.3.2:
     ajv: ^6.12.5
     ajv-keywords: ^3.5.2
   checksum: a084f593f222560c412a4d8f40c92386c01c1c709f27c0672c2f02927a4d4d475f57f8b8e91198d0defb452add160476a03f07a05b26200a64b5124fa874e158
+  languageName: node
+  linkType: hard
+
+"sdk@github:boourns/webaudiomodule#workspace=sdk":
+  version: 0.0.1
+  resolution: "sdk@https://github.com/boourns/webaudiomodule.git#workspace=sdk&commit=de048bcf27e7148eb79e21e8b20206a29304b4b5"
+  checksum: 31ca59982c6f236b5081c81bda6cb90df1f34cc0f5f533bef0ddbf2057fdee4942591fb7fafbb67282815b6d1bcb5e686456f1fc46935f67c309a4ae54ceba52
   languageName: node
   linkType: hard
 
@@ -4954,6 +4962,15 @@ typescript@^4.0.2:
   version: 2.3.0
   resolution: "v8-compile-cache@npm:2.3.0"
   checksum: b56f83d9ff14187562badc4955dadeef53ff3abde478ce60759539dd8d5472a91fce9db6083fc2450e54cef6f2110c1a28d8c12162dbf575a6cfcb846986904b
+  languageName: node
+  linkType: hard
+
+"wam-extensions@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "wam-extensions@npm:0.1.2"
+  dependencies:
+    sdk: "github:boourns/webaudiomodule#workspace=sdk"
+  checksum: 103eaed815a3712c5e2938aa4dd43705d0d9ce394bec25db9b96772ae8ac1d19d52b765176a82ce6cc16c35269358fe84a3b60df52cfc348bd9a2d71fc67869e
   languageName: node
   linkType: hard
 

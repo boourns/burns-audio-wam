@@ -4,38 +4,40 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
-import { WebAudioModule, ParamMgrFactory, CompositeAudioNode } from 'sdk';
+import { WebAudioModule, WamNode } from 'sdk';
+import wamEnvProcessor from 'sdk/src/WamEnv.js'
+
 import { h, render } from 'preact';
+import debug from "debug";
 import { PianoRollView } from './PianoRollView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 import { Clip } from './Clip';
 import { PianoRoll } from './PianoRoll';
 import { PatternDelegate } from 'wam-extensions';
 
-import {debug} from "debug"
+
 var logger = debug("plugin:pianoroll")
 
-class Node extends CompositeAudioNode {
+class PianoRollNode extends WamNode {
 	destroyed = false;
 	pianoRoll: PianoRoll
+	_supportedEventTypes: Set<string>
 
 	/**
-	 * @param {AudioWorkletNode} output
-	 * @param {import('../sdk/src/ParamMgr/types').ParamMgrNode} paramMgr
+	 * @param {WebAudioModule} module
+	 * @param {AudioWorkletNodeOptions} options
 	 */
+	constructor(module: WebAudioModule, options: AudioWorkletNodeOptions) {
+		super(module, {...options, processorOptions: {
+			numberOfInputs: 1,
+			numberOfOutputs: 1,
+			outputChannelCount: [2],
+		}});
 
-	// @ts-ignore
-	setup(output, paramMgr) {
-		this.connect(output, 0, 0);
-		this._wamNode = paramMgr;
-		this._output = output;
-	}
+		this.pianoRoll = new PianoRoll(module.instanceId)
 
-	destroy() {
-		super.destroy();
-		this.destroyed = true;
-		// @ts-ignore
-		if (this._output) this._output.parameters.get('destroyed').value = 1;
+		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
+		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
 	}
 
 	async getState(): Promise<any> {
@@ -47,7 +49,7 @@ class Node extends CompositeAudioNode {
 	}
 }
 
-export default class PianoRollModule extends WebAudioModule<Node> {
+export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', import.meta.url));
 
@@ -62,38 +64,27 @@ export default class PianoRollModule extends WebAudioModule<Node> {
 		Object.assign(this.descriptor, descriptor);
 	}
 
-	pianoRoll: PianoRoll
-	pianoRollNode: AudioWorkletNode
+	sequencer: PianoRollNode
 
 	async initialize(state: any) {
 		await this._loadDescriptor();
+		// @ts-ignore
+		const AudioWorkletRegister = window.AudioWorkletRegister;
+		await AudioWorkletRegister.register('__WebAudioModules_WamEnv', wamEnvProcessor, this.audioContext.audioWorklet);
 		await this.audioContext.audioWorklet.addModule(this._pianoRollProcessorUrl)
-
-		this.pianoRoll = new PianoRoll(this.instanceId)
 
 		return super.initialize(state);
 	}
 
 	async createAudioNode(initialState: any) {
-		this.pianoRollNode = new AudioWorkletNode(this.audioContext, 'pianoroll-processor', { processorOptions: { proxyId: this.instanceId }})
+		const node: PianoRollNode = new PianoRollNode(this, {});
 
-		const node = new Node(this.audioContext);
-		node.pianoRoll = this.pianoRoll
+		node.setState(initialState);
 
-		// @ts-ignore
-		const internalParamsConfig = Object.fromEntries(this.pianoRollNode.parameters);
-		delete internalParamsConfig.destroyed;
-		const optionsIn = { internalParamsConfig };
-		const paramMgrNode = await ParamMgrFactory.create(this, optionsIn);
-		node.setup(this.pianoRollNode, paramMgrNode);
+		this.sequencer = node
 
-		// If there is an initial state at construction for this plugin,
-		if (initialState) node.setState(initialState);
-
-		node.connect(this.audioContext.destination);
-
-		this.pianoRoll.updateProcessor = (c: Clip) => {
-			this.pianoRollNode.port.postMessage({action: "clip", id: c.state.id, state: c.getState()})
+		this.sequencer.pianoRoll.updateProcessor = (c: Clip) => {
+			this.sequencer.port.postMessage({action: "clip", id: c.state.id, state: c.getState()})
 		}
 
 		this.updatePatternExtension()
@@ -113,17 +104,17 @@ export default class PianoRollModule extends WebAudioModule<Node> {
 		
 		//shadow.appendChild(container)
 		if (!clipId) {
-			clipId = this.pianoRoll.clip().state.id
+			clipId = this.sequencer.pianoRoll.clip().state.id
 		} else {
-			this.pianoRoll.addClip(clipId)
+			this.sequencer.pianoRoll.addClip(clipId)
 		}
-		render(<PianoRollView plugin={this} pianoRoll={this.pianoRoll} clipId={clipId}></PianoRollView>, div);
+		render(<PianoRollView plugin={this} pianoRoll={this.sequencer.pianoRoll} clipId={clipId}></PianoRollView>, div);
 
 		return div;
 	}
 
 	clip(): Clip {
-		return this.pianoRoll.clip()
+		return this.sequencer.pianoRoll.clip()
 	}
 
 	destroyGui(el: Element) {
@@ -137,33 +128,33 @@ export default class PianoRollModule extends WebAudioModule<Node> {
 
 		let patternDelegate: PatternDelegate = {
 			getPatternList: () => {
-				return this.pianoRoll.clips.map(c => {
+				return this.sequencer.pianoRoll.clips.map(c => {
 					return {id: c.state.id, name: "pattern"}
 				})
 			},
 			createPattern: (id: string) => {
 				logger("createPattern(%s)", id)
-				this.pianoRoll.addClip(id)
+				this.sequencer.pianoRoll.addClip(id)
 			},
 			deletePattern: (id: string) => {
 				logger("deletePattern(%s)", id)
-				this.pianoRoll.clips = this.pianoRoll.clips.filter(c => c.state.id != id)
+				this.sequencer.pianoRoll.clips = this.sequencer.pianoRoll.clips.filter(c => c.state.id != id)
 			},
 			playPattern: (id: string | undefined) => {
 				logger("playPattern(%s)", id)
 
-				let clip = this.pianoRoll.getClip(id)
+				let clip = this.sequencer.pianoRoll.getClip(id)
 				if (!clip && id != undefined) {
-					this.pianoRoll.addClip(id)
+					this.sequencer.pianoRoll.addClip(id)
 				}
-				this.pianoRoll.playingClip = id
+				this.sequencer.pianoRoll.playingClip = id
 
-				this.pianoRollNode.port.postMessage({action: "play", id})
+				this.sequencer.port.postMessage({action: "play", id})
 			},
 			getPatternState: (id: string) => {
 				logger("getPatternState(%s)", id)
 
-				let clip = this.pianoRoll.getClip(id)
+				let clip = this.sequencer.pianoRoll.getClip(id)
 				if (clip) {
 					return clip.getState()
 				} else {
@@ -172,12 +163,12 @@ export default class PianoRollModule extends WebAudioModule<Node> {
 			},
 			setPatternState: (id: string, state: any) => {
 				logger("setPatternState(%s, %o)", id, state)
-				let clip = this.pianoRoll.getClip(id)
+				let clip = this.sequencer.pianoRoll.getClip(id)
 				if (clip) {
 					clip.setState(state)
 				} else {
 					let clip = new Clip(id, state)
-					this.pianoRoll.clips.push(clip)
+					this.sequencer.pianoRoll.clips.push(clip)
 				}
 			}
 		}

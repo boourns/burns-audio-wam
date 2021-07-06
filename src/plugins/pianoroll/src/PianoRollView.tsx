@@ -215,7 +215,9 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         window.removeEventListener('mouseup', this.gridMouseUp)
     }
 
-    async animate() {        
+    async animate() {
+        return
+        
         let timestamp = this.props.plugin.audioContext.currentTime
         // @ts-ignore
         var transportEvents = await window.WAMHost.getTransportEvents(timestamp, timestamp) as WamTransportEvent[]

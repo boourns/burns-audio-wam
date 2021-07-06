@@ -1,64 +1,54 @@
-/* eslint-disable class-methods-use-this */
-/* eslint-disable max-len */
-/* eslint-disable import/extensions */
-/* eslint-disable max-classes-per-file */
-/* eslint-disable no-underscore-dangle */
+import { WebAudioModule, ParamMgrFactory, CompositeAudioNode, WamNode, WamParameterInfo } from 'sdk';
+import AudioWorkletRegister from 'sdk/src/ParamMgr/AudioWorkletRegister'
+// @ts-ignore
+import wamEnvProcessor from 'sdk/src/WamEnv.js'
 
-import { WebAudioModule, ParamMgrFactory, CompositeAudioNode, ParamMgrNode, WamParameterInfo } from 'sdk/src';
 import { h, render } from 'preact';
-import { StepModulatorView } from './StepModulatorView';
+//import { ChorderView } from './ChorderView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
-import { Clip } from './Clip';
-import { StepModulator } from './StepModulator';
-import { PatternDelegate } from '../../extensions';
 
 import {debug} from "debug"
-var logger = debug("plugin:stepModulator")
+import { StepModulatorView } from './StepModulatorView';
+import { StepModulator } from './StepModulator';
+import { Clip } from './Clip';
 
-class Node extends CompositeAudioNode {
+import {WAMExtensions, PatternDelegate} from 'wam-extensions';
+
+var logger = debug("plugin:chorder")
+
+export {AudioWorkletRegister}
+
+class StepModulatorNode extends WamNode {
 	destroyed = false;
+	_supportedEventTypes: Set<string>
+
 	sequencer: StepModulator
 
 	/**
-	 * @param {AudioWorkletNode} output
-	 * @param {import('../sdk/src/ParamMgr/types').ParamMgrNode} paramMgr
+	 * @param {WebAudioModule} module
+	 * @param {AudioWorkletNodeOptions} options
 	 */
+	 constructor(module: WebAudioModule, options: AudioWorkletNodeOptions) {
+		super(module, {...options, processorOptions: {
+			numberOfInputs: 1,
+			numberOfOutputs: 1,
+			outputChannelCount: [2],
+		}});
 
-	// @ts-ignore
-	setup(output, paramMgr) {
-		this.connect(output, 0, 0);
-		this._wamNode = paramMgr;
-		this._output = output;
-	}
-
-	_wamNode: ParamMgrNode = undefined;
-
-	get paramMgr(): ParamMgrNode {
-		return this._wamNode;
-	}
-
-	destroy() {
-		super.destroy();
-		this.destroyed = true;
-		// @ts-ignore
-		if (this._output) this._output.parameters.get('destroyed').value = 1;
+		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
+		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
 	}
 
 	getState(): any {
-		var params: any = {}
-
-		this.paramMgr.parameters.forEach((v, k) => {
-			params[k] = v.value
-		})
+		var params = super.getState()
 		return {params, sequencer: this.sequencer.getState()}
 	}
 
 	async setState(state: any) {
-		this.paramMgr.parameters.forEach((v, k) => {
-			if (state.params[k]) {
-				v.setValueAtTime(state.params[k], 0)
-			}
-		})
+		if (state.params) {
+			await super.setState(state.params)
+		}
+
 		if (state.sequencer) {
 			this.sequencer.setState(state.sequencer ? state.sequencer : {})
 		}
@@ -81,56 +71,25 @@ export default class StepModulatorModule extends WebAudioModule<Node> {
 	}
 
 	sequencer: StepModulator
-	sequencerNode: AudioWorkletNode
+	sequencerNode: StepModulatorNode
 	targetParam?: WamParameterInfo
 
 	async initialize(state: any) {
 		await this._loadDescriptor();
+		// @ts-ignore
+		const AudioWorkletRegister = window.AudioWorkletRegister;
+		await AudioWorkletRegister.register('__WebAudioModules_WamEnv', wamEnvProcessor, this.audioContext.audioWorklet);
 		await this.audioContext.audioWorklet.addModule(this._processorUrl)
-
-		this.sequencer = new StepModulator(this.instanceId)
 
 		return super.initialize(state);
 	}
 
 	async createAudioNode(initialState: any) {
-		this.sequencerNode = new AudioWorkletNode(this.audioContext, 'step-modulator-processor', { processorOptions: { proxyId: this.instanceId }})
-
-		const node = new Node(this.audioContext);
+		const node: StepModulatorNode = new StepModulatorNode(this, {});
+		this.sequencer = new StepModulator(this.instanceId)
 		node.sequencer = this.sequencer
-		
-		// @ts-ignore
-		const paramsConfig = Object.fromEntries(this.sequencerNode.parameters)
-		delete paramsConfig.destroyed;
+		this.sequencerNode = node
 
-		const internalParamsConfig = {
-			step1: this.sequencerNode.parameters.get("step1"),
-			step2: this.sequencerNode.parameters.get("step2"),
-			step3: this.sequencerNode.parameters.get("step3"),
-			step4: this.sequencerNode.parameters.get("step4"),
-			step5: this.sequencerNode.parameters.get("step5"),
-			step6: this.sequencerNode.parameters.get("step6"),
-			step7: this.sequencerNode.parameters.get("step7"),
-			step8: this.sequencerNode.parameters.get("step8"),
-			gain: this.sequencerNode.parameters.get("gain"),
-			slew: this.sequencerNode.parameters.get("slew")
-		}
-
-		const paramsMapping = {
-			slew: {
-				slew: {
-					sourceRange: [0, 1],
-					targetRange: [1, 0]
-				}
-			}
-		}
-        const optionsIn = { internalParamsConfig, paramsConfig, paramsMapping};
-
-		// @ts-ignore
-		const paramMgrNode = await ParamMgrFactory.create(this, optionsIn);
-		node.setup(this.sequencerNode, paramMgrNode);
-
-		// If there is an initial state at construction for this plugin,
 		if (initialState) node.setState(initialState);
 
 		this.sequencer.updateProcessor = (c: Clip) => {
@@ -152,7 +111,7 @@ export default class StepModulatorModule extends WebAudioModule<Node> {
 		} else {
 			console.log("did not find modulationTarget extension ", window.WAMExtensions)
 		}
-
+		
 		return node
     }
 

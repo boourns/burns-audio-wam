@@ -1,9 +1,17 @@
-import { WamTransportEvent, WamTransportEvent2 } from "sdk/src/api/types";
 import { MIDI } from "../../shared/midi";
-import { Clip, PPQN } from "./Clip";
 
-import {debug} from "debug"
-var logger = debug("plugin:pianoroll:processor")
+import { WamTransportData } from "sdk/src/api/types";
+
+import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
+import WamProcessor from "sdk/src/WamProcessor";
+
+const PPQN = 24
+
+// @ts-ignore
+globalThis.WamParameterInterpolator = WamParameterInterpolator
+
+import WamParameterInfo from "sdk/src/WamParameterInfo";
+import { Clip } from "./Clip";
 
 interface AudioWorkletProcessor {
     readonly port: MessagePort;
@@ -33,75 +41,75 @@ const audioWorkletGlobalScope = globalThis;
 // other variables that could be included:
 // - renderAhead: number - how far into the future should plugins render?
 
-class PianoRollProcessor extends AudioWorkletProcessor {
+export type FunctionSequencer = {
+    onTick?(ticks: number): {note: number, velocity: number, duration: number}[]
+}
+
+class PianoRollProcessor extends WamProcessor {
 	// @ts-ignore
-	static get parameterDescriptors() {
-		return [
-            {
-                name: 'destroyed',
-                defaultValue: 0,
-                minValue: 0,
-                maxValue: 1,
-            }
-        ];
-	}
+    static generateWamParameterInfo() {
+        return {
+        }
+    }
 
     lastTime: number
     ticks: number
     proxyId: string
     lastBPM: number
     secondsPerTick: number
+    transportData?: WamTransportData
+    count: number
 
     clips: Map<string, Clip>
+    
     pendingClipChange?: {id: string, timestamp: number} 
     currentClipId: string
 
     futureEvents: any[]
+    destroyed: boolean
 
 	constructor(options: any) {
 		super(options);
+        this.destroyed = false
+
+        const {
+			moduleId,
+			instanceId,
+		} = options.processorOptions;
+
+        // @ts-ignore
+        const { webAudioModules } = audioWorkletGlobalScope;
+
+        // @ts-ignore
+        if (globalThis.WamProcessors) globalThis.WamProcessors[instanceId] = this;
+        // @ts-ignore
+		else globalThis.WamProcessors = { [instanceId]: this };
+
+        // not sure about this line
 		this.proxyId = options.processorOptions.proxyId;
+
 		this.lastTime = null;
 		this.ticks = -1;
         this.clips = new Map()
         this.currentClipId = ""
+        this.count = 0
 
-        this.port.onmessage = (ev) => {
-            logger("Received message %o", ev.data)
-
-            if (ev.data.action == "clip") {
-                let clip = new Clip(ev.data.id, ev.data.state)
-                this.clips.set(ev.data.id, clip)
-            } else if (ev.data.action == "play") {
-                this.pendingClipChange = {
-                    id: ev.data.id,
-                    timestamp: 0,
-                }
-            }
-        }
-	}
-
-	get proxy() {
-        // @ts-ignore
-		const { webAudioModules } = audioWorkletGlobalScope;
-		return webAudioModules?.processors[this.proxyId];
+        super.port.start();
 	}
 
 	/**
-	 * Main process
-	 *
+	 * Implement custom DSP here.
+	 * @param {number} startSample beginning of processing slice
+	 * @param {number} endSample end of processing slice
 	 * @param {Float32Array[][]} inputs
 	 * @param {Float32Array[][]} outputs
-	 * @param {Record<P, Float32Array>} parameters
 	 */
-     process (inputs: Float32Array[][], outputs: Float32Array[][], parameters: Record<string, Float32Array>) {
-		const destroyed = parameters.destroyed[0];
-		if (destroyed) return false;
-		if (!this.proxy) return true;
+     _process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
+		if (this.destroyed) return false;
 
         // @ts-ignore
         const { webAudioModules, currentTime } = audioWorkletGlobalScope;
-
+        
         if (this.pendingClipChange && this.pendingClipChange.timestamp <= currentTime) {
             this.currentClipId = this.pendingClipChange.id
             this.pendingClipChange = undefined
@@ -110,41 +118,64 @@ class PianoRollProcessor extends AudioWorkletProcessor {
         let clip = this.clips.get(this.currentClipId)
         if (!clip) return true;
 
-        var transportEvents = webAudioModules.getTransportEvents(currentTime, currentTime) as WamTransportEvent2[]
-		if (transportEvents.length == 0) {
-			return true
-		}
+        if (!this.transportData) {
+            return true
+        }
 
-		var transport = transportEvents[0]
-		
-		if (transport.playing) {
-			var barPosition = webAudioModules.getBarPosition(currentTime)
-			var beatPosition = barPosition * transport.beatsPerBar
-
+		if (this.transportData!.playing) {
+			var timeElapsed = currentTime - this.transportData!.currentBarStarted
+            var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
             var tickPosition = Math.floor(beatPosition * PPQN)
+
             let clipPosition = tickPosition % clip.state.length;
 
             if (this.ticks != clipPosition) {
-                let secondsPerTick = 1.0 / ((transport.start.bpm / 60.0) * PPQN);
+                let secondsPerTick = 1.0 / ((this.transportData!.tempo / 60.0) * PPQN);
 
                 this.ticks = clipPosition;
                 clip.notesForTick(clipPosition).forEach(note => {
-                    logger("sending MIDI: %o", note)
-
-                    this.proxy.emitEvents(
-                        { type: 'midi', time: currentTime, data: { bytes: [MIDI.NOTE_ON, note.number, note.velocity] } },
-                        { type: 'midi', time: currentTime+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF, note.number, note.velocity] } }
+                    this.emitEvents(
+                        { type: 'wam-midi', time: currentTime, data: { bytes: [MIDI.NOTE_ON, note.number, note.velocity] } },
+                        { type: 'wam-midi', time: currentTime+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF, note.number, note.velocity] } }
                     )
                 })
             }
 		}
-		
+
 		return true;
+	}
+
+	/**
+	 * Messages from main thread appear here.
+	 * @param {MessageEvent} message
+	 */
+     async _onMessage(message: any): Promise<void> {
+        if (message.data && message.data.action == "clip") {
+            let clip = new Clip(message.data.id, message.data.state)
+            this.clips.set(message.data.id, clip)
+        } else if (message.data && message.data.action == "play") {
+            this.pendingClipChange = {
+                id: message.data.id,
+                timestamp: 0,
+            }
+        } else {
+            // @ts-ignore
+            super._onMessage(message)
+        }
+     }
+
+    _onTransport(transportData: WamTransportData) {
+        this.transportData = transportData
+    }
+
+    destroy() {
+		this.destroyed = true;
+		super.port.close();
 	}
 }
 
 try {
-	registerProcessor('pianoroll-processor', PianoRollProcessor);
+	registerProcessor('Tom BurnsPiano Roll', PianoRollProcessor);
 } catch (error) {
 	// eslint-disable-next-line no-console
 	console.warn(error);

@@ -1,8 +1,21 @@
-import { WamParameterInfo, WamTransportEvent, WamTransportEvent2 } from "sdk/src/api/types";
-import { Clip, PPQN } from "./Clip";
-import {debug} from "debug"
-import { StepModulatorView } from "./StepModulatorView";
-var logger = debug("plugin:stepModulator:processor")
+import { MIDI } from "../../shared/midi";
+
+import { WamTransportData } from "sdk/src/api/types";
+
+import WamParameter from "sdk/src/WamParameter.js"
+// @ts-ignore
+globalThis.WamParameter = WamParameter;
+
+import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
+import WamProcessor from "sdk/src/WamProcessor";
+
+const PPQN = 24
+
+// @ts-ignore
+globalThis.WamParameterInterpolator = WamParameterInterpolator
+
+import WamParameterInfo from "sdk/src/WamParameterInfo";
+import { Clip } from "./Clip";
 
 interface AudioWorkletProcessor {
     readonly port: MessagePort;
@@ -41,146 +54,126 @@ let quantizeValues = [
     96
 ]
 
-class StepModulatorProcessor extends AudioWorkletProcessor {
-	// @ts-ignore
-	static get parameterDescriptors() {
-		return [
-            {
-                name: 'destroyed',
-                defaultValue: 0,
-                minValue: 0,
-                maxValue: 1,
-            },
-            {
-                name: "slew",
+class StepModulatorProcessor extends WamProcessor {
+
+    // @ts-ignore
+    static generateWamParameterInfo() {
+		return {
+            slew: new WamParameterInfo('slew', {
                 type: "float",
                 defaultValue: 0,
                 minValue: 0,
                 maxValue: 1.0,
-                automationRate: 'k-rate'
-            },
-            {
-                name: "gain",
+            }),
+            gain: new WamParameterInfo('gain', {
                 type: "float",
                 defaultValue: 1.0,
                 minValue: 0,
                 maxValue: 1.0,
-                automationRate: 'a-rate'
-            },
-            {
-                name: "step1",
+            }),
+            step1: new WamParameterInfo('step1', {
+                type: "float",
                 defaultValue: 0,
                 minValue: 0,
                 maxValue: 1,
-                automationRate: 'a-rate'
-            },            
-            {
-                name: "step2",
+            }),
+            step2: new WamParameterInfo('step2', {
+                type: "float",
                 defaultValue: 0,
                 minValue: 0,
                 maxValue: 1,
-                automationRate: 'a-rate'
-            },            
-            {
-                name: "step3",
+            }),
+            step3: new WamParameterInfo('step3', {
+                type: "float",
                 defaultValue: 0,
                 minValue: 0,
                 maxValue: 1,
-                automationRate: 'a-rate'
-            },            
-            {
-                name: "step4",
+            }),
+            step4: new WamParameterInfo('step4', {
+                type: "float",
                 defaultValue: 0,
                 minValue: 0,
                 maxValue: 1,
-                automationRate: 'a-rate'
-            },            
-            {
-                name: "step5",
+            }),
+            step5: new WamParameterInfo('step5', {
+                type: "float",
                 defaultValue: 0,
                 minValue: 0,
                 maxValue: 1,
-                automationRate: 'a-rate'
-            },            
-            {
-                name: "step6",
+            }),
+            step6: new WamParameterInfo('step6', {
+                type: "float",
                 defaultValue: 0,
                 minValue: 0,
                 maxValue: 1,
-                automationRate: 'a-rate'
-            },            
-            {
-                name: "step7",
+            }),
+            step7: new WamParameterInfo('step7', {
+                type: "float",
                 defaultValue: 0,
                 minValue: 0,
                 maxValue: 1,
-                automationRate: 'a-rate'
-            },            
-            {
-                name: "step8",
+            }),
+            step8: new WamParameterInfo('step8', {
+                type: "float",
                 defaultValue: 0,
                 minValue: 0,
                 maxValue: 1,
-                automationRate: 'a-rate'
-            }
-        ];
+            }),
+        }
 	}
 
+    destroyed: boolean
     lastTime: number
     ticks: number
-    proxyId: string
     lastBPM: number
     secondsPerTick: number
     lastValue: number
     targetParam?: WamParameterInfo
+    transportData?: WamTransportData
+
+    count = 0
 
     clips: Map<string, Clip>
     pendingClipChange?: {id: string, timestamp: number} 
     currentClipId: string
 
 	constructor(options: any) {
-		super(options);
-		this.proxyId = options.processorOptions.proxyId;
+        super(options);
+        this.destroyed = false
+
+        const {
+			moduleId,
+			instanceId,
+		} = options.processorOptions;
+
+        // @ts-ignore
+        const { webAudioModules } = audioWorkletGlobalScope;
+
+        // @ts-ignore
+        if (globalThis.WamProcessors) globalThis.WamProcessors[instanceId] = this;
+        // @ts-ignore
+		else globalThis.WamProcessors = { [instanceId]: this };
+
+		this.lastTime = null;
+		
+        super.port.start();
+
 		this.lastTime = null;
 		this.ticks = 0;
         this.clips = new Map()
         this.currentClipId = ""
         this.lastValue = 0
-
-        this.port.onmessage = (ev) => {
-            logger("Received message %o", ev.data)
-
-            if (ev.data.action == "clip") {
-                let clip = new Clip(ev.data.id, ev.data.state)
-                this.clips.set(ev.data.id, clip)
-            } else if (ev.data.action == "play") {
-                this.pendingClipChange = {
-                    id: ev.data.id,
-                    timestamp: 0,
-                }
-            } else if (ev.data.action == "target") {
-                this.targetParam = ev.data.param
-            }
-        }
-	}
-
-	get proxy() {
-        // @ts-ignore
-		const { webAudioModules } = audioWorkletGlobalScope;
-		return webAudioModules?.processors[this.proxyId];
 	}
 
 	/**
-	 * Main process
-	 *
+	 * Implement custom DSP here.
+	 * @param {number} startSample beginning of processing slice
+	 * @param {number} endSample end of processing slice
 	 * @param {Float32Array[][]} inputs
 	 * @param {Float32Array[][]} outputs
-	 * @param {Record<P, Float32Array>} parameters
 	 */
-     process (inputs: Float32Array[][], outputs: Float32Array[][], parameters: Record<string, Float32Array>) {
-		const destroyed = parameters.destroyed[0];
-		if (destroyed) return false;
-		if (!this.proxy) return true;
+     _process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
+		if (this.destroyed) return false;
 
         // @ts-ignore
         const { webAudioModules, currentTime } = audioWorkletGlobalScope;
@@ -195,23 +188,18 @@ class StepModulatorProcessor extends AudioWorkletProcessor {
 
         if (!this.targetParam) return true
 
-        var transportEvents = webAudioModules.getTransportEvents(currentTime, currentTime) as WamTransportEvent2[]
-		if (transportEvents.length == 0) {
-			return true
-		}
-
-		var transport = transportEvents[0]
-
-		if (transport.playing) {
-			var barPosition = webAudioModules.getBarPosition(currentTime)
-			var beatPosition = barPosition * transport.beatsPerBar
-
+        if (!this.transportData) {
+            return true
+        }
+        
+		if (this.transportData!.playing) {
+			var timeElapsed = currentTime - this.transportData!.currentBarStarted
+            var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
             var tickPosition = Math.floor(beatPosition * PPQN)
+
             let clipPosition = tickPosition % (clip.state.length * clip.state.speed);
 
             if (this.ticks != clipPosition) {
-                let secondsPerTick = 1.0 / ((transport.start.bpm / 60.0) * PPQN);
-
                 this.ticks = clipPosition;
             }
 		}
@@ -225,44 +213,54 @@ class StepModulatorProcessor extends AudioWorkletProcessor {
                 result = 0;
                 break
             case 0:
-                result = parameters.step1[0]
+                // @ts-ignore
+                result = this._parameterInterpolators.step1.values[startSample]
                 break
             case 1:
-                result = parameters.step2[0]
+                // @ts-ignore
+                result = this._parameterInterpolators.step2.values[startSample]
                 break
             case 2:
-                result = parameters.step3[0]
+                // @ts-ignore
+                result = this._parameterInterpolators.step3.values[startSample]
                 break
             case 3:
-                result = parameters.step4[0]
+                // @ts-ignore
+                result = this._parameterInterpolators.step4.values[startSample]
                 break
             case 4:
-                result = parameters.step5[0]
+                // @ts-ignore
+                result = this._parameterInterpolators.step5.values[startSample]
                 break
             case 5:
-                result = parameters.step6[0]
+                // @ts-ignore
+                result = this._parameterInterpolators.step6.values[startSample]
                 break
             case 6:
-                result = parameters.step7[0]
+                // @ts-ignore
+                result = this._parameterInterpolators.step7.values[startSample]
                 break
             case 7:
-                result = parameters.step8[0]
+                // @ts-ignore
+                result = this._parameterInterpolators.step8.values[startSample]
                 break
         }
         let target = (step < clip.state.steps.length) ? clip.state.steps[step] + result : result
-        // this value is inverted by the params mgr
-        let slew = parameters.slew[0]
+        // @ts-ignore
+        let slew = this._parameterInterpolators.slew.values[startSample]
+        let gain = this._parameterInterpolators.gain.values[startSample]
 
         let value = this.lastValue + ((target - this.lastValue) * (slew) * slew * slew)
 
+        // @ts-ignore
         if (value != this.lastValue) {
-            var output = this.targetParam.minValue + (value * (this.targetParam.maxValue - this.targetParam.minValue) * parameters.gain[0])
+            var output = this.targetParam.minValue + (value * (this.targetParam.maxValue - this.targetParam.minValue) * gain)
             if (this.targetParam.type == 'int' || this.targetParam.type == 'choice' || this.targetParam.type == 'boolean') {
                 output = Math.round(output)
             }
-            this.proxy.emitEvents(
+            this.emitEvents(
                 {
-                    type: "automation",
+                    type: "wam-automation",
                     data: {
                         id: this.targetParam.id,
                         normalized: false,
@@ -277,10 +275,40 @@ class StepModulatorProcessor extends AudioWorkletProcessor {
 
 		return true;
 	}
+
+    /**
+	 * Messages from main thread appear here.
+	 * @param {MessageEvent} message
+	 */
+     async _onMessage(message: any): Promise<void> {
+        if (message.data && message.data.action == "clip") {
+            let clip = new Clip(message.data.id, message.data.state)
+            this.clips.set(message.data.id, clip)
+        } else if (message.data && message.data.action == "play") {
+            this.pendingClipChange = {
+                id: message.data.id,
+                timestamp: 0,
+            }
+        } else if (message.data && message.data.action == "target") {
+            this.targetParam = message.data.param
+        } else {
+            // @ts-ignore
+            super._onMessage(message)
+        }
+     }
+
+    _onTransport(transportData: WamTransportData) {
+        this.transportData = transportData
+    }
+
+    destroy() {
+		this.destroyed = true;
+		super.port.close();
+	}
 }
 
 try {
-	registerProcessor('step-modulator-processor', StepModulatorProcessor);
+	registerProcessor('Tom BurnsStep Sequencing Modulator', StepModulatorProcessor);
 } catch (error) {
 	// eslint-disable-next-line no-console
 	console.warn(error);

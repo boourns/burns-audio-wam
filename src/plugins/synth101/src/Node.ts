@@ -103,7 +103,7 @@ export default class Synth101Node extends CompositeAudioNode {
 
 	setup(paramMgr: ParamMgrNode) {
         // @ts-ignore
-        paramMgr.addEventListener('midi', (e) => this.processMIDIEvents([{event: e.detail.data.bytes, time: 0}]));
+        paramMgr.addEventListener('wam-midi', (e) => this.processMIDIEvents([{event: e.detail.data.bytes, time: 0}]));
 
         this._wamNode = paramMgr
 	}
