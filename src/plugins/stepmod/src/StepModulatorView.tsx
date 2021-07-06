@@ -37,36 +37,41 @@ export type StepModulatorViewProps = {
 }
 
 type StepModulatorViewState = {
-    showSettingsModal: boolean
+    gain: number
+    slew: number
 }
 
 export class StepModulatorView extends Component<StepModulatorViewProps, StepModulatorViewState> {
+    statePoller: number
+
     constructor() {
         super();
+        this.pollState = this.pollState.bind(this)
     }
 
     componentDidMount() {
+        this.pollState()
+
         this.props.sequencer.renderCallback = () => {
             this.forceUpdate()
         }
     }
 
     componentWillUnmount() {
+        window.cancelAnimationFrame(this.statePoller)
+
         this.props.sequencer.renderCallback = undefined
     }
 
-    paramChanged(name: string, value: number) {
-        this.props.plugin.audioNode.paramMgr.parameters.get(name).setValueAtTime(value, 0)
+    async pollState() {
+        // this.state = await this.props.plugin.audioNode.getParameterValues(false)
+
+        // this.statePoller = window.requestAnimationFrame(this.pollState)
     }
 
-    getValue(name: string): number {
-        let params = this.props.plugin.audioNode.paramMgr.parameters
-
-        if (params.get(name) === undefined || params.get(name).value === undefined) {
-            return 0
-        } else {
-            return params.get(name).value
-        }
+    paramChanged(name: string, value: number) {
+        this.state[param].value = value
+        this.props.plugin.audioNode.setParameterValues(this.state) 
     }
 
     targetValueString(v: number): string {
@@ -105,8 +110,8 @@ export class StepModulatorView extends Component<StepModulatorViewProps, StepMod
             </div>
 
             <div style="display: flex">
-                <Knob label="Gain" size={40} value={() => this.getValue("gain")} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("gain", v)}/>
-                <Knob label="Slew" size={40} value={() => this.getValue("slew")} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("slew", v)}/>
+                <Knob label="Gain" size={40} value={() => this.state.gain} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("gain", v)}/>
+                <Knob label="Slew" size={40} value={() => this.state.slew} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("slew", v)}/>
                 <Select label="Speed" options={quantizeOptions} values={quantizeValues} value={() => clip.state.speed} onChange={(e) => { clip.state.speed = parseInt(e); clip.updateProcessor(clip)}} />
             </div>
 

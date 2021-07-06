@@ -1,9 +1,3 @@
-/* eslint-disable class-methods-use-this */
-/* eslint-disable max-len */
-/* eslint-disable import/extensions */
-/* eslint-disable max-classes-per-file */
-/* eslint-disable no-underscore-dangle */
-
 import { WebAudioModule, ParamMgrFactory, CompositeAudioNode, WamNode } from 'sdk';
 import AudioWorkletRegister from 'sdk/src/ParamMgr/AudioWorkletRegister'
 // @ts-ignore
@@ -44,7 +38,7 @@ export default class ChorderModule extends WebAudioModule<WamNode> {
 	_baseURL = getBaseUrl(new URL('.', import.meta.url));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
-	_pianoRollProcessorUrl = `${this._baseURL}/ChorderProcessor.js`;
+	_processorUrl = `${this._baseURL}/ChorderProcessor.js`;
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -54,14 +48,12 @@ export default class ChorderModule extends WebAudioModule<WamNode> {
 		Object.assign(this.descriptor, descriptor);
 	}
 
-	chorderProcessor: AudioWorkletNode
-
 	async initialize(state: any) {
 		await this._loadDescriptor();
 		// @ts-ignore
 		const AudioWorkletRegister = window.AudioWorkletRegister;
 		await AudioWorkletRegister.register('__WebAudioModules_WamEnv', wamEnvProcessor, this.audioContext.audioWorklet);
-		await this.audioContext.audioWorklet.addModule(this._pianoRollProcessorUrl)
+		await this.audioContext.audioWorklet.addModule(this._processorUrl)
 
 		return super.initialize(state);
 	}
