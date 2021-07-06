@@ -125,7 +125,6 @@ class StepModulatorProcessor extends WamProcessor {
     destroyed: boolean
     lastTime: number
     ticks: number
-    proxyId: string
     lastBPM: number
     secondsPerTick: number
     lastValue: number
@@ -155,9 +154,6 @@ class StepModulatorProcessor extends WamProcessor {
         // @ts-ignore
 		else globalThis.WamProcessors = { [instanceId]: this };
 
-        // not sure about this line
-		this.proxyId = options.processorOptions.proxyId;
-
 		this.lastTime = null;
 		
         super.port.start();
@@ -169,12 +165,6 @@ class StepModulatorProcessor extends WamProcessor {
         this.lastValue = 0
 	}
 
-	get proxy() {
-        // @ts-ignore
-		const { webAudioModules } = audioWorkletGlobalScope;
-		return webAudioModules?.processors[this.proxyId];
-	}
-
 	/**
 	 * Implement custom DSP here.
 	 * @param {number} startSample beginning of processing slice
@@ -184,7 +174,6 @@ class StepModulatorProcessor extends WamProcessor {
 	 */
      _process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
 		if (this.destroyed) return false;
-		if (!this.proxy) return true;
 
         // @ts-ignore
         const { webAudioModules, currentTime } = audioWorkletGlobalScope;
@@ -258,16 +247,18 @@ class StepModulatorProcessor extends WamProcessor {
         }
         let target = (step < clip.state.steps.length) ? clip.state.steps[step] + result : result
         // @ts-ignore
-        let slew = this._parameterInterpolators.step1.values[startSample]
+        let slew = this._parameterInterpolators.slew.values[startSample]
+        let gain = this._parameterInterpolators.gain.values[startSample]
 
         let value = this.lastValue + ((target - this.lastValue) * (slew) * slew * slew)
 
+        // @ts-ignore
         if (value != this.lastValue) {
-            var output = this.targetParam.minValue + (value * (this.targetParam.maxValue - this.targetParam.minValue) * parameters.gain[0])
+            var output = this.targetParam.minValue + (value * (this.targetParam.maxValue - this.targetParam.minValue) * gain)
             if (this.targetParam.type == 'int' || this.targetParam.type == 'choice' || this.targetParam.type == 'boolean') {
                 output = Math.round(output)
             }
-            this.proxy.emitEvents(
+            this.emitEvents(
                 {
                     type: "wam-automation",
                     data: {

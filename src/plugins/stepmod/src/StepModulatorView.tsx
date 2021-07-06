@@ -41,12 +41,17 @@ type StepModulatorViewState = {
     slew: number
 }
 
-export class StepModulatorView extends Component<StepModulatorViewProps, StepModulatorViewState> {
+export class StepModulatorView extends Component<StepModulatorViewProps, any> {
     statePoller: number
 
     constructor() {
         super();
         this.pollState = this.pollState.bind(this)
+
+        this.state = {
+            "gain" : {value: 1.0},
+            "slew" : {value: 1.0},
+          }
     }
 
     componentDidMount() {
@@ -64,13 +69,13 @@ export class StepModulatorView extends Component<StepModulatorViewProps, StepMod
     }
 
     async pollState() {
-        // this.state = await this.props.plugin.audioNode.getParameterValues(false)
+        this.state = await this.props.plugin.audioNode.getParameterValues(false)
 
-        // this.statePoller = window.requestAnimationFrame(this.pollState)
+        this.statePoller = window.requestAnimationFrame(this.pollState)
     }
 
     paramChanged(name: string, value: number) {
-        this.state[param].value = value
+        this.state[name].value = value
         this.props.plugin.audioNode.setParameterValues(this.state) 
     }
 
@@ -110,8 +115,8 @@ export class StepModulatorView extends Component<StepModulatorViewProps, StepMod
             </div>
 
             <div style="display: flex">
-                <Knob label="Gain" size={40} value={() => this.state.gain} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("gain", v)}/>
-                <Knob label="Slew" size={40} value={() => this.state.slew} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("slew", v)}/>
+                <Knob label="Gain" size={40} value={() => this.state['gain'].value} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("gain", v)}/>
+                <Knob label="Slew" size={40} value={() => this.state['slew'].value} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("slew", v)}/>
                 <Select label="Speed" options={quantizeOptions} values={quantizeValues} value={() => clip.state.speed} onChange={(e) => { clip.state.speed = parseInt(e); clip.updateProcessor(clip)}} />
             </div>
 
