@@ -4069,7 +4069,7 @@ fsevents@~2.3.2:
     rollup-plugin-node-builtins: ^2.1.2
     ts-loader: ^8.0.12
     typescript: ^4.0.2
-    wam-extensions: ^0.1.2
+    wam-extensions: ^0.1.7
     webpack: ^5.11.1
     webpack-cli: ^4.3.0
   languageName: unknown
@@ -4965,12 +4965,12 @@ typescript@^4.0.2:
   languageName: node
   linkType: hard
 
-"wam-extensions@npm:^0.1.2":
-  version: 0.1.2
-  resolution: "wam-extensions@npm:0.1.2"
+"wam-extensions@npm:^0.1.7":
+  version: 0.1.7
+  resolution: "wam-extensions@npm:0.1.7"
   dependencies:
     sdk: "github:boourns/webaudiomodule#workspace=sdk"
-  checksum: 103eaed815a3712c5e2938aa4dd43705d0d9ce394bec25db9b96772ae8ac1d19d52b765176a82ce6cc16c35269358fe84a3b60df52cfc348bd9a2d71fc67869e
+  checksum: 96bf3817592c3f0d13cadc35eec6203c01b585affbaa0572096b4ba6cc33ad4b82bd91cfe8c372b7fe72034165e2c17b27763ea9b56f654ee1d8c672262f486b
   languageName: node
   linkType: hard
 
