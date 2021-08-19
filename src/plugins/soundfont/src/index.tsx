@@ -5,7 +5,7 @@
 /* eslint-disable no-underscore-dangle */
 
 import { WebAudioModule, ParamMgrFactory, CompositeAudioNode } from 'sdk';
-import Synth101Node from './Node';
+import SoundfontPlayerNode from './Node';
 import { h, render } from 'preact';
 import { SoundfontView } from './SoundfontView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
@@ -17,13 +17,15 @@ let subRanges = ["-10ct", "-20ct pulse", "-20ct sine", "-20ct tri"]
 let vcaSources = ["Env", "Gate"]
 let portamentoModes = ["Off", "Auto", "On"]
 
-export default class Soundfont extends WebAudioModule<Synth101Node> {
+export default class SoundfontModule extends WebAudioModule<SoundfontPlayerNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', import.meta.url));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_envelopeGeneratorUrl = `${this._baseURL}/EnvelopeGeneratorProcessor.js`;
 	_slewUrl = `${this._baseURL}/SlewProcessor.js`;
+
+	synth: SoundfontPlayerNode
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -40,7 +42,8 @@ export default class Soundfont extends WebAudioModule<Synth101Node> {
 	}
 
 	async createAudioNode(initialState: any) {
-		const synthNode = new Synth101Node(this.audioContext);
+		const synthNode = new SoundfontPlayerNode(this.audioContext);
+		this.synth = synthNode
 
 		const paramsConfig = {
         };
