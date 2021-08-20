@@ -158,7 +158,7 @@ export class SoundfontView extends Component<SoundfontViewProps, any> {
   }
 
   instrumentChanged(v: string) {
-      this.props.plugin.synth.instrumentChanged(v)
+    this.props.plugin.synth.setState({instrument: v})
   }
 
   render() {
@@ -168,8 +168,8 @@ export class SoundfontView extends Component<SoundfontViewProps, any> {
 
     return (
     <div class="soundfont-module">
-        <div style="display: flex">
-            <Select options={availableInstruments} value={() => this.props.plugin.currentInstrument} onChange={(v) => this.instrumentChanged(v)}></Select>
+        <div style="soundfont-section">
+            <Select label={"Instrument"} options={availableInstruments} values={availableInstruments} value={() => this.props.plugin.synth.instrument} onChange={(v) => this.instrumentChanged(v)}></Select>
             <div style="flex: 1">
             </div>
         </div>
@@ -183,7 +183,7 @@ export class SoundfontView extends Component<SoundfontViewProps, any> {
     return `
       .soundfont-module {
           flex: 1;
-          background-color: #631F87;
+          background-color: #292a30;
           display: flex;
           flex-direction:column;
           justify-content:space-between;
@@ -191,9 +191,19 @@ export class SoundfontView extends Component<SoundfontViewProps, any> {
           color: white;
       }
       
-      .distortion-module .component-wrapper {
+      .soundfont-module .component-wrapper {
           padding: 5px;
       }
+
+      .soundfont-101-section {
+        /* border: 1px solid white; */
+        border: 1px solid rgba(0,0,0,0.3);
+    
+        border-radius: 2px;
+        margin: 5px;
+        display: flex;
+        flex-direction: column;
+    }
 
         /* UI elements */
     

@@ -5,17 +5,13 @@ import { MIDI, ScheduledMIDIEvent } from '../../shared/midi'
 
 import Soundfont, { InstrumentName } from 'soundfont-player'
 
-let STATE_UNLOADED = 0
-let STATE_LOADING = 1
-let STATE_LOADED = 2
-
 export default class SoundfontPlayerNode extends CompositeAudioNode {
 	_wamNode: ParamMgrNode = undefined;
 
     soundfont: any
     instrument: InstrumentName = "acoustic_grand_piano"
     loadedInstrument: string = ""
-    loadState: number = 0
+    loadingInstrument: string = ""
 
     heldNotes: any[]
 
@@ -83,14 +79,29 @@ export default class SoundfontPlayerNode extends CompositeAudioNode {
     }
 
     updateFromState() {
-        if (this.loadState != STATE_LOADING && this.loadedInstrument != this.instrument) {
-            this.loadState = STATE_LOADING
+        let instrument = this.instrument
+        if (this.loadedInstrument != instrument) {
+            if (instrument != this.loadingInstrument) {
+                this.loadingInstrument = instrument
 
-            Soundfont.instrument(this.context as AudioContext, this.instrument, {destination: this._output}).then((sf: any) => {
-                this.soundfont = sf
-                this.loadState = STATE_LOADED
-            })
+                Soundfont.instrument(this.context as AudioContext, instrument, {destination: this._output}).then((sf: any) => {
+                    this.soundfont = sf
+                    this.loadedInstrument = instrument
+                })
+            }
         }
     }
 
+    async setState(state: any) {
+        if (state && state.instrument) {
+            this.instrument = state.instrument
+            this.updateFromState()
+        }
+    }
+
+    async getState() {
+        return {
+            instrument: this.instrument
+        }
+    }
 }
