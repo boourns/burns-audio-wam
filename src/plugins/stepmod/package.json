@@ -26,7 +26,7 @@
     "rollup": "^2.42.1",
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-node-builtins": "^2.1.2",
-    "wam-extensions": "^0.1.2"
+    "wam-extensions": "^0.1.7"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.12.13",

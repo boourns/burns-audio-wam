@@ -15,7 +15,6 @@ import { Clip } from './Clip';
 import { PianoRoll } from './PianoRoll';
 import { PatternDelegate } from 'wam-extensions';
 
-
 var logger = debug("plugin:pianoroll")
 
 class PianoRollNode extends WamNode {

@@ -2536,7 +2536,7 @@ __metadata:
     rollup-plugin-node-builtins: ^2.1.2
     ts-loader: ^8.0.12
     typescript: ^4.0.2
-    wam-extensions: ^0.1.1
+    wam-extensions: ^0.1.7
     webpack: ^5.11.1
     webpack-cli: ^4.3.0
   languageName: unknown
@@ -4463,10 +4463,10 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"sdk@github:53js/webaudiomodule#workspace=sdk":
+"sdk@github:boourns/webaudiomodule#workspace=sdk":
   version: 0.0.1
-  resolution: "sdk@https://github.com/53js/webaudiomodule.git#workspace=sdk&commit=be4f89fa4f2800a39d2a743d5a9ac3947e04b3cc"
-  checksum: 19786a601c47dad27c34f53541350436a8be144545ea67063717f4c53d83013b3bbcc1d7fe4d6838de573185ceede440d8a12bdde8497edddd8a4469da33a3d7
+  resolution: "sdk@https://github.com/boourns/webaudiomodule.git#workspace=sdk&commit=de048bcf27e7148eb79e21e8b20206a29304b4b5"
+  checksum: 31ca59982c6f236b5081c81bda6cb90df1f34cc0f5f533bef0ddbf2057fdee4942591fb7fafbb67282815b6d1bcb5e686456f1fc46935f67c309a4ae54ceba52
   languageName: node
   linkType: hard
 
@@ -4964,12 +4964,12 @@ typescript@^4.0.2:
   languageName: node
   linkType: hard
 
-"wam-extensions@npm:^0.1.1":
-  version: 0.1.1
-  resolution: "wam-extensions@npm:0.1.1"
+"wam-extensions@npm:^0.1.7":
+  version: 0.1.7
+  resolution: "wam-extensions@npm:0.1.7"
   dependencies:
-    sdk: "github:53js/webaudiomodule#workspace=sdk"
-  checksum: 9adb69b3890c8f0aec4c87d9463561ccb0a0de09a3921fd4be77299ba206ed78bdeb5ae1372971134f63827feb53f50b7a4c7c20e55e60585238f1037a516d1f
+    sdk: "github:boourns/webaudiomodule#workspace=sdk"
+  checksum: 96bf3817592c3f0d13cadc35eec6203c01b585affbaa0572096b4ba6cc33ad4b82bd91cfe8c372b7fe72034165e2c17b27763ea9b56f654ee1d8c672262f486b
   languageName: node
   linkType: hard
 
