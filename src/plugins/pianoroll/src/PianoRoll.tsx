@@ -80,6 +80,10 @@ export class PianoRoll {
 	}
 
 	async setState(state: PianoRollState) {
+		if (!state) {
+			return
+		}
+		
 		// TODO this is very shitty performance
 		// and prolly some bugs lol
 		this.clips = state.clips.map(c => new Clip(c.id, c))
