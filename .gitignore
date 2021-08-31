@@ -8,4 +8,5 @@ node_modules/
 !.yarn/versions
 .pnp.*
 .DS_Store
+**/.yarn/*
 
