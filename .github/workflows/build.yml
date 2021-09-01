@@ -24,5 +24,8 @@ jobs:
       - name: what is here
         run: ls -al
 
+      - name: whats my parent
+        run: cd .. && ls -al
+
       - name: Build Plugins
         run: ./tools/build.sh    
