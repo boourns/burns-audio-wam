@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 15
     steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
       - name: Install emscripten
         uses: mymindstorm/setup-emsdk@v9
         with:
@@ -23,9 +26,6 @@ jobs:
 
       - name: what is here
         run: ls -al
-
-      - name: whats my parent
-        run: cd .. && ls -al
 
       - name: Build Plugins
         run: ./tools/build.sh    
