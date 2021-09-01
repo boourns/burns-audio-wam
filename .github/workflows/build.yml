@@ -2,9 +2,9 @@ name: Build JS
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
 
@@ -13,10 +13,19 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 15
     steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
       - name: Install emscripten
         uses: mymindstorm/setup-emsdk@v9
         with:
           version: 2.0.16
      
+      - name: What directory am i in
+        run: pwd
+
+      - name: what is here
+        run: ls -al
+
       - name: Build Plugins
         run: ./tools/build.sh    
