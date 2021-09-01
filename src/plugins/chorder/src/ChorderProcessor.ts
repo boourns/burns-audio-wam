@@ -5,6 +5,7 @@ globalThis.WamParameter = WamParameter;
 import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
 import WamProcessor from "sdk/src/WamProcessor";
 
+
 // @ts-ignore
 globalThis.WamParameterInterpolator = WamParameterInterpolator
 

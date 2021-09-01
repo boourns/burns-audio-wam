@@ -1,23 +1,16 @@
-import {debug} from "debug"
-import { WamMidiEvent } from "sdk/src/api/types";
+import WamParameter from "sdk/src/WamParameter.js"
+// @ts-ignore
+globalThis.WamParameter = WamParameter;
 
 import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
-import {WamParameterNoSab, WamParameterSab} from "sdk/src/WamParameter"
 import WamProcessor from "sdk/src/WamProcessor";
 
-// @ts-ignore
-import wamEnvProcessor from "../../sdk/src/WamEnv.js";
 
-// @ts-ignore
-globalThis.WamParameterNoSab = WamParameterNoSab
-// @ts-ignore
-globalThis.WamParameterSab = WamParameterSab
 // @ts-ignore
 globalThis.WamParameterInterpolator = WamParameterInterpolator
 
 import WamParameterInfo from "sdk/src/WamParameterInfo";
-
-var logger = debug("plugin:chorder:processor")
+import { WamMidiEvent } from "sdk/src/api/types";
 
 interface AudioWorkletProcessor {
     readonly port: MessagePort;
@@ -43,6 +36,9 @@ declare function registerProcessor(
 ): undefined;
 
 const audioWorkletGlobalScope = globalThis;
+
+// other variables that could be included:
+// - renderAhead: number - how far into the future should plugins render?
 
 // other variables that could be included:
 // - renderAhead: number - how far into the future should plugins render?

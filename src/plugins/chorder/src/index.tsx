@@ -4,7 +4,6 @@ import AudioWorkletRegister from 'sdk/src/ParamMgr/AudioWorkletRegister'
 import wamEnvProcessor from 'sdk/src/WamEnv.js'
 
 import { h, render } from 'preact';
-//import { ChorderView } from './ChorderView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
 import {debug} from "debug"
