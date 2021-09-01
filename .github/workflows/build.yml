@@ -18,5 +18,11 @@ jobs:
         with:
           version: 2.0.16
      
+      - name: What directory am i in
+        run: pwd
+
+      - name: what is here
+        run: ls -al
+
       - name: Build Plugins
         run: ./tools/build.sh    
