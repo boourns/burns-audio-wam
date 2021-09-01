@@ -1,0 +1,22 @@
+name: Build JS
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    timeout-minutes: 15
+    steps:
+      - name: Install emscripten
+        uses: mymindstorm/setup-emsdk@v9
+        with:
+          version: 2.0.16
+     
+      - name: Build Plugins
+        run: ./tools/build.sh    
