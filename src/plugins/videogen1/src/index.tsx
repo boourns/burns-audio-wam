@@ -1,4 +1,10 @@
-import { WebAudioModule, ParamMgrFactory, CompositeAudioNode, WamNode } from 'sdk';
+/* eslint-disable class-methods-use-this */
+/* eslint-disable max-len */
+/* eslint-disable import/extensions */
+/* eslint-disable max-classes-per-file */
+/* eslint-disable no-underscore-dangle */
+
+import { WebAudioModule, WamNode } from 'sdk';
 import AudioWorkletRegister from 'sdk/src/ParamMgr/AudioWorkletRegister'
 // @ts-ignore
 import wamEnvProcessor from 'sdk/src/WamEnv.js'
@@ -7,12 +13,15 @@ import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
 import {debug} from "debug"
-import { ChorderView } from './ChorderView';
 var logger = debug("plugin:chorder")
+
+import { VideoGenerator } from './VideoGenerator';
+import { VideoExtensionOptions } from 'wam-extensions';
+import { VideoGeneratorView } from './VideoGeneratorView';
 
 export {AudioWorkletRegister}
 	
-class ChorderNode extends WamNode {
+class VideoGeneratorNode extends WamNode {
 	destroyed = false;
 	_supportedEventTypes: Set<string>
 
@@ -32,12 +41,12 @@ class ChorderNode extends WamNode {
 	}
 }
 
-export default class ChorderModule extends WebAudioModule<WamNode> {
+export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', import.meta.url));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
-	_processorUrl = `${this._baseURL}/ChorderProcessor.js`;
+	_processorUrl = `${this._baseURL}/VideoGenProcessor.js`;
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -46,6 +55,8 @@ export default class ChorderModule extends WebAudioModule<WamNode> {
 		const descriptor = await response.json();
 		Object.assign(this.descriptor, descriptor);
 	}
+
+	chorderProcessor: AudioWorkletNode
 
 	async initialize(state: any) {
 		await this._loadDescriptor();
@@ -58,12 +69,46 @@ export default class ChorderModule extends WebAudioModule<WamNode> {
 	}
 
 	async createAudioNode(initialState: any) {
-		const node: ChorderNode = new ChorderNode(this, {});
+		const node: VideoGeneratorNode = new VideoGeneratorNode(this, {});
 
 		if (initialState) node.setState(initialState);
 
+		if (window.WAMExtensions && window.WAMExtensions.video) {
+			window.WAMExtensions.video.setDelegate(this.instanceId, {
+				connectVideo: (options: VideoExtensionOptions, input?: WebGLTexture) => {
+					console.log("connectVideo!")
+					return this.attach(options, input)
+				},
+				render: (currentTime: number) => {
+					this.generator.render(currentTime)
+				},
+				disconnectVideo: () => {
+					console.log("disconnectVideo")
+				},
+			})
+		}
+
 		return node
     }
+
+	gl: WebGLRenderingContext
+	generator: VideoGenerator
+
+	attach(options: VideoExtensionOptions, input?: WebGLTexture): WebGLTexture {
+		this.generator = new VideoGenerator(options)
+
+		if (!this.generator.output) {
+			throw new Error("VideoGenerator did not instantiate it's output texture!")
+		}
+
+		return this.generator.output
+	}
+
+	// Random color helper function.
+	getRandomColor() {
+		return [Math.random(), Math.random(), Math.random()];
+	}
+	
 
 	async createGui() {
 		const div = document.createElement('div');
@@ -77,7 +122,7 @@ export default class ChorderModule extends WebAudioModule<WamNode> {
 		
 		//shadow.appendChild(container)
 
-		render(<ChorderView plugin={this}></ChorderView>, div);
+		render(<VideoGeneratorView plugin={this}></VideoGeneratorView>, div);
 		return div;
 	}
 

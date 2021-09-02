@@ -1466,6 +1466,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/debug@npm:^4.1.6":
+  version: 4.1.6
+  resolution: "@types/debug@npm:4.1.6"
+  checksum: f2816703a81f2cecb9fe575ed73f69378f190f92e49aab01b5b1832166cd89b19d4e85999c955f8993d3dba36e78ffd1ac5f697449eff13a6a13de309dc6e0f5
+  languageName: node
+  linkType: hard
+
 "@types/eslint-scope@npm:^3.7.0":
   version: 3.7.0
   resolution: "@types/eslint-scope@npm:3.7.0"
@@ -4047,34 +4054,6 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"pianoroll@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "pianoroll@workspace:."
-  dependencies:
-    "@babel/core": ^7.12.16
-    "@babel/plugin-proposal-class-properties": ^7.13.0
-    "@babel/plugin-syntax-import-meta": ^7.10.4
-    "@babel/preset-env": ^7.13.10
-    "@babel/preset-react": ^7.12.13
-    "@babel/preset-typescript": ^7.13.0
-    "@rollup/plugin-babel": ^5.3.0
-    "@rollup/plugin-commonjs": ^17.1.0
-    "@rollup/plugin-node-resolve": ^11.2.0
-    "@rollup/plugin-replace": ^2.4.1
-    "@surma/rollup-plugin-off-main-thread": ^2.1.0
-    debug: ^4.3.1
-    preact: ^10.5.5
-    rollup: ^2.42.1
-    rollup-plugin-copy: ^3.4.0
-    rollup-plugin-node-builtins: ^2.1.2
-    ts-loader: ^8.0.12
-    typescript: ^4.0.2
-    wam-extensions: ^0.1.10
-    webpack: ^5.11.1
-    webpack-cli: ^4.3.0
-  languageName: unknown
-  linkType: soft
-
 "picomatch@npm:^2.2.2, picomatch@npm:^2.2.3":
   version: 2.3.0
   resolution: "picomatch@npm:2.3.0"
@@ -4957,6 +4936,35 @@ typescript@^4.0.2:
   checksum: b56f83d9ff14187562badc4955dadeef53ff3abde478ce60759539dd8d5472a91fce9db6083fc2450e54cef6f2110c1a28d8c12162dbf575a6cfcb846986904b
   languageName: node
   linkType: hard
+
+"videogen1@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "videogen1@workspace:."
+  dependencies:
+    "@babel/core": ^7.12.16
+    "@babel/plugin-proposal-class-properties": ^7.13.0
+    "@babel/plugin-syntax-import-meta": ^7.10.4
+    "@babel/preset-env": ^7.13.10
+    "@babel/preset-react": ^7.12.13
+    "@babel/preset-typescript": ^7.13.0
+    "@rollup/plugin-babel": ^5.3.0
+    "@rollup/plugin-commonjs": ^17.1.0
+    "@rollup/plugin-node-resolve": ^11.2.0
+    "@rollup/plugin-replace": ^2.4.1
+    "@surma/rollup-plugin-off-main-thread": ^2.1.0
+    "@types/debug": ^4.1.6
+    debug: ^4.3.1
+    preact: ^10.5.5
+    rollup: ^2.42.1
+    rollup-plugin-copy: ^3.4.0
+    rollup-plugin-node-builtins: ^2.1.2
+    ts-loader: ^8.0.12
+    typescript: ^4.0.2
+    wam-extensions: ^0.1.10
+    webpack: ^5.11.1
+    webpack-cli: ^4.3.0
+  languageName: unknown
+  linkType: soft
 
 "wam-extensions@npm:^0.1.10":
   version: 0.1.10

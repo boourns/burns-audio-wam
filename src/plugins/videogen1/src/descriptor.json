@@ -1,0 +1,11 @@
+{
+    "name": "VideoGen",
+    "vendor": "TomBurns",
+    "description": "WAM2 Video Generator Effect",
+    "version": "1.0.0",
+    "sdkVersion": "1.0.0",
+    "thumbnail": "",
+    "keywords": ["video", "generator"],
+    "isInstrument": false,
+    "website": ""
+}
