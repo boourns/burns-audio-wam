@@ -5,7 +5,6 @@ globalThis.WamParameter = WamParameter;
 import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
 import WamProcessor from "sdk/src/WamProcessor";
 
-
 // @ts-ignore
 globalThis.WamParameterInterpolator = WamParameterInterpolator
 
@@ -47,57 +46,12 @@ class VideoGenProcessor extends WamProcessor {
 	// @ts-ignore
     static generateWamParameterInfo() {
         return {
-            offset1: new WamParameterInfo('offset1', {
-				type: 'int',
-				label: 'Offset 1',
-				defaultValue: 0,
-                minValue: -24,
-                maxValue: 24
-			}),
-            offset2: new WamParameterInfo('offset2', {
-				type: 'int',
-				label: 'Offset 2',
-				defaultValue: 0,
-                minValue: -24,
-                maxValue: 24
-			}),
-            offset3: new WamParameterInfo('offset3', {
-				type: 'int',
-				label: 'Offset 3',
-				defaultValue: 0,
-                minValue: -24,
-                maxValue: 24
-			}),
-            offset4: new WamParameterInfo('offset4', {
-				type: 'int',
-				label: 'Offset 4',
-				defaultValue: 0,
-                minValue: -24,
-                maxValue: 24
-			}),
-            offset5: new WamParameterInfo('offset5', {
-				type: 'int',
-				label: 'Offset 5',
-				defaultValue: 0,
-                minValue: -24,
-                maxValue: 24
-			}),
-            offset6: new WamParameterInfo('offset6', {
-				type: 'int',
-				label: 'Offset 6',
-				defaultValue: 0,
-                minValue: -24,
-                maxValue: 24
-			}),
         }
     }
 
     lastTime: number
     proxyId: string
     destroyed: boolean
-
-    heldNotes: number[][]
-    offsets: number[]
 
 	constructor(options: any) {
 		super(options);
@@ -110,9 +64,6 @@ class VideoGenProcessor extends WamProcessor {
 
         // @ts-ignore
         const { webAudioModules } = audioWorkletGlobalScope;
-
-        this.heldNotes = []
-        this.heldNotes.fill([], 0, 128)
 
         // @ts-ignore
         if (globalThis.WamProcessors) globalThis.WamProcessors[instanceId] = this;
@@ -133,21 +84,6 @@ class VideoGenProcessor extends WamProcessor {
 	 */
      _process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
 		if (this.destroyed) return false;
-
-        this.offsets = [
-            // @ts-ignore
-            ...new Set([this._parameterInterpolators.offset1.values[startSample],       
-            // @ts-ignore
-            this._parameterInterpolators.offset2.values[startSample],
-            // @ts-ignore
-            this._parameterInterpolators.offset3.values[startSample],
-            // @ts-ignore
-            this._parameterInterpolators.offset4.values[startSample],
-            // @ts-ignore            
-            this._parameterInterpolators.offset5.values[startSample],
-            // @ts-ignore
-            this._parameterInterpolators.offset6.values[startSample]])
-        ].filter(n => n != 0)
 
         // @ts-ignore
         const { webAudioModules, currentTime } = audioWorkletGlobalScope;
@@ -170,59 +106,13 @@ class VideoGenProcessor extends WamProcessor {
 
         switch (type) {
         case 0x80: { /* note off */
-            this.chordOff(data1, data2)
         } break;
         case 0x90: { /* note on */
-            this.chordOn(data1, data2, this.offsets)
         } break;
         
         default: { 
-            this.emitEvents(
-                {type:"midi", time: currentTime, data: midiData}
-            )
          } break;
         }
-    }
-
-    chordOn(note: number, velocity: number, offsets: number[]) {
-        // @ts-ignore
-        const { currentTime } = audioWorkletGlobalScope;
-
-        let notes = []
-        notes.push(note)
-        for (let offset of offsets) {
-            let n = note + offset
-            if (n < 128 && n >= 0) {
-                notes.push(n)
-            }
-        }
-
-        let events: WamMidiEvent[] = notes.map(n => {
-            return {type:"midi", time: currentTime, data: {bytes: [0x90, n, velocity]}}
-        })
-
-        this.emitEvents(
-            ...events
-        )
-
-        this.heldNotes[note] = notes
-    }
-
-    chordOff(note: number, velocity: number) {
-        // @ts-ignore
-        const { currentTime } = audioWorkletGlobalScope;
-
-        let notes = this.heldNotes[note]
-
-        let events: WamMidiEvent[] = notes.map(n => {
-            return {type:"midi", time: currentTime, data: {bytes: [0x80, n, velocity]}}
-        })
-
-        this.emitEvents(
-            ...events
-        )
-
-        this.heldNotes[note] = []
     }
 
     destroy() {
