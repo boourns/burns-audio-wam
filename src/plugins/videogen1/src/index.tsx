@@ -17,6 +17,7 @@ var logger = debug("plugin:chorder")
 
 import { VideoGenerator } from './VideoGenerator';
 import { VideoExtensionOptions } from 'wam-extensions';
+import { VideoGeneratorView } from './VideoGeneratorView';
 
 export {AudioWorkletRegister}
 	
@@ -121,8 +122,7 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
 		
 		//shadow.appendChild(container)
 
-		//render(<ChorderView plugin={this}></ChorderView>, div);
-		render(<div>Yo</div>, div)
+		render(<VideoGeneratorView plugin={this}></VideoGeneratorView>, div);
 		return div;
 	}
 

@@ -8,9 +8,6 @@ import WamProcessor from "sdk/src/WamProcessor";
 // @ts-ignore
 globalThis.WamParameterInterpolator = WamParameterInterpolator
 
-import WamParameterInfo from "sdk/src/WamParameterInfo";
-import { WamMidiEvent } from "sdk/src/api/types";
-
 interface AudioWorkletProcessor {
     readonly port: MessagePort;
     process(
@@ -35,9 +32,6 @@ declare function registerProcessor(
 ): undefined;
 
 const audioWorkletGlobalScope = globalThis;
-
-// other variables that could be included:
-// - renderAhead: number - how far into the future should plugins render?
 
 // other variables that could be included:
 // - renderAhead: number - how far into the future should plugins render?
