@@ -1,2 +1,3 @@
 vendor/
-
+.yarn/
+src/plugins/*/.yarn/*
