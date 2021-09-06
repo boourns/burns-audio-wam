@@ -1,5 +1,5 @@
 import { Clip, ClipState } from './Clip'
-import { NoteDefinition } from '../../extensions'
+import { NoteDefinition } from 'wam-extensions'
 
 export type MIDIEvent = Uint8Array
  export type ScheduledMIDIEvent = {

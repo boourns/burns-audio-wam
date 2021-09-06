@@ -39,8 +39,8 @@ class StepModulatorNode extends WamNode {
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
 	}
 
-	getState(): any {
-		var params = super.getState()
+	async getState(): Promise<any> {
+		var params = await super.getState()
 		return {params, sequencer: this.sequencer.getState()}
 	}
 

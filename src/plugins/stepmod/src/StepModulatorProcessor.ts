@@ -61,7 +61,7 @@ class StepModulatorProcessor extends WamProcessor {
 		return {
             slew: new WamParameterInfo('slew', {
                 type: "float",
-                defaultValue: 0,
+                defaultValue: 1.0,
                 minValue: 0,
                 maxValue: 1.0,
             }),
