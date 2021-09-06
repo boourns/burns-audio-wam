@@ -434,7 +434,6 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
                     }
                 }, 10)
                 this.dirty = true
-                console.log("WOOF forcing a second render")
                 this.forceUpdate()
             }
         } else {
