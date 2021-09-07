@@ -44,7 +44,10 @@ const plugin = {
     ...common,
     input: "./src/index.tsx",
     output: [{ ...common.output[0], dir: "./dist" }],
-    plugins: [...common.plugins, copy({ targets: [{ src: "./src/descriptor.json", dest: "./dist" }] })]
+    plugins: [...common.plugins, copy({ targets: [
+        { src: "./src/descriptor.json", dest: "./dist" },
+        { src: "./assets/*", dest: "./dist/assets"}
+    ] })]
 };
 
 export default [plugin];

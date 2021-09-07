@@ -3801,6 +3801,32 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
+"mverb2@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "mverb2@workspace:."
+  dependencies:
+    "@babel/core": ^7.12.16
+    "@babel/plugin-proposal-class-properties": ^7.13.0
+    "@babel/plugin-syntax-import-meta": ^7.10.4
+    "@babel/preset-env": ^7.13.10
+    "@babel/preset-react": ^7.12.13
+    "@babel/preset-typescript": ^7.13.0
+    "@rollup/plugin-babel": ^5.3.0
+    "@rollup/plugin-commonjs": ^17.1.0
+    "@rollup/plugin-node-resolve": ^11.2.0
+    "@rollup/plugin-replace": ^2.4.1
+    "@surma/rollup-plugin-off-main-thread": ^2.1.0
+    preact: ^10.5.5
+    rollup: ^2.42.1
+    rollup-plugin-copy: ^3.4.0
+    rollup-plugin-node-builtins: ^2.1.2
+    ts-loader: ^8.0.12
+    typescript: ^4.0.2
+    webpack: ^5.11.1
+    webpack-cli: ^4.3.0
+  languageName: unknown
+  linkType: soft
+
 "neo-async@npm:^2.6.2":
   version: 2.6.2
   resolution: "neo-async@npm:2.6.2"
@@ -4334,32 +4360,6 @@ fsevents@~2.3.2:
   checksum: 08ef02ed0514f020a51131ba2e6c27c66ccebe25d49cfc83467a0d4054db4634a2853480d0895c710b645ab66af1a6fb3e183888306ae559413bd96c69f39ccd
   languageName: node
   linkType: hard
-
-"reverb@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "reverb@workspace:."
-  dependencies:
-    "@babel/core": ^7.12.16
-    "@babel/plugin-proposal-class-properties": ^7.13.0
-    "@babel/plugin-syntax-import-meta": ^7.10.4
-    "@babel/preset-env": ^7.13.10
-    "@babel/preset-react": ^7.12.13
-    "@babel/preset-typescript": ^7.13.0
-    "@rollup/plugin-babel": ^5.3.0
-    "@rollup/plugin-commonjs": ^17.1.0
-    "@rollup/plugin-node-resolve": ^11.2.0
-    "@rollup/plugin-replace": ^2.4.1
-    "@surma/rollup-plugin-off-main-thread": ^2.1.0
-    preact: ^10.5.5
-    rollup: ^2.42.1
-    rollup-plugin-copy: ^3.4.0
-    rollup-plugin-node-builtins: ^2.1.2
-    ts-loader: ^8.0.12
-    typescript: ^4.0.2
-    webpack: ^5.11.1
-    webpack-cli: ^4.3.0
-  languageName: unknown
-  linkType: soft
 
 "rimraf@npm:^3.0.2":
   version: 3.0.2

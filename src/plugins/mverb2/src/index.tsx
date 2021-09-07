@@ -30,7 +30,7 @@ export default class ConvolutionReverb extends WebAudioModule<ConvolutionReverbN
 	}
 
 	async createAudioNode(initialState: any) {
-		const synthNode = new ConvolutionReverbNode(this.audioContext);
+		const synthNode = new ConvolutionReverbNode(this.audioContext, this._baseURL);
 
 		const paramsConfig = {
 			time: {

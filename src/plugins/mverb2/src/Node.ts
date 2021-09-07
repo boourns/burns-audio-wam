@@ -4,6 +4,8 @@ import { CompositeAudioNode, ParamMgrNode } from 'sdk';
 import {ScheduledMIDIEvent} from '../../shared/midi'
 import { AudioPool } from './AudioPool';
 
+import { getBaseUrl } from '../../shared/getBaseUrl';
+
 export default class ConvolutionReverbNode extends CompositeAudioNode {
 	_wamNode: ParamMgrNode<string, string> = undefined;
     _input!: AudioNode
@@ -15,6 +17,7 @@ export default class ConvolutionReverbNode extends CompositeAudioNode {
 
     audioPool: AudioPool
     reverb!: ConvolverNode
+    baseUrl: string
 
     state = {
         reverbTime: 1,
@@ -26,8 +29,10 @@ export default class ConvolutionReverbNode extends CompositeAudioNode {
 		return this._wamNode;
 	}
 
-	constructor(audioContext: BaseAudioContext, options={}) {
+	constructor(audioContext: BaseAudioContext, baseUrl: string, options={}) {        
 		super(audioContext, options);
+
+        this.baseUrl = baseUrl
 
         console.log("ConvolutionReverbNode constructor()")
         this.audioPool = new AudioPool(audioContext)
@@ -68,7 +73,7 @@ export default class ConvolutionReverbNode extends CompositeAudioNode {
 
         this.updateFromState()
 
-        this.audioPool.loadSample("https://burns.ca/static/mverb2.wav", (buffer: AudioBuffer) => {
+        this.audioPool.loadSample(`${this.baseUrl}/assets/xlarge.wav`, (buffer: AudioBuffer) => {
             console.log("IR loaded")
             this.reverb.buffer = buffer
         });
