@@ -71,8 +71,7 @@ class SlewProcessor extends AudioWorkletProcessor {
         const riseSpeed = parameters.riseSpeed[0]
         const fallSpeed = parameters.fallSpeed[0]
         
-        const destroyed = parameters.destroyed;
-        if (destroyed[0] > 0.5) {
+        if (parameters.destroyed[0] > 0.5) {
           return false
         }
 

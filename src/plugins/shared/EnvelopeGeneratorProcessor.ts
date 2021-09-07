@@ -166,8 +166,7 @@ class EnvelopeGeneratorProcessor extends AudioWorkletProcessor {
   }
 
   process (inputs: Float32Array[][], outputs: Float32Array[][], parameters: Record<string, Float32Array>) {
-    const destroyed = parameters.destroyed;
-    if (destroyed[0] > 0.5) {
+    if (parameters.destroyed[0] > 0.5) {
       return false
     }
 
