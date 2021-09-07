@@ -22,7 +22,7 @@ export class ConvolutionReverbView extends Component<ConvolutionReverbViewProps,
   }
 
   // Lifecycle: Called whenever our component is created
-  componentDidMount() {
+  componentWillMount() {
     this.setState({
       IRList: this.props.plugin.audioNode.IRs()
     })
@@ -52,7 +52,6 @@ export class ConvolutionReverbView extends Component<ConvolutionReverbViewProps,
     <div class="reverb-module">
         <div style="display: flex">
             <Select options={irOptions} values={irValues} value={() => this.props.plugin.audioNode.state.ir} label="Model" onChange={(v) => this.updateIR(v)} />
-            <Knob label="Time" size={40} value={() => params.getParamValue("time")} minimumValue={0.001} maximumValue={40} onChange={(v) => this.paramChanged("time", v)}/>
             <Knob label="Mix" size={40} value={() => params.getParamValue("wet")} minimumValue={0.0} maximumValue={1} onChange={(v) => this.paramChanged("wet", v)}/>
         </div>
 
