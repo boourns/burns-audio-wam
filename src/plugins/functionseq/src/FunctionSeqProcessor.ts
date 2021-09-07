@@ -53,14 +53,12 @@ class FunctionSequencerProcessor extends WamProcessor {
 
     lastTime: number
     proxyId: string
-    destroyed: boolean
     ticks: number
     function: FunctionSequencer
     transportData?: WamTransportData
 
 	constructor(options: any) {
 		super(options);
-        this.destroyed = false
 
         const {
 			moduleId,
@@ -97,17 +95,15 @@ class FunctionSequencerProcessor extends WamProcessor {
 	 * @param {Float32Array[][]} outputs
 	 */
      _process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
-		if (this.destroyed) return false;
-
         // @ts-ignore
         const { webAudioModules, currentTime } = audioWorkletGlobalScope;
         
         if (!this.transportData) {
-            return true
+            return
         }
 
         if (!this.function) {
-            return true
+            return
         }
 
 		if (this.transportData!.playing) {
@@ -141,7 +137,7 @@ class FunctionSequencerProcessor extends WamProcessor {
             }
 		}
 
-		return true;
+		return;
 	}
 
 	/**
@@ -165,11 +161,6 @@ class FunctionSequencerProcessor extends WamProcessor {
     _onTransport(transportData: WamTransportData) {
         this.transportData = transportData
     }
-
-    destroy() {
-		this.destroyed = true;
-		super.port.close();
-	}
 }
 
 try {

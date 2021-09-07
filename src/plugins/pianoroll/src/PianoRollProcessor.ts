@@ -66,11 +66,9 @@ class PianoRollProcessor extends WamProcessor {
     currentClipId: string
 
     futureEvents: any[]
-    destroyed: boolean
 
 	constructor(options: any) {
 		super(options);
-        this.destroyed = false
 
         const {
 			moduleId,
@@ -105,8 +103,6 @@ class PianoRollProcessor extends WamProcessor {
 	 * @param {Float32Array[][]} outputs
 	 */
      _process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
-		if (this.destroyed) return false;
-
         // @ts-ignore
         const { webAudioModules, currentTime } = audioWorkletGlobalScope;
         
@@ -116,10 +112,10 @@ class PianoRollProcessor extends WamProcessor {
         }
 
         let clip = this.clips.get(this.currentClipId)
-        if (!clip) return true;
+        if (!clip) return
 
         if (!this.transportData) {
-            return true
+            return
         }
 
 		if (this.transportData!.playing) {
@@ -142,7 +138,7 @@ class PianoRollProcessor extends WamProcessor {
             }
 		}
 
-		return true;
+		return
 	}
 
 	/**
@@ -167,11 +163,6 @@ class PianoRollProcessor extends WamProcessor {
     _onTransport(transportData: WamTransportData) {
         this.transportData = transportData
     }
-
-    destroy() {
-		this.destroyed = true;
-		super.port.close();
-	}
 }
 
 try {

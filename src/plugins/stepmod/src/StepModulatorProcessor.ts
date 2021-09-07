@@ -122,7 +122,6 @@ class StepModulatorProcessor extends WamProcessor {
         }
 	}
 
-    destroyed: boolean
     lastTime: number
     ticks: number
     lastBPM: number
@@ -139,7 +138,6 @@ class StepModulatorProcessor extends WamProcessor {
 
 	constructor(options: any) {
         super(options);
-        this.destroyed = false
 
         const {
 			moduleId,
@@ -173,8 +171,6 @@ class StepModulatorProcessor extends WamProcessor {
 	 * @param {Float32Array[][]} outputs
 	 */
      _process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
-		if (this.destroyed) return false;
-
         // @ts-ignore
         const { webAudioModules, currentTime } = audioWorkletGlobalScope;
 
@@ -184,12 +180,12 @@ class StepModulatorProcessor extends WamProcessor {
         }
 
         let clip = this.clips.get(this.currentClipId)
-        if (!clip) return true;
+        if (!clip) return
 
-        if (!this.targetParam) return true
+        if (!this.targetParam) return
 
         if (!this.transportData) {
-            return true
+            return
         }
         
 		if (this.transportData!.playing) {
@@ -273,7 +269,7 @@ class StepModulatorProcessor extends WamProcessor {
 
         this.lastValue = value
 
-		return true;
+		return
 	}
 
     /**
@@ -300,11 +296,6 @@ class StepModulatorProcessor extends WamProcessor {
     _onTransport(transportData: WamTransportData) {
         this.transportData = transportData
     }
-
-    destroy() {
-		this.destroyed = true;
-		super.port.close();
-	}
 }
 
 try {
