@@ -370,4 +370,11 @@ export default class Synth101Node extends CompositeAudioNode {
         }
     }
 
+    destroy() {
+        this.gateSlew.parameters.get("destroyed").setValueAtTime(1, 0);
+        this.env.parameters.get("destroyed").setValueAtTime(1,0);
+
+        super.destroy()
+    }
+
 }
