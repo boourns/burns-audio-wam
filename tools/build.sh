@@ -29,7 +29,7 @@ mkdir -p dist/plugins
 for i in ${plugins[*]}; do
   echo "Installing dist/plugins/$i"
   mkdir -p dist/plugins/$i
-  cp src/plugins/$i/dist/* dist/plugins/$i/
+  cp -R src/plugins/$i/dist/* dist/plugins/$i/
 done
 
 echo "=== BUILDING MANIFEST ==="

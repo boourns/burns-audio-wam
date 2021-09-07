@@ -1,7 +1,7 @@
 {
-  "name": "reverb",
+  "name": "mverb2",
   "version": "0.0.0",
-  "description": "> TODO: description",
+  "description": "Emulation of a classic preset rack-mount reverb unit",
   "author": "Tom Burns <tom@burns.ca>",
   "homepage": "https://github.com/53js/webaudiomodule#readme",
   "license": "MIT",

@@ -1,3 +1,8 @@
 vendor/
 .yarn/
-src/plugins/*/.yarn/*
+src/*
+.yarnrc.yml
+.github/*
+tools/*
+.gitmodules
+

@@ -4,7 +4,7 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
-import { WebAudioModule, ParamMgrFactory, CompositeAudioNode } from 'sdk';
+import { WebAudioModule, ParamMgrFactory } from 'sdk';
 import ConvolutionReverbNode from './Node';
 import { h, render } from 'preact';
 import { ConvolutionReverbView } from './ReverbView';
@@ -30,14 +30,9 @@ export default class ConvolutionReverb extends WebAudioModule<ConvolutionReverbN
 	}
 
 	async createAudioNode(initialState: any) {
-		const synthNode = new ConvolutionReverbNode(this.audioContext);
+		const synthNode = new ConvolutionReverbNode(this.audioContext, this._baseURL);
 
 		const paramsConfig = {
-			time: {
-				defaultValue: 1,
-				minValue: 0.001,
-				maxValue: 40,
-			},
 			wet: {
 				defaultValue: 0.3,
 				minValue: 0,
@@ -46,9 +41,6 @@ export default class ConvolutionReverb extends WebAudioModule<ConvolutionReverbN
 		}
 
         const internalParamsConfig = {
-            overdrive: {
-				onChange: (v: number) => { synthNode.state.reverbTime = v; synthNode.updateFromState() }
-			},
 			wet: synthNode.wet.gain,
 			dry: synthNode.dry.gain
         };

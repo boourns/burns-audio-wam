@@ -3,18 +3,29 @@ import { Knob } from '../../shared/ui/Knob'
 import { Select } from '../../shared/ui/Select'
 
 import ConvolutionReverb from '.'
+import { IRListEntry } from './Node';
 
 export interface ConvolutionReverbViewProps {
   plugin: ConvolutionReverb
 }
 
-export class ConvolutionReverbView extends Component<ConvolutionReverbViewProps, any> {
+export type ConvolutionReverbViewState = {
+  IRList: IRListEntry[]
+}
+
+export class ConvolutionReverbView extends Component<ConvolutionReverbViewProps, ConvolutionReverbViewState> {
   constructor() {
     super();
+    this.state = {
+      IRList: []
+    }
   }
 
   // Lifecycle: Called whenever our component is created
-  componentDidMount() {
+  componentWillMount() {
+    this.setState({
+      IRList: this.props.plugin.audioNode.IRs()
+    })
   }
 
   // Lifecycle: Called just before our component will be destroyed
@@ -25,18 +36,24 @@ export class ConvolutionReverbView extends Component<ConvolutionReverbViewProps,
     this.props.plugin.audioNode.paramMgr.setParamValue(param, value)
   }
 
+  updateIR(id: string) {
+    this.props.plugin.audioNode.setState({ir: id})
+  }
+
   render() {
     h("div", {})
 
     let params = this.props.plugin.audioNode.paramMgr
 
+    let irOptions = this.state.IRList.map(e => e.name)
+    let irValues = this.state.IRList.map(e => e.id)
+
     return (
     <div class="reverb-module">
         <div style="display: flex">
-            <Knob label="Time" size={40} value={() => params.getParamValue("time")} minimumValue={0.001} maximumValue={40} onChange={(v) => this.paramChanged("time", v)}/>
+            <Select options={irOptions} values={irValues} value={() => this.props.plugin.audioNode.state.ir} label="Model" onChange={(v) => this.updateIR(v)} />
             <Knob label="Mix" size={40} value={() => params.getParamValue("wet")} minimumValue={0.0} maximumValue={1} onChange={(v) => this.paramChanged("wet", v)}/>
-
-                   </div>
+        </div>
 
         <div style="flex: 1">
         </div>
