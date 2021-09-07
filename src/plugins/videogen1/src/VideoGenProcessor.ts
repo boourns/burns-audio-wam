@@ -45,11 +45,9 @@ class VideoGenProcessor extends WamProcessor {
 
     lastTime: number
     proxyId: string
-    destroyed: boolean
 
 	constructor(options: any) {
 		super(options);
-        this.destroyed = false
 
         const {
 			moduleId,
@@ -77,12 +75,10 @@ class VideoGenProcessor extends WamProcessor {
 	 * @param {Float32Array[][]} outputs
 	 */
      _process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
-		if (this.destroyed) return false;
-
         // @ts-ignore
         const { webAudioModules, currentTime } = audioWorkletGlobalScope;
 
-		return true;
+		return;
 	}
 
     _onMidi(midiData: any) {        
@@ -108,11 +104,6 @@ class VideoGenProcessor extends WamProcessor {
          } break;
         }
     }
-
-    destroy() {
-		this.destroyed = true;
-		super.port.close();
-	}
 }
 
 try {

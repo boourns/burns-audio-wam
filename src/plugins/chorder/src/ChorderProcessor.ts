@@ -5,7 +5,6 @@ globalThis.WamParameter = WamParameter;
 import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
 import WamProcessor from "sdk/src/WamProcessor";
 
-
 // @ts-ignore
 globalThis.WamParameterInterpolator = WamParameterInterpolator
 
@@ -91,14 +90,11 @@ class ChorderProcessor extends WamProcessor {
 
     lastTime: number
     proxyId: string
-    destroyed: boolean
-
     heldNotes: number[][]
     offsets: number[]
 
 	constructor(options: any) {
 		super(options);
-        this.destroyed = false
 
         const {
 			moduleId,
@@ -129,8 +125,6 @@ class ChorderProcessor extends WamProcessor {
 	 * @param {Float32Array[][]} outputs
 	 */
      _process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
-		if (this.destroyed) return false;
-
         this.offsets = [
             // @ts-ignore
             ...new Set([this._parameterInterpolators.offset1.values[startSample],       
@@ -149,7 +143,7 @@ class ChorderProcessor extends WamProcessor {
         // @ts-ignore
         const { webAudioModules, currentTime } = audioWorkletGlobalScope;
 
-		return true;
+		return;
 	}
 
     _onMidi(midiData: any) {        
@@ -221,11 +215,6 @@ class ChorderProcessor extends WamProcessor {
 
         this.heldNotes[note] = []
     }
-
-    destroy() {
-		this.destroyed = true;
-		super.port.close();
-	}
 }
 
 try {

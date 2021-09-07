@@ -156,7 +156,6 @@ class SpectrumModalProcessor extends WamProcessor {
 
     lastTime: number
     proxyId: string
-    destroyed: boolean
     renderedFramePos: number
     renderedFrameLength: number
 
@@ -170,7 +169,6 @@ class SpectrumModalProcessor extends WamProcessor {
 
 	constructor(options: any) {
 		super(options);
-        this.destroyed = false
 
         const {
 			moduleId,
@@ -227,8 +225,6 @@ class SpectrumModalProcessor extends WamProcessor {
 	 * @param {Float32Array[][]} outputs
 	 */
      _process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
-		if (this.destroyed) return false;
-
         // @ts-ignore
         const { webAudioModules, currentTime } = audioWorkletGlobalScope;
         var output = outputs[0];
@@ -297,11 +293,6 @@ class SpectrumModalProcessor extends WamProcessor {
          } break;
         }
     }
-
-    destroy() {
-		this.destroyed = true;
-		super.port.close();
-	}
 }
 
 try {
