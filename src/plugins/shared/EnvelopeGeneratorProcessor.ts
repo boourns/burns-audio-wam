@@ -170,8 +170,6 @@ class EnvelopeGeneratorProcessor extends AudioWorkletProcessor {
     if (destroyed[0] > 0.5) {
       return false
     }
-    console.log("env")
-
 
     var recalculate = true
     var valueIncrement = 0
