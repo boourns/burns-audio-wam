@@ -52,6 +52,13 @@ class SlewProcessor extends AudioWorkletProcessor {
                 maxValue: 1,
                 automationRate: 'a-rate'
             },
+            {
+              name: 'destroyed',
+              defaultValue: 0.0,
+              minValue: 0,
+              maxValue: 1,
+              automationRate: 'k-rate'
+            },
         ]
     }
 
@@ -63,6 +70,13 @@ class SlewProcessor extends AudioWorkletProcessor {
 
         const riseSpeed = parameters.riseSpeed[0]
         const fallSpeed = parameters.fallSpeed[0]
+
+        console.log("slew")
+        
+        const destroyed = parameters.destroyed;
+        if (destroyed[0] > 0.5) {
+          return false
+        }
 
         for (let i = 0; i < output.length; i++) {
             let inputValue = (input.length == 1) ? input[0] : input[i]

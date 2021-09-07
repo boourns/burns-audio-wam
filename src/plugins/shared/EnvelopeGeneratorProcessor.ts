@@ -73,6 +73,13 @@ class EnvelopeGeneratorProcessor extends AudioWorkletProcessor {
         maxValue: 10,
         automationRate: 'k-rate'
       },
+      {
+        name: 'destroyed',
+        defaultValue: 0.0,
+        minValue: 0,
+        maxValue: 1,
+        automationRate: 'k-rate'
+      },
     ]
   }
 
@@ -159,6 +166,13 @@ class EnvelopeGeneratorProcessor extends AudioWorkletProcessor {
   }
 
   process (inputs: Float32Array[][], outputs: Float32Array[][], parameters: Record<string, Float32Array>) {
+    const destroyed = parameters.destroyed;
+    if (destroyed[0] > 0.5) {
+      return false
+    }
+    console.log("env")
+
+
     var recalculate = true
     var valueIncrement = 0
     let output = outputs[0][0]
