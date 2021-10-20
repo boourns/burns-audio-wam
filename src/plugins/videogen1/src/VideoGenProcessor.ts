@@ -38,7 +38,7 @@ const audioWorkletGlobalScope = globalThis;
 
 class VideoGenProcessor extends WamProcessor {
 	// @ts-ignore
-    static generateWamParameterInfo() {
+    _generateWamParameterInfo() {
         return {
         }
     }

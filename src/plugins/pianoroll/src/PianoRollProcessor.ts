@@ -46,8 +46,7 @@ export type FunctionSequencer = {
 }
 
 class PianoRollProcessor extends WamProcessor {
-	// @ts-ignore
-    static generateWamParameterInfo() {
+    _generateWamParameterInfo() {
         return {
         }
     }

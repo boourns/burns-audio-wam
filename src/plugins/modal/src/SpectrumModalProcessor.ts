@@ -7,8 +7,6 @@ globalThis.WamParameter = WamParameter;
 import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
 import WamProcessor from "sdk/src/WamProcessor";
 
-
-
 const PPQN = 96
 
 // @ts-ignore
@@ -46,7 +44,7 @@ const audioWorkletGlobalScope = globalThis;
 
 class SpectrumModalProcessor extends WamProcessor {
 	// @ts-ignore
-    static generateWamParameterInfo() {
+    _generateWamParameterInfo() {
         return {
             exciterEnvShape: new WamParameterInfo('exciterEnvShape', {
                 type: 'float',

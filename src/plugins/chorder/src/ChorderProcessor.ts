@@ -41,7 +41,7 @@ const audioWorkletGlobalScope = globalThis;
 
 class ChorderProcessor extends WamProcessor {
 	// @ts-ignore
-    static generateWamParameterInfo() {
+    _generateWamParameterInfo() {
         return {
             offset1: new WamParameterInfo('offset1', {
 				type: 'int',

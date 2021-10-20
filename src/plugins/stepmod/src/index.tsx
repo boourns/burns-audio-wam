@@ -86,6 +86,8 @@ export default class StepModulatorModule extends WebAudioModule<Node> {
 
 	async createAudioNode(initialState: any) {
 		const node: StepModulatorNode = new StepModulatorNode(this, {});
+		await node._initialize();
+
 		this.sequencer = new StepModulator(this.instanceId)
 		node.sequencer = this.sequencer
 		this.sequencerNode = node

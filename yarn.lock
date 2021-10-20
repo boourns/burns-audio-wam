@@ -10,7 +10,7 @@ __metadata:
   resolution: "burns-audio-wam@workspace:."
   dependencies:
     preact: ^10.5.5
-    sdk: "boourns/webaudiomodule#workspace=sdk&commit=48a7d6f7025975871b2e2f82e3ae0d86559717fd"
+    sdk: "53js/webaudiomodule#workspace=sdk&commit=10817e0d619fbb4d91fcf9cf0d8562e6fc65034e"
   languageName: unknown
   linkType: soft
 
@@ -21,9 +21,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sdk@boourns/webaudiomodule#workspace=sdk&commit=48a7d6f7025975871b2e2f82e3ae0d86559717fd":
+"sdk@53js/webaudiomodule#workspace=sdk&commit=10817e0d619fbb4d91fcf9cf0d8562e6fc65034e":
   version: 0.0.1
-  resolution: "sdk@https://github.com/boourns/webaudiomodule.git#workspace=sdk&commit=48a7d6f7025975871b2e2f82e3ae0d86559717fd"
-  checksum: 4eb90f5ee66192076ee192d0304046bb2ba27a4835da999a1aae895b4bdaa97a69348ad8e6a6b334e7fe8ac27665d76b7386be4becac12a3031277187eadab11
+  resolution: "sdk@https://github.com/53js/webaudiomodule.git#workspace=sdk&commit=10817e0d619fbb4d91fcf9cf0d8562e6fc65034e"
+  checksum: e2eefe507927935e01d34542c231e1e7a88d1af80abb79eff9a9eaa4c0924aa975ed1c8a2a210ae440ce3bda88669c3098cdf7b80346278a1fc85e690b450974
   languageName: node
   linkType: hard

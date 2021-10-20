@@ -111,6 +111,7 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 
 	async createAudioNode(initialState: any) {
 		const node: FunctionSeqNode = new FunctionSeqNode(this, {});
+		await node._initialize();
 
 		node.setState(initialState || {script:this.defaultScript()});
 

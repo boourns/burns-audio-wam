@@ -57,7 +57,7 @@ let quantizeValues = [
 class StepModulatorProcessor extends WamProcessor {
 
     // @ts-ignore
-    static generateWamParameterInfo() {
+    _generateWamParameterInfo() {
 		return {
             slew: new WamParameterInfo('slew', {
                 type: "float",

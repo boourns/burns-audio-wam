@@ -78,6 +78,8 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 	async createAudioNode(initialState: any) {
 		const node: PianoRollNode = new PianoRollNode(this, {});
 
+		await node._initialize()
+
 		node.setState(initialState);
 
 		this.sequencer = node
