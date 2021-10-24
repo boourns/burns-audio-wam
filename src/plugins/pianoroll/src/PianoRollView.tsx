@@ -6,20 +6,12 @@ import PianoRollModule from '.';
 import { PianoRoll } from './PianoRoll';
 
 import { ClipSettingsView } from './ClipSettingsView';
-import { PPQN } from './Clip';
+import { Note, PPQN } from './Clip';
+import { Design, NoteCanvasRenderer, NoteCanvasRenderState } from './NoteCanvasRenderer';
 var logger = (...any: any) => {}
 //const logger = console.log
 
-class Design {
-	static cellHeight = 20
-	static gutterWidth = 80
-	static headerHeight = 40
-    static cellWidth = 20
-}
-
 type PositionEvent = MouseEvent & { layerX: number, layerY: number}
-
-const ratio = window.devicePixelRatio || 1;
 
 function positionFromEvent(e: PositionEvent) {
     // Safari populates these
@@ -43,7 +35,7 @@ export type PianoRollProps = {
 
 type PianoRollState = {
     showSettingsModal: boolean
-    layingNewNote?: {tick: number, number: number, duration: number}
+    layingNewNote?: Note
 }
 
 export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
@@ -52,23 +44,19 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
     position: number;
     dirty: boolean;
     ref?: HTMLDivElement;
-    canvas?: HTMLCanvasElement;
     header?: HTMLDivElement;
+    canvasRenderer: NoteCanvasRenderer;
 
-    cellWidth: number;
-    maxHeight: number;
+    totalHeight: number;
     notes: NoteDefinition[];
     defaultNotes!: NoteDefinition[];
     body?: HTMLDivElement;
     totalWidth: number;
     clipLength: any;
     tickWidth: number;
-    visibleCells: number;
-    visibleTicks: number;
     scrubber?: SVGRectElement;
     scrubberPressed: boolean;
     scrubberMousePosition?: { x: any; y: any; };
-    layingNote?: SVGElement;
 
     animationHandler: number;
     playhead?: SVGElement;
@@ -85,14 +73,10 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
         this.initializeDefaultNotes()
         
-        this.renderedBackground = false;
         this.zoom = 1.0
         this.position = 0 // in ticks currently
-        this.visibleCells = 0
-        this.visibleTicks = 0
         this.tickWidth = 0
-        this.cellWidth = 0
-        this.maxHeight = 0
+        this.totalHeight = 0
         this.totalWidth = 0
 
         this.scrubberMouseDown = this.scrubberMouseDown.bind(this)
@@ -107,6 +91,8 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         this.dirty = false
         this.notes = []
         this.animate = this.animate.bind(this)
+
+        this.canvasRenderer = new NoteCanvasRenderer(document)
     }
 
     componentDidMount() {
@@ -123,7 +109,6 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         window.cancelAnimationFrame(this.animationHandler)
 
         this.ref = undefined
-        this.canvas = undefined
         this.header = undefined
 
         window.removeEventListener('mousemove', this.scrubberMouseMove)
@@ -160,7 +145,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         var tick = this.position + ((x-Design.gutterWidth) / this.tickWidth!);
         tick = tick - (tick % clip.quantize)
 
-        let index = Math.floor((this.maxHeight - y)/Design.cellHeight);
+        let index = Math.floor((this.totalHeight - y)/Design.cellHeight);
         if (index >= this.notes.length) {
             return
         }
@@ -175,7 +160,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
             window.addEventListener("mousemove", this.gridMouseMove)
             window.addEventListener("mouseup", this.gridMouseUp)
 
-            this.setState({layingNewNote: {tick, number, duration}})
+            this.setState({layingNewNote: {tick, number, duration, velocity: 100}})
         }
 
         this.setup(this.ref);
@@ -188,21 +173,19 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
         let clip = this.props.pianoRoll.getClip(this.props.clipId)
 
-        let tick = Math.floor(this.position) + (Math.floor((x-Design.gutterWidth) / this.cellWidth!) * clip.quantize);
+        let tick = Math.floor(this.position) + (Math.floor((x-Design.gutterWidth) / this.canvasRenderer.facts.cellWidth) * clip.quantize);
         
         if (tick > this.state.layingNewNote!.tick) {
             this.setState({layingNewNote: {
                 tick: this.state.layingNewNote!.tick,
                 number: this.state.layingNewNote!.number,
-                duration: tick - this.state.layingNewNote!.tick + clip.quantize
+                duration: tick - this.state.layingNewNote!.tick + clip.quantize,
+                velocity: 100
             }})
         }
     }
 
     gridMouseUp(e: MouseEvent) {
-        //this.svg!.removeChild(this.layingNote!)
-        this.layingNote = undefined;
-
         let note = this.state.layingNewNote!
 
         this.addNote(note.tick, note.number, note.duration)
@@ -233,11 +216,11 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
             if (clipPosition >= 0 && this.props.clipId == this.props.pianoRoll.playingClip) {
                 var x = -10
-                if (clipPosition >= this.position && clipPosition < this.position + this.visibleTicks) {
+                if (clipPosition >= this.position && clipPosition < this.position + this.canvasRenderer.facts.visibleTicks) {
                     x = Design.gutterWidth + ((clipPosition - this.position) * this.tickWidth);
                 }
                 if (!this.playhead) {
-                    this.playhead = svg_line(0, 0, 0, this.maxHeight, "red")
+                    this.playhead = svg_line(0, 0, 0, this.totalHeight, "red")
                     this.playhead.setAttribute("stroke-width", "2px")
                     //this.svg?.appendChild(this.playhead)
                 }
@@ -253,15 +236,16 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
     setup(ref: HTMLDivElement | undefined | null) {
         logger("entering setup")
-        let gutterWidth = Design.gutterWidth
-        let cellHeight = Design.cellHeight
 
-        if (ref == null || !this.props.pianoRoll.getClip(this.props.clipId)) {
+        let clip = this.props.pianoRoll.getClip(this.props.clipId)
+        if (ref == null || !clip) {
             logger("Skipping rendering, ref=%o clipId=%o clip=%o", ref, this.props.clipId, this.props.pianoRoll.getClip(this.props.clipId))
             return
         }
 
-        var firstRender = false;
+        // do we need to reposition the scroll
+        //var firstRender = false;
+
         if (this.props.pianoRoll.noteList) {
             logger(`Have custom noteList length ${this.notes}`)
             this.notes = this.props.pianoRoll.noteList
@@ -271,14 +255,28 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
             this.notes = this.defaultNotes
         }
 
-        let noteCount = this.notes.length
+        this.totalHeight = Design.cellHeight * this.notes.length;
+        if (this.totalWidth == 0) {
+            logger(`totalWidth 0, starting at ${window.innerWidth * 0.9}`)
+            this.totalWidth = window.innerWidth * 0.9
+        }
 
-        if (this.ref != ref || !this.renderedBackground) {
-            logger("Rendering background")
+        let rendererState: NoteCanvasRenderState = {
+            width: this.totalWidth,
+            height: this.totalHeight,
+            position: this.position,
+            horizontalZoom: this.zoom,
+            clip: clip,
+            visibleNotes: this.notes,
+            layingNewNote: this.state.layingNewNote
+        }
 
+        let canvas = this.canvasRenderer.render(rendererState)
+
+        if (this.ref != ref) {
             ref.innerHTML = ""
 
-            firstRender = true;
+            //firstRender = true;
             this.header = document.createElement("div")
             let body = document.createElement("div");
             body.setAttribute("class", "pianoroll-body");
@@ -288,10 +286,6 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
             //     this.svg.removeChild(this.playhead)
             //     this.playhead = undefined
             // }
-
-            let canvas = document.createElement("canvas")
-
-            this.canvas = canvas;
 
             body.appendChild(canvas)
             ref.appendChild(this.header)
@@ -316,140 +310,28 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
               });
     
             this.resizeObserver.observe(ref)
-
-            if (this.totalWidth == 0) {
-                logger(`totalWidth 0, starting at ${window.innerWidth * 0.9}`)
-                this.totalWidth = window.innerWidth * 0.9
-            }
-
-            this.maxHeight = cellHeight * noteCount;
-            canvas.style.height = `${this.maxHeight}px`
-            canvas.style.width = `${this.totalWidth}px`
-            canvas.width = this.totalWidth * ratio
-            canvas.height = this.maxHeight * ratio
-
             canvas.addEventListener('mousedown', this.gridMouseDown)
 
-            let ctx = canvas.getContext("2d")
-
-            this.notes.forEach((note, i) => {
-                // main background
-                let mainColor = note.blackKey ? "#bbbbbb" : "white"
-
-                fillRect(ctx, 0, this.maxHeight-cellHeight*(i+1), this.totalWidth, cellHeight, mainColor)
-
-                // gutter
-                let gutterColor = note.blackKey ? "black" : "white"
-                
-                fillRect(ctx, 0, this.maxHeight-cellHeight*(i+1), gutterWidth, cellHeight, gutterColor)
-
-                if (note.name) {
-                    fillText(ctx, note.name, 5, this.maxHeight-cellHeight*(i)-4, 24, note.blackKey ? "#fff" : "#000")
-                }
-            })
-
             this.ref = ref;
-
             this.renderedBackground = true;
             this.dirty = true
         }
 
-        let clip = this.props.pianoRoll.getClip(this.props.clipId)
         this.clipLength = clip.state.length
 
-        // break from gutter to edge into N steps
-        let visibleTicks = this.clipLength * this.zoom;
-        this.visibleTicks = visibleTicks
-        this.tickWidth = (this.totalWidth - gutterWidth) / visibleTicks;
-
-        this.visibleCells = visibleTicks / clip.quantize;
-        this.cellWidth = this.tickWidth * clip.quantize;
-
-        let ctx = this.canvas.getContext("2d")
-
-        if (clip.needsRender() || this.dirty) {
-            logger("Rendering clip")
-
-            let newHeader = this.renderHeader();
-            if (this.header) {
-                ref.replaceChild(newHeader, this.header);
-            }
-            this.header = newHeader;
-
-            clip.setRenderFlag(false);
-            this.dirty = false;
-
-            // calculate first line position, in ticks.
-            let firstLine = Math.floor((this.position - (this.position % clip.quantize)));
-
-            for (var pos = firstLine; pos < this.position + visibleTicks; pos += clip.quantize) {
-                if (pos >= this.position) {
-                    let x = gutterWidth + ((pos - this.position) * this.tickWidth)
-                    let style = (pos % 24 == 0) ? "black" : "grey"
-                    let lineWidth = 1
-                    if (pos % 24 == 0) {
-                        lineWidth = 2
-                    }
-
-                    line(ctx, x, 0, x, this.maxHeight, lineWidth, style)
-                }
-            }
-
-            var firstNoteHeight = this.maxHeight;
-            clip.state.notes.forEach((note) => {
-                if (note.tick + note.duration < this.position || note.tick >= this.position + visibleTicks) {
-                    return
-                }
-                let index = this.notes.findIndex(n => n.number == note.number)
-
-                var x = gutterWidth + ((note.tick - this.position) * this.tickWidth);
-                var y = this.maxHeight - cellHeight*(index+1);
-                var width = this.tickWidth * note.duration;
-                var height = cellHeight;
-
-                if (y < firstNoteHeight) {
-                    // calculate the height of the first note for pre-scrolling
-                    firstNoteHeight = y;
-                }
-
-                if (x < gutterWidth) {
-                    // subtract the overlap between x and gutterwidth from original width
-                    width = width - (gutterWidth - x);
-                    x = gutterWidth;
-                }
-
-                fillRect(ctx, x, y, width, height, "red")
-            })
-            
-            if (firstRender) {
-                window.setTimeout(() => {
-                    if (clip.state.notes.length > 0) {
-                        var pos = (firstNoteHeight > 40) ? firstNoteHeight-40 : firstNoteHeight;
-                        this.body!.scrollTop = pos;
-                    } else {
-                        this.body!.scrollTop = this.maxHeight / 2;
-                    }
-                }, 10)
-                this.dirty = true
-                this.forceUpdate()
-            }
-        } else {
-            logger(`Skipping clip render, this.dirty=${this.dirty} clip.needsRender()=${clip.needsRender()}`)
-        }
-
-        // render the new note, still being laid
-        if (this.state.layingNewNote) {
-            let note = this.state.layingNewNote;
-
-            var x = gutterWidth + ((note.tick - this.position) * this.tickWidth);
-            var width = this.tickWidth * note.duration;
-            var height = cellHeight;
-
-            let index = this.notes.findIndex(n => n.number == note.number)
-            var y = this.maxHeight - cellHeight*(index+1);
-
-            fillRect(ctx, x, y, width, height, "red")
-        }  
+        // if (firstRender) {
+        //     window.setTimeout(() => {
+        //         if (clip.state.notes.length > 0) {
+        //             var pos = (firstNoteHeight > 40) ? firstNoteHeight-40 : firstNoteHeight;
+        //             this.body!.scrollTop = pos;
+        //         } else {
+        //             this.body!.scrollTop = this.totalHeight / 2;
+        //         }
+        //     }, 10)
+        //     this.dirty = true
+        //     this.forceUpdate()
+        // }
+        
     }
 
     render() {
@@ -611,26 +493,3 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 }
 
 
-function fillRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, style: string) {
-    ctx.strokeStyle = ""
-    ctx.fillStyle = style
-    ctx.fillRect(x*ratio, y*ratio, w*ratio, h*ratio)
-}
-
-function fillText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, size: number, style: string) {
-    ctx.font = `${size*ratio}px`
-    ctx.strokeStyle = ""
-    ctx.fillStyle = style
-    
-    ctx.fillText(text, x*ratio, y*ratio)
-}
-
-function line(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number, width: number, style: string) {
-    ctx.lineWidth = width
-    ctx.strokeStyle = style
-    
-    ctx.beginPath()
-    ctx.moveTo(x1*ratio, y1*ratio)
-    ctx.lineTo(x2*ratio, y2*ratio)
-    ctx.stroke()
-}
