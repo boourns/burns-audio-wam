@@ -57,27 +57,50 @@ export class NoteCanvasRenderer {
         }
     }
 
-    render(state: NoteCanvasRenderState) {
-        let canvas = document.createElement("canvas")
-        this.canvas = canvas;
+    dimensionsChanged(newState: NoteCanvasRenderState): boolean {
+        return !this.oldState || this.oldState.width != newState.width || this.oldState.height != newState.height
+    }
 
-        canvas.style.height = `${state.height}px`
-        canvas.style.width = `${state.width}px`
-        canvas.width = state.width * ratio
-        canvas.height = state.height * ratio
+    visibleNotesChanged(newState: NoteCanvasRenderState): boolean {
+        if (!this.oldState) {
+            return true
+        }
+
+        if (newState.visibleNotes.length != this.oldState.visibleNotes.length) {
+            return true
+        }
+
+        return newState.visibleNotes.some((element, i) => !sameNote(element, this.oldState.visibleNotes[i]))
+    }
+
+    render(state: NoteCanvasRenderState) {
+        const dimensionsChanged = this.dimensionsChanged(state)
+        const horizontalChanged = !this.oldState || this.oldState.horizontalZoom != state.horizontalZoom || this.oldState.position != state.position
+        const visibleNotesChanged = this.visibleNotesChanged(state)
+        const mustRenderBackground = !this.canvas || dimensionsChanged || visibleNotesChanged || horizontalChanged || state.clip.needsRender()
+
+        if (!this.canvas) {
+            this.canvas = document.createElement("canvas")
+        }
+        const canvas = this.canvas
+
+        if (dimensionsChanged) {
+            canvas.style.height = `${state.height}px`
+            canvas.style.width = `${state.width}px`
+            canvas.width = state.width * ratio
+            canvas.height = state.height * ratio
+        }
 
         let facts = this.calculateFacts(state)
         this.facts = facts
 
         let ctx = this.canvas.getContext("2d")
 
-        this.renderBackground(state)
+        ctx.clearRect(0, 0, state.width, state.height)
 
-        if (state.clip.needsRender()) {
-            logger("Rendering clip")
-
-            state.clip.setRenderFlag(false);
-
+        if (mustRenderBackground) {
+            this.renderBackground(state)
+        
             // calculate first line position, in ticks.
             let firstLine = Math.floor((state.position - (state.position % state.clip.quantize)));
 
@@ -141,15 +164,14 @@ export class NoteCanvasRenderer {
             fillRect(ctx, x, y, width, height, "red")
         }
 
+        this.oldState = state
+
         return canvas
-    }
-
-    instantiateCanvas() {
-
     }
 
     renderBackground(state: NoteCanvasRenderState) {
         let ctx = this.canvas.getContext("2d")
+        console.log("CanvasRenderer renderBackground")
 
         state.visibleNotes.forEach((note, i) => {
             // main background
@@ -191,4 +213,8 @@ function line(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number,
     ctx.moveTo(x1*ratio, y1*ratio)
     ctx.lineTo(x2*ratio, y2*ratio)
     ctx.stroke()
+}
+
+function sameNote(n1: NoteDefinition, n2: NoteDefinition): boolean {
+    return n1.blackKey == n2.blackKey && n1.name == n2.name && n1.number == n2.number
 }

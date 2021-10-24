@@ -97,8 +97,6 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
     componentDidMount() {
         this.props.pianoRoll.renderCallback = () => {
-            this.renderedBackground = false
-            this.dirty = true
             this.forceUpdate()
         }
 
@@ -160,6 +158,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
             window.addEventListener("mousemove", this.gridMouseMove)
             window.addEventListener("mouseup", this.gridMouseUp)
 
+            console.log("Adding layingNewNote!")
             this.setState({layingNewNote: {tick, number, duration, velocity: 100}})
         }
 
@@ -272,15 +271,16 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         }
 
         let canvas = this.canvasRenderer.render(rendererState)
+        clip.setRenderFlag(false);
 
         if (this.ref != ref) {
             ref.innerHTML = ""
 
-            //firstRender = true;
-            this.header = document.createElement("div")
             let body = document.createElement("div");
             body.setAttribute("class", "pianoroll-body");
             this.body = body;
+
+            this.header = this.renderHeader();
 
             // if (this.svg && this.playhead) {
             //     this.svg.removeChild(this.playhead)
