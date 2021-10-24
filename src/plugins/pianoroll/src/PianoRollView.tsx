@@ -1,7 +1,7 @@
 import { Component, h } from 'preact';
 import { svg_rectangle, svg_text, svg_line } from '../../shared/ui/svg'
 //import { ClipSettingsView } from './ClipSettingsView'
-import { NoteDefinition } from '../../extensions/notes/NoteExtension';
+import { NoteDefinition } from 'wam-extensions';
 import PianoRollModule from '.';
 import { PianoRoll } from './PianoRoll';
 
@@ -19,7 +19,7 @@ class Design {
 
 type PositionEvent = MouseEvent & { layerX: number, layerY: number}
 
-var lastWidth = 0
+const ratio = window.devicePixelRatio || 1;
 
 function positionFromEvent(e: PositionEvent) {
     // Safari populates these
@@ -49,12 +49,12 @@ type PianoRollState = {
 export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
     renderedBackground: boolean;
     zoom: number;
-    clipNodes: SVGElement[];
     position: number;
     dirty: boolean;
     ref?: HTMLDivElement;
-    svg?: SVGElement;
+    canvas?: HTMLCanvasElement;
     header?: HTMLDivElement;
+
     cellWidth: number;
     maxHeight: number;
     notes: NoteDefinition[];
@@ -87,7 +87,6 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         
         this.renderedBackground = false;
         this.zoom = 1.0
-        this.clipNodes = []
         this.position = 0 // in ticks currently
         this.visibleCells = 0
         this.visibleTicks = 0
@@ -124,9 +123,8 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         window.cancelAnimationFrame(this.animationHandler)
 
         this.ref = undefined
-        this.svg = undefined
+        this.canvas = undefined
         this.header = undefined
-        this.clipNodes = []
 
         window.removeEventListener('mousemove', this.scrubberMouseMove)
         window.removeEventListener('mouseup', this.scrubberMouseUp)
@@ -202,7 +200,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
     }
 
     gridMouseUp(e: MouseEvent) {
-        this.svg!.removeChild(this.layingNote!)
+        //this.svg!.removeChild(this.layingNote!)
         this.layingNote = undefined;
 
         let note = this.state.layingNewNote!
@@ -241,11 +239,11 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
                 if (!this.playhead) {
                     this.playhead = svg_line(0, 0, 0, this.maxHeight, "red")
                     this.playhead.setAttribute("stroke-width", "2px")
-                    this.svg?.appendChild(this.playhead)
+                    //this.svg?.appendChild(this.playhead)
                 }
                 this.playhead.setAttribute("style", `will-change: transform; transform:translate(${x}px, 0px)`)
             } else if (this.playhead) {
-                this.svg?.removeChild(this.playhead)
+                //this.svg?.removeChild(this.playhead)
                 this.playhead = undefined
             }
         }
@@ -286,15 +284,16 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
             body.setAttribute("class", "pianoroll-body");
             this.body = body;
 
-            if (this.svg && this.playhead) {
-                this.svg.removeChild(this.playhead)
-                this.playhead = undefined
-            }
+            // if (this.svg && this.playhead) {
+            //     this.svg.removeChild(this.playhead)
+            //     this.playhead = undefined
+            // }
 
-            let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            this.svg = svg;
+            let canvas = document.createElement("canvas")
 
-            body.appendChild(svg)
+            this.canvas = canvas;
+
+            body.appendChild(canvas)
             ref.appendChild(this.header)
             ref.appendChild(body)
 
@@ -323,28 +322,29 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
                 this.totalWidth = window.innerWidth * 0.9
             }
 
-            svg.setAttribute('class', "pianoroll");
-            svg.setAttribute('width', `${this.totalWidth}px`);
-
-            svg.addEventListener('mousedown', this.gridMouseDown)
-
             this.maxHeight = cellHeight * noteCount;
-            svg.setAttribute('height', `${this.maxHeight}px`);
+            canvas.style.height = `${this.maxHeight}px`
+            canvas.style.width = `${this.totalWidth}px`
+            canvas.width = this.totalWidth * ratio
+            canvas.height = this.maxHeight * ratio
+
+            canvas.addEventListener('mousedown', this.gridMouseDown)
+
+            let ctx = canvas.getContext("2d")
 
             this.notes.forEach((note, i) => {
                 // main background
                 let mainColor = note.blackKey ? "#bbbbbb" : "white"
-                let rect = svg_rectangle(0, this.maxHeight-cellHeight*(i+1), this.totalWidth, cellHeight, mainColor)
-                svg.appendChild(rect)
+
+                fillRect(ctx, 0, this.maxHeight-cellHeight*(i+1), this.totalWidth, cellHeight, mainColor)
 
                 // gutter
                 let gutterColor = note.blackKey ? "black" : "white"
-                let gutter = svg_rectangle(0, this.maxHeight-cellHeight*(i+1), gutterWidth, cellHeight, gutterColor)
-                svg.appendChild(gutter)
+                
+                fillRect(ctx, 0, this.maxHeight-cellHeight*(i+1), gutterWidth, cellHeight, gutterColor)
 
                 if (note.name) {
-                    let text = svg_text(5, this.maxHeight-cellHeight*(i)-4, 14, note.name, note.blackKey ? "#fff" : "#000")
-                    svg.appendChild(text)
+                    fillText(ctx, note.name, 5, this.maxHeight-cellHeight*(i)-4, 24, note.blackKey ? "#fff" : "#000")
                 }
             })
 
@@ -352,7 +352,6 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
             this.renderedBackground = true;
             this.dirty = true
-            this.clipNodes = []
         }
 
         let clip = this.props.pianoRoll.getClip(this.props.clipId)
@@ -366,6 +365,8 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         this.visibleCells = visibleTicks / clip.quantize;
         this.cellWidth = this.tickWidth * clip.quantize;
 
+        let ctx = this.canvas.getContext("2d")
+
         if (clip.needsRender() || this.dirty) {
             logger("Rendering clip")
 
@@ -377,8 +378,6 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
             clip.setRenderFlag(false);
             this.dirty = false;
-            this.clipNodes.forEach(n => this.svg!.removeChild(n))
-            this.clipNodes = []
 
             // calculate first line position, in ticks.
             let firstLine = Math.floor((this.position - (this.position % clip.quantize)));
@@ -386,13 +385,13 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
             for (var pos = firstLine; pos < this.position + visibleTicks; pos += clip.quantize) {
                 if (pos >= this.position) {
                     let x = gutterWidth + ((pos - this.position) * this.tickWidth)
-                    let color = (pos % 24 == 0) ? "black" : "grey"
-                    let line = svg_line(x, 0, x, this.maxHeight, color);
+                    let style = (pos % 24 == 0) ? "black" : "grey"
+                    let lineWidth = 1
                     if (pos % 24 == 0) {
-                        line.setAttribute("stroke-width", `2px`)
+                        lineWidth = 2
                     }
-                    this.clipNodes.push(line);
-                    this.svg!.appendChild(line);
+
+                    line(ctx, x, 0, x, this.maxHeight, lineWidth, style)
                 }
             }
 
@@ -418,10 +417,8 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
                     width = width - (gutterWidth - x);
                     x = gutterWidth;
                 }
-                let noteRect = svg_rectangle(x, y, width, height, "red")
-                this.clipNodes.push(noteRect);
 
-                this.svg!.appendChild(noteRect)
+                fillRect(ctx, x, y, width, height, "red")
             })
             
             if (firstRender) {
@@ -448,18 +445,11 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
             var width = this.tickWidth * note.duration;
             var height = cellHeight;
 
-            if (!this.layingNote) {
-                let index = this.notes.findIndex(n => n.number == note.number)
-                var y = this.maxHeight - cellHeight*(index+1);
+            let index = this.notes.findIndex(n => n.number == note.number)
+            var y = this.maxHeight - cellHeight*(index+1);
 
-                this.layingNote = svg_rectangle(x, y, width, height, "red")
-                this.svg!.appendChild(this.layingNote)
-            }
-            this.layingNote.setAttribute("width", `${width}px`)
-        } else if (this.layingNote) {
-            this.svg!.removeChild(this.layingNote);
-            this.layingNote = undefined;
-        }        
+            fillRect(ctx, x, y, width, height, "red")
+        }  
     }
 
     render() {
@@ -618,4 +608,29 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 }
         `
     }
+}
+
+
+function fillRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, style: string) {
+    ctx.strokeStyle = ""
+    ctx.fillStyle = style
+    ctx.fillRect(x*ratio, y*ratio, w*ratio, h*ratio)
+}
+
+function fillText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, size: number, style: string) {
+    ctx.font = `${size*ratio}px`
+    ctx.strokeStyle = ""
+    ctx.fillStyle = style
+    
+    ctx.fillText(text, x*ratio, y*ratio)
+}
+
+function line(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number, width: number, style: string) {
+    ctx.lineWidth = width
+    ctx.strokeStyle = style
+    
+    ctx.beginPath()
+    ctx.moveTo(x1*ratio, y1*ratio)
+    ctx.lineTo(x2*ratio, y2*ratio)
+    ctx.stroke()
 }

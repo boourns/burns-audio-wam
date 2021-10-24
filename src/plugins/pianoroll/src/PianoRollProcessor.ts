@@ -1,7 +1,5 @@
 import { MIDI } from "../../shared/midi";
-
-import { WamTransportData } from "sdk/src/api/types";
-
+import { AudioParamDescriptor, WamTransportData } from "sdk/src/api/types";
 import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
 import WamProcessor from "sdk/src/WamProcessor";
 
@@ -10,7 +8,6 @@ const PPQN = 24
 // @ts-ignore
 globalThis.WamParameterInterpolator = WamParameterInterpolator
 
-import WamParameterInfo from "sdk/src/WamParameterInfo";
 import { Clip } from "./Clip";
 
 interface AudioWorkletProcessor {
