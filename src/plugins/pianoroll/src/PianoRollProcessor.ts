@@ -161,6 +161,11 @@ class PianoRollProcessor extends WamProcessor {
 
     _onTransport(transportData: WamTransportData) {
         this.transportData = transportData
+
+        super.port.postMessage({
+            event:"transport",
+            transport: transportData
+        })
     }
 }
 

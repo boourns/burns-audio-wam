@@ -5,10 +5,10 @@ import { NoteDefinition } from '../../extensions/notes/NoteExtension';
 import PianoRollModule from '.';
 import { PianoRoll } from './PianoRoll';
 
-import {debug} from "debug"
 import { ClipSettingsView } from './ClipSettingsView';
 import { PPQN } from './Clip';
-var logger = debug("plugin:pianoroll:view")
+var logger = (...any: any) => {}
+//const logger = console.log
 
 class Design {
 	static cellHeight = 20
@@ -216,24 +216,19 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
     }
 
     async animate() {
-        return
-        
         let timestamp = this.props.plugin.audioContext.currentTime
-        // @ts-ignore
-        var transportEvents = await window.WAMHost.getTransportEvents(timestamp, timestamp) as WamTransportEvent[]
-		if (transportEvents.length == 0) {
+		var transport = this.props.plugin.transport
+		
+		if (!transport) {
             this.animationHandler = window.requestAnimationFrame(this.animate)
 			return
 		}
 
-		var transport = transportEvents[0]
-		
 		if (transport.playing) {
             let clip = this.props.pianoRoll.getClip(this.props.clipId)
+            var timeElapsed = this.props.plugin.audioContext.currentTime - transport.currentBarStarted
 
-            // @ts-ignore
-			var barPosition = window.WAMHost.getBarPosition(timestamp)
-			var beatPosition = barPosition * transport.beatsPerBar
+            var beatPosition = (transport.currentBar * transport.timeSigNumerator) + ((transport.tempo/60.0) * timeElapsed)
 
             var tickPosition = Math.floor(beatPosition * PPQN)
             let clipPosition = tickPosition % clip.state.length;
@@ -246,11 +241,11 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
                 if (!this.playhead) {
                     this.playhead = svg_line(0, 0, 0, this.maxHeight, "red")
                     this.playhead.setAttribute("stroke-width", "2px")
-                    this.svg!.appendChild(this.playhead)
+                    this.svg?.appendChild(this.playhead)
                 }
-                this.playhead.setAttribute("style", `transform:translate(${x}px, 0px)`)
+                this.playhead.setAttribute("style", `will-change: transform; transform:translate(${x}px, 0px)`)
             } else if (this.playhead) {
-                this.svg!.removeChild(this.playhead)
+                this.svg?.removeChild(this.playhead)
                 this.playhead = undefined
             }
         }
@@ -291,6 +286,11 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
             body.setAttribute("class", "pianoroll-body");
             this.body = body;
 
+            if (this.svg && this.playhead) {
+                this.svg.removeChild(this.playhead)
+                this.playhead = undefined
+            }
+
             let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
             this.svg = svg;
 
@@ -305,7 +305,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
             // @ts-ignore
             this.resizeObserver = new ResizeObserver((entries: any[]) => {
-                logger("resize totalWidth=%o entries %o", this.totalWidth, entries)
+                logger("resize! totalWidth=%o entries %o", this.totalWidth, entries)
 
                 if (this.totalWidth != entries[0].contentRect.width) {
                     let delta = Math.abs(this.totalWidth - entries[0].contentRect.width)
@@ -459,12 +459,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         } else if (this.layingNote) {
             this.svg!.removeChild(this.layingNote);
             this.layingNote = undefined;
-        }
-
-        // render the playhead
-        // TODO - deliver transport state to plugins, oh and to view? hmm
-
-        
+        }        
     }
 
     render() {
