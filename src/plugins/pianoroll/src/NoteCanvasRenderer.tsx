@@ -1,8 +1,8 @@
 import { NoteDefinition } from "wam-extensions";
 import { Clip, Note } from "./Clip";
 
-//var logger = (...any: any) => {}
-const logger = console.log
+const logger = (...any: any) => {}
+//const logger = console.log
 
 const ratio = window.devicePixelRatio || 1;
 
@@ -82,10 +82,10 @@ export class NoteCanvasRenderer {
         const mustRender = !this.canvas || dimensionsChanged || visibleNotesChanged || horizontalChanged || state.clip.needsRender() || state.layingNewNote
 
         if (!this.canvas) {
-            this.canvas = document.createElement("canvas")
+            this.canvas = this.doc.createElement("canvas")
         }
         if (!this.playhead) {
-            this.playhead = document.createElement("canvas")
+            this.playhead = this.doc.createElement("canvas")
         }
 
         const canvas = this.canvas
@@ -97,8 +97,6 @@ export class NoteCanvasRenderer {
             canvas.width = state.width * ratio
             canvas.height = state.height * ratio
 
-            // playhead.style.height=`${state.height}px`
-            // playhead.style.width = `2px`
             playhead.height = state.height
             playhead.width = 1
 
