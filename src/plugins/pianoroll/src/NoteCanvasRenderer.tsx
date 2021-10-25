@@ -108,7 +108,7 @@ export class NoteCanvasRenderer {
         let facts = this.calculateFacts(state)
         this.facts = facts
 
-        let ctx = this.canvas.getContext("2d", {alpha: false})
+        let ctx = this.canvas.getContext("2d")
 
         if (mustRender) {
             this.renderBackground(state)        

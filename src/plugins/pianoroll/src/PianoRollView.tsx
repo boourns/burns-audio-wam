@@ -39,10 +39,9 @@ type PianoRollState = {
 }
 
 export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
-    renderedBackground: boolean;
     zoom: number;
     position: number;
-    dirty: boolean;
+
     ref?: HTMLDivElement;
     header?: HTMLDivElement;
     canvasRenderer: NoteCanvasRenderer;
@@ -52,13 +51,13 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
     defaultNotes!: NoteDefinition[];
     body?: HTMLDivElement;
     totalWidth: number;
-    clipLength: any;
+    clipLength: number;
+
     scrubber?: SVGRectElement;
     scrubberPressed: boolean;
     scrubberMousePosition?: { x: any; y: any; };
 
     animationHandler: number;
-    playhead?: SVGElement;
 
     // @ts-ignore
     resizeObserver?: ResizeObserver
@@ -86,7 +85,6 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         this.gridMouseUp = this.gridMouseUp.bind(this)
 
         this.scrubberPressed = false
-        this.dirty = false
         this.notes = []
         this.animate = this.animate.bind(this)
 
@@ -213,7 +211,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
                 }
             }
 
-            playhead.setAttribute("style", `will-change: transform; transform:translate(${x}px, 0px)`)
+            playhead.setAttribute("style", `left: ${x}px`)
         }
 
         this.animationHandler = window.requestAnimationFrame(this.animate)
@@ -246,6 +244,8 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
             this.totalWidth = window.innerWidth * 0.9
         }
 
+        this.clipLength = clip.state.length
+
         let rendererState: NoteCanvasRenderState = {
             width: this.totalWidth,
             height: this.totalHeight,
@@ -259,6 +259,8 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         let canvas = this.canvasRenderer.render(rendererState)
         clip.setRenderFlag(false);
 
+        let header = this.renderHeader();
+
         if (this.ref != ref) {
             ref.innerHTML = ""
 
@@ -266,13 +268,11 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
             body.setAttribute("class", "pianoroll-body");
             this.body = body;
 
-            this.header = this.renderHeader();
-
             body.appendChild(canvas)
             body.appendChild(this.canvasRenderer.playhead)
             this.canvasRenderer.playhead.setAttribute("class", "playhead")
 
-            ref.appendChild(this.header)
+            ref.appendChild(header)
             ref.appendChild(body)
 
             if (this.resizeObserver) {
@@ -288,7 +288,6 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
                     let delta = Math.abs(this.totalWidth - entries[0].contentRect.width)
                     logger(`totalWidth=${this.totalWidth} contentRect=${entries[0].contentRect.width} delta=${delta}`)
                     this.totalWidth = entries[0].contentRect.width
-                    this.renderedBackground = false
                     this.forceUpdate()
                 }
               });
@@ -297,11 +296,10 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
             canvas.addEventListener('mousedown', this.gridMouseDown)
 
             this.ref = ref;
-            this.renderedBackground = true;
-            this.dirty = true
+        } else if (this.header) {
+            this.ref.replaceChild(header, this.header)
         }
-
-        this.clipLength = clip.state.length
+        this.header = header
 
         // if (firstRender) {
         //     window.setTimeout(() => {
@@ -366,6 +364,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         container.appendChild(span)
 
         let scrubberLength = this.totalWidth-Design.gutterWidth;
+
         let clipHeader = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         clipHeader.setAttribute("style", `height: ${Design.headerHeight}px; width: ${scrubberLength}px; background-color: rgba(255, 255, 255, 0.4)`)
         container.appendChild(clipHeader)
@@ -422,18 +421,15 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
                 position = this.clipLength - (this.zoom*this.clipLength);
             }
             this.position = position
-            this.dirty = true
             this.forceUpdate()
         }
     }
 
     clipSettingsChanged() {
-        this.dirty = true
         this.forceUpdate()
     }
 
     closeClipSettings() {
-        this.dirty = true
         this.setState({
             showSettingsModal: false
         })
