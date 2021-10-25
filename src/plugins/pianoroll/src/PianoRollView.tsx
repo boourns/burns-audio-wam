@@ -53,7 +53,6 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
     body?: HTMLDivElement;
     totalWidth: number;
     clipLength: any;
-    tickWidth: number;
     scrubber?: SVGRectElement;
     scrubberPressed: boolean;
     scrubberMousePosition?: { x: any; y: any; };
@@ -75,7 +74,6 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         
         this.zoom = 1.0
         this.position = 0 // in ticks currently
-        this.tickWidth = 0
         this.totalHeight = 0
         this.totalWidth = 0
 
@@ -139,8 +137,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         let y = eventPosition.y;
 
         let clip = this.props.pianoRoll.getClip(this.props.clipId)
-
-        var tick = this.position + ((x-Design.gutterWidth) / this.tickWidth!);
+        var tick = this.position + ((x-Design.gutterWidth) / this.canvasRenderer.facts.tickWidth!);
         tick = tick - (tick % clip.quantize)
 
         let index = Math.floor((this.totalHeight - y)/Design.cellHeight);
@@ -150,19 +147,17 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         let number = this.notes[index].number;
         let duration = clip.quantize;
 
-        // if there is a note exactly at the starting point for our tick, we remove that note
+        // // if there is a note exactly at the starting point for our tick, we remove that note
         if (clip.hasNote(tick, number)) {
             clip.removeNote(tick, number);
+            this.forceUpdate()
         } else {
             // we are laying down a new note
             window.addEventListener("mousemove", this.gridMouseMove)
             window.addEventListener("mouseup", this.gridMouseUp)
 
-            console.log("Adding layingNewNote!")
             this.setState({layingNewNote: {tick, number, duration, velocity: 100}})
         }
-
-        this.setup(this.ref);
     }
 
     gridMouseMove(e: MouseEvent) {
@@ -196,38 +191,29 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
     }
 
     async animate() {
-        let timestamp = this.props.plugin.audioContext.currentTime
 		var transport = this.props.plugin.transport
-		
-		if (!transport) {
-            this.animationHandler = window.requestAnimationFrame(this.animate)
-			return
-		}
+        let playhead = this.canvasRenderer.playhead
 
-		if (transport.playing) {
-            let clip = this.props.pianoRoll.getClip(this.props.clipId)
-            var timeElapsed = this.props.plugin.audioContext.currentTime - transport.currentBarStarted
+        if (transport && playhead) {
+            let x = -1000
 
-            var beatPosition = (transport.currentBar * transport.timeSigNumerator) + ((transport.tempo/60.0) * timeElapsed)
-
-            var tickPosition = Math.floor(beatPosition * PPQN)
-            let clipPosition = tickPosition % clip.state.length;
-
-            if (clipPosition >= 0 && this.props.clipId == this.props.pianoRoll.playingClip) {
-                var x = -10
-                if (clipPosition >= this.position && clipPosition < this.position + this.canvasRenderer.facts.visibleTicks) {
-                    x = Design.gutterWidth + ((clipPosition - this.position) * this.tickWidth);
+            if (transport.playing) {
+                let clip = this.props.pianoRoll.getClip(this.props.clipId)
+                let timeElapsed = this.props.plugin.audioContext.currentTime - transport.currentBarStarted
+    
+                let beatPosition = (transport.currentBar * transport.timeSigNumerator) + ((transport.tempo/60.0) * timeElapsed)
+    
+                let tickPosition = Math.floor(beatPosition * PPQN)
+                let clipPosition = tickPosition % clip.state.length;
+    
+                if (clipPosition >= 0 && this.props.clipId == this.props.pianoRoll.playingClip) {
+                    if (clipPosition >= this.position && clipPosition < this.position + this.canvasRenderer.facts.visibleTicks) {
+                        x = Design.gutterWidth + ((clipPosition - this.position) * this.canvasRenderer.facts.tickWidth);
+                    }
                 }
-                if (!this.playhead) {
-                    this.playhead = svg_line(0, 0, 0, this.totalHeight, "red")
-                    this.playhead.setAttribute("stroke-width", "2px")
-                    //this.svg?.appendChild(this.playhead)
-                }
-                this.playhead.setAttribute("style", `will-change: transform; transform:translate(${x}px, 0px)`)
-            } else if (this.playhead) {
-                //this.svg?.removeChild(this.playhead)
-                this.playhead = undefined
             }
+
+            playhead.setAttribute("style", `position: absolute; will-change: transform; transform:translate(${x}px, 0px)`)
         }
 
         this.animationHandler = window.requestAnimationFrame(this.animate)
@@ -282,12 +268,9 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
             this.header = this.renderHeader();
 
-            // if (this.svg && this.playhead) {
-            //     this.svg.removeChild(this.playhead)
-            //     this.playhead = undefined
-            // }
-
             body.appendChild(canvas)
+            body.appendChild(this.canvasRenderer.playhead)
+
             ref.appendChild(this.header)
             ref.appendChild(body)
 

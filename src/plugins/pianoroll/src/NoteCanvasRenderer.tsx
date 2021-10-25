@@ -1,8 +1,8 @@
 import { NoteDefinition } from "wam-extensions";
 import { Clip, Note } from "./Clip";
 
-var logger = (...any: any) => {}
-//const logger = console.log
+//var logger = (...any: any) => {}
+const logger = console.log
 
 const ratio = window.devicePixelRatio || 1;
 
@@ -34,6 +34,8 @@ type NoteCanvasRenderFacts = {
 export class NoteCanvasRenderer {
     doc: Document
     canvas?: HTMLCanvasElement
+    playhead?: HTMLCanvasElement
+
     oldState?: NoteCanvasRenderState
     facts?: NoteCanvasRenderFacts
 
@@ -77,29 +79,39 @@ export class NoteCanvasRenderer {
         const dimensionsChanged = this.dimensionsChanged(state)
         const horizontalChanged = !this.oldState || this.oldState.horizontalZoom != state.horizontalZoom || this.oldState.position != state.position
         const visibleNotesChanged = this.visibleNotesChanged(state)
-        const mustRenderBackground = !this.canvas || dimensionsChanged || visibleNotesChanged || horizontalChanged || state.clip.needsRender()
+        const mustRender = !this.canvas || dimensionsChanged || visibleNotesChanged || horizontalChanged || state.clip.needsRender() || state.layingNewNote
 
         if (!this.canvas) {
             this.canvas = document.createElement("canvas")
         }
+        if (!this.playhead) {
+            this.playhead = document.createElement("canvas")
+        }
+
         const canvas = this.canvas
+        const playhead = this.playhead
 
         if (dimensionsChanged) {
             canvas.style.height = `${state.height}px`
             canvas.style.width = `${state.width}px`
             canvas.width = state.width * ratio
             canvas.height = state.height * ratio
+
+            playhead.style.height=`${state.height}px`
+            playhead.style.width = `2px`
+            playhead.height = state.height * ratio
+            playhead.width = 2 * ratio
+
+            this.renderPlayhead(state)
         }
 
         let facts = this.calculateFacts(state)
         this.facts = facts
 
-        let ctx = this.canvas.getContext("2d")
+        let ctx = this.canvas.getContext("2d", {alpha: false})
 
-        ctx.clearRect(0, 0, state.width, state.height)
-
-        if (mustRenderBackground) {
-            this.renderBackground(state)
+        if (mustRender) {
+            this.renderBackground(state)        
         
             // calculate first line position, in ticks.
             let firstLine = Math.floor((state.position - (state.position % state.clip.quantize)));
@@ -141,13 +153,10 @@ export class NoteCanvasRenderer {
                     x = Design.gutterWidth;
                 }
 
-                fillRect(ctx, x, y, width, height, "red")
+                rect(ctx, x, y, width, height, "red")
             })
 
             facts.firstNoteRenderHeight = firstNoteHeight
-            
-        } else {
-            logger(`Skipping clip render, clip.needsRender()=${state.clip.needsRender()}`)
         }
 
         // render the new note, still being laid
@@ -161,12 +170,17 @@ export class NoteCanvasRenderer {
             let index = state.visibleNotes.findIndex(n => n.number == note.number)
             var y = state.height - Design.cellHeight*(index+1);
 
-            fillRect(ctx, x, y, width, height, "red")
+            rect(ctx, x, y, width, height, "red")
         }
 
         this.oldState = state
 
         return canvas
+    }
+
+    renderPlayhead(state: NoteCanvasRenderState) {
+        let ctx = this.playhead.getContext("2d")
+        rect(ctx, 0, 0, 2, state.height, "red")
     }
 
     renderBackground(state: NoteCanvasRenderState) {
@@ -177,12 +191,14 @@ export class NoteCanvasRenderer {
             // main background
             let mainColor = note.blackKey ? "#bbbbbb" : "white"
 
-            fillRect(ctx, 0, state.height-Design.cellHeight*(i+1), state.width, Design.cellHeight, mainColor)
+            ctx.strokeStyle = "black"
+            ctx.lineWidth = 1
+            rect(ctx, 0, state.height-Design.cellHeight*(i+1), state.width, Design.cellHeight, mainColor)
 
             // gutter
             let gutterColor = note.blackKey ? "black" : "white"
             
-            fillRect(ctx, 0, state.height-Design.cellHeight*(i+1), Design.gutterWidth, Design.cellHeight, gutterColor)
+            rect(ctx, 0, state.height-Design.cellHeight*(i+1), Design.gutterWidth, Design.cellHeight, gutterColor)
 
             if (note.name) {
                 fillText(ctx, note.name, 5, state.height-Design.cellHeight*(i)-4, 14, note.blackKey ? "#fff" : "#000")
@@ -191,9 +207,8 @@ export class NoteCanvasRenderer {
     }
 }
 
-function fillRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, style: string) {
-    ctx.strokeStyle = ""
-    ctx.fillStyle = style
+function rect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, fillStyle: string) {
+    ctx.fillStyle = fillStyle
     ctx.fillRect(x*ratio, y*ratio, w*ratio, h*ratio)
 }
 
