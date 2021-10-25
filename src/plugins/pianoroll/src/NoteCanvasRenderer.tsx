@@ -97,10 +97,10 @@ export class NoteCanvasRenderer {
             canvas.width = state.width * ratio
             canvas.height = state.height * ratio
 
-            playhead.style.height=`${state.height}px`
-            playhead.style.width = `2px`
-            playhead.height = state.height * ratio
-            playhead.width = 2 * ratio
+            // playhead.style.height=`${state.height}px`
+            // playhead.style.width = `2px`
+            playhead.height = state.height
+            playhead.width = 1
 
             this.renderPlayhead(state)
         }
@@ -185,7 +185,6 @@ export class NoteCanvasRenderer {
 
     renderBackground(state: NoteCanvasRenderState) {
         let ctx = this.canvas.getContext("2d")
-        console.log("CanvasRenderer renderBackground")
 
         state.visibleNotes.forEach((note, i) => {
             // main background
@@ -193,7 +192,10 @@ export class NoteCanvasRenderer {
 
             ctx.strokeStyle = "black"
             ctx.lineWidth = 1
-            rect(ctx, 0, state.height-Design.cellHeight*(i+1), state.width, Design.cellHeight, mainColor)
+            const y = state.height-Design.cellHeight*(i+1)
+
+            rect(ctx, 0, y, state.width, Design.cellHeight, mainColor)
+            line(ctx, 0, y, state.width, y, 1, "gray")
 
             // gutter
             let gutterColor = note.blackKey ? "black" : "white"

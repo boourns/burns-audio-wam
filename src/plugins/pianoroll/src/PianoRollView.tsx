@@ -213,7 +213,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
                 }
             }
 
-            playhead.setAttribute("style", `position: absolute; will-change: transform; transform:translate(${x}px, 0px)`)
+            playhead.setAttribute("style", `will-change: transform; transform:translate(${x}px, 0px)`)
         }
 
         this.animationHandler = window.requestAnimationFrame(this.animate)
@@ -270,6 +270,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
             body.appendChild(canvas)
             body.appendChild(this.canvasRenderer.playhead)
+            this.canvasRenderer.playhead.setAttribute("class", "playhead")
 
             ref.appendChild(this.header)
             ref.appendChild(body)
@@ -451,6 +452,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 .pianoroll-body {
     flex-shrink: 1;
     overflow: scroll;
+    position: relative;
     scrollbar-width: none; /* fixes endless resize bug on old FF, but probably needs to be replaced to a fixed width */
 }
 
@@ -460,16 +462,10 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
     stroke-width:1
 }
 
-.black-key {
-    background-color: #444444
-}
-
-.black-key {
-    background-color: #cccccc
-}
-
-.note-row {
-    height: 10px;
+.playhead {
+    position: absolute; 
+    top: 0; 
+    left: 0;
 }
         `
     }
