@@ -70,6 +70,7 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
 
 	async createAudioNode(initialState: any) {
 		const node: VideoGeneratorNode = new VideoGeneratorNode(this, {});
+		await node._initialize();
 
 		if (initialState) node.setState(initialState);
 

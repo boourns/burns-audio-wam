@@ -14,13 +14,14 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import { Clip } from './Clip';
 import { PianoRoll } from './PianoRoll';
 import { PatternDelegate } from 'wam-extensions';
+import { WamEventMap, WamTransportData } from 'sdk/src/api/types';
 
 var logger = debug("plugin:pianoroll")
 
 class PianoRollNode extends WamNode {
 	destroyed = false;
 	pianoRoll: PianoRoll
-	_supportedEventTypes: Set<string>
+	_supportedEventTypes: Set<keyof WamEventMap>
 
 	/**
 	 * @param {WebAudioModule} module
@@ -61,9 +62,11 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this.descriptor, descriptor);
+		return descriptor
 	}
 
 	sequencer: PianoRollNode
+	transport?: WamTransportData
 
 	async initialize(state: any) {
 		await this._loadDescriptor();
@@ -78,6 +81,8 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 	async createAudioNode(initialState: any) {
 		const node: PianoRollNode = new PianoRollNode(this, {});
 
+		await node._initialize()
+
 		node.setState(initialState);
 
 		this.sequencer = node
@@ -86,28 +91,34 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 			this.sequencer.port.postMessage({action: "clip", id: c.state.id, state: c.getState()})
 		}
 
+		this.sequencer.port.addEventListener("message", ev => {
+			if (ev.data.event == "transport") {
+				this.transport = ev.data.transport
+			}
+		})
+
 		this.updatePatternExtension()
 
 		return node
     }
 
-	async createGui(clipId?: string) {
+	async createGui(clipId?: string) {		
 		const div = document.createElement('div');
 		// hack because h() is getting stripped for non-use despite it being what the JSX compiles to
 		h("div", {})
 		div.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
 
-		//var shadow = div.attachShadow({mode: 'open'});
-		//const container = document.createElement('div');
-		//container.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
+		var shadow = div.attachShadow({mode: 'open'});
+		const container = document.createElement('div');
+		container.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
 		
-		//shadow.appendChild(container)
+		shadow.appendChild(container)
 		if (!clipId) {
 			clipId = this.sequencer.pianoRoll.clip().state.id
 		} else {
 			this.sequencer.pianoRoll.addClip(clipId)
 		}
-		render(<PianoRollView plugin={this} pianoRoll={this.sequencer.pianoRoll} clipId={clipId}></PianoRollView>, div);
+		render(<PianoRollView plugin={this} pianoRoll={this.sequencer.pianoRoll} clipId={clipId}></PianoRollView>, shadow);
 
 		return div;
 	}

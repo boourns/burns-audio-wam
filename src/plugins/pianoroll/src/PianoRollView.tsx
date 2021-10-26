@@ -1,25 +1,17 @@
 import { Component, h } from 'preact';
 import { svg_rectangle, svg_text, svg_line } from '../../shared/ui/svg'
 //import { ClipSettingsView } from './ClipSettingsView'
-import { NoteDefinition } from '../../extensions/notes/NoteExtension';
+import { NoteDefinition } from 'wam-extensions';
 import PianoRollModule from '.';
 import { PianoRoll } from './PianoRoll';
 
-import {debug} from "debug"
 import { ClipSettingsView } from './ClipSettingsView';
-import { PPQN } from './Clip';
-var logger = debug("plugin:pianoroll:view")
-
-class Design {
-	static cellHeight = 20
-	static gutterWidth = 80
-	static headerHeight = 40
-    static cellWidth = 20
-}
+import { Note, PPQN } from './Clip';
+import { Design, NoteCanvasRenderer, NoteCanvasRenderState } from './NoteCanvasRenderer';
+var logger = (...any: any) => {}
+//const logger = console.log
 
 type PositionEvent = MouseEvent & { layerX: number, layerY: number}
-
-var lastWidth = 0
 
 function positionFromEvent(e: PositionEvent) {
     // Safari populates these
@@ -43,35 +35,29 @@ export type PianoRollProps = {
 
 type PianoRollState = {
     showSettingsModal: boolean
-    layingNewNote?: {tick: number, number: number, duration: number}
+    layingNewNote?: Note
 }
 
 export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
-    renderedBackground: boolean;
     zoom: number;
-    clipNodes: SVGElement[];
     position: number;
-    dirty: boolean;
+
     ref?: HTMLDivElement;
-    svg?: SVGElement;
     header?: HTMLDivElement;
-    cellWidth: number;
-    maxHeight: number;
+    canvasRenderer: NoteCanvasRenderer;
+
+    totalHeight: number;
     notes: NoteDefinition[];
     defaultNotes!: NoteDefinition[];
     body?: HTMLDivElement;
     totalWidth: number;
-    clipLength: any;
-    tickWidth: number;
-    visibleCells: number;
-    visibleTicks: number;
+    clipLength: number;
+
     scrubber?: SVGRectElement;
     scrubberPressed: boolean;
     scrubberMousePosition?: { x: any; y: any; };
-    layingNote?: SVGElement;
 
     animationHandler: number;
-    playhead?: SVGElement;
 
     // @ts-ignore
     resizeObserver?: ResizeObserver
@@ -85,15 +71,9 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
         this.initializeDefaultNotes()
         
-        this.renderedBackground = false;
         this.zoom = 1.0
-        this.clipNodes = []
         this.position = 0 // in ticks currently
-        this.visibleCells = 0
-        this.visibleTicks = 0
-        this.tickWidth = 0
-        this.cellWidth = 0
-        this.maxHeight = 0
+        this.totalHeight = 0
         this.totalWidth = 0
 
         this.scrubberMouseDown = this.scrubberMouseDown.bind(this)
@@ -105,15 +85,14 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         this.gridMouseUp = this.gridMouseUp.bind(this)
 
         this.scrubberPressed = false
-        this.dirty = false
         this.notes = []
         this.animate = this.animate.bind(this)
+
+        this.canvasRenderer = new NoteCanvasRenderer(document)
     }
 
     componentDidMount() {
         this.props.pianoRoll.renderCallback = () => {
-            this.renderedBackground = false
-            this.dirty = true
             this.forceUpdate()
         }
 
@@ -124,9 +103,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         window.cancelAnimationFrame(this.animationHandler)
 
         this.ref = undefined
-        this.svg = undefined
         this.header = undefined
-        this.clipNodes = []
 
         window.removeEventListener('mousemove', this.scrubberMouseMove)
         window.removeEventListener('mouseup', this.scrubberMouseUp)
@@ -158,29 +135,27 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         let y = eventPosition.y;
 
         let clip = this.props.pianoRoll.getClip(this.props.clipId)
-
-        var tick = this.position + ((x-Design.gutterWidth) / this.tickWidth!);
+        var tick = this.position + ((x-Design.gutterWidth) / this.canvasRenderer.facts.tickWidth!);
         tick = tick - (tick % clip.quantize)
 
-        let index = Math.floor((this.maxHeight - y)/Design.cellHeight);
+        let index = Math.floor((this.totalHeight - y)/Design.cellHeight);
         if (index >= this.notes.length) {
             return
         }
         let number = this.notes[index].number;
         let duration = clip.quantize;
 
-        // if there is a note exactly at the starting point for our tick, we remove that note
+        // // if there is a note exactly at the starting point for our tick, we remove that note
         if (clip.hasNote(tick, number)) {
             clip.removeNote(tick, number);
+            this.forceUpdate()
         } else {
             // we are laying down a new note
             window.addEventListener("mousemove", this.gridMouseMove)
             window.addEventListener("mouseup", this.gridMouseUp)
 
-            this.setState({layingNewNote: {tick, number, duration}})
+            this.setState({layingNewNote: {tick, number, duration, velocity: 100}})
         }
-
-        this.setup(this.ref);
     }
 
     gridMouseMove(e: MouseEvent) {
@@ -190,21 +165,19 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
         let clip = this.props.pianoRoll.getClip(this.props.clipId)
 
-        let tick = Math.floor(this.position) + (Math.floor((x-Design.gutterWidth) / this.cellWidth!) * clip.quantize);
+        let tick = Math.floor(this.position) + (Math.floor((x-Design.gutterWidth) / this.canvasRenderer.facts.cellWidth) * clip.quantize);
         
         if (tick > this.state.layingNewNote!.tick) {
             this.setState({layingNewNote: {
                 tick: this.state.layingNewNote!.tick,
                 number: this.state.layingNewNote!.number,
-                duration: tick - this.state.layingNewNote!.tick + clip.quantize
+                duration: tick - this.state.layingNewNote!.tick + clip.quantize,
+                velocity: 100
             }})
         }
     }
 
     gridMouseUp(e: MouseEvent) {
-        this.svg!.removeChild(this.layingNote!)
-        this.layingNote = undefined;
-
         let note = this.state.layingNewNote!
 
         this.addNote(note.tick, note.number, note.duration)
@@ -216,43 +189,29 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
     }
 
     async animate() {
-        return
-        
-        let timestamp = this.props.plugin.audioContext.currentTime
-        // @ts-ignore
-        var transportEvents = await window.WAMHost.getTransportEvents(timestamp, timestamp) as WamTransportEvent[]
-		if (transportEvents.length == 0) {
-            this.animationHandler = window.requestAnimationFrame(this.animate)
-			return
-		}
+		var transport = this.props.plugin.transport
+        let playhead = this.canvasRenderer.playhead
 
-		var transport = transportEvents[0]
-		
-		if (transport.playing) {
-            let clip = this.props.pianoRoll.getClip(this.props.clipId)
+        if (transport && playhead) {
+            let x = -1000
 
-            // @ts-ignore
-			var barPosition = window.WAMHost.getBarPosition(timestamp)
-			var beatPosition = barPosition * transport.beatsPerBar
-
-            var tickPosition = Math.floor(beatPosition * PPQN)
-            let clipPosition = tickPosition % clip.state.length;
-
-            if (clipPosition >= 0 && this.props.clipId == this.props.pianoRoll.playingClip) {
-                var x = -10
-                if (clipPosition >= this.position && clipPosition < this.position + this.visibleTicks) {
-                    x = Design.gutterWidth + ((clipPosition - this.position) * this.tickWidth);
+            if (transport.playing) {
+                let clip = this.props.pianoRoll.getClip(this.props.clipId)
+                let timeElapsed = this.props.plugin.audioContext.currentTime - transport.currentBarStarted
+    
+                let beatPosition = (transport.currentBar * transport.timeSigNumerator) + ((transport.tempo/60.0) * timeElapsed)
+    
+                let tickPosition = Math.floor(beatPosition * PPQN)
+                let clipPosition = tickPosition % clip.state.length;
+    
+                if (clipPosition >= 0 && this.props.clipId == this.props.pianoRoll.playingClip) {
+                    if (clipPosition >= this.position && clipPosition < this.position + this.canvasRenderer.facts.visibleTicks) {
+                        x = Design.gutterWidth + ((clipPosition - this.position) * this.canvasRenderer.facts.tickWidth);
+                    }
                 }
-                if (!this.playhead) {
-                    this.playhead = svg_line(0, 0, 0, this.maxHeight, "red")
-                    this.playhead.setAttribute("stroke-width", "2px")
-                    this.svg!.appendChild(this.playhead)
-                }
-                this.playhead.setAttribute("style", `transform:translate(${x}px, 0px)`)
-            } else if (this.playhead) {
-                this.svg!.removeChild(this.playhead)
-                this.playhead = undefined
             }
+
+            playhead.setAttribute("style", `left: ${x}px`)
         }
 
         this.animationHandler = window.requestAnimationFrame(this.animate)
@@ -260,15 +219,16 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
     setup(ref: HTMLDivElement | undefined | null) {
         logger("entering setup")
-        let gutterWidth = Design.gutterWidth
-        let cellHeight = Design.cellHeight
 
-        if (ref == null || !this.props.pianoRoll.getClip(this.props.clipId)) {
+        let clip = this.props.pianoRoll.getClip(this.props.clipId)
+        if (ref == null || !clip) {
             logger("Skipping rendering, ref=%o clipId=%o clip=%o", ref, this.props.clipId, this.props.pianoRoll.getClip(this.props.clipId))
             return
         }
 
-        var firstRender = false;
+        // do we need to reposition the scroll
+        //var firstRender = false;
+
         if (this.props.pianoRoll.noteList) {
             logger(`Have custom noteList length ${this.notes}`)
             this.notes = this.props.pianoRoll.noteList
@@ -278,24 +238,41 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
             this.notes = this.defaultNotes
         }
 
-        let noteCount = this.notes.length
+        this.totalHeight = Design.cellHeight * this.notes.length;
+        if (this.totalWidth == 0) {
+            logger(`totalWidth 0, starting at ${window.innerWidth * 0.9}`)
+            this.totalWidth = window.innerWidth * 0.9
+        }
 
-        if (this.ref != ref || !this.renderedBackground) {
-            logger("Rendering background")
+        this.clipLength = clip.state.length
 
+        let rendererState: NoteCanvasRenderState = {
+            width: this.totalWidth,
+            height: this.totalHeight,
+            position: this.position,
+            horizontalZoom: this.zoom,
+            clip: clip,
+            visibleNotes: this.notes,
+            layingNewNote: this.state.layingNewNote
+        }
+
+        let canvas = this.canvasRenderer.render(rendererState)
+        clip.setRenderFlag(false);
+
+        let header = this.renderHeader();
+
+        if (this.ref != ref) {
             ref.innerHTML = ""
 
-            firstRender = true;
-            this.header = document.createElement("div")
             let body = document.createElement("div");
             body.setAttribute("class", "pianoroll-body");
             this.body = body;
 
-            let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            this.svg = svg;
+            body.appendChild(canvas)
+            body.appendChild(this.canvasRenderer.playhead)
+            this.canvasRenderer.playhead.setAttribute("class", "playhead")
 
-            body.appendChild(svg)
-            ref.appendChild(this.header)
+            ref.appendChild(header)
             ref.appendChild(body)
 
             if (this.resizeObserver) {
@@ -305,165 +282,37 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
             // @ts-ignore
             this.resizeObserver = new ResizeObserver((entries: any[]) => {
-                logger("resize totalWidth=%o entries %o", this.totalWidth, entries)
+                logger("resize! totalWidth=%o entries %o", this.totalWidth, entries)
 
                 if (this.totalWidth != entries[0].contentRect.width) {
                     let delta = Math.abs(this.totalWidth - entries[0].contentRect.width)
                     logger(`totalWidth=${this.totalWidth} contentRect=${entries[0].contentRect.width} delta=${delta}`)
                     this.totalWidth = entries[0].contentRect.width
-                    this.renderedBackground = false
                     this.forceUpdate()
                 }
               });
     
             this.resizeObserver.observe(ref)
-
-            if (this.totalWidth == 0) {
-                logger(`totalWidth 0, starting at ${window.innerWidth * 0.9}`)
-                this.totalWidth = window.innerWidth * 0.9
-            }
-
-            svg.setAttribute('class', "pianoroll");
-            svg.setAttribute('width', `${this.totalWidth}px`);
-
-            svg.addEventListener('mousedown', this.gridMouseDown)
-
-            this.maxHeight = cellHeight * noteCount;
-            svg.setAttribute('height', `${this.maxHeight}px`);
-
-            this.notes.forEach((note, i) => {
-                // main background
-                let mainColor = note.blackKey ? "#bbbbbb" : "white"
-                let rect = svg_rectangle(0, this.maxHeight-cellHeight*(i+1), this.totalWidth, cellHeight, mainColor)
-                svg.appendChild(rect)
-
-                // gutter
-                let gutterColor = note.blackKey ? "black" : "white"
-                let gutter = svg_rectangle(0, this.maxHeight-cellHeight*(i+1), gutterWidth, cellHeight, gutterColor)
-                svg.appendChild(gutter)
-
-                if (note.name) {
-                    let text = svg_text(5, this.maxHeight-cellHeight*(i)-4, 14, note.name, note.blackKey ? "#fff" : "#000")
-                    svg.appendChild(text)
-                }
-            })
+            canvas.addEventListener('mousedown', this.gridMouseDown)
 
             this.ref = ref;
-
-            this.renderedBackground = true;
-            this.dirty = true
-            this.clipNodes = []
+        } else if (this.header) {
+            this.ref.replaceChild(header, this.header)
         }
+        this.header = header
 
-        let clip = this.props.pianoRoll.getClip(this.props.clipId)
-        this.clipLength = clip.state.length
-
-        // break from gutter to edge into N steps
-        let visibleTicks = this.clipLength * this.zoom;
-        this.visibleTicks = visibleTicks
-        this.tickWidth = (this.totalWidth - gutterWidth) / visibleTicks;
-
-        this.visibleCells = visibleTicks / clip.quantize;
-        this.cellWidth = this.tickWidth * clip.quantize;
-
-        if (clip.needsRender() || this.dirty) {
-            logger("Rendering clip")
-
-            let newHeader = this.renderHeader();
-            if (this.header) {
-                ref.replaceChild(newHeader, this.header);
-            }
-            this.header = newHeader;
-
-            clip.setRenderFlag(false);
-            this.dirty = false;
-            this.clipNodes.forEach(n => this.svg!.removeChild(n))
-            this.clipNodes = []
-
-            // calculate first line position, in ticks.
-            let firstLine = Math.floor((this.position - (this.position % clip.quantize)));
-
-            for (var pos = firstLine; pos < this.position + visibleTicks; pos += clip.quantize) {
-                if (pos >= this.position) {
-                    let x = gutterWidth + ((pos - this.position) * this.tickWidth)
-                    let color = (pos % 24 == 0) ? "black" : "grey"
-                    let line = svg_line(x, 0, x, this.maxHeight, color);
-                    if (pos % 24 == 0) {
-                        line.setAttribute("stroke-width", `2px`)
-                    }
-                    this.clipNodes.push(line);
-                    this.svg!.appendChild(line);
-                }
-            }
-
-            var firstNoteHeight = this.maxHeight;
-            clip.state.notes.forEach((note) => {
-                if (note.tick + note.duration < this.position || note.tick >= this.position + visibleTicks) {
-                    return
-                }
-                let index = this.notes.findIndex(n => n.number == note.number)
-
-                var x = gutterWidth + ((note.tick - this.position) * this.tickWidth);
-                var y = this.maxHeight - cellHeight*(index+1);
-                var width = this.tickWidth * note.duration;
-                var height = cellHeight;
-
-                if (y < firstNoteHeight) {
-                    // calculate the height of the first note for pre-scrolling
-                    firstNoteHeight = y;
-                }
-
-                if (x < gutterWidth) {
-                    // subtract the overlap between x and gutterwidth from original width
-                    width = width - (gutterWidth - x);
-                    x = gutterWidth;
-                }
-                let noteRect = svg_rectangle(x, y, width, height, "red")
-                this.clipNodes.push(noteRect);
-
-                this.svg!.appendChild(noteRect)
-            })
-            
-            if (firstRender) {
-                window.setTimeout(() => {
-                    if (clip.state.notes.length > 0) {
-                        var pos = (firstNoteHeight > 40) ? firstNoteHeight-40 : firstNoteHeight;
-                        this.body!.scrollTop = pos;
-                    } else {
-                        this.body!.scrollTop = this.maxHeight / 2;
-                    }
-                }, 10)
-                this.dirty = true
-                this.forceUpdate()
-            }
-        } else {
-            logger(`Skipping clip render, this.dirty=${this.dirty} clip.needsRender()=${clip.needsRender()}`)
-        }
-
-        // render the new note, still being laid
-        if (this.state.layingNewNote) {
-            let note = this.state.layingNewNote;
-
-            var x = gutterWidth + ((note.tick - this.position) * this.tickWidth);
-            var width = this.tickWidth * note.duration;
-            var height = cellHeight;
-
-            if (!this.layingNote) {
-                let index = this.notes.findIndex(n => n.number == note.number)
-                var y = this.maxHeight - cellHeight*(index+1);
-
-                this.layingNote = svg_rectangle(x, y, width, height, "red")
-                this.svg!.appendChild(this.layingNote)
-            }
-            this.layingNote.setAttribute("width", `${width}px`)
-        } else if (this.layingNote) {
-            this.svg!.removeChild(this.layingNote);
-            this.layingNote = undefined;
-        }
-
-        // render the playhead
-        // TODO - deliver transport state to plugins, oh and to view? hmm
-
+        // if (firstRender) {
+        //     window.setTimeout(() => {
+        //         if (clip.state.notes.length > 0) {
+        //             var pos = (firstNoteHeight > 40) ? firstNoteHeight-40 : firstNoteHeight;
+        //             this.body!.scrollTop = pos;
+        //         } else {
+        //             this.body!.scrollTop = this.totalHeight / 2;
+        //         }
+        //     }, 10)
+        //     this.dirty = true
+        //     this.forceUpdate()
+        // }
         
     }
 
@@ -515,6 +364,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         container.appendChild(span)
 
         let scrubberLength = this.totalWidth-Design.gutterWidth;
+
         let clipHeader = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         clipHeader.setAttribute("style", `height: ${Design.headerHeight}px; width: ${scrubberLength}px; background-color: rgba(255, 255, 255, 0.4)`)
         container.appendChild(clipHeader)
@@ -571,18 +421,15 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
                 position = this.clipLength - (this.zoom*this.clipLength);
             }
             this.position = position
-            this.dirty = true
             this.forceUpdate()
         }
     }
 
     clipSettingsChanged() {
-        this.dirty = true
         this.forceUpdate()
     }
 
     closeClipSettings() {
-        this.dirty = true
         this.setState({
             showSettingsModal: false
         })
@@ -601,6 +448,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 .pianoroll-body {
     flex-shrink: 1;
     overflow: scroll;
+    position: relative;
     scrollbar-width: none; /* fixes endless resize bug on old FF, but probably needs to be replaced to a fixed width */
 }
 
@@ -610,17 +458,13 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
     stroke-width:1
 }
 
-.black-key {
-    background-color: #444444
-}
-
-.black-key {
-    background-color: #cccccc
-}
-
-.note-row {
-    height: 10px;
+.playhead {
+    position: absolute; 
+    top: 0; 
+    left: 0;
 }
         `
     }
 }
+
+

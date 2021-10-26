@@ -26,6 +26,6 @@
   "homepage": "https://github.com/boourns/burns-audio-wam#readme",
   "dependencies": {
     "preact": "^10.5.5",
-    "sdk": "boourns/webaudiomodule#workspace=sdk&commit=48a7d6f7025975871b2e2f82e3ae0d86559717fd"
+    "sdk": "53js/webaudiomodule#workspace=sdk&commit=02a6a5f27dbb3dd193944096a4ad3e81fec01a66"
   }
 }

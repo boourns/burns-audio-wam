@@ -46,7 +46,7 @@ export type FunctionSequencer = {
 
 class FunctionSequencerProcessor extends WamProcessor {
 	// @ts-ignore
-    static generateWamParameterInfo() {
+    _generateWamParameterInfo() {
         return {
         }
     }
