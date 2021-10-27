@@ -4,7 +4,8 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
-import { WebAudioModule, ParamMgrFactory, CompositeAudioNode } from 'sdk';
+import { WebAudioModule } from '@webaudiomodules/sdk';
+import {ParamMgrFactory} from '@webaudiomodules/sdk-parammgr'
 import SimpleEQNode from './Node';
 import { h, render } from 'preact';
 import { SimpleEQView } from './SimpleEQView';
@@ -21,7 +22,7 @@ export default class SimpleEQ extends WebAudioModule<SimpleEQNode> {
 		if (!url) throw new TypeError('Descriptor not found');
 		const response = await fetch(url);
 		const descriptor = await response.json();
-		Object.assign(this.descriptor, descriptor);
+		Object.assign(this._descriptor, descriptor);
 	}
 
 	async initialize(state: any) {

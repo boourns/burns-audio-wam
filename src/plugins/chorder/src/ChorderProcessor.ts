@@ -1,15 +1,15 @@
-import WamParameter from "sdk/src/WamParameter.js"
+import WamParameter from "@webaudiomodules/sdk/src/WamParameter.js"
 // @ts-ignore
 globalThis.WamParameter = WamParameter;
 
-import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
-import WamProcessor from "sdk/src/WamProcessor";
+import WamParameterInterpolator from "@webaudiomodules/sdk/src/WamParameterInterpolator"
+import WamProcessor from "@webaudiomodules/sdk/src/WamProcessor";
 
 // @ts-ignore
 globalThis.WamParameterInterpolator = WamParameterInterpolator
 
-import WamParameterInfo from "sdk/src/WamParameterInfo";
-import { WamMidiEvent } from "sdk/src/api/types";
+import {WamParameterInfo} from "@webaudiomodules/sdk";
+import { WamMidiEvent } from "@webaudiomodules/api";
 
 interface AudioWorkletProcessor {
     readonly port: MessagePort;

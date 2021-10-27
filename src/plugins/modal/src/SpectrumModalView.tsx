@@ -3,10 +3,6 @@ import { Knob } from '../../shared/ui/Knob'
 import SpectrumModalModule from '.';
 import { Select } from '../../shared/ui/Select'
 
-import {debug} from "debug"
-
-var logger = debug("plugin:chorder:view")
-
 export interface SpectrumModalViewProps {
   plugin: SpectrumModalModule
 }

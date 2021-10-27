@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-import { CompositeAudioNode, ParamMgrNode } from 'sdk';
+import { CompositeAudioNode, ParamMgrNode } from '@webaudiomodules/sdk-parammgr';
 
 export default class LFONode extends CompositeAudioNode {
 	_wamNode: ParamMgrNode<string, string> = undefined;

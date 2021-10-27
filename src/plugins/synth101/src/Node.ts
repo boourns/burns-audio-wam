@@ -1,12 +1,9 @@
 /* eslint-disable no-underscore-dangle */
-import { CompositeAudioNode, ParamMgrNode } from 'sdk';
+import { CompositeAudioNode, ParamMgrNode } from '@webaudiomodules/sdk-parammgr';
 import { constantSource, noiseSource } from '../../shared/util'
 import { MIDI, ScheduledMIDIEvent } from '../../shared/midi'
 
 let lfoWaves: OscillatorType[] = ["triangle", "square"]
-
-import {debug} from "debug"
-var logger = debug("plugin:synth101")
 
 let shaperLength = 44100
 

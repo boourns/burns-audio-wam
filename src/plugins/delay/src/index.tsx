@@ -4,8 +4,8 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
-import { WebAudioModule } from 'sdk';
-import { ParamMgrFactory, CompositeAudioNode } from 'sdk-parammgr';
+import { WebAudioModule } from '@webaudiomodules/sdk';
+import { ParamMgrFactory, CompositeAudioNode } from '@webaudiomodules/sdk-parammgr';
 
 import DelayPluginNode from './Node';
 import { h, render } from 'preact';

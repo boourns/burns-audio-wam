@@ -4,16 +4,13 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
-import { WebAudioModule, WamNode } from 'sdk';
-import AudioWorkletRegister from 'sdk/src/ParamMgr/AudioWorkletRegister'
+import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
+import {AudioWorkletRegister} from '@webaudiomodules/sdk-parammgr'
 // @ts-ignore
-import wamEnvProcessor from 'sdk/src/WamEnv.js'
+import wamEnvProcessor from '@webaudiomodules/sdk/src/WamEnv.js'
 
 import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
-
-import {debug} from "debug"
-var logger = debug("plugin:chorder")
 
 import { VideoGenerator } from './VideoGenerator';
 import { VideoExtensionOptions } from 'wam-extensions';
@@ -53,7 +50,7 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
 		if (!url) throw new TypeError('Descriptor not found');
 		const response = await fetch(url);
 		const descriptor = await response.json();
-		Object.assign(this.descriptor, descriptor);
+		Object.assign(this._descriptor, descriptor);
 	}
 
 	chorderProcessor: AudioWorkletNode

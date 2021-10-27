@@ -1,16 +1,14 @@
 import { MIDI } from "../../shared/midi";
 
-import { WamTransportData } from "sdk/src/api/types";
+import { WamTransportData } from "@webaudiomodules/api";
 
-import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
-import WamProcessor from "sdk/src/WamProcessor";
+import WamParameterInterpolator from "@webaudiomodules/sdk/src/WamParameterInterpolator"
+import WamProcessor from "@webaudiomodules/sdk/src/WamProcessor";
 
 const PPQN = 96
 
 // @ts-ignore
 globalThis.WamParameterInterpolator = WamParameterInterpolator
-
-import WamParameterInfo from "sdk/src/WamParameterInfo";
 
 interface AudioWorkletProcessor {
     readonly port: MessagePort;
@@ -81,8 +79,6 @@ class FunctionSequencerProcessor extends WamProcessor {
         //         this.function = new Function()
         //     } 
         // }
-
-        super.port.start();
 	}
 
     count = 0;
