@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-import { CompositeAudioNode, ParamMgrNode } from 'sdk';
+import { CompositeAudioNode, ParamMgrNode } from '@webaudiomodules/sdk-parammgr';
 
 import {ScheduledMIDIEvent} from '../../shared/midi'
 import { AudioPool } from './AudioPool';

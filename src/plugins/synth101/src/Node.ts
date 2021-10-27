@@ -1,12 +1,9 @@
 /* eslint-disable no-underscore-dangle */
-import { CompositeAudioNode, ParamMgrNode } from 'sdk';
+import { CompositeAudioNode, ParamMgrNode } from '@webaudiomodules/sdk-parammgr';
 import { constantSource, noiseSource } from '../../shared/util'
 import { MIDI, ScheduledMIDIEvent } from '../../shared/midi'
 
 let lfoWaves: OscillatorType[] = ["triangle", "square"]
-
-import {debug} from "debug"
-var logger = debug("plugin:synth101")
 
 let shaperLength = 44100
 
@@ -66,7 +63,6 @@ export default class Synth101Node extends CompositeAudioNode {
 
 	constructor(audioContext: BaseAudioContext, options={}) {        
 		super(audioContext, options);
-        logger("Synth101 constructor()")
         
         // internal note-holding state
         this.heldNotes = []
@@ -237,8 +233,6 @@ export default class Synth101Node extends CompositeAudioNode {
 
     processMIDIEvents(midiEvents: ScheduledMIDIEvent[]) {
 		midiEvents.forEach (message => {
-            logger("synth got midi ", message, ", event timestamp ", message.time, "currentTime", this.context.currentTime)
-
             if (message.event[0] == MIDI.NOTE_ON && message.event[2] > 0) {
                 let midiNote = message.event[1]
                 this.noteOn(midiNote, message.time)

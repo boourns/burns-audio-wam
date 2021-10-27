@@ -4,8 +4,9 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
-import { WebAudioModule, WamNode } from 'sdk';
-import wamEnvProcessor from 'sdk/src/WamEnv.js'
+import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
+import wamEnvProcessor from '@webaudiomodules/sdk/src/WamEnv.js'
+import {AudioWorkletRegister} from '@webaudiomodules/sdk-parammgr'
 
 import { h, render } from 'preact';
 import debug from "debug";
@@ -14,9 +15,11 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import { Clip } from './Clip';
 import { PianoRoll } from './PianoRoll';
 import { PatternDelegate } from 'wam-extensions';
-import { WamEventMap, WamTransportData } from 'sdk/src/api/types';
+import { WamEventMap, WamTransportData } from '@webaudiomodules/api';
 
 var logger = debug("plugin:pianoroll")
+
+let a = AudioWorkletRegister
 
 class PianoRollNode extends WamNode {
 	destroyed = false;
@@ -61,7 +64,7 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 		if (!url) throw new TypeError('Descriptor not found');
 		const response = await fetch(url);
 		const descriptor = await response.json();
-		Object.assign(this.descriptor, descriptor);
+		Object.assign(this._descriptor, descriptor);
 		return descriptor
 	}
 

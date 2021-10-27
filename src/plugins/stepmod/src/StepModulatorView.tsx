@@ -2,11 +2,9 @@ import { Component, h } from 'preact';
 import { Fader } from '../../shared/ui/Fader'
 import { Select } from '../../shared/ui/Select'
 import { Knob } from '../../shared/ui/Knob'
-import {debug} from "debug"
+
 import StepModulatorModule from '.';
 import { StepModulator } from './StepModulator';
-
-var logger = debug("plugin:stepModulator:view")
 
 let quantizeOptions = [
     "1/32",

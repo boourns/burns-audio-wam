@@ -1,16 +1,14 @@
-import { WebAudioModule, ParamMgrFactory, CompositeAudioNode, WamNode } from 'sdk';
-import AudioWorkletRegister from 'sdk/src/ParamMgr/AudioWorkletRegister'
+import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
+import {AudioWorkletRegister} from '@webaudiomodules/sdk-parammgr'
 // @ts-ignore
-import wamEnvProcessor from 'sdk/src/WamEnv.js'
+import wamEnvProcessor from '@webaudiomodules/sdk/src/WamEnv.js'
 
 import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
-import {debug} from "debug"
 import { ChorderView } from './ChorderView';
-var logger = debug("plugin:chorder")
 
-export {AudioWorkletRegister}
+let a = AudioWorkletRegister
 	
 class ChorderNode extends WamNode {
 	destroyed = false;
@@ -44,7 +42,7 @@ export default class ChorderModule extends WebAudioModule<WamNode> {
 		if (!url) throw new TypeError('Descriptor not found');
 		const response = await fetch(url);
 		const descriptor = await response.json();
-		Object.assign(this.descriptor, descriptor);
+		Object.assign(this._descriptor, descriptor);
 	}
 
 	async initialize(state: any) {

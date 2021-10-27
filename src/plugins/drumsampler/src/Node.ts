@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-import { CompositeAudioNode, ParamMgrNode, WamParameterInfo } from 'sdk';
+import { ParamMgrFactory, CompositeAudioNode, ParamMgrNode} from '@webaudiomodules/sdk-parammgr'
 import { MIDI, ScheduledMIDIEvent } from '../../shared/midi'
 import { NoteDefinition, NoteExtension } from 'wam-extensions'
 

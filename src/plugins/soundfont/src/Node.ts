@@ -1,6 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-import { CompositeAudioNode, ParamMgrNode } from 'sdk';
-import { constantSource, noiseSource } from '../../shared/util'
+import { CompositeAudioNode, ParamMgrNode } from '@webaudiomodules/sdk-parammgr';
 import { MIDI, ScheduledMIDIEvent } from '../../shared/midi'
 
 import Soundfont, { InstrumentName } from 'soundfont-player'

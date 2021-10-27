@@ -1,20 +1,19 @@
-import { WebAudioModule, ParamMgrFactory, CompositeAudioNode, WamNode, WamParameterInfo } from 'sdk';
-import AudioWorkletRegister from 'sdk/src/ParamMgr/AudioWorkletRegister'
+import { WebAudioModule, WamNode, WamParameterInfo } from '@webaudiomodules/sdk';
+import {AudioWorkletRegister} from '@webaudiomodules/sdk-parammgr'
 // @ts-ignore
-import wamEnvProcessor from 'sdk/src/WamEnv.js'
+import wamEnvProcessor from '@webaudiomodules/sdk/src/WamEnv.js'
 
 import { h, render } from 'preact';
 //import { ChorderView } from './ChorderView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
-import {debug} from "debug"
 import { StepModulatorView } from './StepModulatorView';
 import { StepModulator } from './StepModulator';
 import { Clip } from './Clip';
 
 import {WAMExtensions, PatternDelegate} from 'wam-extensions';
 
-var logger = debug("plugin:chorder")
+var logger = console.log
 
 export {AudioWorkletRegister}
 
@@ -67,7 +66,7 @@ export default class StepModulatorModule extends WebAudioModule<Node> {
 		if (!url) throw new TypeError('Descriptor not found');
 		const response = await fetch(url);
 		const descriptor = await response.json();
-		Object.assign(this.descriptor, descriptor);
+		Object.assign(this._descriptor, descriptor);
 	}
 
 	sequencer: StepModulator

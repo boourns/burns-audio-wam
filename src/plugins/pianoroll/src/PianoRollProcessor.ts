@@ -1,7 +1,7 @@
 import { MIDI } from "../../shared/midi";
-import { AudioParamDescriptor, WamTransportData } from "sdk/src/api/types";
-import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
-import WamProcessor from "sdk/src/WamProcessor";
+import { AudioParamDescriptor, WamTransportData } from "@webaudiomodules/api";
+import WamParameterInterpolator from "@webaudiomodules/sdk/src/WamParameterInterpolator"
+import WamProcessor from "@webaudiomodules/sdk/src/WamProcessor";
 
 const PPQN = 24
 

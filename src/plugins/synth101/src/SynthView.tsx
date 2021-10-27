@@ -4,7 +4,6 @@ import { Select } from '../../shared/ui/Select'
 import { Fader } from '../../shared/ui/Fader'
 
 import Synth101 from '.';
-import { WamParameterDataMap } from 'sdk/src/api/types';
 
 // TODO put these in one spot and export them
 let waves = ["sine", "square", "sawtooth", "triangle"]

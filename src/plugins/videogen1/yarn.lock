@@ -4960,18 +4960,18 @@ typescript@^4.0.2:
     rollup-plugin-node-builtins: ^2.1.2
     ts-loader: ^8.0.12
     typescript: ^4.0.2
-    wam-extensions: ^0.1.10
+    wam-extensions: ^0.1.11
     webpack: ^5.11.1
     webpack-cli: ^4.3.0
   languageName: unknown
   linkType: soft
 
-"wam-extensions@npm:^0.1.10":
-  version: 0.1.10
-  resolution: "wam-extensions@npm:0.1.10"
+"wam-extensions@npm:^0.1.11":
+  version: 0.1.11
+  resolution: "wam-extensions@npm:0.1.11"
   peerDependencies:
-    sdk: "*"
-  checksum: f850cea6b70b41645c7dc64969fb6588474df6e1d9b5de9d80a5185bafe146975bd597e3261269766bf569c895172b38d7f6a0a87c6c00972bf2fe4e78d3e20a
+    "@webaudiomodules/api": "*"
+  checksum: b411340692dd00b3cda6a177312b8d76747f1d248ff2356abb373aeec3e870537fcdb1fa539e7f9a49856e8e81341f998f3439ad9ce56bd688f6b7e7116a8ede
   languageName: node
   linkType: hard
 

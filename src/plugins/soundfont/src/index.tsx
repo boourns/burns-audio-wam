@@ -4,18 +4,13 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
-import { WebAudioModule, ParamMgrFactory, CompositeAudioNode } from 'sdk';
+import { WebAudioModule } from '@webaudiomodules/sdk';
+import {ParamMgrFactory} from '@webaudiomodules/sdk-parammgr'
+
 import SoundfontPlayerNode from './Node';
 import { h, render } from 'preact';
 import { SoundfontView } from './SoundfontView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
-
-let lfoWaves: OscillatorType[] = ["triangle", "square"]
-let ranges = ["32'", "16'", "8'", "4'"]
-let pwms = ["LFO", "Manual", "Env"]
-let subRanges = ["-10ct", "-20ct pulse", "-20ct sine", "-20ct tri"]
-let vcaSources = ["Env", "Gate"]
-let portamentoModes = ["Off", "Auto", "On"]
 
 export default class SoundfontModule extends WebAudioModule<SoundfontPlayerNode> {
 	//@ts-ignore
@@ -32,7 +27,7 @@ export default class SoundfontModule extends WebAudioModule<SoundfontPlayerNode>
 		if (!url) throw new TypeError('Descriptor not found');
 		const response = await fetch(url);
 		const descriptor = await response.json();
-		Object.assign(this.descriptor, descriptor);
+		Object.assign(this._descriptor, descriptor);
 	}
 
 	async initialize(state: any) {

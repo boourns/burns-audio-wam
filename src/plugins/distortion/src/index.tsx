@@ -4,7 +4,8 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
-import { WebAudioModule, ParamMgrFactory, CompositeAudioNode } from 'sdk';
+import { WebAudioModule,  } from '@webaudiomodules/sdk';
+import {ParamMgrFactory, CompositeAudioNode} from '@webaudiomodules/sdk-parammgr'
 import DistortionNode from './Node';
 import { h, render } from 'preact';
 import { DistortionView } from './DistortionView';
@@ -23,7 +24,7 @@ export default class Distortion extends WebAudioModule<DistortionNode> {
 		if (!url) throw new TypeError('Descriptor not found');
 		const response = await fetch(url);
 		const descriptor = await response.json();
-		Object.assign(this.descriptor, descriptor);
+		Object.assign(this._descriptor, descriptor);
 	}
 
 	async initialize(state: any) {

@@ -1,20 +1,20 @@
 import { MIDI } from "../../shared/midi";
 
-import { WamTransportData } from "sdk/src/api/types";
+import { WamTransportData } from "@webaudiomodules/api";
 
-import WamParameter from "sdk/src/WamParameter.js"
+import WamParameter from "@webaudiomodules/sdk/src/WamParameter.js"
 // @ts-ignore
 globalThis.WamParameter = WamParameter;
 
-import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
-import WamProcessor from "sdk/src/WamProcessor";
+import WamParameterInterpolator from "@webaudiomodules/sdk/src/WamParameterInterpolator"
+import WamProcessor from "@webaudiomodules/sdk/src/WamProcessor";
 
 const PPQN = 24
 
 // @ts-ignore
 globalThis.WamParameterInterpolator = WamParameterInterpolator
 
-import WamParameterInfo from "sdk/src/WamParameterInfo";
+import WamParameterInfo from "@webaudiomodules/sdk/src/WamParameterInfo";
 import { Clip } from "./Clip";
 
 interface AudioWorkletProcessor {
