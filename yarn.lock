@@ -5,10 +5,18 @@ __metadata:
   version: 4
   cacheKey: 7
 
+"api@webaudiomodules/api#commit=84892b520213872f79f7d3d9ff443e05782cc4fe":
+  version: 2.0.0-alpha.1
+  resolution: "api@https://github.com/webaudiomodules/api.git#commit=84892b520213872f79f7d3d9ff443e05782cc4fe"
+  checksum: 90fb90ca2afb21acbc6adb5f239cea475c85c620badcb048c9d0472d138779707f8ac8b9c6c08ee40547ee5dc0dae8da178dc78601b83b54f1e01fa0439861bb
+  languageName: node
+  linkType: hard
+
 "burns-audio-wam@workspace:.":
   version: 0.0.0-use.local
   resolution: "burns-audio-wam@workspace:."
   dependencies:
+    api: "webaudiomodules/api#commit=84892b520213872f79f7d3d9ff443e05782cc4fe"
     preact: ^10.5.5
     sdk: "53js/webaudiomodule#workspace=sdk&commit=02a6a5f27dbb3dd193944096a4ad3e81fec01a66"
   languageName: unknown
