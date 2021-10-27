@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-import { CompositeAudioNode, ParamMgrNode } from 'sdk';
+import { CompositeAudioNode, ParamMgrNode } from 'sdk-parammgr';
 import {ScheduledMIDIEvent} from '../../shared/midi'
 
 export default class DelayPluginNode extends CompositeAudioNode {
