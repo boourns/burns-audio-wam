@@ -9,7 +9,8 @@ import WamProcessor from "sdk/src/WamProcessor";
 globalThis.WamParameterInterpolator = WamParameterInterpolator
 
 import WamParameterInfo from "sdk/src/WamParameterInfo";
-import { AudioParamDescriptor, WamMidiEvent } from "sdk/src/api/types";
+import { AudioParamDescriptor, WamMidiEvent, WamParameterInfoMap } from "sdk/src/api/types";
+import { InstrumentDefinition } from "./InstrumentDefinition";
 
 interface AudioWorkletProcessor {
     readonly port: MessagePort;
@@ -40,16 +41,29 @@ const audioWorkletGlobalScope = globalThis;
 // - renderAhead: number - how far into the future should plugins render?
 
 class ExternalInstrumentProcessor extends WamProcessor {
-	// @ts-ignore
-    _generateWamParameterInfo() {
-        return {
-            
+    _generateWamParameterInfo(): WamParameterInfoMap {
+        if (!this.instrument) {
+            return {}
         }
+
+        let result: WamParameterInfoMap = {}
+        this.instrument.midiCCs.map(cc => {
+            result[cc.name] = new WamParameterInfo(cc.name, {
+                type: "int",
+                label: cc.name,
+                minValue: cc.minValue ? cc.minValue : 0,
+                maxValue: cc.maxValue ? cc.maxValue : 127,
+                defaultValue: cc.startValue ? cc.startValue : 0,
+            })
+        })
+
+        return result
     }
 
     lastTime: number
     proxyId: string
     heldNotes: number[][]
+    instrument?: InstrumentDefinition
 
 	constructor(options: any) {
 		super(options);
@@ -71,7 +85,22 @@ class ExternalInstrumentProcessor extends WamProcessor {
 		else globalThis.WamProcessors = { [instanceId]: this };
 
         super.port.addEventListener("message", (ev) => {
-            console.log("Processor side: ", ev)
+            console.log("Processor side: ", ev.data)
+            if (ev.data.me) {
+                console.log("Processor side: ", ev.data)
+                if (ev.data.message == "instrument") {
+                    console.log("Loading instrument")
+                    this.instrument = new InstrumentDefinition(
+                        ev.data.name, 
+                        ev.data.cc,
+                        ev.data.notes)
+                }
+            }
+        })
+
+        super.port.postMessage({
+            me: true,
+            message: "hello"
         })
 	}
 

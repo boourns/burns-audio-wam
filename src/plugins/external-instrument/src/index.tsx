@@ -35,10 +35,22 @@ class ExternalInstrumentNode extends WamNode {
 		this.instrument = new InstrumentDefinition("Standard MIDI", standardMIDICCs)
 
 		super.port.addEventListener("message", (ev) => {
-			console.log("Node side: ", ev)
+			if (ev.data.me) {
+				console.log("Node side: ", ev.data)
+
+				if (ev.data.message == "hello") {
+					console.log("Sending instrument")
+
+					super.port.postMessage({
+						me: true,
+						message: "instrument", 
+						notes: this.instrument.notes,
+						cc: this.instrument.midiCCs
+					})
+				}
+			}
 		})
 
-		super.port.postMessage({message:"instrument", data: {notes: this.instrument.notes, cc: this.instrument.midiCCs}})
 	}
 
 	async loadInstrumentFile(url: string) {
@@ -51,7 +63,7 @@ export default class ExternalInstrumentModule extends WebAudioModule<WamNode> {
 	_baseURL = getBaseUrl(new URL('.', import.meta.url));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
-	_processorUrl = `${this._baseURL}/ChorderProcessor.js`;
+	_processorUrl = `${this._baseURL}/ExternalInstrumentProcessor.js`;
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
