@@ -6,6 +6,7 @@
 
 import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
 import wamEnvProcessor from '@webaudiomodules/sdk/src/WamEnv.js'
+import {AudioWorkletRegister} from '@webaudiomodules/sdk-parammgr'
 
 import { h, render } from 'preact';
 import debug from "debug";
@@ -17,6 +18,8 @@ import { PatternDelegate } from 'wam-extensions';
 import { WamEventMap, WamTransportData } from '@webaudiomodules/api';
 
 var logger = debug("plugin:pianoroll")
+
+let a = AudioWorkletRegister
 
 class PianoRollNode extends WamNode {
 	destroyed = false;
