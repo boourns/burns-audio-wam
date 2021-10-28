@@ -61,6 +61,8 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
     // @ts-ignore
     resizeObserver?: ResizeObserver
+
+    firstRender: boolean
     
     constructor() {
         super()
@@ -89,6 +91,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         this.animate = this.animate.bind(this)
 
         this.canvasRenderer = new NoteCanvasRenderer(document)
+        this.firstRender = true
     }
 
     componentDidMount() {
@@ -301,18 +304,19 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         }
         this.header = header
 
-        // if (firstRender) {
-        //     window.setTimeout(() => {
-        //         if (clip.state.notes.length > 0) {
-        //             var pos = (firstNoteHeight > 40) ? firstNoteHeight-40 : firstNoteHeight;
-        //             this.body!.scrollTop = pos;
-        //         } else {
-        //             this.body!.scrollTop = this.totalHeight / 2;
-        //         }
-        //     }, 10)
-        //     this.dirty = true
-        //     this.forceUpdate()
-        // }
+        if (this.firstRender) {
+            window.setTimeout(() => {
+                if (clip.state.notes.length > 0) {
+                    let firstNoteHeight = this.canvasRenderer.facts.firstNoteRenderHeight
+                    var pos = (firstNoteHeight > 40) ? firstNoteHeight-40 : firstNoteHeight;
+                    this.body!.scrollTop = pos;
+                } else {
+                    this.body!.scrollTop = this.totalHeight / 2;
+                }
+            }, 10)
+            this.firstRender = false
+            this.forceUpdate()
+        }
         
     }
 
