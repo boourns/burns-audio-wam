@@ -115,7 +115,7 @@ export class Select<T> extends Component<SelectProps, any> {
 
         return <div class="component-wrapper" style={style}>
             {this.props.label && <label>{this.props.label}</label>}
-            <div ref={(e) => this.setup(e)} class="component-select text-black">
+            <div ref={(e) => this.setup(e)} style="color: black;" class="component-select">
             </div>
         </div>
     }
