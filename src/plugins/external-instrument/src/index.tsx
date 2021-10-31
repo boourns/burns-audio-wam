@@ -1,5 +1,5 @@
-import { WebAudioModule, WamNode } from 'sdk';
-import AudioWorkletRegister from 'sdk/src/ParamMgr/AudioWorkletRegister'
+import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
+import {AudioWorkletRegister} from '@webaudiomodules/sdk-parammgr'
 // @ts-ignore
 import wamEnvProcessor from 'sdk/src/WamEnv.js'
 
@@ -7,11 +7,11 @@ import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
 import { ExternalInstrumentView } from './ExternalInstrumentView';
-import { WamEventMap } from 'sdk/src/api/types';
+import { WamEventMap } from '@webaudiomodules/api';
 import { InstrumentDefinition, InstrumentDefinitionLoader, MIDIControlChange } from './InstrumentDefinition';
 
-export {AudioWorkletRegister}
-	
+const register = AudioWorkletRegister
+
 class ExternalInstrumentNode extends WamNode {
 	destroyed = false;
 	_supportedEventTypes: Set<keyof WamEventMap>
