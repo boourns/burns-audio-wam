@@ -1,11 +1,11 @@
 {
-    "name": "External Instrument",
+    "name": "MIDI Instrument",
     "vendor": "Tom Burns",
-    "description": "WAM2 MIDI External Instrument Controller",
+    "description": "WAM2 MIDI Instrument Controller",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
     "thumbnail": "",
-    "keywords": ["chord", "effect", "midi"],
+    "keywords": ["midi", "instrument"],
     "isInstrument": true,
     "website": ""
 }

@@ -1,14 +1,14 @@
 import { Component, h } from 'preact';
-import ExternalInstrumentModule from '.';
+import MIDIInstrumentModule from '.';
 
 var logger = (...any: any) => {}
 //const logger = console.log
 
-export interface ExternalInstrumentViewProps {
-  plugin: ExternalInstrumentModule
+export interface MIDIInstrumentViewProps {
+  plugin: MIDIInstrumentModule
 }
 
-export class ExternalInstrumentView extends Component<ExternalInstrumentViewProps, any> {
+export class MIDIInstrumentView extends Component<MIDIInstrumentViewProps, any> {
   statePoller: number
 
   constructor() {
@@ -43,8 +43,8 @@ export class ExternalInstrumentView extends Component<ExternalInstrumentViewProp
     let CCs = this.props.plugin
 
     return (
-      <div>External Instrument
-
+      <div>
+        
       </div>
     )
   }

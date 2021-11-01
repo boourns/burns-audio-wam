@@ -40,13 +40,20 @@ const common = {
 const plugin = {
     ...common,
     input: "./src/index.tsx",
-    output: [{ ...common.output[0], dir: "./dist" }],
-    plugins: [...common.plugins, copy({ targets: [{ src: "./src/descriptor.json", dest: "./dist" }] })]
+    output: [
+        { ...common.output[0], dir: "./dist" },
+    ],
+    plugins: [...common.plugins, copy({ targets: [
+        { src: "./src/descriptor.json", dest: "./dist" },
+        { src: "./assets/*", dest: "./dist/assets"}
+    ] })]
 };
+
+
 
 const processor = {
     ...common,
-    input: "./src/ExternalInstrumentProcessor.ts",
+    input: "./src/MIDIInstrumentProcessor.ts",
     output: [{ ...common.output[0], dir: "./dist" }],
 }
 

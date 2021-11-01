@@ -1,18 +1,18 @@
 import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
 import {AudioWorkletRegister} from '@webaudiomodules/sdk-parammgr'
-// @ts-ignore
-import wamEnvProcessor from 'sdk/src/WamEnv.js'
+import wamEnvProcessor from '@webaudiomodules/sdk/src/WamEnv.js'
 
 import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
-import { ExternalInstrumentView } from './ExternalInstrumentView';
+import { MIDIInstrumentView } from './MIDIInstrumentView';
 import { WamEventMap } from '@webaudiomodules/api';
 import { InstrumentDefinition, InstrumentDefinitionLoader, MIDIControlChange } from './InstrumentDefinition';
 
 const register = AudioWorkletRegister
 
-class ExternalInstrumentNode extends WamNode {
+class MIDIInstrumentNode extends WamNode {
+	processorReady = false;
 	destroyed = false;
 	_supportedEventTypes: Set<keyof WamEventMap>
 
@@ -39,31 +39,42 @@ class ExternalInstrumentNode extends WamNode {
 				console.log("Node side: ", ev.data)
 
 				if (ev.data.message == "hello") {
-					console.log("Sending instrument")
-
-					super.port.postMessage({
-						me: true,
-						message: "instrument", 
-						notes: this.instrument.notes,
-						cc: this.instrument.midiCCs
-					})
+					this.processorReady = true
+					if (this.instrument) {
+						this.sendInstrument()
+					}
 				}
 			}
 		})
 
 	}
 
+	sendInstrument() {
+		if (!this.processorReady) {
+			return
+		}
+		super.port.postMessage({
+			me: true,
+			message: "instrument", 
+			notes: this.instrument.notes,
+			cc: this.instrument.midiCCs
+		})
+	}
+
 	async loadInstrumentFile(url: string) {
-		let instrument = InstrumentDefinitionLoader.parseFile(await InstrumentDefinitionLoader.loadURL(url))[0]
+		this.instrument = InstrumentDefinitionLoader.parseFile(await InstrumentDefinitionLoader.loadURL(url))[0]
+		if (this.processorReady) {
+
+		}
 	}
 }
 
-export default class ExternalInstrumentModule extends WebAudioModule<WamNode> {
+export default class MIDIInstrumentModule extends WebAudioModule<WamNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', import.meta.url));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
-	_processorUrl = `${this._baseURL}/ExternalInstrumentProcessor.js`;
+	_processorUrl = `${this._baseURL}/MIDIInstrumentProcessor.js`;
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -86,7 +97,7 @@ export default class ExternalInstrumentModule extends WebAudioModule<WamNode> {
 	}
 
 	async createAudioNode(initialState: any) {
-		const node: ExternalInstrumentNode = new ExternalInstrumentNode(this, {});
+		const node: MIDIInstrumentNode = new MIDIInstrumentNode(this, {});
 		await node._initialize()
 
 		if (initialState) node.setState(initialState);
@@ -106,7 +117,7 @@ export default class ExternalInstrumentModule extends WebAudioModule<WamNode> {
 		
 		//shadow.appendChild(container)
 
-		render(<ExternalInstrumentView plugin={this}></ExternalInstrumentView>, div);
+		render(<MIDIInstrumentView plugin={this}></MIDIInstrumentView>, div);
 		return div;
 	}
 

@@ -40,9 +40,10 @@ export class InstrumentDefinition {
     notes?: NoteDefinition[]
     midiCCs: MIDIControlChange[]
     
-    constructor(name: string, midiCCs?: MIDIControlChange[], notes?: NoteDefinition[]) {
+    constructor(name: string, midiCCs: MIDIControlChange[] = [], notes: undefined | NoteDefinition[] = undefined) {
         this.name = name
-        this.midiCCs = []
+        this.midiCCs = midiCCs
+        this.notes = notes
     }
 
     parseDefinition(def: CirklonInstrumentDefinition): InstrumentDefinition {

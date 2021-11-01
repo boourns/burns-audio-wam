@@ -44,6 +44,10 @@ class StepModulatorNode extends WamNode {
 	}
 
 	async setState(state: any) {
+		if (!state) {
+			return
+		}
+		
 		if (state.params) {
 			await super.setState(state.params)
 		}

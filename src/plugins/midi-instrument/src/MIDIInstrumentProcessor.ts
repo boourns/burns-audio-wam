@@ -1,16 +1,16 @@
-import WamParameter from "sdk/src/WamParameter.js"
+import WamParameter from "@webaudiomodules/sdk/src/WamParameter.js"
 // @ts-ignore
 globalThis.WamParameter = WamParameter;
 
-import WamParameterInterpolator from "sdk/src/WamParameterInterpolator"
-import WamProcessor from "sdk/src/WamProcessor";
+import WamParameterInterpolator from "@webaudiomodules/sdk/src/WamParameterInterpolator"
+import WamProcessor from "@webaudiomodules/sdk/src/WamProcessor";
 
 // @ts-ignore
 globalThis.WamParameterInterpolator = WamParameterInterpolator
 
-import WamParameterInfo from "sdk/src/WamParameterInfo";
-import { AudioParamDescriptor, WamMidiEvent, WamParameterInfoMap } from "sdk/src/api/types";
-import { InstrumentDefinition } from "./InstrumentDefinition";
+import WamParameterInfo from "@webaudiomodules/sdk/src/WamParameterInfo";
+import { AudioParamDescriptor, WamMidiEvent, WamParameterInfoMap } from "@webaudiomodules/api";
+import { InstrumentDefinition, MIDIControlChange } from "./InstrumentDefinition";
 
 interface AudioWorkletProcessor {
     readonly port: MessagePort;
@@ -37,32 +37,53 @@ declare function registerProcessor(
 
 const audioWorkletGlobalScope = globalThis;
 
-// other variables that could be included:
-// - renderAhead: number - how far into the future should plugins render?
+type CCState = {
+    lastValue: number
+    cc: MIDIControlChange
+}
 
-class ExternalInstrumentProcessor extends WamProcessor {
+class MIDIInstrumentProcessor extends WamProcessor {
+    ccMap: Record<string, CCState> = {}
+    parameterNames: string[] = []
+
     _generateWamParameterInfo(): WamParameterInfoMap {
         if (!this.instrument) {
+            console.log("_generateWamParameterInfo: no instrument")
             return {}
         }
 
         let result: WamParameterInfoMap = {}
+        let ccMap: Record<string, CCState> = {}
+
+        let parameterNames: string[] = []
+
         this.instrument.midiCCs.map(cc => {
-            result[cc.name] = new WamParameterInfo(cc.name, {
+            let name = `${cc.ccNumber} - ${cc.name}`
+            ccMap[name] = {
+                lastValue: cc.startValue ? cc.startValue : 0,
+                cc
+            }
+            parameterNames.push(name)
+
+            result[name] = new WamParameterInfo(name, {
                 type: "int",
-                label: cc.name,
+                label: name,
                 minValue: cc.minValue ? cc.minValue : 0,
                 maxValue: cc.maxValue ? cc.maxValue : 127,
                 defaultValue: cc.startValue ? cc.startValue : 0,
             })
         })
 
+        this.parameterNames = parameterNames
+        this.ccMap = ccMap
+
+        console.log("_generateWamParameterInfo: parameters ", result)
+
         return result
     }
 
     lastTime: number
     proxyId: string
-    heldNotes: number[][]
     instrument?: InstrumentDefinition
 
 	constructor(options: any) {
@@ -76,16 +97,12 @@ class ExternalInstrumentProcessor extends WamProcessor {
         // @ts-ignore
         const { webAudioModules } = audioWorkletGlobalScope;
 
-        this.heldNotes = []
-        this.heldNotes.fill([], 0, 128)
-
         // @ts-ignore
         if (globalThis.WamProcessors) globalThis.WamProcessors[instanceId] = this;
         // @ts-ignore
 		else globalThis.WamProcessors = { [instanceId]: this };
 
-        super.port.addEventListener("message", (ev) => {
-            console.log("Processor side: ", ev.data)
+        super.port.addEventListener("message", (ev: MessageEvent) => {
             if (ev.data.me) {
                 console.log("Processor side: ", ev.data)
                 if (ev.data.message == "instrument") {
@@ -94,6 +111,7 @@ class ExternalInstrumentProcessor extends WamProcessor {
                         ev.data.name, 
                         ev.data.cc,
                         ev.data.notes)
+                    this._initialize()
                 }
             }
         })
@@ -117,6 +135,23 @@ class ExternalInstrumentProcessor extends WamProcessor {
         // @ts-ignore
         const { webAudioModules, currentTime } = audioWorkletGlobalScope;
 
+        for (let i = 0; i < this.parameterNames.length; i++) {
+            let paramName = this.parameterNames[i]
+            let cc = this.ccMap[this.parameterNames[i]]
+            let value = Math.floor(this._parameterInterpolators[paramName].values[startSample])
+            
+            if (cc.lastValue != value) {
+                cc.lastValue = value
+                console.log(`Emitting ${paramName}: cc ${cc.cc.ccNumber} value ${value}`)
+                this.emitEvents(
+                    {
+                        type: 'wam-midi', time: currentTime, data: {bytes: [0xB0,cc.cc.ccNumber, value]}
+                    }
+                )
+            }
+        }
+        
+
 		return;
 	}
 
@@ -128,7 +163,7 @@ class ExternalInstrumentProcessor extends WamProcessor {
 }
 
 try {
-	registerProcessor('Tom BurnsExternal Instrument', ExternalInstrumentProcessor);
+	registerProcessor('Tom BurnsMIDI Instrument', MIDIInstrumentProcessor);
 } catch (error) {
 	// eslint-disable-next-line no-console
 	console.warn(error);
