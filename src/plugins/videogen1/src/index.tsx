@@ -15,12 +15,13 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import { VideoGenerator } from './VideoGenerator';
 import { VideoExtensionOptions } from 'wam-extensions';
 import { VideoGeneratorView } from './VideoGeneratorView';
+import { WamEventMap } from '@webaudiomodules/api';
 
 export {AudioWorkletRegister}
 	
 class VideoGeneratorNode extends WamNode {
 	destroyed = false;
-	_supportedEventTypes: Set<string>
+	_supportedEventTypes: Set<keyof WamEventMap>
 
 	/**
 	 * @param {WebAudioModule} module
@@ -38,7 +39,7 @@ class VideoGeneratorNode extends WamNode {
 	}
 }
 
-export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
+export default class VideoGeneratorModule extends WebAudioModule<VideoGeneratorNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', import.meta.url));
 
@@ -51,6 +52,7 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this._descriptor, descriptor);
+		return descriptor
 	}
 
 	chorderProcessor: AudioWorkletNode

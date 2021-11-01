@@ -12,6 +12,7 @@ import { StepModulator } from './StepModulator';
 import { Clip } from './Clip';
 
 import {WAMExtensions, PatternDelegate} from 'wam-extensions';
+import { WamEventMap } from '@webaudiomodules/api';
 
 var logger = console.log
 
@@ -19,7 +20,7 @@ export {AudioWorkletRegister}
 
 class StepModulatorNode extends WamNode {
 	destroyed = false;
-	_supportedEventTypes: Set<string>
+	_supportedEventTypes: Set<keyof WamEventMap>
 
 	sequencer: StepModulator
 
@@ -58,7 +59,7 @@ class StepModulatorNode extends WamNode {
 	}
 }
 
-export default class StepModulatorModule extends WebAudioModule<Node> {
+export default class StepModulatorModule extends WebAudioModule<StepModulatorNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', import.meta.url));
 
@@ -71,6 +72,7 @@ export default class StepModulatorModule extends WebAudioModule<Node> {
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this._descriptor, descriptor);
+		return descriptor
 	}
 
 	sequencer: StepModulator

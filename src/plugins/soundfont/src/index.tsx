@@ -28,6 +28,7 @@ export default class SoundfontModule extends WebAudioModule<SoundfontPlayerNode>
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this._descriptor, descriptor);
+		return descriptor
 	}
 
 	async initialize(state: any) {
