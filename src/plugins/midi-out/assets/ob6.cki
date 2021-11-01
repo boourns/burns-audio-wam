@@ -1,0 +1,183 @@
+{
+    "instrument_data": {
+        "OB-6": {
+            "midi_port": "1",
+            "midi_chan": 1,
+            "track_values": {
+                "slot_1": {
+                    "track_control": "pgm"
+                },
+                "slot_2": {
+                    "MIDI_CC": 0,
+                    "label": "Bank"
+                },
+                "slot_3": {
+                    "track_control": "note%"
+                },
+                "slot_4": {
+                    "track_control": "noteC"
+                },
+                "slot_5": {
+                    "MIDI_CC": 1,
+                    "label": "ModWhl"
+                },
+                "slot_6": {
+                    "MIDI_CC": 3,
+                    "label": "BPM"
+                },
+                "slot_7": {
+                    "MIDI_CC": 4,
+                    "label": "Foot"
+                },
+                "slot_8": {
+                    "MIDI_CC": 5,
+                    "label": "PortTm"
+                },
+                "slot_9": {
+                    "MIDI_CC": 7,
+                    "label": "Volume"
+                },
+                "slot_10": {
+                    "MIDI_CC": 8,
+                    "label": "SubLvl"
+                },
+                "slot_11": {
+                    "MIDI_CC": 9,
+                    "label": "DstAmt"
+                },
+                "slot_12": {
+                    "MIDI_CC": 40,
+                    "label": "VEvAmt"
+                },
+                "slot_13": {
+                    "MIDI_CC": 41,
+                    "label": "VCAVel"
+                },
+                "slot_14": {
+                    "MIDI_CC": 43,
+                    "label": "VCAAtk"
+                },
+                "slot_15": {
+                    "MIDI_CC": 44,
+                    "label": "VCADec"
+                },
+                "slot_16": {
+                    "MIDI_CC": 45,
+                    "label": "VCASus"
+                },
+                "slot_17": {
+                    "MIDI_CC": 46,
+                    "label": "VCARel"
+                },
+                "slot_18": {
+                    "MIDI_CC": 47,
+                    "label": "FEvAmt"
+                },
+                "slot_19": {
+                    "MIDI_CC": 50,
+                    "label": "FltAtk"
+                },
+                "slot_20": {
+                    "MIDI_CC": 51,
+                    "label": "FltDec"
+                },
+                "slot_21": {
+                    "MIDI_CC": 52,
+                    "label": "FilSus"
+                },
+                "slot_22": {
+                    "MIDI_CC": 53,
+                    "label": "FilRel"
+                },
+                "slot_23": {
+                    "MIDI_CC": 58,
+                    "label": "ArpOn"
+                },
+                "slot_24": {
+                    "MIDI_CC": 59,
+                    "label": "ArpTyp"
+                },
+                "slot_25": {
+                    "MIDI_CC": 60,
+                    "label": "ArpOct"
+                },
+                "slot_26": {
+                    "MIDI_CC": 62,
+                    "label": "ArpClk"
+                },
+                "slot_27": {
+                    "MIDI_CC": 64,
+                    "label": "Damper"
+                },
+                "slot_28": {
+                    "MIDI_CC": 65,
+                    "label": "PortOn"
+                },
+                "slot_29": {
+                    "MIDI_CC": 67,
+                    "label": "OFreq1"
+                },
+                "slot_30": {
+                    "MIDI_CC": 69,
+                    "label": "OLvl1"
+                },
+                "slot_31": {
+                    "MIDI_CC": 70,
+                    "label": "Shape1"
+                },
+                "slot_32": {
+                    "MIDI_CC": 71,
+                    "label": "OPW1"
+                },
+                "slot_33": {
+                    "MIDI_CC": 74,
+                    "label": "Bright"
+                },
+                "slot_34": {
+                    "MIDI_CC": 75,
+                    "label": "OFreq2"
+                },
+                "slot_35": {
+                    "MIDI_CC": 76,
+                    "label": "ODtun2"
+                },
+                "slot_36": {
+                    "MIDI_CC": 77,
+                    "label": "OLvl2"
+                },
+                "slot_37": {
+                    "MIDI_CC": 78,
+                    "label": "Shape2"
+                },
+                "slot_38": {
+                    "MIDI_CC": 79,
+                    "label": "OPW2"
+                },
+                "slot_39": {
+                    "MIDI_CC": 102,
+                    "label": "Cutoff"
+                },
+                "slot_40": {
+                    "MIDI_CC": 103,
+                    "label": "Res"
+                },
+                "slot_41": {
+                    "MIDI_CC": 104,
+                    "label": "FilKey"
+                },
+                "slot_42": {
+                    "MIDI_CC": 105,
+                    "label": "FilVel"
+                },
+                "slot_43": {
+                    "MIDI_CC": 106,
+                    "label": "FilTyp"
+                },
+                "slot_44": {
+                    "MIDI_CC": 107,
+                    "label": "BP On"
+                }
+            }
+        }
+    }
+}

@@ -1,7 +1,7 @@
 {
-  "name": "midi-instrument",
+  "name": "midi-out",
   "version": "0.0.0",
-  "description": "Rich MIDI instruments control / patch editing",
+  "description": "MIDI Output WAM2",
   "author": "Tom Burns <tom@burns.ca>",
   "homepage": "https://github.com/boourns/burns-audio-wam",
   "license": "MIT",
