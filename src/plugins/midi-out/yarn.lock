@@ -1556,6 +1556,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/webmidi@npm:^2.0.6":
+  version: 2.0.6
+  resolution: "@types/webmidi@npm:2.0.6"
+  checksum: 63066aaf5616806f302675f0e26c2ddbfeeea826564a84ebb8c8ac02a77a037aa144590b8fa44002c714b673b0de9b5b0900cf12dad24df5be75525220d4336e
+  languageName: node
+  linkType: hard
+
 "@webassemblyjs/ast@npm:1.11.0":
   version: 1.11.0
   resolution: "@webassemblyjs/ast@npm:1.11.0"
@@ -2736,35 +2743,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"external-instrument@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "external-instrument@workspace:."
-  dependencies:
-    "@babel/core": ^7.12.16
-    "@babel/plugin-proposal-class-properties": ^7.13.0
-    "@babel/plugin-syntax-import-meta": ^7.10.4
-    "@babel/preset-env": ^7.13.10
-    "@babel/preset-react": ^7.12.13
-    "@babel/preset-typescript": ^7.13.0
-    "@rollup/plugin-babel": ^5.3.0
-    "@rollup/plugin-commonjs": ^17.1.0
-    "@rollup/plugin-node-resolve": ^11.2.0
-    "@rollup/plugin-replace": ^2.4.1
-    "@surma/rollup-plugin-off-main-thread": ^2.1.0
-    "@types/debug": ^4.1.6
-    debug: ^4.3.1
-    preact: ^10.5.5
-    rollup: ^2.42.1
-    rollup-plugin-copy: ^3.4.0
-    rollup-plugin-node-builtins: ^2.1.2
-    ts-loader: ^8.0.12
-    typescript: ^4.0.2
-    wam-extensions: ^0.1.10
-    webpack: ^5.11.1
-    webpack-cli: ^4.3.0
-  languageName: unknown
-  linkType: soft
-
 "fast-deep-equal@npm:^3.1.1":
   version: 3.1.3
   resolution: "fast-deep-equal@npm:3.1.3"
@@ -3678,6 +3656,36 @@ fsevents@~2.3.2:
   checksum: bc522ad93c086aa176f50fea2dc8060a8f7d7a621c811cf9ba02a1912577cc100190508166d721231465f10a575a40ec8a1bffc23bbc2c0108fcbf02e4be04ed
   languageName: node
   linkType: hard
+
+"midi-out@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "midi-out@workspace:."
+  dependencies:
+    "@babel/core": ^7.12.16
+    "@babel/plugin-proposal-class-properties": ^7.13.0
+    "@babel/plugin-syntax-import-meta": ^7.10.4
+    "@babel/preset-env": ^7.13.10
+    "@babel/preset-react": ^7.12.13
+    "@babel/preset-typescript": ^7.13.0
+    "@rollup/plugin-babel": ^5.3.0
+    "@rollup/plugin-commonjs": ^17.1.0
+    "@rollup/plugin-node-resolve": ^11.2.0
+    "@rollup/plugin-replace": ^2.4.1
+    "@surma/rollup-plugin-off-main-thread": ^2.1.0
+    "@types/debug": ^4.1.6
+    "@types/webmidi": ^2.0.6
+    debug: ^4.3.1
+    preact: ^10.5.5
+    rollup: ^2.42.1
+    rollup-plugin-copy: ^3.4.0
+    rollup-plugin-node-builtins: ^2.1.2
+    ts-loader: ^8.0.12
+    typescript: ^4.0.2
+    wam-extensions: ^0.1.10
+    webpack: ^5.11.1
+    webpack-cli: ^4.3.0
+  languageName: unknown
+  linkType: soft
 
 "miller-rabin@npm:^4.0.0":
   version: 4.0.1

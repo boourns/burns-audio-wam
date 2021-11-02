@@ -10,10 +10,23 @@ import { WamEventMap } from '@webaudiomodules/api';
 
 const register = AudioWorkletRegister
 
+type MIDIOutputNodeState = {
+	channel: number
+	deviceID: string | undefined
+}
+
 class MIDIOutputNode extends WamNode {
 	processorReady = false;
+	outputReady = false;
+	midiAccess?: WebMidi.MIDIAccess
+	updateUI?: () => void
+
 	destroyed = false;
 	_supportedEventTypes: Set<keyof WamEventMap>
+
+	state: MIDIOutputNodeState
+	fetchedOutputID?: string
+	output?: WebMidi.MIDIOutput
 
 	/**
 	 * @param {WebAudioModule} module
@@ -26,23 +39,67 @@ class MIDIOutputNode extends WamNode {
 			outputChannelCount: [2],
 		}});
 
+		this.state = {
+			deviceID: undefined,
+			channel: 0
+		}
+
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi']);
 
 		super.port.addEventListener("message", (ev) => {
 			if (ev.data.me) {
-
 				if (ev.data.message == "hello") {
 					this.processorReady = true
+				}
 
+				if (ev.data.message == "midi" && this.midiAccess) {
+					if (this.fetchedOutputID != this.state.deviceID) {
+						this.output = this.midiAccess.outputs.get(this.state.deviceID)
+						this.fetchedOutputID = this.state.deviceID
+					}
+					
+					this.output.send(ev.data.data.bytes)
 				}
 			}
 		})
 
+		this.requestMIDI()
+	}
+
+	async requestMIDI() {
+		try {
+			// @ts-ignore
+			let midi = await navigator.requestMIDIAccess({sysex: false, software: true})
+
+			this.midiReady(midi)
+		}
+		catch (e) {
+			console.error("Failure requesting MIDI access: ", e)
+		}
+	}
+
+	midiReady(midi: WebMidi.MIDIAccess) {
+		this.midiAccess = midi
+		if (this.state.deviceID == undefined) {
+			this.state.deviceID = Array.from(midi.outputs.keys())[0]
+		}
+
+		if (this.updateUI) {
+			this.updateUI()
+		}
+	}
+
+	async getState(): Promise<MIDIOutputNodeState> {
+		return {...this.state}
+	}
+
+	async setState(state: MIDIOutputNodeState) {
+		this.state = {...state}
 	}
 }
 
-export default class MIDIOutputModule extends WebAudioModule<WamNode> {
+export default class MIDIOutputModule extends WebAudioModule<MIDIOutputNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', import.meta.url));
 
