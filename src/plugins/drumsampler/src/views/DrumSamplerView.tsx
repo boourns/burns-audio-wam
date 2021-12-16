@@ -1,22 +1,31 @@
 import { h, Component, render } from 'preact';
-import { Knob } from '../../shared/ui/Knob'
-import { Select } from '../../shared/ui/Select'
-import { Fader } from '../../shared/ui/Fader'
+import { Knob } from '../../../shared/ui/Knob'
+import { Select } from '../../../shared/ui/Select'
+import { Fader } from '../../../shared/ui/Fader'
 
-import DrumSampler from '.';
+import DrumSampler from '..';
+
+import styles from './DrumSamplerView.scss';
 
 export interface DrumSamplerViewProps {
     plugin: DrumSampler
     initialState: Record<string, number>
 }
-  
-export class DrumSamplerView extends Component<DrumSamplerViewProps, any> {
+
+type DrumSamplerState = {
+  selectedPad: number
+}
+
+export class DrumSamplerView extends Component<DrumSamplerViewProps, DrumSamplerState> {
   wamState!: Record<string, number>
   automationStatePoller: number
 
   constructor() {
     super();
     this.pollAutomationState = this.pollAutomationState.bind(this)
+    this.state = {
+      selectedPad: 0,
+    }
   }
 
   // Lifecycle: Called whenever our component is created
@@ -45,7 +54,26 @@ export class DrumSamplerView extends Component<DrumSamplerViewProps, any> {
     </div>
   }
 
+  renderPads() {
+    return <div class={styles.bigPanel}>
+      Pads
+    </div>
+  }
+
+  renderPadEditor() {
+    return <div class={styles.bigPanel}>
+      Editor
+    </div>
+  }
+
   render() {
+    return <div class={styles.root}>
+      {this.renderPads()}
+      {this.renderPadEditor()}
+    </div>
+  }
+
+  Oldrender() {
     h("div", {})
 
     var voices = []

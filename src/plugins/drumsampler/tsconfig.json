@@ -22,11 +22,12 @@
       "noFallthroughCasesInSwitch": true,
       "allowUnreachableCode": false,
       "experimentalDecorators": true,
-      "downlevelIteration": true
+      "downlevelIteration": true,
+      "resolveJsonModule": true,
     },
     "include": [
       "./src/*"
-    ],
+, "src/views/DrumSamplerView.tsx"    ],
     "exclude": [
       "dist",
       "node_modules",

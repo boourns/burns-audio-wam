@@ -1,0 +1,23 @@
+.root {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 10px;
+
+    position: relative;
+    width: 840px;
+    height: 459px;
+
+    background: #848583;
+}
+
+.bigPanel {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px 6px;
+
+    align-self: stretch;
+    flex-grow: 1;
+}
