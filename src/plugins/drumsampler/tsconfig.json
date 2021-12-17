@@ -25,9 +25,7 @@
       "downlevelIteration": true,
       "resolveJsonModule": true,
     },
-    "include": [
-      "./src/*"
-, "src/views/DrumSamplerView.tsx"    ],
+    "include": ["src/**/*"],
     "exclude": [
       "dist",
       "node_modules",

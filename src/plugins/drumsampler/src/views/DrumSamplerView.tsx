@@ -1,11 +1,26 @@
-import { h, Component, render } from 'preact';
+import { h, Component } from 'preact';
 import { Knob } from '../../../shared/ui/Knob'
-import { Select } from '../../../shared/ui/Select'
-import { Fader } from '../../../shared/ui/Fader'
 
 import DrumSampler from '..';
 
-import styles from './DrumSamplerView.scss';
+import styleRoot from './DrumSamplerView.scss';
+import { DrumSamplerKit } from '../Kit';
+import { DrumSamplerVoiceState } from '../Voice';
+import {WaveformView} from "./WaveformView"
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
+
+const c = (a: string[]) => a.filter(el => !!el).join(" ")
+
+type KitPad = {
+  label: string
+  note: number
+}
+
+type Kit = {
+  pads: KitPad[]
+}
 
 export interface DrumSamplerViewProps {
     plugin: DrumSampler
@@ -19,6 +34,7 @@ type DrumSamplerState = {
 export class DrumSamplerView extends Component<DrumSamplerViewProps, DrumSamplerState> {
   wamState!: Record<string, number>
   automationStatePoller: number
+  kit: DrumSamplerKit
 
   constructor() {
     super();
@@ -28,20 +44,22 @@ export class DrumSamplerView extends Component<DrumSamplerViewProps, DrumSampler
     }
   }
 
-  // Lifecycle: Called whenever our component is created
-  componentDidMount() {
+  componentWillMount(): void {
     this.wamState = this.props.initialState
+    this.kit = this.props.plugin.audioNode.kit
+  }
+
+  componentDidMount() {
     this.automationStatePoller = window.requestAnimationFrame(this.pollAutomationState)
   }
 
-  // Lifecycle: Called just before our component will be destroyed
   componentWillUnmount() {
     window.cancelAnimationFrame(this.automationStatePoller)
   }
 
   renderVoice(index: number) {
-    var slot = this.props.plugin.audioNode.state.slots[index]
-    var voice = this.props.plugin.audioNode.voices[index]
+    var slot = this.props.plugin.audioNode.kit.state.slots[index]
+    var voice = this.props.plugin.audioNode.kit.voices[index]
 
     return <div style="display: flex; flex-direction: column; padding-left: 5px; padding-right: 5px; width: 60px;">
       <label>{index+1}</label>
@@ -54,19 +72,84 @@ export class DrumSamplerView extends Component<DrumSamplerViewProps, DrumSampler
     </div>
   }
 
+  selectPad(index: number) {
+    this.setState({selectedPad: index})
+  }
+
+  renderPad(index: number) {
+    let slot = this.kit.state.slots[index]
+
+    return <div class={styles.padContainer}>
+      <div class={c([styles.pad, this.state.selectedPad == index && styles.padSelected])} onClick={() => this.selectPad(index)}>
+        <div class={styles.padLabel}>
+          {slot?.name}
+        </div>
+      </div>
+    </div>
+  }
+
+  renderPadRow(index: number) {
+    return <div class={styles.padRow}>
+      {this.renderPad(index)}
+      {this.renderPad(index+1)}
+      {this.renderPad(index+2)}
+      {this.renderPad(index+3)}
+    </div>
+  }
+
   renderPads() {
     return <div class={styles.bigPanel}>
-      Pads
+      {this.renderPadRow(12)}
+      {this.renderPadRow(8)}
+      {this.renderPadRow(4)}
+      {this.renderPadRow(0)}
+    </div>
+  }
+
+  loadAsset() {
+    console.log("LoadAsset called!")
+  }
+
+  renderEditorTitleBar(slot: DrumSamplerVoiceState) {
+    return <div class={styles.editorTitleBar} >
+      <div class={styles.editorTitle}>
+        {slot.name}
+      </div>
+      <button class={styles.button} onClick={() => { this.loadAsset() } }>Load</button>
+    </div>
+  }
+
+  renderWaveform() {
+    let buffer = this.props.plugin.audioNode.kit.buffers[this.state.selectedPad]
+    return <WaveformView width={400} height={175} buffer={buffer}></WaveformView>
+  }
+
+  renderControls(slot: DrumSamplerVoiceState) {
+    let index = this.state.selectedPad
+
+    return <div class={styles.controlContainer}>
+      {this.knob("Tone", `tone${index+1}`, -1, 1)}
+      {this.knob("Pan", `pan${index+1}`, -1, 1)}
+      {this.knob("Gain", `gain${index+1}`, 0, 1.5)}
     </div>
   }
 
   renderPadEditor() {
+    let slot = this.kit.state.slots[this.state.selectedPad]
+    
     return <div class={styles.bigPanel}>
-      Editor
+      <div style="display: flex; flex-direction: column;">
+        {this.renderEditorTitleBar(slot)}
+        {this.renderWaveform()}
+      </div>
+
+      {this.renderControls(slot)}
     </div>
   }
 
   render() {
+    h("div", {})
+
     return <div class={styles.root}>
       {this.renderPads()}
       {this.renderPadEditor()}
@@ -74,10 +157,8 @@ export class DrumSamplerView extends Component<DrumSamplerViewProps, DrumSampler
   }
 
   Oldrender() {
-    h("div", {})
-
     var voices = []
-    for (let i = 0; i < this.props.plugin.audioNode.voices.length; i++) {
+    for (let i = 0; i < this.props.plugin.audioNode.kit.voices.length; i++) {
       voices.push(this.renderVoice(i))
     }
 

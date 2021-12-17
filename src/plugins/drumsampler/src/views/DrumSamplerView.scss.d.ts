@@ -2,6 +2,15 @@
 // Please do not change this file!
 interface CssExports {
   'bigPanel': string;
+  'button': string;
+  'controlContainer': string;
+  'editorTitle': string;
+  'editorTitleBar': string;
+  'pad': string;
+  'padContainer': string;
+  'padLabel': string;
+  'padRow': string;
+  'padSelected': string;
   'root': string;
 }
 export const cssExports: CssExports;

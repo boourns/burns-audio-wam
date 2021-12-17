@@ -1,12 +1,13 @@
 .root {
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
+    align-items: stretch;
     padding: 10px;
 
     position: relative;
-    width: 840px;
-    height: 459px;
+    width: 100%;
+    height: 100%;
+    flex-grow: 1;
 
     background: #848583;
 }
@@ -15,9 +16,92 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: stretch;
     padding: 10px 6px;
 
     align-self: stretch;
-    flex-grow: 1;
+    flex: 1;
+}
+
+.padRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: stretch;
+    align-items: center;
+    padding: 2px 12px;
+}
+
+.pad {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: flex-start;
+
+    min-width: 74px;
+    min-height: 74px;
+
+    background: #003163;
+    border: 3px solid #074480;
+    box-sizing: border-box;
+    border-radius: 5px;
+
+    margin: 2px 2px;
+
+    /* Inside Auto Layout */
+    cursor: pointer;
+}
+
+.padSelected {
+    border-color: #dddddd;
+}
+
+.padContainer {
+    display: flex;
+    margin: auto;
+}
+
+.padLabel {
+    font-style: normal;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: 14px;
+    margin: 2px;
+
+    color: #AFB1B1;
+}
+
+.editorTitleBar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2px;
+    margin-bottom:4px;
+}
+
+.editorTitle {
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 14px;
+    /* identical to box height */
+
+    color: #FFFFFF;
+}
+
+.button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px 6px;
+    color: #ffffff;
+
+    background: #074480;
+    border: 1px solid rgba(192, 194, 194, 0.2);
+    box-sizing: border-box;
+    border-radius: 2px;
+}
+
+.controlContainer {
+    display: flex;
+    flex-direction: row;
 }
