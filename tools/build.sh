@@ -7,6 +7,8 @@ git submodule update --init --recursive
 
 plugins=()
 
+yarn install
+
 echo "===== Building ==== "
 cd src/plugins
 for i in *; do

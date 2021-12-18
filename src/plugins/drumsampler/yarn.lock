@@ -255,27 +255,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webaudiomodules/api@webaudiomodules/api#commit=84892b520213872f79f7d3d9ff443e05782cc4fe":
-  version: 2.0.0-alpha.1
-  resolution: "@webaudiomodules/api@https://github.com/webaudiomodules/api.git#commit=84892b520213872f79f7d3d9ff443e05782cc4fe"
-  checksum: a44e3a6c3483f43d93cd4f74cda33f8b7e97b9b5ab765d02f91a964e9148f768eee884829591b9defddcc7812a928127ad9ab508aef4829e63156a59b9c64ca4
-  languageName: node
-  linkType: hard
-
-"@webaudiomodules/sdk-parammgr@webaudiomodules/sdk-parammgr#commit=fc9601a3bdd43a696e4bf9ac7933a54fe942cf4e":
-  version: 0.0.4
-  resolution: "@webaudiomodules/sdk-parammgr@https://github.com/webaudiomodules/sdk-parammgr.git#commit=fc9601a3bdd43a696e4bf9ac7933a54fe942cf4e"
-  checksum: 130c44f3af227151baf11d54214d91710f5fb1cc66967b0eab41fe74e07b2faba08b91adecb10bb23e94ea0d08e69afc7137fd43f30a9e680f68f98e42b04dc7
-  languageName: node
-  linkType: hard
-
-"@webaudiomodules/sdk@webaudiomodules/sdk#commit=547b172d19a4b5a10a4b847ced6b0b36effa9500":
-  version: 0.0.4
-  resolution: "@webaudiomodules/sdk@https://github.com/webaudiomodules/sdk.git#commit=547b172d19a4b5a10a4b847ced6b0b36effa9500"
-  checksum: 0d7d8c3afa9bbec11cc943b2694eec5873082291cb3c6171d258928e84360db4b0522dda13eb4409638585d2e5e25da2c320aaa1d164f6d7c5d75d3f1a344971
-  languageName: node
-  linkType: hard
-
 "@webpack-cli/configtest@npm:^1.0.4":
   version: 1.0.4
   resolution: "@webpack-cli/configtest@npm:1.0.4"
@@ -782,13 +761,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "drm-16@workspace:."
   dependencies:
-    "@webaudiomodules/api": "webaudiomodules/api#commit=84892b520213872f79f7d3d9ff443e05782cc4fe"
-    "@webaudiomodules/sdk": "webaudiomodules/sdk#commit=547b172d19a4b5a10a4b847ced6b0b36effa9500"
-    "@webaudiomodules/sdk-parammgr": "webaudiomodules/sdk-parammgr#commit=fc9601a3bdd43a696e4bf9ac7933a54fe942cf4e"
     copy-webpack-plugin: ^9.0.0
     css-loader: ^6.2.0
     css-modules-typescript-loader: ^4.0.1
-    preact: ^10.5.5
     sass: ^1.39.2
     sass-loader: ^12.1.0
     style-loader: ^3.2.1
@@ -2005,13 +1980,6 @@ fsevents@~2.3.2:
     picocolors: ^1.0.0
     source-map-js: ^1.0.1
   checksum: 9fc52b650c4720e67b27423fdfb2fff5699bb75915f35dbce310111edcf3af58f91a9edf731b447b82bf090a4890e993dec66726728ed0d204873119626aa718
-  languageName: node
-  linkType: hard
-
-"preact@npm:^10.5.5":
-  version: 10.5.14
-  resolution: "preact@npm:10.5.14"
-  checksum: 1cb6f0eecd0f1de15621efae40f86790dac5a5eb68ca2a02790685c234055fc6efe60def719a0a90b747ed35b1b5099fc7a3e33cf0d4972bf9b1e3895cf02efa
   languageName: node
   linkType: hard
 
