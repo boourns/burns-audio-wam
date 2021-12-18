@@ -3,9 +3,12 @@
 interface CssExports {
   'bigPanel': string;
   'button': string;
-  'controlContainer': string;
+  'controlPanel': string;
+  'controlPanelContent': string;
+  'controlPanelHead': string;
   'editorTitle': string;
   'editorTitleBar': string;
+  'knobContainer': string;
   'pad': string;
   'padContainer': string;
   'padLabel': string;

@@ -127,10 +127,15 @@ export class DrumSamplerView extends Component<DrumSamplerViewProps, DrumSampler
   renderControls(slot: DrumSamplerVoiceState) {
     let index = this.state.selectedPad
 
-    return <div class={styles.controlContainer}>
-      {this.knob("Tone", `tone${index+1}`, -1, 1)}
-      {this.knob("Pan", `pan${index+1}`, -1, 1)}
-      {this.knob("Gain", `gain${index+1}`, 0, 1.5)}
+    return <div class={styles.controlPanel}>
+        <div class={styles.controlPanelHead}>
+          Output
+        </div>
+        <div class={styles.controlPanelContent}>
+          {this.knob("Tone", `tone${index+1}`, -1, 1)}
+          {this.knob("Pan", `pan${index+1}`, -1, 1)}
+          {this.knob("Gain", `gain${index+1}`, 0, 1.5)}
+        </div>
     </div>
   }
 
@@ -156,23 +161,10 @@ export class DrumSamplerView extends Component<DrumSamplerViewProps, DrumSampler
     </div>
   }
 
-  Oldrender() {
-    var voices = []
-    for (let i = 0; i < this.props.plugin.audioNode.kit.voices.length; i++) {
-      voices.push(this.renderVoice(i))
-    }
-
-    return <div style="display: flex; flex-direction: row; justify-content: center; ">
-        {voices}
-        <div style="display: flex; flex-direction: column; padding-left: 5px; padding-right: 5px; width: 60px;">
-          <label>Master</label>
-          {this.knob("Compress", `compression`, 0, 1)}
-        </div>
-      </div>
-  }
-
   knob(label: string, param: string, low: number, high: number) {
-    return <Knob label={label} size={40} bipolar={low < 0} defaultValue={low < 0 ? 0 : 1} minimumValue={low} maximumValue={high} value={() => this.value(param)} onChange={(e) => this.parameterChanged(param,e)}/>
+    return <div class={styles.knobContainer}>
+      <Knob label={label} size={40} bipolar={low < 0} defaultValue={low < 0 ? 0 : 1} minimumValue={low} maximumValue={high} value={() => this.value(param)} onChange={(e) => this.parameterChanged(param,e)}/>
+    </div>
   }
 
   parameterChanged(name: string, value: number) {

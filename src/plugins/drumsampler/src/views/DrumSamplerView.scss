@@ -101,7 +101,27 @@
     border-radius: 2px;
 }
 
-.controlContainer {
+.controlPanel {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0px 0px 8px;    
+
+    border: 1px solid #AFB1B1;
+    box-sizing: border-box;
+}
+
+.controlPanelHead {
+    background-color: #AFB1B1;
+    color: #000000;
+    margin: 0;
+}
+
+.controlPanelContent {
     display: flex;
     flex-direction: row;
+}
+
+.knobContainer {
+    margin: 4px;
 }
