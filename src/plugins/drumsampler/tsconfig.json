@@ -22,11 +22,10 @@
       "noFallthroughCasesInSwitch": true,
       "allowUnreachableCode": false,
       "experimentalDecorators": true,
-      "downlevelIteration": true
+      "downlevelIteration": true,
+      "resolveJsonModule": true,
     },
-    "include": [
-      "./src/*"
-    ],
+    "include": ["src/**/*"],
     "exclude": [
       "dist",
       "node_modules",

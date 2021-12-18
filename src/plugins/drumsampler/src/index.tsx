@@ -8,12 +8,13 @@ import { WebAudioModule,  } from '@webaudiomodules/sdk';
 import { ParamMgrFactory, CompositeAudioNode} from '@webaudiomodules/sdk-parammgr'
 import { DrumSamplerNode } from './Node';
 import { h, render } from 'preact';
-import { DrumSamplerView } from './DrumSamplerView'
+import { DrumSamplerView } from './views/DrumSamplerView'
 import { getBaseUrl } from '../../shared/getBaseUrl';
+import styles from "./views/DrumSamplerView.scss"
 
 export default class DrumSampler extends WebAudioModule<DrumSamplerNode> {
 	//@ts-ignore
-	_baseURL = getBaseUrl(new URL('.', import.meta.url));
+	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 
@@ -23,6 +24,7 @@ export default class DrumSampler extends WebAudioModule<DrumSamplerNode> {
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this.descriptor, descriptor);
+		return descriptor
 	}
 
 	async initialize(state: any) {
@@ -32,19 +34,19 @@ export default class DrumSampler extends WebAudioModule<DrumSamplerNode> {
 
 	async createAudioNode(initialState: any) {
 		const node = new DrumSamplerNode(this.audioContext);
-		const paramsConfig = Object.assign({}, ...node.voices.map((v, i) => v.paramsConfig(i+1)))
+		const paramsConfig = Object.assign({}, ...node.kit.voices.map((v, i) => v.paramsConfig(i+1)))
 		paramsConfig["compression"] = {
 			minValue: 0,
 			maxValue: 1,
 			defaultValue: 0,
 		}
-        const internalParamsConfig = Object.assign({}, ...node.voices.map((v, i) => v.internalParamsConfig(i+1)))
+        const internalParamsConfig = Object.assign({}, ...node.kit.voices.map((v, i) => v.internalParamsConfig(i+1)))
 		internalParamsConfig["compThreshold"] = node.compressor.threshold
 		internalParamsConfig["compRatio"] = node.compressor.ratio
 		internalParamsConfig["compKnee"] = node.compressor.knee
 		internalParamsConfig["compAttack"] = node.compressor.attack
 		internalParamsConfig["compRelease"] = node.compressor.release
-		const paramsMapping = Object.assign({}, ...node.voices.map((v, i) => v.paramsMapping(i+1)))
+		const paramsMapping = Object.assign({}, ...node.kit.voices.map((v, i) => v.paramsMapping(i+1)))
 		paramsMapping['compression'] = {
 			compThreshold: {
 				sourceRange: [0, 1],
@@ -82,7 +84,13 @@ export default class DrumSampler extends WebAudioModule<DrumSamplerNode> {
 		h("div", {})
 
 		var shadow = div.attachShadow({mode: 'open'});
-		let initialState = await this.audioNode.getParameterValues()
+		
+		// @ts-ignore
+    	styles.use({ target: shadow });
+
+		div.setAttribute("style", "display: flex; flex-direction: column: width: 100%; height: 100%")
+
+		let initialState = this.audioNode.paramMgr.getParamsValues()
 
 		render(<DrumSamplerView initialState={initialState} plugin={this}></DrumSamplerView>, shadow);
 
@@ -90,6 +98,8 @@ export default class DrumSampler extends WebAudioModule<DrumSamplerNode> {
 	}
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styles.unuse()
 		render(null, el.shadowRoot)
 	}
 }

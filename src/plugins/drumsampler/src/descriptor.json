@@ -1,11 +1,11 @@
 {
-    "name": "DrumSampler",
+    "name": "DRM-16 DrumComputer",
     "vendor": "Tom Burns",
-    "description": "DrumSampler WAM2 MIDI Instrument",
+    "description": "16-pad drum sampler",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
     "thumbnail": "",
     "keywords": ["drum-machine"],
     "isInstrument": true,
-    "website": ""
+    "website": "https://github.com/boourns/burns-audio-wam"
 }
