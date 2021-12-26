@@ -169,7 +169,7 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 
 				let clip = this.sequencer.pianoRoll.getClip(id)
 				if (clip) {
-					return clip.getState()
+					return clip.getState(true)
 				} else {
 					return undefined
 				}
@@ -178,10 +178,13 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 				logger("setPatternState(%s, %o)", id, state)
 				let clip = this.sequencer.pianoRoll.getClip(id)
 				if (clip) {
-					clip.setState(state)
+					clip.setState(state, id)
 				} else {
 					let clip = new Clip(id, state)
 					this.sequencer.pianoRoll.clips.push(clip)
+				}
+				if (this.sequencer.pianoRoll.renderCallback) {
+					this.sequencer.pianoRoll.renderCallback()
 				}
 			}
 		}

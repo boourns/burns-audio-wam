@@ -11,7 +11,7 @@ export type Note = {
 }
 
 export type ClipState = {
-    id: string
+    id?: string
     length: number
     notes: Note[]
 }
@@ -25,7 +25,7 @@ export class Clip {
     constructor(id?: string, state?: ClipState) {
         if (state) {
             this.state = {
-                id: state.id,
+                id: id || state.id,
                 length: state.length,
                 notes: state.notes.map(n => {
                     return {...n}
@@ -43,18 +43,26 @@ export class Clip {
         this.quantize = PP16;
     }
 
-    getState() {
-        return {
-            id: this.state.id,
+    getState(removeId?: boolean): ClipState {
+        let state: ClipState = {
             length: this.state.length, 
             notes: this.state.notes.map(n => {
                 return {...n}
             })
         }
+        if (!removeId) {
+            state.id = this.state.id
+        }
+        return state
     }
 
-    async setState(state: ClipState) {
-        this.state.id = state.id
+    async setState(state: ClipState, newId?: string) {
+        if (!state.id && !newId) {
+            console.error("Need an id for clip!")
+            return
+        }
+
+        this.state.id = newId ? newId : state.id
         this.state.length = state.length
         this.state.notes = state.notes.map(n => {
             return {...n}
