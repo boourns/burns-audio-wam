@@ -3,12 +3,21 @@ import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk
 
 import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
+import getChorderProcessor from './ChorderProcessor';
 
 import { ChorderView } from './ChorderView';
 	
 class ChorderNode extends WamNode {
 	destroyed = false;
 	_supportedEventTypes: Set<keyof WamEventMap>
+
+	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
+		const { audioWorklet } = audioContext;
+
+		await super.addModules(audioContext, moduleId);
+
+		await addFunctionModule(audioWorklet, getChorderProcessor, moduleId);
+	}
 
 	/**
 	 * @param {WebAudioModule} module
@@ -23,7 +32,7 @@ class ChorderNode extends WamNode {
 
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi']);
-	}
+	}	
 }
 
 export default class ChorderModule extends WebAudioModule<WamNode> {
@@ -43,15 +52,6 @@ export default class ChorderModule extends WebAudioModule<WamNode> {
 		return descriptor
 	}
 
-	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
-		const { audioWorklet } = audioContext;
-
-		// @ts-ignore TODO why?
-		await super.addModules(audioContext, moduleId);
-
-		await addFunctionModule(audioWorklet, getChorderProcessor, moduleId);
-	}
-
 	async initialize(state: any) {
 		await this._loadDescriptor();
 
@@ -59,6 +59,8 @@ export default class ChorderModule extends WebAudioModule<WamNode> {
 	}
 
 	async createAudioNode(initialState: any) {
+		await ChorderNode.addModules(this.audioContext, this.moduleId)
+
 		const node: ChorderNode = new ChorderNode(this, {});
 		await node._initialize()
 

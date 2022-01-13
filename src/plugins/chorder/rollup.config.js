@@ -44,10 +44,4 @@ const plugin = {
     plugins: [...common.plugins, copy({ targets: [{ src: "./src/descriptor.json", dest: "./dist" }] })]
 };
 
-const processor = {
-    ...common,
-    input: "./src/ChorderProcessor.ts",
-    output: [{ ...common.output[0], dir: "./dist" }],
-}
-
-export default [plugin, processor];
+export default [plugin];
