@@ -1,18 +1,14 @@
-import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
-import {AudioWorkletRegister} from '@webaudiomodules/sdk-parammgr'
-// @ts-ignore
-import wamEnvProcessor from '@webaudiomodules/sdk/src/WamEnv.js'
+import { WamEventMap } from '@webaudiomodules/api';
+import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk';
 
 import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
 import { ChorderView } from './ChorderView';
-
-let a = AudioWorkletRegister
 	
 class ChorderNode extends WamNode {
 	destroyed = false;
-	_supportedEventTypes: Set<string>
+	_supportedEventTypes: Set<keyof WamEventMap>
 
 	/**
 	 * @param {WebAudioModule} module
@@ -43,14 +39,21 @@ export default class ChorderModule extends WebAudioModule<WamNode> {
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this._descriptor, descriptor);
+
+		return descriptor
+	}
+
+	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
+		const { audioWorklet } = audioContext;
+
+		// @ts-ignore TODO why?
+		await super.addModules(audioContext, moduleId);
+
+		await addFunctionModule(audioWorklet, getChorderProcessor, moduleId);
 	}
 
 	async initialize(state: any) {
 		await this._loadDescriptor();
-		// @ts-ignore
-		const AudioWorkletRegister = window.AudioWorkletRegister;
-		await AudioWorkletRegister.register('__WebAudioModules_WamEnv', wamEnvProcessor, this.audioContext.audioWorklet);
-		await this.audioContext.audioWorklet.addModule(this._processorUrl)
 
 		return super.initialize(state);
 	}
