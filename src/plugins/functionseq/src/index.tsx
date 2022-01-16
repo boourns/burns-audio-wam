@@ -4,24 +4,29 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
-import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
-import {WamEventMap} from '@webaudiomodules/api';
-import {AudioWorkletRegister} from '@webaudiomodules/sdk-parammgr'
-// @ts-ignore
-import wamEnvProcessor from '@webaudiomodules/sdk/src/WamEnv.js'
-
+import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk';
 import { h, render } from 'preact';
+
+import {WamEventMap} from '@webaudiomodules/api';
+
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
 import { FunctionSeqView } from './FunctionSeqView';
-
-export {AudioWorkletRegister}
+import getFunctionSequencerProcessor from './FunctionSeqProcessor';
 	
 class FunctionSeqNode extends WamNode {
 	destroyed = false;
 	_supportedEventTypes: Set<keyof WamEventMap>
 	renderCallback?: (script: string | undefined, error: string | undefined) => void
 	script: string
+
+	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
+		const { audioWorklet } = audioContext;
+
+		await super.addModules(audioContext, moduleId);
+
+		await addFunctionModule(audioWorklet, getFunctionSequencerProcessor, moduleId);
+	}
 
 	/**
 	 * @param {WebAudioModule} module
@@ -96,23 +101,22 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this._descriptor, descriptor);
+
+		return descriptor
 	}
 
 	async initialize(state: any) {
 		await this._loadDescriptor();
-		// @ts-ignore
-		const AudioWorkletRegister = window.AudioWorkletRegister;
-		await AudioWorkletRegister.register('__WebAudioModules_WamEnv', wamEnvProcessor, this.audioContext.audioWorklet);
-		await this.audioContext.audioWorklet.addModule(this._functionProcessorUrl)
 
 		return super.initialize(state);
 	}
 
 	async createAudioNode(initialState: any) {
+		await FunctionSeqNode.addModules(this.audioContext, this.moduleId)
 		const node: FunctionSeqNode = new FunctionSeqNode(this, {});
 		await node._initialize();
 
-		node.setState(initialState || {script:this.defaultScript()});
+		node.setState(initialState || {script: this.defaultScript()});
 
 		this.sequencer = node
 
