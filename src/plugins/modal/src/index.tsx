@@ -4,21 +4,18 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
-import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
-import {AudioWorkletRegister} from '@webaudiomodules/sdk-parammgr'
-// @ts-ignore
-import wamEnvProcessor from '@webaudiomodules/sdk/src/WamEnv.js'
+import { WamEventMap } from '@webaudiomodules/api';
+import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk';
 
 import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
+import getSpectrumModalProcessor from "./SpectrumModalProcessor"
 
 import { SpectrumModalView } from './SpectrumModalView';
-
-export {AudioWorkletRegister}
 	
 class SpectrumModalNode extends WamNode {
 	destroyed = false;
-	_supportedEventTypes: Set<keyof string>
+	_supportedEventTypes: Set<keyof WamEventMap>
 
 	/**
 	 * @param {WebAudioModule} module
@@ -41,10 +38,10 @@ class SpectrumModalNode extends WamNode {
 
 export default class SpectrumModalModule extends WebAudioModule<WamNode> {
 	//@ts-ignore
-	_baseURL = getBaseUrl(new URL('.', import.meta.url));
+	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
-	_processorUrl = `${this._baseURL}/SpectrumModalProcessor.js`;
+	_coreUrl = `${this._baseURL}/SpectrumModalCore.js`;
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -52,20 +49,22 @@ export default class SpectrumModalModule extends WebAudioModule<WamNode> {
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this._descriptor, descriptor);
+		return descriptor
 	}
 
 	async initialize(state: any) {
 		await this._loadDescriptor();
-		// @ts-ignore
-		const AudioWorkletRegister = window.AudioWorkletRegister;
-		await AudioWorkletRegister.register('__WebAudioModules_WamEnv', wamEnvProcessor, this.audioContext.audioWorklet);
 
-		await this.audioContext.audioWorklet.addModule(this._processorUrl)
 
 		return super.initialize(state);
 	}
 
-	async createAudioNode(initialState: any) {
+	async createAudioNode(initialState: any) {		
+		await SpectrumModalNode.addModules(this.audioContext, this.moduleId)
+
+		await this.audioContext.audioWorklet.addModule(this._coreUrl)
+		await addFunctionModule(this.audioContext.audioWorklet, getSpectrumModalProcessor, this.moduleId);
+
 		const node: SpectrumModalNode = new SpectrumModalNode(this, {});
 		await node._initialize()
 

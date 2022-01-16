@@ -4,7 +4,7 @@ set -e
 
 mkdir -p tmp
 
-./node_modules/.bin/rollup -c
+./node_modules/.bin/webpack
 
 emcc \
 ./src/main.cpp \
@@ -23,7 +23,4 @@ emcc \
 -s SINGLE_FILE=1 \
 -s MODULARIZE=1 \
 --bind \
--o tmp/em.js
-
-cat tmp/em.js tmp/SpectrumModalProcessor.js > dist/SpectrumModalProcessor.js
-
+-o dist/SpectrumModalCore.js
