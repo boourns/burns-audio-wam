@@ -178,7 +178,7 @@ const getChorderProcessor = (moduleId: string) => {
     }
 
     try {
-		registerProcessor('TomBurnsChorder', ChorderProcessor);
+		registerProcessor('TomBurnsChorder', (ChorderProcessor as typeof WamProcessor));
 	} catch (error) {
 		console.warn(error);
 	}
