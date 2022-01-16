@@ -1,14 +1,20 @@
-import { MIDI } from "../../shared/midi";
-import { AudioWorkletGlobalScope, WamMidiEvent } from "@webaudiomodules/api";
 import { WamTransportData } from "@webaudiomodules/api";
-
-const PPQN = 96
+import { AudioWorkletGlobalScope, WamMidiEvent } from "@webaudiomodules/api";
 
 export type FunctionSequencer = {
     onTick?(ticks: number): {note: number, velocity: number, duration: number}[]
 }
 
 const getFunctionSequencerProcessor = (moduleId: string) => {
+    const PPQN = 96
+    class MIDI {
+        static NOTE_ON = 0x90;
+        static NOTE_OFF = 0x80;
+        static CC = 0xB0;
+    }
+    
+    // @ts-ignore
+
     const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
     const { registerProcessor } = audioWorkletGlobalScope;
 
@@ -128,7 +134,7 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
     }
 
     try {
-        registerProcessor('TomBurnsFunctionSequencer', FunctionSequencerProcessor);
+        registerProcessor('TomBurnsFunctionSequencer', FunctionSequencerProcessor as typeof WamProcessor);
     } catch (error) {
         // eslint-disable-next-line no-console
         console.warn(error);

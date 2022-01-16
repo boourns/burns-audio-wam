@@ -89,7 +89,7 @@ class FunctionSeqNode extends WamNode {
 
 export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 	//@ts-ignore
-	_baseURL = getBaseUrl(new URL('.', import.meta.url));
+	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_functionProcessorUrl = `${this._baseURL}/FunctionSeqProcessor.js`;
