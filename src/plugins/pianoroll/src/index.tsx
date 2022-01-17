@@ -4,22 +4,18 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
+import { WamEventMap, WamTransportData } from '@webaudiomodules/api';
 import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
-import wamEnvProcessor from '@webaudiomodules/sdk/src/WamEnv.js'
-import {AudioWorkletRegister} from '@webaudiomodules/sdk-parammgr'
-
 import { h, render } from 'preact';
-import debug from "debug";
+
+import { PatternDelegate } from 'wam-extensions';
+
 import { PianoRollView } from './PianoRollView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 import { Clip } from './Clip';
 import { PianoRoll } from './PianoRoll';
-import { PatternDelegate } from 'wam-extensions';
-import { WamEventMap, WamTransportData } from '@webaudiomodules/api';
 
-var logger = debug("plugin:pianoroll")
-
-let a = AudioWorkletRegister
+const logger = console.log
 
 class PianoRollNode extends WamNode {
 	destroyed = false;
@@ -54,7 +50,7 @@ class PianoRollNode extends WamNode {
 
 export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 	//@ts-ignore
-	_baseURL = getBaseUrl(new URL('.', import.meta.url));
+	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_pianoRollProcessorUrl = `${this._baseURL}/PianoRollProcessor.js`;
@@ -73,15 +69,15 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 
 	async initialize(state: any) {
 		await this._loadDescriptor();
-		// @ts-ignore
-		const AudioWorkletRegister = window.AudioWorkletRegister;
-		await AudioWorkletRegister.register('__WebAudioModules_WamEnv', wamEnvProcessor, this.audioContext.audioWorklet);
-		await this.audioContext.audioWorklet.addModule(this._pianoRollProcessorUrl)
+		
 
 		return super.initialize(state);
 	}
 
 	async createAudioNode(initialState: any) {
+		await PianoRollNode.addModules(this.audioContext, this.moduleId)
+		await this.audioContext.audioWorklet.addModule(this._pianoRollProcessorUrl)
+
 		const node: PianoRollNode = new PianoRollNode(this, {});
 
 		await node._initialize()
