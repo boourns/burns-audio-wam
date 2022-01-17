@@ -1,6 +1,4 @@
 import { AudioWorkletGlobalScope, WamTransportData } from "@webaudiomodules/api";
-import { WamParameterInfo } from '@webaudiomodules/api'
-
 import { Clip } from "./Clip";
 
 const moduleId = 'Tom BurnsStep Sequencing Modulator'
@@ -9,6 +7,7 @@ const PPQN = 24
 const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
 const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
 const WamProcessor = ModuleScope.WamProcessor
+const WamParameterInfo = ModuleScope.WamParameterInfo
 
 let quantizeValues = [
     1,
@@ -92,7 +91,7 @@ class StepModulatorProcessor extends WamProcessor {
     lastBPM: number
     secondsPerTick: number
     lastValue: number
-    targetParam?: WamParameterInfo
+    targetParam?: typeof WamParameterInfo
     transportData?: WamTransportData
 
     count = 0
@@ -246,7 +245,7 @@ class StepModulatorProcessor extends WamProcessor {
 }
 
 try {
-	audioWorkletGlobalScope.registerProcessor('Tom BurnsStep Sequencing Modulator', StepModulatorProcessor as typeof WamProcessor);
+	audioWorkletGlobalScope.registerProcessor(moduleId, StepModulatorProcessor as typeof WamProcessor);
 } catch (error) {
 	// eslint-disable-next-line no-console
 	console.warn(error);
