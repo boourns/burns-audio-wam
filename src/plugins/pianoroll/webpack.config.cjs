@@ -1,17 +1,6 @@
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-let entry = {
-  app: {
-    import: './src/app.tsx',
-    filename: 'static/js/app.js'
-  },
-  editor: {
-    import: './src/editor.tsx',
-    filename: 'editor/js/editor.js'
-  }
-}
-
 // default settings for building
 let cssLoaders = [ 
   { 
@@ -35,29 +24,15 @@ let cssLoaders = [
   // NOTE: The first build after adding/removing/renaming CSS classes fails, since the newly generated .d.ts typescript module is picked up only later
 ] 
 
-module.exports = {
+const wamNode = {
   entry: {
     app: {
       import: './src/index.tsx',
       filename: 'index.js'
     },
-    processor: {
-      import: './src/PianoRollProcessor.ts',
-      filename: 'PianoRollProcessor.js'
-    }
   },
   module: {
     rules: [
-      {
-        test: /\.worklet\.(ts|js)$/,
-        use: [{
-          loader: 'worklet-loader',
-          options: {
-            name: '[fullhash].worklet.js'
-          }
-        }],
-        exclude: /node_modules/
-      },
       {
         test: /\.tsx?$/,
         use: 'ts-loader',
@@ -71,16 +46,16 @@ module.exports = {
     ],
   },
   mode: "development",
-  devtool: false,
   resolve: {
     extensions: [ '.tsx', '.ts', '.js', ".css", ".scss" ],
   },
-  // experiments: {
-  //   outputModule: true
-  // },
+  experiments: {
+    outputModule: true
+  },
   output: {
-    path: path.resolve(__dirname, './dist'),
-    publicPath: 'auto',
+      path: path.resolve(__dirname, './dist'),
+      publicPath: 'auto',
+      libraryTarget: 'module',
   },
   plugins: [
     new CopyWebpackPlugin({
@@ -90,3 +65,32 @@ module.exports = {
     }),
   ]
 };
+
+const processor = {
+  entry: {
+    processor: {
+      import: './src/PianoRollProcessor.ts',
+      filename: 'PianoRollProcessor.js'
+    }
+  },
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
+    ],
+  },
+  mode: "development",
+  devtool: false,
+  resolve: {
+    extensions: [ '.tsx', '.ts', '.js' ],
+  },
+  output: {
+    path: path.resolve(__dirname, './dist'),
+    publicPath: 'auto',
+  }
+};
+
+module.exports = [wamNode, processor]
