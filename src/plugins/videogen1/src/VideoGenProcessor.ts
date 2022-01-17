@@ -1,43 +1,13 @@
-import WamParameter from "@webaudiomodules/sdk/src/WamParameter.js"
-// @ts-ignore
-globalThis.WamParameter = WamParameter;
+import { AudioWorkletGlobalScope } from "@webaudiomodules/api";
 
-import WamParameterInterpolator from "@webaudiomodules/sdk/src/WamParameterInterpolator"
-import WamProcessor from "@webaudiomodules/sdk/src/WamProcessor";
+const moduleId = 'TomBurnsVideoGen'
+const PPQN = 24
 
-// @ts-ignore
-globalThis.WamParameterInterpolator = WamParameterInterpolator
-
-interface AudioWorkletProcessor {
-    readonly port: MessagePort;
-    process(
-        inputs: Float32Array[][],
-        outputs: Float32Array[][],
-        parameters: Record<string, Float32Array>
-    ): boolean;
-}
-
-declare var AudioWorkletProcessor: {
-    prototype: AudioWorkletProcessor;
-    new (options?: AudioWorkletNodeOptions): AudioWorkletProcessor;
-};
-
-declare function registerProcessor(
-    name: string,
-    processorCtor: (new (
-        options?: AudioWorkletNodeOptions
-    ) => AudioWorkletProcessor) & {
-        parameterDescriptors?: AudioParamDescriptor[];
-    }
-): undefined;
-
-const audioWorkletGlobalScope = globalThis;
-
-// other variables that could be included:
-// - renderAhead: number - how far into the future should plugins render?
+const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
+const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
+const WamProcessor = ModuleScope.WamProcessor
 
 class VideoGenProcessor extends WamProcessor {
-	// @ts-ignore
     _generateWamParameterInfo() {
         return {
         }
@@ -54,14 +24,6 @@ class VideoGenProcessor extends WamProcessor {
 			instanceId,
 		} = options.processorOptions;
 
-        // @ts-ignore
-        const { webAudioModules } = audioWorkletGlobalScope;
-
-        // @ts-ignore
-        if (globalThis.WamProcessors) globalThis.WamProcessors[instanceId] = this;
-        // @ts-ignore
-		else globalThis.WamProcessors = { [instanceId]: this };
-
         super.port.start();
 	}
 
@@ -75,8 +37,7 @@ class VideoGenProcessor extends WamProcessor {
 	 * @param {Float32Array[][]} outputs
 	 */
      _process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
-        // @ts-ignore
-        const { webAudioModules, currentTime } = audioWorkletGlobalScope;
+        const { currentTime } = audioWorkletGlobalScope;
 
 		return;
 	}
@@ -107,7 +68,7 @@ class VideoGenProcessor extends WamProcessor {
 }
 
 try {
-	registerProcessor('TomBurnsVideoGen', VideoGenProcessor);
+	audioWorkletGlobalScope.registerProcessor('TomBurnsVideoGen', VideoGenProcessor as typeof WamProcessor);
 } catch (error) {
 	// eslint-disable-next-line no-console
 	console.warn(error);

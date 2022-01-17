@@ -5,9 +5,6 @@
 /* eslint-disable no-underscore-dangle */
 
 import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
-import {AudioWorkletRegister} from '@webaudiomodules/sdk-parammgr'
-// @ts-ignore
-import wamEnvProcessor from '@webaudiomodules/sdk/src/WamEnv.js'
 
 import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
@@ -15,12 +12,11 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import { VideoGenerator } from './VideoGenerator';
 import { VideoExtensionOptions } from 'wam-extensions';
 import { VideoGeneratorView } from './VideoGeneratorView';
-
-export {AudioWorkletRegister}
+import { WamEventMap } from '@webaudiomodules/api';
 	
 class VideoGeneratorNode extends WamNode {
 	destroyed = false;
-	_supportedEventTypes: Set<string>
+	_supportedEventTypes: Set<keyof WamEventMap>
 
 	/**
 	 * @param {WebAudioModule} module
@@ -40,7 +36,7 @@ class VideoGeneratorNode extends WamNode {
 
 export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
 	//@ts-ignore
-	_baseURL = getBaseUrl(new URL('.', import.meta.url));
+	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_processorUrl = `${this._baseURL}/VideoGenProcessor.js`;
@@ -51,21 +47,20 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this._descriptor, descriptor);
+		return descriptor
 	}
-
-	chorderProcessor: AudioWorkletNode
 
 	async initialize(state: any) {
 		await this._loadDescriptor();
-		// @ts-ignore
-		const AudioWorkletRegister = window.AudioWorkletRegister;
-		await AudioWorkletRegister.register('__WebAudioModules_WamEnv', wamEnvProcessor, this.audioContext.audioWorklet);
-		await this.audioContext.audioWorklet.addModule(this._processorUrl)
+
 
 		return super.initialize(state);
 	}
 
 	async createAudioNode(initialState: any) {
+		await VideoGeneratorNode.addModules(this.audioContext, this.moduleId)
+		await this.audioContext.audioWorklet.addModule(this._processorUrl)
+
 		const node: VideoGeneratorNode = new VideoGeneratorNode(this, {});
 		await node._initialize();
 
