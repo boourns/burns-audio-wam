@@ -1,9 +1,6 @@
 import { AudioWorkletGlobalScope } from "@webaudiomodules/api";
-import * from "../tmp/em.js"
 
 const getSpectrumModalProcessor = (moduleId: string) => {
-    console.log("HERE")
-    
     const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
     const { registerProcessor } = audioWorkletGlobalScope;
 
@@ -11,6 +8,7 @@ const getSpectrumModalProcessor = (moduleId: string) => {
 	const {
 		WamProcessor,
 		WamParameterInfo,
+        Module
 	} = ModuleScope;
 
     class SpectrumModalProcessor extends WamProcessor {

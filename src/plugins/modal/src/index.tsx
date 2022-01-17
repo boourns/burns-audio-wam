@@ -55,15 +55,15 @@ export default class SpectrumModalModule extends WebAudioModule<WamNode> {
 	async initialize(state: any) {
 		await this._loadDescriptor();
 
-
 		return super.initialize(state);
 	}
 
-	async createAudioNode(initialState: any) {		
+	async createAudioNode(initialState: any) {
 		await SpectrumModalNode.addModules(this.audioContext, this.moduleId)
 
 		await this.audioContext.audioWorklet.addModule(this._coreUrl)
-		await addFunctionModule(this.audioContext.audioWorklet, getSpectrumModalProcessor, this.moduleId);
+		
+		await addFunctionModule(this.audioContext.audioWorklet, getSpectrumModalProcessor, this.moduleId)
 
 		const node: SpectrumModalNode = new SpectrumModalNode(this, {});
 		await node._initialize()

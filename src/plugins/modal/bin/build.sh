@@ -23,4 +23,6 @@ emcc \
 -s SINGLE_FILE=1 \
 -s MODULARIZE=1 \
 --bind \
--o dist/SpectrumModalCore.js
+-o tmp/emcc.js
+
+cat tmp/emcc.js src/postScript.js > dist/SpectrumModalCore.js
