@@ -1,12 +1,9 @@
 import { Component, h } from 'preact';
 import { Knob } from '../../shared/ui/Knob'
 
-import {debug} from "debug"
 import FunctionSeqModule from '.';
 import type Monaco from '@monaco-editor/loader'
 import loader from '@monaco-editor/loader';
-
-var logger = debug("plugin:chorder:view")
 
 export interface FunctionSeqViewProps {
   plugin: FunctionSeqModule

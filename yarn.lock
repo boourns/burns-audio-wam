@@ -5,24 +5,24 @@ __metadata:
   version: 4
   cacheKey: 7
 
-"@webaudiomodules/api@webaudiomodules/api#commit=84892b520213872f79f7d3d9ff443e05782cc4fe":
-  version: 2.0.0-alpha.1
-  resolution: "@webaudiomodules/api@https://github.com/webaudiomodules/api.git#commit=84892b520213872f79f7d3d9ff443e05782cc4fe"
-  checksum: a44e3a6c3483f43d93cd4f74cda33f8b7e97b9b5ab765d02f91a964e9148f768eee884829591b9defddcc7812a928127ad9ab508aef4829e63156a59b9c64ca4
+"@webaudiomodules/api@webaudiomodules/api#commit=3ca912e8e08e66917eba22c330e85554932de494":
+  version: 2.0.0-alpha.3
+  resolution: "@webaudiomodules/api@https://github.com/webaudiomodules/api.git#commit=3ca912e8e08e66917eba22c330e85554932de494"
+  checksum: 32a61d8f8f28ce2ed7c17b79a8faf4cfd68f6923bfc4f516f2448f17fc52ab37a96a20aa37a5514c22ce48cb25279e2a6b1f3b00c7cb78e94104957612cff578
   languageName: node
   linkType: hard
 
-"@webaudiomodules/sdk-parammgr@webaudiomodules/sdk-parammgr#commit=fc9601a3bdd43a696e4bf9ac7933a54fe942cf4e":
-  version: 0.0.4
-  resolution: "@webaudiomodules/sdk-parammgr@https://github.com/webaudiomodules/sdk-parammgr.git#commit=fc9601a3bdd43a696e4bf9ac7933a54fe942cf4e"
-  checksum: 130c44f3af227151baf11d54214d91710f5fb1cc66967b0eab41fe74e07b2faba08b91adecb10bb23e94ea0d08e69afc7137fd43f30a9e680f68f98e42b04dc7
+"@webaudiomodules/sdk-parammgr@webaudiomodules/sdk-parammgr#commit=6eb3bc85fc30144502043f456f47268a62d3db5a":
+  version: 0.0.6
+  resolution: "@webaudiomodules/sdk-parammgr@https://github.com/webaudiomodules/sdk-parammgr.git#commit=6eb3bc85fc30144502043f456f47268a62d3db5a"
+  checksum: 0eb201e2117027c202c283c9c735e96f0f5e615f1085bbb6eb54f19e6a0f263ce96f84d38e04c3b5b8cdfc79db161be4152ef68ed7cacf0c6338beed731636ff
   languageName: node
   linkType: hard
 
-"@webaudiomodules/sdk@webaudiomodules/sdk#commit=547b172d19a4b5a10a4b847ced6b0b36effa9500":
-  version: 0.0.4
-  resolution: "@webaudiomodules/sdk@https://github.com/webaudiomodules/sdk.git#commit=547b172d19a4b5a10a4b847ced6b0b36effa9500"
-  checksum: 0d7d8c3afa9bbec11cc943b2694eec5873082291cb3c6171d258928e84360db4b0522dda13eb4409638585d2e5e25da2c320aaa1d164f6d7c5d75d3f1a344971
+"@webaudiomodules/sdk@webaudiomodules/sdk#commit=810ba256f58385c0d50c16e36c82c7818bd01ead":
+  version: 0.0.6
+  resolution: "@webaudiomodules/sdk@https://github.com/webaudiomodules/sdk.git#commit=810ba256f58385c0d50c16e36c82c7818bd01ead"
+  checksum: 2b8219733aca02db3c2b3c6bad19ddea76551e9f4af5390b2fcf3f2652c5e870b02c4c3b8a85bcd772ea245b59d08715c84372726dc7058ea08397965cfbcfd2
   languageName: node
   linkType: hard
 
@@ -30,9 +30,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "burns-audio-wam@workspace:."
   dependencies:
-    "@webaudiomodules/api": "webaudiomodules/api#commit=84892b520213872f79f7d3d9ff443e05782cc4fe"
-    "@webaudiomodules/sdk": "webaudiomodules/sdk#commit=547b172d19a4b5a10a4b847ced6b0b36effa9500"
-    "@webaudiomodules/sdk-parammgr": "webaudiomodules/sdk-parammgr#commit=fc9601a3bdd43a696e4bf9ac7933a54fe942cf4e"
+    "@webaudiomodules/api": "webaudiomodules/api#commit=3ca912e8e08e66917eba22c330e85554932de494"
+    "@webaudiomodules/sdk": "webaudiomodules/sdk#commit=810ba256f58385c0d50c16e36c82c7818bd01ead"
+    "@webaudiomodules/sdk-parammgr": "webaudiomodules/sdk-parammgr#commit=6eb3bc85fc30144502043f456f47268a62d3db5a"
     preact: ^10.5.5
   languageName: unknown
   linkType: soft

@@ -1,46 +1,13 @@
 import { MIDI } from "../../shared/midi";
-import { AudioParamDescriptor, WamTransportData } from "@webaudiomodules/api";
-import WamParameterInterpolator from "@webaudiomodules/sdk/src/WamParameterInterpolator"
-import WamProcessor from "@webaudiomodules/sdk/src/WamProcessor";
-
-const PPQN = 24
-
-// @ts-ignore
-globalThis.WamParameterInterpolator = WamParameterInterpolator
-
+import { AudioWorkletGlobalScope, WamTransportData } from "@webaudiomodules/api";
 import { Clip } from "./Clip";
 
-interface AudioWorkletProcessor {
-    readonly port: MessagePort;
-    process(
-        inputs: Float32Array[][],
-        outputs: Float32Array[][],
-        parameters: Record<string, Float32Array>
-    ): boolean;
-}
+const moduleId = 'Tom BurnsPiano Roll'
+const PPQN = 24
 
-declare var AudioWorkletProcessor: {
-    prototype: AudioWorkletProcessor;
-    new (options?: AudioWorkletNodeOptions): AudioWorkletProcessor;
-};
-
-declare function registerProcessor(
-    name: string,
-    processorCtor: (new (
-        options?: AudioWorkletNodeOptions
-    ) => AudioWorkletProcessor) & {
-        parameterDescriptors?: AudioParamDescriptor[];
-    }
-): undefined;
-
-const audioWorkletGlobalScope = globalThis;
-
-// other variables that could be included:
-// - renderAhead: number - how far into the future should plugins render?
-
-export type FunctionSequencer = {
-    onTick?(ticks: number): {note: number, velocity: number, duration: number}[]
-}
+const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
+const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
+const WamProcessor = ModuleScope.WamProcessor
 
 class PianoRollProcessor extends WamProcessor {
     _generateWamParameterInfo() {
@@ -70,17 +37,6 @@ class PianoRollProcessor extends WamProcessor {
 			moduleId,
 			instanceId,
 		} = options.processorOptions;
-
-        // @ts-ignore
-        const { webAudioModules } = audioWorkletGlobalScope;
-
-        // @ts-ignore
-        if (globalThis.WamProcessors) globalThis.WamProcessors[instanceId] = this;
-        // @ts-ignore
-		else globalThis.WamProcessors = { [instanceId]: this };
-
-        // not sure about this line
-		this.proxyId = options.processorOptions.proxyId;
 
 		this.lastTime = null;
 		this.ticks = -1;
@@ -151,7 +107,6 @@ class PianoRollProcessor extends WamProcessor {
                 timestamp: 0,
             }
         } else {
-            // @ts-ignore
             super._onMessage(message)
         }
      }
@@ -167,7 +122,7 @@ class PianoRollProcessor extends WamProcessor {
 }
 
 try {
-	registerProcessor('Tom BurnsPiano Roll', PianoRollProcessor);
+	audioWorkletGlobalScope.registerProcessor(moduleId, PianoRollProcessor as typeof WamProcessor);
 } catch (error) {
 	// eslint-disable-next-line no-console
 	console.warn(error);

@@ -23,6 +23,7 @@ export default class LFO extends WebAudioModule<LFONode> {
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this._descriptor, descriptor);
+		return descriptor
 	}
 
 	async initialize(state: any) {
