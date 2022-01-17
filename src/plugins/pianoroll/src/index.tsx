@@ -70,12 +70,10 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 	async initialize(state: any) {
 		await this._loadDescriptor();
 		
-
 		return super.initialize(state);
 	}
 
 	async createAudioNode(initialState: any) {
-		debugger
 		await PianoRollNode.addModules(this.audioContext, this.moduleId)
 		await this.audioContext.audioWorklet.addModule(this._pianoRollProcessorUrl)
 

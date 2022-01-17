@@ -1,25 +1,22 @@
-import { WebAudioModule, WamNode, WamParameterInfo } from '@webaudiomodules/sdk';
-import {AudioWorkletRegister} from '@webaudiomodules/sdk-parammgr'
-// @ts-ignore
-import wamEnvProcessor from '@webaudiomodules/sdk/src/WamEnv.js'
+import { WamEventMap, WamParameterInfo, WamTransportData } from '@webaudiomodules/api';
+
+import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
 
 import { h, render } from 'preact';
-//import { ChorderView } from './ChorderView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
 import { StepModulatorView } from './StepModulatorView';
 import { StepModulator } from './StepModulator';
+
 import { Clip } from './Clip';
 
-import {WAMExtensions, PatternDelegate} from 'wam-extensions';
+import {PatternDelegate} from 'wam-extensions';
 
 var logger = console.log
 
-export {AudioWorkletRegister}
-
 class StepModulatorNode extends WamNode {
 	destroyed = false;
-	_supportedEventTypes: Set<string>
+	_supportedEventTypes: Set<keyof WamEventMap>
 
 	sequencer: StepModulator
 
@@ -54,9 +51,9 @@ class StepModulatorNode extends WamNode {
 	}
 }
 
-export default class StepModulatorModule extends WebAudioModule<Node> {
+export default class StepModulatorModule extends WebAudioModule<StepModulatorNode> {
 	//@ts-ignore
-	_baseURL = getBaseUrl(new URL('.', import.meta.url));
+	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_processorUrl = `${this._baseURL}/StepModulatorProcessor.js`;
@@ -67,6 +64,7 @@ export default class StepModulatorModule extends WebAudioModule<Node> {
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this._descriptor, descriptor);
+		return descriptor
 	}
 
 	sequencer: StepModulator
@@ -75,15 +73,15 @@ export default class StepModulatorModule extends WebAudioModule<Node> {
 
 	async initialize(state: any) {
 		await this._loadDescriptor();
-		// @ts-ignore
-		const AudioWorkletRegister = window.AudioWorkletRegister;
-		await AudioWorkletRegister.register('__WebAudioModules_WamEnv', wamEnvProcessor, this.audioContext.audioWorklet);
-		await this.audioContext.audioWorklet.addModule(this._processorUrl)
 
 		return super.initialize(state);
 	}
 
 	async createAudioNode(initialState: any) {
+		await StepModulatorNode.addModules(this.audioContext, this.moduleId)
+		
+		await this.audioContext.audioWorklet.addModule(this._processorUrl)
+
 		const node: StepModulatorNode = new StepModulatorNode(this, {});
 		await node._initialize();
 

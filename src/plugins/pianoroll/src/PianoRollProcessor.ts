@@ -5,14 +5,8 @@ import { Clip } from "./Clip";
 const moduleId = 'Tom BurnsPiano Roll'
 const PPQN = 24
 
-export type FunctionSequencer = {
-    onTick?(ticks: number): {note: number, velocity: number, duration: number}[]
-}
-
 const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
-
 const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
-
 const WamProcessor = ModuleScope.WamProcessor
 
 class PianoRollProcessor extends WamProcessor {

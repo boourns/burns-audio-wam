@@ -42,9 +42,7 @@ export default class ChorderModule extends WebAudioModule<WamNode> {
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_processorUrl = `${this._baseURL}/ChorderProcessor.js`;
 
-	async _loadDescriptor() {
-		debugger
-		
+	async _loadDescriptor() {		
 		const url = this._descriptorUrl;
 		if (!url) throw new TypeError('Descriptor not found');
 		const response = await fetch(url);

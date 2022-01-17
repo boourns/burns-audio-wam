@@ -1,49 +1,14 @@
-import { MIDI } from "../../shared/midi";
+import { AudioWorkletGlobalScope, WamTransportData } from "@webaudiomodules/api";
+import { WamParameterInfo } from '@webaudiomodules/api'
 
-import { WamTransportData } from "@webaudiomodules/api";
-
-import WamParameter from "@webaudiomodules/sdk/src/WamParameter.js"
-// @ts-ignore
-globalThis.WamParameter = WamParameter;
-
-import WamParameterInterpolator from "@webaudiomodules/sdk/src/WamParameterInterpolator"
-import WamProcessor from "@webaudiomodules/sdk/src/WamProcessor";
-
-const PPQN = 24
-
-// @ts-ignore
-globalThis.WamParameterInterpolator = WamParameterInterpolator
-
-import WamParameterInfo from "@webaudiomodules/sdk/src/WamParameterInfo";
 import { Clip } from "./Clip";
 
-interface AudioWorkletProcessor {
-    readonly port: MessagePort;
-    process(
-        inputs: Float32Array[][],
-        outputs: Float32Array[][],
-        parameters: Record<string, Float32Array>
-    ): boolean;
-}
+const moduleId = 'Tom BurnsStep Sequencing Modulator'
+const PPQN = 24
 
-declare var AudioWorkletProcessor: {
-    prototype: AudioWorkletProcessor;
-    new (options?: AudioWorkletNodeOptions): AudioWorkletProcessor;
-};
-
-declare function registerProcessor(
-    name: string,
-    processorCtor: (new (
-        options?: AudioWorkletNodeOptions
-    ) => AudioWorkletProcessor) & {
-        parameterDescriptors?: AudioParamDescriptor[];
-    }
-): undefined;
-
-const audioWorkletGlobalScope = globalThis;
-
-// other variables that could be included:
-// - renderAhead: number - how far into the future should plugins render?
+const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
+const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
+const WamProcessor = ModuleScope.WamProcessor
 
 let quantizeValues = [
     1,
@@ -144,14 +109,6 @@ class StepModulatorProcessor extends WamProcessor {
 			instanceId,
 		} = options.processorOptions;
 
-        // @ts-ignore
-        const { webAudioModules } = audioWorkletGlobalScope;
-
-        // @ts-ignore
-        if (globalThis.WamProcessors) globalThis.WamProcessors[instanceId] = this;
-        // @ts-ignore
-		else globalThis.WamProcessors = { [instanceId]: this };
-
 		this.lastTime = null;
 		
         super.port.start();
@@ -172,7 +129,7 @@ class StepModulatorProcessor extends WamProcessor {
 	 */
      _process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
         // @ts-ignore
-        const { webAudioModules, currentTime } = audioWorkletGlobalScope;
+        const { currentTime } = audioWorkletGlobalScope;
 
         if (this.pendingClipChange && this.pendingClipChange.timestamp <= currentTime) {
             this.currentClipId = this.pendingClipChange.id
@@ -209,46 +166,36 @@ class StepModulatorProcessor extends WamProcessor {
                 result = 0;
                 break
             case 0:
-                // @ts-ignore
                 result = this._parameterInterpolators.step1.values[startSample]
                 break
             case 1:
-                // @ts-ignore
                 result = this._parameterInterpolators.step2.values[startSample]
                 break
             case 2:
-                // @ts-ignore
                 result = this._parameterInterpolators.step3.values[startSample]
                 break
             case 3:
-                // @ts-ignore
                 result = this._parameterInterpolators.step4.values[startSample]
                 break
             case 4:
-                // @ts-ignore
                 result = this._parameterInterpolators.step5.values[startSample]
                 break
             case 5:
-                // @ts-ignore
                 result = this._parameterInterpolators.step6.values[startSample]
                 break
             case 6:
-                // @ts-ignore
                 result = this._parameterInterpolators.step7.values[startSample]
                 break
             case 7:
-                // @ts-ignore
                 result = this._parameterInterpolators.step8.values[startSample]
                 break
         }
         let target = (step < clip.state.steps.length) ? clip.state.steps[step] + result : result
-        // @ts-ignore
         let slew = this._parameterInterpolators.slew.values[startSample]
         let gain = this._parameterInterpolators.gain.values[startSample]
 
         let value = this.lastValue + ((target - this.lastValue) * (slew) * slew * slew)
 
-        // @ts-ignore
         if (value != this.lastValue) {
             var output = this.targetParam.minValue + (value * (this.targetParam.maxValue - this.targetParam.minValue) * gain)
             if (this.targetParam.type == 'int' || this.targetParam.type == 'choice' || this.targetParam.type == 'boolean') {
@@ -299,7 +246,7 @@ class StepModulatorProcessor extends WamProcessor {
 }
 
 try {
-	registerProcessor('Tom BurnsStep Sequencing Modulator', StepModulatorProcessor);
+	audioWorkletGlobalScope.registerProcessor('Tom BurnsStep Sequencing Modulator', StepModulatorProcessor as typeof WamProcessor);
 } catch (error) {
 	// eslint-disable-next-line no-console
 	console.warn(error);
