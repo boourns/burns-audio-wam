@@ -1,6 +1,6 @@
 export type DrumSamplerVoiceState = {
 	name: string
-	url: string
+	uri: string
 	note: number
 }
 

@@ -1,4 +1,4 @@
-import { NoteDefinition } from "wam-extensions";
+import { NoteDefinition, WamAsset } from "wam-extensions";
 import { MIDI, ScheduledMIDIEvent } from "../../shared/midi";
 import { AudioPool } from "./AudioPool";
 import { DrumSamplerVoice, DrumSamplerVoiceState } from "./Voice";
@@ -10,6 +10,8 @@ export type DrumSamplerKitState = {
 export class DrumSamplerKit {
     numVoices: number
     audioPool: AudioPool
+	instanceId: string
+	audioContext: BaseAudioContext
 
     loaded: boolean
     state: DrumSamplerKitState
@@ -17,7 +19,10 @@ export class DrumSamplerKit {
 	buffers: (AudioBuffer|undefined)[]
 	noteMap: Map<number, number[]>
 
-    constructor(numVoices: number, audioContext: BaseAudioContext) {
+    constructor(instanceId: string, numVoices: number, audioContext: BaseAudioContext) {
+		this.instanceId = instanceId
+		this.audioContext = audioContext
+
         this.numVoices = numVoices
         this.voices = []
 		this.buffers = []
@@ -34,21 +39,59 @@ export class DrumSamplerKit {
 		}
     }
 
-	updateSlots(slots: DrumSamplerVoiceState[]) {
+	getState(): DrumSamplerKitState {
+		return {
+			slots: this.state.slots.map(s => { return {...s}})
+		}
+	}
+
+	async setState(state: DrumSamplerKitState) {
+		if (state.slots) {
+			await this.updateSlots(state.slots)
+		}
+	}
+
+	async updateSlot(index: number, slot: DrumSamplerVoiceState) {
+		let slots = [...this.state.slots]
+		slots[index] = slot
+		
+		await this.updateSlots(slots)
+	}
+
+	async updateSlots(slots: DrumSamplerVoiceState[]) {
+		console.log("updateSlots!")
 		let notes = new Map<number, number[]>()
 
 		var noteMapChanged = false
 
 		for (let i = 0; i < this.numVoices; i++) {
+		
 			if (slots[i]) {
 				// new state has a value for this slot
-				if (!this.state.slots[i] || slots[i].url != this.state.slots[i].url) {
+				if (!this.state.slots[i] || slots[i].uri != this.state.slots[i].uri) {
 					// url previously didn't exist, or changed
-					this.audioPool.loadSample(slots[i].url, (buffer: AudioBuffer) => {
-						this.buffers[i] = buffer;
-					});
-				
-					noteMapChanged = true
+
+					if (window.WAMExtensions.assets) {
+						// depend on host to load uri: might not be public URL
+						window.WAMExtensions.assets.loadAsset(this.instanceId, slots[i].uri).then(async (asset: WamAsset) => {
+							if (asset.content) {
+								let buffer = await asset.content.arrayBuffer()
+
+								this.audioContext.decodeAudioData(buffer, (buffer: AudioBuffer) => {
+									this.buffers[i] = buffer
+								})
+							}
+						})
+
+					} else {
+						this.audioPool.loadSample(slots[i].uri, (buffer: AudioBuffer) => {
+							this.buffers[i] = buffer;
+						});
+
+						noteMapChanged = true
+					}
+
+					
 				}
 				this.state.slots[i] = {...slots[i]}
 			} else {
