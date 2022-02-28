@@ -201,7 +201,7 @@ export class NoteCanvasRenderer {
             rect(ctx, 0, state.height-Design.cellHeight*(i+1), Design.gutterWidth, Design.cellHeight, gutterColor)
 
             if (note.name) {
-                fillText(ctx, note.name, 5, state.height-Design.cellHeight*(i)-4, 14, note.blackKey ? "#fff" : "#000")
+                fillText(ctx, note.name.substring(0,9), 5, state.height-Design.cellHeight*(i)-4, 14, note.blackKey ? "#fff" : "#000")
             }
         })
     }

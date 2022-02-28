@@ -33,7 +33,7 @@ export default class DrumSampler extends WebAudioModule<DrumSamplerNode> {
 	}
 
 	async createAudioNode(initialState: any) {
-		const node = new DrumSamplerNode(this.audioContext);
+		const node = new DrumSamplerNode(this.instanceId, this.audioContext);
 		const paramsConfig = Object.assign({}, ...node.kit.voices.map((v, i) => v.paramsConfig(i+1)))
 		paramsConfig["compression"] = {
 			minValue: 0,
@@ -74,7 +74,71 @@ export default class DrumSampler extends WebAudioModule<DrumSamplerNode> {
 		
 		node.setup(paramMgrNode);
 
-		if (initialState) node.setState(initialState);
+		if (initialState) {
+			node.setState(initialState)
+		} else {
+			node.setState({
+				kit: {
+					slots: [
+						{
+							name: "Kick",
+							uri: "https://burns.ca/static/909/kick.wav",
+							note: 36,
+						},
+						{
+							name: "Rimshot",
+							uri: "https://burns.ca/static/909/rimshot.wav",
+							note: 37,
+						},
+						{
+							name: "Snare",
+							uri: "https://burns.ca/static/909/snare.wav",
+							note: 38,
+						},
+						{
+							name: "Clap",
+							uri: "https://burns.ca/static/909/clap.wav",
+							note: 39,
+						},
+						{
+							name: "Low Tom",
+							uri: "https://burns.ca/static/909/low_tom.wav",
+							note: 41,
+						},
+						{
+							name: "Mid Tom",
+							uri: "https://burns.ca/static/909/mid_tom.wav",
+							note: 47,
+						},
+						{
+							name: "High Tom",
+							uri: "https://burns.ca/static/909/hi_tom.wav",
+							note: 43,
+						},
+						{
+							name: "CH",
+							uri: "https://burns.ca/static/909/ch.wav",
+							note: 42,
+						},
+						{
+							name: "OH",
+							uri: "https://burns.ca/static/909/oh.wav",
+							note: 46,
+						},
+						{
+							name: "Crash",
+							uri: "https://burns.ca/static/909/crash.wav",
+							note: 49,
+						},
+						{
+							name: "Ride",
+							uri: "https://burns.ca/static/909/ride.wav",
+							note: 51,
+						},
+					]
+				}
+			})
+		}
 		return node;
     }
 

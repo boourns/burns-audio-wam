@@ -7,6 +7,7 @@ import styleRoot from './DrumSamplerView.scss';
 import { DrumSamplerKit } from '../Kit';
 import { DrumSamplerVoiceState } from '../Voice';
 import {WaveformView} from "./WaveformView"
+import { WamAsset } from 'wam-extensions';
 
 // @ts-ignore
 let styles = styleRoot.locals as typeof styleRoot
@@ -47,6 +48,9 @@ export class DrumSamplerView extends Component<DrumSamplerViewProps, DrumSampler
   componentWillMount(): void {
     this.wamState = this.props.initialState
     this.kit = this.props.plugin.audioNode.kit
+    this.props.plugin.audioNode.callback = () => {
+      this.forceUpdate()
+    }
   }
 
   componentDidMount() {
@@ -55,11 +59,12 @@ export class DrumSamplerView extends Component<DrumSamplerViewProps, DrumSampler
 
   componentWillUnmount() {
     window.cancelAnimationFrame(this.automationStatePoller)
+    this.props.plugin.audioNode.callback = undefined
   }
 
   renderVoice(index: number) {
-    var slot = this.props.plugin.audioNode.kit.state.slots[index]
-    var voice = this.props.plugin.audioNode.kit.voices[index]
+    var slot = this.kit.state.slots[index]
+    var voice = this.kit.voices[index]
 
     return <div style="display: flex; flex-direction: column; padding-left: 5px; padding-right: 5px; width: 60px;">
       <label>{index+1}</label>
@@ -106,16 +111,29 @@ export class DrumSamplerView extends Component<DrumSamplerViewProps, DrumSampler
     </div>
   }
 
-  loadAsset() {
-    console.log("LoadAsset called!")
+  loadAsset(index: number) {
+    if (!window.WAMExtensions.assets) {
+      console.error("Host must implement asset WAM extension")
+      return
+    }
+    
+    window.WAMExtensions.assets.pickAsset(this.props.plugin.instanceId, "AUDIO", async (asset: WamAsset) => {
+      let slot = {...this.kit.state.slots[index]}
+      slot.name = asset.name
+      slot.uri = asset.uri
+
+      await this.kit.updateSlot(index, slot)
+      
+      this.forceUpdate()
+    })
   }
 
-  renderEditorTitleBar(slot: DrumSamplerVoiceState) {
+  renderEditorTitleBar(index: number, slot: DrumSamplerVoiceState) {
     return <div class={styles.editorTitleBar} >
       <div class={styles.editorTitle}>
         {slot.name}
       </div>
-      <button class={styles.button} onClick={() => { this.loadAsset() } }>Load</button>
+      <button class={styles.button} onClick={() => { this.loadAsset(index) } }>Load</button>
     </div>
   }
 
@@ -144,7 +162,7 @@ export class DrumSamplerView extends Component<DrumSamplerViewProps, DrumSampler
     
     return <div class={styles.bigPanel}>
       <div style="display: flex; flex-direction: column;">
-        {this.renderEditorTitleBar(slot)}
+        {this.renderEditorTitleBar(this.state.selectedPad, slot)}
         {this.renderWaveform()}
       </div>
 

@@ -9,10 +9,11 @@
   "type": "module",
   "scripts": {
     "clean": "del dist",
-    "build": "./node_modules/.bin/webpack"
+    "build": "./node_modules/.bin/webpack",
+    "watch": "./node_modules/.bin/webpack -w"
   },
   "dependencies": {
-    "wam-extensions": "^0.1.11"
+    "wam-extensions": "^0.2.0"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^9.0.0",

@@ -2,27 +2,27 @@
 # Manual changes might be lost - proceed with caution!
 
 __metadata:
-  version: 4
-  cacheKey: 7
+  version: 5
+  cacheKey: 8
 
 "@webaudiomodules/api@webaudiomodules/api#commit=3ca912e8e08e66917eba22c330e85554932de494":
   version: 2.0.0-alpha.3
   resolution: "@webaudiomodules/api@https://github.com/webaudiomodules/api.git#commit=3ca912e8e08e66917eba22c330e85554932de494"
-  checksum: 32a61d8f8f28ce2ed7c17b79a8faf4cfd68f6923bfc4f516f2448f17fc52ab37a96a20aa37a5514c22ce48cb25279e2a6b1f3b00c7cb78e94104957612cff578
+  checksum: ec1cba804bc764cf2403889c52805aa3ad81403e9c66866a2a478cc71b4cdf1198c22630c536dbe1225697c7e589772aac5a56c05fdada45003ee237818ab491
   languageName: node
   linkType: hard
 
 "@webaudiomodules/sdk-parammgr@webaudiomodules/sdk-parammgr#commit=6eb3bc85fc30144502043f456f47268a62d3db5a":
   version: 0.0.6
   resolution: "@webaudiomodules/sdk-parammgr@https://github.com/webaudiomodules/sdk-parammgr.git#commit=6eb3bc85fc30144502043f456f47268a62d3db5a"
-  checksum: 0eb201e2117027c202c283c9c735e96f0f5e615f1085bbb6eb54f19e6a0f263ce96f84d38e04c3b5b8cdfc79db161be4152ef68ed7cacf0c6338beed731636ff
+  checksum: 8e3af59430baca3982a206356f9a59e43ae6a1ea2f1a018df438a7dfd699c3fa008f6762f3b7591aec42c4a572f3462c2e21d6bf6c33ff4e8590d870c814d347
   languageName: node
   linkType: hard
 
 "@webaudiomodules/sdk@webaudiomodules/sdk#commit=810ba256f58385c0d50c16e36c82c7818bd01ead":
   version: 0.0.6
   resolution: "@webaudiomodules/sdk@https://github.com/webaudiomodules/sdk.git#commit=810ba256f58385c0d50c16e36c82c7818bd01ead"
-  checksum: 2b8219733aca02db3c2b3c6bad19ddea76551e9f4af5390b2fcf3f2652c5e870b02c4c3b8a85bcd772ea245b59d08715c84372726dc7058ea08397965cfbcfd2
+  checksum: d26bf7fd371df29d91894214a36d7a70c17ce57beba7f047657611f31afbf29a66bb412825259333e35787af29dfc44d61adc3b287ea596406f11307e2aa29db
   languageName: node
   linkType: hard
 
@@ -40,6 +40,6 @@ __metadata:
 "preact@npm:^10.5.5":
   version: 10.5.14
   resolution: "preact@npm:10.5.14"
-  checksum: 1cb6f0eecd0f1de15621efae40f86790dac5a5eb68ca2a02790685c234055fc6efe60def719a0a90b747ed35b1b5099fc7a3e33cf0d4972bf9b1e3895cf02efa
+  checksum: d936f83a2afad13aa5870812d7fa8fec111d4a1bb6b0bea6485f2656a062bcc01717398d8184c4bc589cba455f3b2def8e43ba23db846b208d9823e3804658ad
   languageName: node
   linkType: hard
