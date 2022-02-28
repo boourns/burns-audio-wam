@@ -13,7 +13,7 @@
     "watch": "./node_modules/.bin/webpack -w"
   },
   "dependencies": {
-    "wam-extensions": "boourns/wam-extensions#commit=abc6c71d2ea500d7e94613bc7fb5ef9241cbd98d"
+    "wam-extensions": "^0.2.0"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^9.0.0",
