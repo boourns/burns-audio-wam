@@ -48,6 +48,9 @@ export class DrumSamplerView extends Component<DrumSamplerViewProps, DrumSampler
   componentWillMount(): void {
     this.wamState = this.props.initialState
     this.kit = this.props.plugin.audioNode.kit
+    this.props.plugin.audioNode.callback = () => {
+      this.forceUpdate()
+    }
   }
 
   componentDidMount() {
@@ -56,11 +59,12 @@ export class DrumSamplerView extends Component<DrumSamplerViewProps, DrumSampler
 
   componentWillUnmount() {
     window.cancelAnimationFrame(this.automationStatePoller)
+    this.props.plugin.audioNode.callback = undefined
   }
 
   renderVoice(index: number) {
-    var slot = this.props.plugin.audioNode.kit.state.slots[index]
-    var voice = this.props.plugin.audioNode.kit.voices[index]
+    var slot = this.kit.state.slots[index]
+    var voice = this.kit.voices[index]
 
     return <div style="display: flex; flex-direction: column; padding-left: 5px; padding-right: 5px; width: 60px;">
       <label>{index+1}</label>
@@ -114,13 +118,13 @@ export class DrumSamplerView extends Component<DrumSamplerViewProps, DrumSampler
     }
     
     window.WAMExtensions.assets.pickAsset(this.props.plugin.instanceId, "AUDIO", async (asset: WamAsset) => {
-      
-      let slot = {...this.props.plugin.audioNode.kit.state.slots[index]}
+      let slot = {...this.kit.state.slots[index]}
       slot.name = asset.name
       slot.uri = asset.uri
 
-      this.props.plugin.audioNode.kit.updateSlot(index, slot)
-
+      await this.kit.updateSlot(index, slot)
+      
+      this.forceUpdate()
     })
   }
 

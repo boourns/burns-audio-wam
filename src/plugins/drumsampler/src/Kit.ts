@@ -19,6 +19,8 @@ export class DrumSamplerKit {
 	buffers: (AudioBuffer|undefined)[]
 	noteMap: Map<number, number[]>
 
+	callback?: () => void
+
     constructor(instanceId: string, numVoices: number, audioContext: BaseAudioContext) {
 		this.instanceId = instanceId
 		this.audioContext = audioContext
@@ -45,10 +47,11 @@ export class DrumSamplerKit {
 		}
 	}
 
-	async setState(state: DrumSamplerKitState) {
+	async setState(state: DrumSamplerKitState): Promise<boolean> {
 		if (state.slots) {
-			await this.updateSlots(state.slots)
+			return await this.updateSlots(state.slots)
 		}
+		return false
 	}
 
 	async updateSlot(index: number, slot: DrumSamplerVoiceState) {
@@ -58,8 +61,7 @@ export class DrumSamplerKit {
 		await this.updateSlots(slots)
 	}
 
-	async updateSlots(slots: DrumSamplerVoiceState[]) {
-		console.log("updateSlots!")
+	async updateSlots(slots: DrumSamplerVoiceState[]): Promise<boolean> {
 		let notes = new Map<number, number[]>()
 
 		var noteMapChanged = false
@@ -79,19 +81,25 @@ export class DrumSamplerKit {
 
 								this.audioContext.decodeAudioData(buffer, (buffer: AudioBuffer) => {
 									this.buffers[i] = buffer
+									if (this.callback) {
+										this.callback()
+									}
 								})
+								
 							}
 						})
 
 					} else {
 						this.audioPool.loadSample(slots[i].uri, (buffer: AudioBuffer) => {
 							this.buffers[i] = buffer;
+
+							if (this.callback) {
+								this.callback()
+							}
 						});
 
 						noteMapChanged = true
 					}
-
-					
 				}
 				this.state.slots[i] = {...slots[i]}
 			} else {
@@ -114,6 +122,7 @@ export class DrumSamplerKit {
 		}
 
 		this.noteMap = notes
+		return noteMapChanged
 	}
 
     connect(node: AudioNode) {

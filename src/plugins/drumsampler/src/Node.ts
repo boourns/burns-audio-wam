@@ -14,10 +14,16 @@ export class DrumSamplerNode extends CompositeAudioNode {
 	compressor: DynamicsCompressorNode
 	kit: DrumSamplerKit
 	paramMgr: ParamMgrNode
+	callback?: () => void
 
 	constructor(instanceId: string, audioContext: BaseAudioContext, options={}) {        
 		super(audioContext, options);
 		this.kit = new DrumSamplerKit(instanceId, NUM_VOICES, audioContext)
+		this.kit.callback = () => {
+			if (this.callback) {
+				this.callback()
+			}
+		}
 
 		this.createNodes();
 	}
@@ -39,8 +45,11 @@ export class DrumSamplerNode extends CompositeAudioNode {
 			await super.setState(state.params)
 		}
 		if (state.kit) {
-			this.kit.setState(state.kit)
-			this.updateNoteExtension()
+			let changed = this.kit.setState(state.kit)
+
+			if (changed) {
+				this.updateNoteExtension()
+			}
 		}
 	}
 
@@ -50,8 +59,6 @@ export class DrumSamplerNode extends CompositeAudioNode {
 
         this._wamNode = paramMgr
 		this.paramMgr = paramMgr
-
-		
 	}
 
     processMIDIEvents(midiEvents: ScheduledMIDIEvent[]) {

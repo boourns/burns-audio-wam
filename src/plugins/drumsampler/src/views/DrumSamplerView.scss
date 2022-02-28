@@ -37,8 +37,9 @@
     align-items: flex-end;
     justify-content: flex-start;
 
-    min-width: 74px;
-    min-height: 74px;
+    width: 74px;
+    height: 74px;
+    overflow: hidden;
 
     background: #003163;
     border: 3px solid #074480;
