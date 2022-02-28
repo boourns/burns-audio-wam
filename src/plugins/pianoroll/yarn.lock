@@ -1893,7 +1893,7 @@ fsevents@~2.3.2:
     style-loader: ^3.2.1
     ts-loader: ^8.0.12
     typescript: ^4.0.2
-    wam-extensions: ^0.1.11
+    wam-extensions: ^0.2.0
     webpack: ^5.11.1
     webpack-cli: ^4.3.0
   languageName: unknown
@@ -2609,12 +2609,12 @@ typescript@^4.0.2:
   languageName: node
   linkType: hard
 
-"wam-extensions@npm:^0.1.11":
-  version: 0.1.11
-  resolution: "wam-extensions@npm:0.1.11"
+"wam-extensions@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "wam-extensions@npm:0.2.0"
   peerDependencies:
     "@webaudiomodules/api": "*"
-  checksum: 5859950a8c73ab1781b63a5516db4e34ee7a3c0e4029e9e62c4f0be7b6237658a2d5e60462b38968a481f02445cadadebad33276493e371fe4ec5cf9e5e0d530
+  checksum: 0120b9399b0d4d53051b4436f00fb9a8f44fd5914965cda9ecdd0e07cda5ee27932528424ba123079f32c9582428d1a36ca25c9cabd22fdd5f36fe05c5ba4477
   languageName: node
   linkType: hard
 
