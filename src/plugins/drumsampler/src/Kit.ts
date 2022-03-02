@@ -68,7 +68,7 @@ export class DrumSamplerKit {
 
 		for (let i = 0; i < this.numVoices; i++) {
 		
-			if (slots[i]) {
+			if (slots[i] && slots[i].uri) {
 				// new state has a value for this slot
 				if (!this.state.slots[i] || slots[i].uri != this.state.slots[i].uri) {
 					// url previously didn't exist, or changed
