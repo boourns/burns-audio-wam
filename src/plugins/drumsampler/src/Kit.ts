@@ -136,8 +136,10 @@ export class DrumSamplerKit {
 			if (message.event[0] == MIDI.NOTE_ON) {
 				let midiNote = message.event[1]
 				let voices = this.noteMap.get(midiNote)
-				for (let i of voices) {
-					this.voices[i].play(this.buffers[i])
+				if (voices) {
+					for (let i of voices) {
+						this.voices[i].play(this.buffers[i])
+					}
 				}
 			}
 		});
