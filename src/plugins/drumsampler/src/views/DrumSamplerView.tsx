@@ -116,16 +116,23 @@ export class DrumSamplerView extends Component<DrumSamplerViewProps, DrumSampler
       console.error("Host must implement asset WAM extension")
       return
     }
+
+    let backupSlot = {...this.kit.state.slots[index]}
     
     window.WAMExtensions.assets.pickAsset(this.props.plugin.instanceId, "AUDIO", async (asset: WamAsset) => {
-      let slot = {...this.kit.state.slots[index]}
-      slot.name = asset.name
-      slot.uri = asset.uri
-
-      await this.kit.updateSlot(index, slot)
-      
-      this.forceUpdate()
+      if (asset) {
+        let slot = {...this.kit.state.slots[index]}
+        slot.name = asset.name
+        slot.uri = asset.uri
+  
+        await this.kit.updateSlot(index, slot)
+        
+        this.forceUpdate()
+      } else {
+        await this.kit.updateSlot(index, backupSlot)
+      }
     })
+
   }
 
   renderEditorTitleBar(index: number, slot: DrumSamplerVoiceState) {
@@ -159,6 +166,10 @@ export class DrumSamplerView extends Component<DrumSamplerViewProps, DrumSampler
 
   renderPadEditor() {
     let slot = this.kit.state.slots[this.state.selectedPad]
+    if (!slot) {
+      console.error("no slot, something went wrong")
+      return <div></div>
+    }
     
     return <div class={styles.bigPanel}>
       <div style="display: flex; flex-direction: column;">
