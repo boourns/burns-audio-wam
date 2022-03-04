@@ -33,16 +33,14 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, any> {
   render() {
     h("div", {})
 
-    let waveform
-    console.log("In render, audioBuffer ", this.props.plugin.audioNode.audioBuffer)
-    if (this.props.plugin.audioNode.audioBuffer) {
-      waveform = <WaveformView context={this.props.plugin.audioContext as AudioContext} audioBuffer={this.props.plugin.audioNode.audioBuffer}></WaveformView>
-    }
+    let waveforms: h.JSX.Element[] = this.props.plugin.audioNode.samples.reverse().map(s => {
+      return  <WaveformView context={this.props.plugin.audioContext as AudioContext} audioBuffer={s.buffer}></WaveformView>
+    })
 
     return (
     <div>
         <button onClick={(e) => this.toggleRecording()}>{this.state.recording ? "Stop Recording" : "Start Recording"}</button>
-        {waveform}
+        {waveforms}
     </div>)
   }
 

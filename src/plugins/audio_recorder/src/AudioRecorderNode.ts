@@ -3,6 +3,7 @@ import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk
 
 import getAudioRecorderProcessor from "./AudioRecorderProcessor";
 import { RecordingBuffer } from "./RecordingBuffer";
+import { Sample } from './Sample';
 
 export class AudioRecorderNode extends WamNode {
 	destroyed = false;
@@ -10,7 +11,7 @@ export class AudioRecorderNode extends WamNode {
 	recording: boolean
 
 	recordingBuffer?: RecordingBuffer
-	audioBuffer?: AudioBuffer
+	samples: Sample[]
 
 	callback?: () => void
 
@@ -33,6 +34,8 @@ export class AudioRecorderNode extends WamNode {
 			outputChannelCount: [2],
 		}});
 
+		this.samples = []
+
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi']);
 	}
@@ -42,8 +45,7 @@ export class AudioRecorderNode extends WamNode {
 		this.recording = recording
 
 		if (!recording && this.recordingBuffer) {
-            console.log("setting audioBuffer!")
-			this.audioBuffer = this.recordingBuffer.render(this.context)
+			this.samples.push(new Sample(this.recordingBuffer.render(this.context)))
 			this.recordingBuffer = undefined
 		}
 

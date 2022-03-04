@@ -14,10 +14,7 @@ export class WaveformView extends Component<WaveformViewProps, WaveformViewState
     loadedAudioBuffer?: AudioBuffer
 
     loadAudioBuffer() {
-        //this.waveSurfer.load("https://burns.ca/static/909/clap.wav")
-
         window.setTimeout(() => {
-            console.log("trying to load out of band?")
             this.waveSurfer.loadDecodedBuffer(this.props.audioBuffer)
         }, 1)
 
@@ -43,9 +40,7 @@ export class WaveformView extends Component<WaveformViewProps, WaveformViewState
     }
 
     render() {
-        if (this.waveSurfer && (!this.loadedAudioBuffer || this.loadedAudioBuffer != this.props.audioBuffer)) {
-            console.log("TOM changing audio buffer in render, wavesurfer ", this.waveSurfer)
-            
+        if (this.waveSurfer && (!this.loadedAudioBuffer || this.loadedAudioBuffer != this.props.audioBuffer)) {            
             this.loadAudioBuffer()
         }
         return <div style="" ref={(el) => {this.setup(el)}}></div>
