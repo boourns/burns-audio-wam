@@ -1,14 +1,21 @@
 import { Component, h } from "preact";
 import WaveSurfer from 'wavesurfer.js';
+import RegionsPlugin from 'wavesurfer.js/src/plugin/regions';
+
+export type RegionAction = {
+    label: string
+    action: () => {}
+}
 
 export interface WaveformViewProps {
     context: AudioContext
     audioBuffer: AudioBuffer
+    regionActions: RegionAction[]
 }
 
 type WaveformViewState = {}
 
-export class WaveformView extends Component<WaveformViewProps, WaveformViewState> {
+export class WaveformEditorView extends Component<WaveformViewProps, WaveformViewState> {
     container?: HTMLDivElement
     waveSurfer?: WaveSurfer
     loadedAudioBuffer?: AudioBuffer
@@ -16,6 +23,7 @@ export class WaveformView extends Component<WaveformViewProps, WaveformViewState
     loadAudioBuffer() {
         window.setTimeout(() => {
             this.waveSurfer.loadDecodedBuffer(this.props.audioBuffer)
+            this.waveSurfer.enableDragSelection()
         }, 1)
 
         this.loadedAudioBuffer = this.props.audioBuffer
@@ -32,9 +40,15 @@ export class WaveformView extends Component<WaveformViewProps, WaveformViewState
         this.waveSurfer = WaveSurfer.create({
             container: el,
             responsive: true,
-            waveColor: "yellow",
-            audioContext: this.props.context
+            backgroundColor: "black",
+            audioContext: this.props.context,
+            plugins: [
+                RegionsPlugin.create({
+                })
+            ]
         })
+
+        //this.waveSurfer.enableDragSelection()
 
         this.loadAudioBuffer()
     }
@@ -43,6 +57,9 @@ export class WaveformView extends Component<WaveformViewProps, WaveformViewState
         if (this.waveSurfer && (!this.loadedAudioBuffer || this.loadedAudioBuffer != this.props.audioBuffer)) {            
             this.loadAudioBuffer()
         }
-        return <div style="" ref={(el) => {this.setup(el)}}></div>
+        return <div style="margin-top: 5px; margin-bottom: 5px;">
+
+            <div style="" ref={(el) => {this.setup(el)}}></div>
+        </div>
     }
 }
