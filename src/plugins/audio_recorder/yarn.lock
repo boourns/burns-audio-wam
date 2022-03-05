@@ -465,6 +465,8 @@ __metadata:
     style-loader: ^3.2.1
     ts-loader: ^8.0.12
     typescript: ^4.0.2
+    wam-extensions: "boourns/wam-extensions#commit=e1ad51e99d98ccb9367cf7615286316e1f8698a2"
+    wavefile: ^11.0.0
     wavesurfer.js: ^6.0.3
     webpack: ^5.11.1
     webpack-cli: ^4.3.0
@@ -2626,6 +2628,15 @@ typescript@^4.0.2:
   languageName: node
   linkType: hard
 
+"wam-extensions@boourns/wam-extensions#commit=e1ad51e99d98ccb9367cf7615286316e1f8698a2":
+  version: 0.2.0
+  resolution: "wam-extensions@https://github.com/boourns/wam-extensions.git#commit=e1ad51e99d98ccb9367cf7615286316e1f8698a2"
+  peerDependencies:
+    "@webaudiomodules/api": "*"
+  checksum: 0e43138f648e6c5727a8451416170e482168da30ab023dffa0d2f4e7b3682ebbd8f7b38f9a46cc613696166c4ea88f941dfbd90f3bed86eba8b65006250a439d
+  languageName: node
+  linkType: hard
+
 "watchpack@npm:^2.2.0":
   version: 2.2.0
   resolution: "watchpack@npm:2.2.0"
@@ -2633,6 +2644,15 @@ typescript@^4.0.2:
     glob-to-regexp: ^0.4.1
     graceful-fs: ^4.1.2
   checksum: e275f48fae29edee3195c51a8312b609581b9be5ce323d3102ffd082cb124f48d7a393ce05e4110239e4354379e04d78a97ceb26ae367746e7e218bf258135c8
+  languageName: node
+  linkType: hard
+
+"wavefile@npm:^11.0.0":
+  version: 11.0.0
+  resolution: "wavefile@npm:11.0.0"
+  bin:
+    wavefile: ./bin/wavefile.js
+  checksum: 9693a05bd2c672de16df7ffb973b20af5c0a1bbd796c0c5fe9482716840c83d55c8fb4768e9e30a4e78c39a456b1220b4e944b0d9fda0edb1ae7196daddb892e
   languageName: node
   linkType: hard
 

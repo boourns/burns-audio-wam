@@ -11,6 +11,7 @@ export interface WaveformViewProps {
     context: AudioContext
     audioBuffer: AudioBuffer
     regionActions: RegionAction[]
+    onSeek?: (pos: number) => void
 }
 
 type WaveformViewState = {}
@@ -23,7 +24,7 @@ export class WaveformEditorView extends Component<WaveformViewProps, WaveformVie
     loadAudioBuffer() {
         window.setTimeout(() => {
             this.waveSurfer.loadDecodedBuffer(this.props.audioBuffer)
-            this.waveSurfer.enableDragSelection()
+            this.waveSurfer.enableDragSelection({})
         }, 1)
 
         this.loadedAudioBuffer = this.props.audioBuffer
@@ -48,7 +49,11 @@ export class WaveformEditorView extends Component<WaveformViewProps, WaveformVie
             ]
         })
 
-        //this.waveSurfer.enableDragSelection()
+        this.waveSurfer.on("seek", (pos: number) => {
+            if (this.props.onSeek) {
+                this.props.onSeek(pos)
+            }
+        })
 
         this.loadAudioBuffer()
     }
@@ -57,9 +62,6 @@ export class WaveformEditorView extends Component<WaveformViewProps, WaveformVie
         if (this.waveSurfer && (!this.loadedAudioBuffer || this.loadedAudioBuffer != this.props.audioBuffer)) {            
             this.loadAudioBuffer()
         }
-        return <div style="margin-top: 5px; margin-bottom: 5px;">
-
-            <div style="" ref={(el) => {this.setup(el)}}></div>
-        </div>
+        return <div style="" ref={(el) => {this.setup(el)}}></div>   
     }
 }

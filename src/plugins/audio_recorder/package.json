@@ -15,6 +15,8 @@
     "@types/wavesurfer.js": "^6.0.1",
     "debug": "^4.3.1",
     "preact": "^10.5.5",
+    "wam-extensions": "boourns/wam-extensions#commit=e1ad51e99d98ccb9367cf7615286316e1f8698a2",
+    "wavefile": "^11.0.0",
     "wavesurfer.js": "^6.0.3"
   },
   "devDependencies": {

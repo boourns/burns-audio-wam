@@ -33,7 +33,7 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, any> {
   render() {
     h("div", {})
 
-    let samples: h.JSX.Element[] = this.props.plugin.audioNode.samples.reverse().map(s => {
+    let samples: h.JSX.Element[] = this.props.plugin.audioNode.editor.samples.reverse().map(s => {
       return <SampleView context={this.props.plugin.audioContext as AudioContext} sample={s}></SampleView>
     })
 
