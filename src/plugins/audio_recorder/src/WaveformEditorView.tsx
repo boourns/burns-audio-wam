@@ -13,6 +13,11 @@ export type RegionAction = {
     action: () => {}
 }
 
+export type WaveformViewTransportControls = {
+    play: () => void
+    pause: () => void
+}
+
 export interface WaveformViewProps {
     context: AudioContext
     audioBuffer: AudioBuffer
@@ -20,6 +25,7 @@ export interface WaveformViewProps {
     regionActions: RegionAction[]
     onSeek?: (pos: number) => void
     zoom: number
+    transport: (transport?: WaveformViewTransportControls) => void
 }
 
 type WaveformViewState = {}
@@ -31,9 +37,10 @@ export class WaveformEditorView extends Component<WaveformViewProps, WaveformVie
     scrollPos?: number
 
     apply() {
-        console.log("Zooming to ", this.props.zoom)
+        console.log("Zooming to ", this.props.zoom, ", buffer length ",  this.props.audioBuffer.length)
 
-        if (this.props.zoom > 10000) {
+        // TODO; this should actually be related to the audio buffer length
+        if (this.props.zoom > this.props.audioBuffer.length) {
             if (this.props.zoom > this.props.audioBuffer.sampleRate) {
                 this.waveSurfer.params.barWidth = Math.floor(this.props.zoom / this.props.audioBuffer.sampleRate)
             } else {
@@ -45,7 +52,7 @@ export class WaveformEditorView extends Component<WaveformViewProps, WaveformVie
 
         this.waveSurfer.zoom(this.props.zoom)
 
-        this.waveSurfer.setHeight(this.props.height)
+        this.waveSurfer.setHeight(this.props.height / this.props.audioBuffer.numberOfChannels)
     }
 
     loadAudioBuffer() {
@@ -62,7 +69,9 @@ export class WaveformEditorView extends Component<WaveformViewProps, WaveformVie
         if (this.waveSurfer) {
             this.waveSurfer.destroy()
             this.waveSurfer = undefined
-        }        
+        }
+        
+        this.props.transport(undefined)
     }
 
     createWaveSurfer() {
@@ -81,6 +90,8 @@ export class WaveformEditorView extends Component<WaveformViewProps, WaveformVie
             splitChannels: true,
             scrollParent: true,
             forceDecode: true,
+            normalize: false,
+            waveColor: "#ddd",
             plugins: [
                 RegionsPlugin.create({
                 })
@@ -104,9 +115,16 @@ export class WaveformEditorView extends Component<WaveformViewProps, WaveformVie
             console.log(ev)
         })
 
+        this.props.transport({
+            play: () => {
+                this.waveSurfer.play()
+            },
+            pause: () => {
+                this.waveSurfer.pause()
+            }
+        })
 
         this.loadAudioBuffer()
-
     }
 
     setup(el: HTMLDivElement | null) {

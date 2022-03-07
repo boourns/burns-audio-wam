@@ -1,5 +1,5 @@
 import { Component, h } from "preact";
-import { WaveformEditorView } from "./WaveformEditorView";
+import { WaveformEditorView, WaveformViewTransportControls } from "./WaveformEditorView";
 import { SampleEditor, SampleState } from "./SampleEditor";
 import { Sample } from "./Sample";
 import { Resizer } from "./Resizer";
@@ -14,6 +14,12 @@ export interface SampleViewProps {
 type SampleViewState = {}
 
 export class SampleView extends Component<SampleViewProps, SampleViewState> {
+    transport?: WaveformViewTransportControls
+
+    updateTransport(transport?: WaveformViewTransportControls) {
+        this.transport = transport
+    }
+
     saveSample() {
         let blob = this.props.sample.sample.saveWav(32)
         if (window.WAMExtensions && window.WAMExtensions.assets) {
@@ -36,7 +42,20 @@ export class SampleView extends Component<SampleViewProps, SampleViewState> {
         let state = this.props.editor.getState()
 
         let add = split.map((s, i) => this.props.editor.defaultSampleState(s, `${this.props.sample.name} - Ch #${i+1}`))
-        console.log(add)
+
+        state.samples = state.samples.concat(add)
+        this.props.editor.setState(state)
+    }
+
+    split() {
+        let split = this.props.sample.sample.split([
+            {start: 0, end: this.props.sample.seekPos},
+            {start: this.props.sample.seekPos, end: 1}
+        ])
+
+        let state = this.props.editor.getState()
+
+        let add = split.map((s, i) => this.props.editor.defaultSampleState(s, `${this.props.sample.name} - Part ${i+1}`))
 
         state.samples = state.samples.concat(add)
         this.props.editor.setState(state)
@@ -82,31 +101,32 @@ export class SampleView extends Component<SampleViewProps, SampleViewState> {
     }
 
     resize(width: number, height: number) {
-        console.log("Resizeing to ", height)
         this.props.sample.height = height
 
         this.forceUpdate()
     }
 
     resizeFinished() {
-
     }
 
     render() {
         return <div style={`border: 2px; height: ${this.props.sample.height}px; display: flex; flex-direction: column;`}>
             <div style="display: flex; flex-direction: row; height: 30px;">
                 <div>{this.props.sample.name}</div>
+                <button onClick={() => this.transport?.play()}>Play</button>
+
                 <button onClick={() => this.saveSample()}>Save</button>
                 <button onClick={() => this.deleteSample()}>Delete</button>
                 <button onClick={() => this.splitSamples()}>Split Channels</button>
                 <button onClick={() => this.trimLeft()}>Trim left</button>
                 <button onClick={() => this.trimRight()}>Trim right</button>
+                <button onClick={() => this.split()}>Split</button>
 
                 <button onClick={() => this.zoomIn()}>Zoom In</button>
                 <button onClick={() => this.zoomOut()}>Zoom Out</button>
 
             </div>
-            <WaveformEditorView regionActions={[]} context={this.props.context} audioBuffer={this.props.sample.sample.buffer} onSeek={(pos) => this.onSeek(pos)} height={this.props.sample.height-30} zoom={100 * this.props.sample.zoom}></WaveformEditorView>
+            <WaveformEditorView transport={(t) => this.updateTransport(t)} regionActions={[]} context={this.props.context} audioBuffer={this.props.sample.sample.buffer} onSeek={(pos) => this.onSeek(pos)} height={this.props.sample.height-30} zoom={100 * this.props.sample.zoom}></WaveformEditorView>
 
             <Resizer vertical={true} resize={(w, h) => this.resize(w, h)} finished={() => this.resizeFinished()}></Resizer>
         </div>

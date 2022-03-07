@@ -55,7 +55,7 @@ export class Sample {
 
     // accepts 'pos', a float from 0 to 1 representing position to trim left from
     trimLeft(pos: number): Sample {
-        let startPos = this.buffer.length * pos
+        let startPos = Math.floor(this.buffer.length * pos)
         let length = this.buffer.length - startPos
 
         let trimmed = this.context.createBuffer(this.buffer.numberOfChannels, length, this.buffer.sampleRate)
@@ -63,7 +63,7 @@ export class Sample {
             let src = this.buffer.getChannelData(i)
             let dst = trimmed.getChannelData(i)
 
-            for (let j = 0; j < length; j++) {
+            for (let j = 0; j < dst.length; j++) {
                dst[j] = src[startPos+j]
             }
         }
@@ -73,7 +73,7 @@ export class Sample {
 
     // accepts 'pos', a float from 0 to 1 representing position to trim right from
     trimRight(pos: number): Sample {
-        let length = this.buffer.length * pos
+        let length = Math.floor(this.buffer.length * pos)
 
         let trimmed = this.context.createBuffer(this.buffer.numberOfChannels, length, this.buffer.sampleRate)
         for (let i = 0; i < this.buffer.numberOfChannels; i++) {
@@ -90,7 +90,7 @@ export class Sample {
 
     // accepts 'pos', a float from 0 to 1 representing position to fade out from
     fadeOut(pos: number): Sample {
-        let startPos = this.buffer.length * pos
+        let startPos =  Math.floor(this.buffer.length * pos)
         let fadeLength = this.buffer.length - startPos
 
         let faded = this.context.createBuffer(this.buffer.numberOfChannels, this.buffer.length, this.buffer.sampleRate)
@@ -115,7 +115,7 @@ export class Sample {
 
     // accepts 'pos', a float from 0 to 1 representing position to fade out from
     fadeIn(pos: number): Sample {
-        let endPos = this.buffer.length * pos
+        let endPos = Math.floor(this.buffer.length * pos)
         let faded = this.context.createBuffer(this.buffer.numberOfChannels, this.buffer.length, this.buffer.sampleRate)
 
         for (let i = 0; i < this.buffer.numberOfChannels; i++) {
@@ -147,14 +147,44 @@ export class Sample {
             let inp = this.buffer.getChannelData(i)
             let out = split.getChannelData(0)
 
-            for (let i = 0; i < inp.length; i++) {
-                out[i] = inp[i]
+            for (let j = 0; j < inp.length; j++) {
+                out[j] = inp[j]
             }
 
             output.push(new Sample(this.context, split))
         }
 
         debug(`splitChannels returning ${output.length} samples`)
+        return output
+    }
+
+    // Splits a wave into multiple parts, at every 'pos' position.
+    split(sections: {start: number, end: number}[]): Sample[] {
+        let output: Sample[] = []
+
+        for (let section of sections) {                
+            let startPos = Math.floor(this.buffer.length * section.start)
+            let endPos = Math.floor(this.buffer.length * section.end)
+            let length = endPos - startPos
+
+            if (length < 1) {
+                throw new Error("Section end must be after section start")
+            }
+
+            let segment = this.context.createBuffer(this.buffer.numberOfChannels, length, this.buffer.sampleRate)
+
+            for (let i = 0; i < this.buffer.numberOfChannels; i++) {
+                let inp = this.buffer.getChannelData(i)
+                let out = segment.getChannelData(0)
+    
+                for (let i = 0; i < length; i++) {
+                    out[i] = inp[startPos + i]
+                }
+    
+                output.push(new Sample(this.context, segment))
+            }
+        }
+
         return output
     }
 }

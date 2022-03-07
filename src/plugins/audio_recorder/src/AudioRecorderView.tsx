@@ -73,7 +73,7 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
   render() {
     h("div", {})
 
-    let samples: h.JSX.Element[] = this.props.plugin.audioNode.editor.samples.reverse().map((s, i) => {
+    let samples: h.JSX.Element[] = this.props.plugin.audioNode.editor.samples.map((s, i) => {
       return <SampleView index={i} editor={this.props.plugin.audioNode.editor} context={this.props.plugin.audioContext as AudioContext} sample={s}></SampleView>
     })
 
@@ -82,7 +82,7 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
         <button onClick={(e) => this.toggleRecording()}>{this.state.recording ? "Stop Recording" : "Start Recording"}</button>
         <button onClick={(e) => this.loadAssets()}>Load</button>
 
-        {samples}
+        {samples.reverse()}
     </div>)
   }
 

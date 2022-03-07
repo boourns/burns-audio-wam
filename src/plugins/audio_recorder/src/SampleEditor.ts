@@ -36,7 +36,7 @@ export class SampleEditor {
     defaultSampleState(sample: Sample, name: string): SampleState {
         return {
             sample,
-            height: 100,
+            height: 30 + (100 * sample.buffer.numberOfChannels),
             name: name,
             seekPos: undefined,
             zoom: 1
