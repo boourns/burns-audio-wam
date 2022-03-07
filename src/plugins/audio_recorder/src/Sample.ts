@@ -1,10 +1,13 @@
 import { WaveFile } from "wavefile"
 
+var debug = console.log
+
 export class Sample {
     context: BaseAudioContext
     buffer: AudioBuffer
 
     constructor(context: BaseAudioContext, buffer: AudioBuffer) {
+        this.context = context
         this.buffer = buffer
     }
 
@@ -133,5 +136,25 @@ export class Sample {
         }
 
         return new Sample(this.context, faded)
+    }
+
+    // Splits a wave into separate waves per channel
+    splitChannels(): Sample[] {
+        let output: Sample[] = []
+
+        for (let i = 0; i < this.buffer.numberOfChannels; i++) {
+            let split = this.context.createBuffer(1, this.buffer.length, this.buffer.sampleRate)
+            let inp = this.buffer.getChannelData(i)
+            let out = split.getChannelData(0)
+
+            for (let i = 0; i < inp.length; i++) {
+                out[i] = inp[i]
+            }
+
+            output.push(new Sample(this.context, split))
+        }
+
+        debug(`splitChannels returning ${output.length} samples`)
+        return output
     }
 }

@@ -46,7 +46,13 @@ export class AudioRecorderNode extends WamNode {
 		this.recording = recording
 
 		if (!recording && this.recordingBuffer) {
-			this.editor.samples.push(new Sample(this.context, this.recordingBuffer.render(this.context)))
+			this.editor.samples.push({
+				height:100,
+				sample: new Sample(this.context, this.recordingBuffer.render(this.context)),
+				name: `Sample ${this.editor.samples.length+1}`,
+				zoom: 1,
+			})
+
 			this.recordingBuffer = undefined
 		}
 

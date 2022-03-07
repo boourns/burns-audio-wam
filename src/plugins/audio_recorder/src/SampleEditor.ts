@@ -1,18 +1,45 @@
 import { Sample } from "./Sample"
 
+export type SampleEditorState = {
+    samples: SampleState[]
+}
+
+export type SampleState = {
+    sample: Sample
+    height: number
+    name: string
+    seekPos?: number
+    zoom: number
+}
+
 export class SampleEditor {
-    samples: Sample[]
+    samples: SampleState[]
+    callback?: () => void
 
     constructor() {
         this.samples = []
     }
 
-    normalize(idx: number) {
-        let src = this.samples[idx].buffer
-        
-        
-
+    getState(): SampleEditorState {
+        return {
+            samples: [...this.samples]
+        }
     }
 
+    setState(state: SampleEditorState) {
+        this.samples = [...state.samples]
+        if (this.callback) {
+            this.callback()
+        }
+    }
 
+    defaultSampleState(sample: Sample, name: string): SampleState {
+        return {
+            sample,
+            height: 100,
+            name: name,
+            seekPos: undefined,
+            zoom: 1
+        }
+    }
 }
