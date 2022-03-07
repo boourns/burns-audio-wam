@@ -53,12 +53,15 @@ export default class AudioInputNode extends CompositeAudioNode {
                 constraints.echoCancellation = false
                 constraints.noiseSuppression = false
                 await t.applyConstraints(constraints)
+                
                 console.log("After applying, constraints are ", t.getConstraints())
             }
 
             // Create a MediaStreamAudioSourceNode  
             // Feed the HTMLMediaElement into it
             this.streamNode = ctx.createMediaStreamSource(stream);
+
+            console.log("streamNode has ", this.streamNode.numberOfInputs, " inputs and ", this.streamNode.numberOfOutputs, " outputs")
 
         } else {
            console.log('getUserMedia not supported on your browser!');
