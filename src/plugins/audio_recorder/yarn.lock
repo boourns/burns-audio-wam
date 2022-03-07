@@ -465,7 +465,7 @@ __metadata:
     style-loader: ^3.2.1
     ts-loader: ^8.0.12
     typescript: ^4.0.2
-    wam-extensions: "boourns/wam-extensions#commit=e1ad51e99d98ccb9367cf7615286316e1f8698a2"
+    wam-extensions: ^0.2.1
     wavefile: ^11.0.0
     wavesurfer.js: ^6.0.3
     webpack: ^5.11.1
@@ -2628,12 +2628,12 @@ typescript@^4.0.2:
   languageName: node
   linkType: hard
 
-"wam-extensions@boourns/wam-extensions#commit=e1ad51e99d98ccb9367cf7615286316e1f8698a2":
-  version: 0.2.0
-  resolution: "wam-extensions@https://github.com/boourns/wam-extensions.git#commit=e1ad51e99d98ccb9367cf7615286316e1f8698a2"
+"wam-extensions@npm:^0.2.1":
+  version: 0.2.1
+  resolution: "wam-extensions@npm:0.2.1"
   peerDependencies:
     "@webaudiomodules/api": "*"
-  checksum: 0e43138f648e6c5727a8451416170e482168da30ab023dffa0d2f4e7b3682ebbd8f7b38f9a46cc613696166c4ea88f941dfbd90f3bed86eba8b65006250a439d
+  checksum: 7cac2b0aa0f10ae0cdff972c6b5be6004cd90df72a2ffa3fb45b502782f052112c5a8c3aff0124fa215f1b0b9da303a5e39655894a04eecbdf13a545cb10ce3c
   languageName: node
   linkType: hard
 
