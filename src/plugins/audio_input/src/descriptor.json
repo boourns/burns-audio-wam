@@ -1,0 +1,11 @@
+{
+    "name": "Audio Input",
+    "vendor": "Tom Burns",
+    "description": "WAM2 Audio Input",
+    "version": "1.0.0",
+    "sdkVersion": "1.0.0",
+    "thumbnail": "",
+    "keywords": ["utility", "input"],
+    "isInstrument": false,
+    "website": ""
+}

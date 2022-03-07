@@ -68,7 +68,7 @@ export class DrumSamplerKit {
 
 		for (let i = 0; i < this.numVoices; i++) {
 		
-			if (slots[i]) {
+			if (slots[i] && slots[i].uri) {
 				// new state has a value for this slot
 				if (!this.state.slots[i] || slots[i].uri != this.state.slots[i].uri) {
 					// url previously didn't exist, or changed
@@ -136,8 +136,10 @@ export class DrumSamplerKit {
 			if (message.event[0] == MIDI.NOTE_ON) {
 				let midiNote = message.event[1]
 				let voices = this.noteMap.get(midiNote)
-				for (let i of voices) {
-					this.voices[i].play(this.buffers[i])
+				if (voices) {
+					for (let i of voices) {
+						this.voices[i].play(this.buffers[i])
+					}
 				}
 			}
 		});

@@ -56,6 +56,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/debounce@npm:*":
+  version: 3.0.0
+  resolution: "@types/debounce@npm:3.0.0"
+  checksum: af99f44f8ce90388aa5a909066c64b4ddc5efdff72bccf7dcef1fe8a04f03d03a7a42cc1f42ff14620c66923f92600ccfeb768bd77ad250f12a6ebca116ca719
+  languageName: node
+  linkType: hard
+
+"@types/debug@npm:^4.1.6":
+  version: 4.1.6
+  resolution: "@types/debug@npm:4.1.6"
+  checksum: b4c5d07fb383527b1416ab7911dd85c47da276d32f4a337425c0d54f84f36c55cac76ff2d5cd3c5b5f32d213912fcc4e5aa44aa5206e49929328b465bb63f310
+  languageName: node
+  linkType: hard
+
 "@types/eslint-scope@npm:^3.7.0":
   version: 3.7.0
   resolution: "@types/eslint-scope@npm:3.7.0"
@@ -101,6 +115,15 @@ __metadata:
   version: 15.14.0
   resolution: "@types/node@npm:15.14.0"
   checksum: 94bdbf5e92b915b439478c421b1a9554e3411a6770cb01af2703356c1ea46c202e10fb486264a19fbddf028a6b0e260f21cd970b719e6e8b81dd7c64cc9f69c8
+  languageName: node
+  linkType: hard
+
+"@types/wavesurfer.js@npm:^6.0.1":
+  version: 6.0.1
+  resolution: "@types/wavesurfer.js@npm:6.0.1"
+  dependencies:
+    "@types/debounce": "*"
+  checksum: 9144b74fc75103b89a478b6d2c0ceab47ff3c496eeb98d9381fcc74e7c556f4ff6cff2d57dd3ef35230d84719677b30403ce29d6602fb6cd831d5f774519b462
   languageName: node
   linkType: hard
 
@@ -426,6 +449,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"audio_recorder@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "audio_recorder@workspace:."
+  dependencies:
+    "@types/debug": ^4.1.6
+    "@types/wavesurfer.js": ^6.0.1
+    copy-webpack-plugin: ^9.0.0
+    css-loader: ^6.2.0
+    css-modules-typescript-loader: ^4.0.1
+    debug: ^4.3.1
+    preact: ^10.5.5
+    sass: ^1.39.2
+    sass-loader: ^12.1.0
+    style-loader: ^3.2.1
+    ts-loader: ^8.0.12
+    typescript: ^4.0.2
+    wam-extensions: ^0.2.1
+    wavefile: ^11.0.0
+    wavesurfer.js: ^6.0.3
+    webpack: ^5.11.1
+    webpack-cli: ^4.3.0
+  languageName: unknown
+  linkType: soft
+
 "balanced-match@npm:^1.0.0":
   version: 1.0.2
   resolution: "balanced-match@npm:1.0.2"
@@ -722,7 +769,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:^4.1.0":
+"debug@npm:^4.1.0, debug@npm:^4.3.1":
   version: 4.3.1
   resolution: "debug@npm:4.3.1"
   dependencies:
@@ -756,24 +803,6 @@ __metadata:
   checksum: fa05e18324510d7283f55862f3161c6759a3f2f8dbce491a2fc14c8324c498286c54282c1f0e933cb930da8419b30679389499b919122952a4f8592362ef4615
   languageName: node
   linkType: hard
-
-"drm-16@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "drm-16@workspace:."
-  dependencies:
-    copy-webpack-plugin: ^9.0.0
-    css-loader: ^6.2.0
-    css-modules-typescript-loader: ^4.0.1
-    sass: ^1.39.2
-    sass-loader: ^12.1.0
-    style-loader: ^3.2.1
-    ts-loader: ^8.0.12
-    typescript: ^4.0.2
-    wam-extensions: ^0.2.1
-    webpack: ^5.11.1
-    webpack-cli: ^4.3.0
-  languageName: unknown
-  linkType: soft
 
 "electron-to-chromium@npm:^1.3.723":
   version: 1.3.764
@@ -931,16 +960,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-glob@npm:^3.1.1, fast-glob@npm:^3.2.7":
-  version: 3.2.7
-  resolution: "fast-glob@npm:3.2.7"
+"fast-glob@npm:^3.2.7, fast-glob@npm:^3.2.9":
+  version: 3.2.11
+  resolution: "fast-glob@npm:3.2.11"
   dependencies:
     "@nodelib/fs.stat": ^2.0.2
     "@nodelib/fs.walk": ^1.2.3
     glob-parent: ^5.1.2
     merge2: ^1.3.0
     micromatch: ^4.0.4
-  checksum: 2f4708ff112d2b451888129fdd9a0938db88b105b0ddfd043c064e3c4d3e20eed8d7c7615f7565fee660db34ddcf08a2db1bf0ab3c00b87608e4719694642d78
+  checksum: f473105324a7780a20c06de842e15ddbb41d3cb7e71d1e4fe6e8373204f22245d54f5ab9e2061e6a1c613047345954d29b022e0e76f5c28b1df9858179a0e6d7
   languageName: node
   linkType: hard
 
@@ -1091,16 +1120,16 @@ fsevents@~2.3.2:
   linkType: hard
 
 "globby@npm:^11.0.3":
-  version: 11.0.4
-  resolution: "globby@npm:11.0.4"
+  version: 11.1.0
+  resolution: "globby@npm:11.1.0"
   dependencies:
     array-union: ^2.1.0
     dir-glob: ^3.0.1
-    fast-glob: ^3.1.1
-    ignore: ^5.1.4
-    merge2: ^1.3.0
+    fast-glob: ^3.2.9
+    ignore: ^5.2.0
+    merge2: ^1.4.1
     slash: ^3.0.0
-  checksum: d3e02d5e459e02ffa578b45f040381c33e3c0538ed99b958f0809230c423337999867d7b0dbf752ce93c46157d3bbf154d3fff988a93ccaeb627df8e1841775b
+  checksum: b4be8885e0cfa018fc783792942d53926c35c50b3aefd3fdcfb9d22c627639dc26bd2327a40a0b74b074100ce95bb7187bfeae2f236856aa3de183af7a02aea6
   languageName: node
   linkType: hard
 
@@ -1196,10 +1225,10 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"ignore@npm:^5.1.4":
-  version: 5.1.9
-  resolution: "ignore@npm:5.1.9"
-  checksum: 6f6b2235f4e63648116c5814f76b2d3d63fae9c21b8a466862e865732f59e787c9938a9042f9457091db6f0d811508ea3c8c6a60f35bafc4ceea08bbe8f96fd5
+"ignore@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "ignore@npm:5.2.0"
+  checksum: 6b1f926792d614f64c6c83da3a1f9c83f6196c2839aa41e1e32dd7b8d174cef2e329d75caabb62cb61ce9dc432f75e67d07d122a037312db7caa73166a1bdb77
   languageName: node
   linkType: hard
 
@@ -1548,7 +1577,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"merge2@npm:^1.3.0":
+"merge2@npm:^1.3.0, merge2@npm:^1.4.1":
   version: 1.4.1
   resolution: "merge2@npm:1.4.1"
   checksum: 7268db63ed5169466540b6fb947aec313200bcf6d40c5ab722c22e242f651994619bcd85601602972d3c85bd2cc45a358a4c61937e9f11a061919a1da569b0c2
@@ -1698,11 +1727,11 @@ fsevents@~2.3.2:
   linkType: hard
 
 "nanoid@npm:^3.1.30":
-  version: 3.1.30
-  resolution: "nanoid@npm:3.1.30"
+  version: 3.2.0
+  resolution: "nanoid@npm:3.2.0"
   bin:
     nanoid: bin/nanoid.cjs
-  checksum: 276d0d4b0c41c46aeefec5f09f093e4085a2352d06881c845db22b84f8ef72cc8defae6d76bfb1d8a2a128eb2dec42ab148d16582be4e7754c97905806ef57b6
+  checksum: 3d1d5a69fea84e538057cf64106e713931c4ef32af344068ecff153ff91252f39b0f2b472e09b0dfff43ac3cf520c92938d90e6455121fe93976e23660f4fccc
   languageName: node
   linkType: hard
 
@@ -1896,7 +1925,14 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"picomatch@npm:^2.0.4, picomatch@npm:^2.2.1, picomatch@npm:^2.2.3":
+"picomatch@npm:^2.0.4, picomatch@npm:^2.2.1":
+  version: 2.3.1
+  resolution: "picomatch@npm:2.3.1"
+  checksum: 050c865ce81119c4822c45d3c84f1ced46f93a0126febae20737bd05ca20589c564d6e9226977df859ed5e03dc73f02584a2b0faad36e896936238238b0446cf
+  languageName: node
+  linkType: hard
+
+"picomatch@npm:^2.2.3":
   version: 2.3.0
   resolution: "picomatch@npm:2.3.0"
   checksum: 16818720ea7c5872b6af110760dee856c8e4cd79aed1c7a006d076b1cc09eff3ae41ca5019966694c33fbd2e1cc6ea617ab10e4adac6df06556168f13be3fca2
@@ -1957,12 +1993,12 @@ fsevents@~2.3.2:
   linkType: hard
 
 "postcss-selector-parser@npm:^6.0.2, postcss-selector-parser@npm:^6.0.4":
-  version: 6.0.7
-  resolution: "postcss-selector-parser@npm:6.0.7"
+  version: 6.0.8
+  resolution: "postcss-selector-parser@npm:6.0.8"
   dependencies:
     cssesc: ^3.0.0
     util-deprecate: ^1.0.2
-  checksum: 661808ad629e3f289e0d237fbe9bb13766dadd2d548ec09ae86f68118f5d98be0f25bbaf5cd88486c5416e2eefaa9f73c59c2fc98dc370872fa51b250c7d1d9c
+  checksum: 550351c8d04216106e259f7c433652aa6742dd7ddbedf7afdc313526963bb170589a6fefd1bc1fe6268a2cf9f5073d4ecb09bc7b5b4bef49edf80634300500af
   languageName: node
   linkType: hard
 
@@ -1981,6 +2017,13 @@ fsevents@~2.3.2:
     picocolors: ^1.0.0
     source-map-js: ^1.0.1
   checksum: b78abdd89c10f7b48f4bdcd376104a19d6e9c7495ab521729bdb3df315af6c211360e9f06887ad3bc0ab0f61a04b91d68ea11462997c79cced58b9ccd66fac07
+  languageName: node
+  linkType: hard
+
+"preact@npm:^10.5.5":
+  version: 10.5.14
+  resolution: "preact@npm:10.5.14"
+  checksum: d936f83a2afad13aa5870812d7fa8fec111d4a1bb6b0bea6485f2656a062bcc01717398d8184c4bc589cba455f3b2def8e43ba23db846b208d9823e3804658ad
   languageName: node
   linkType: hard
 
@@ -2185,15 +2228,15 @@ resolve@^1.9.0:
   linkType: hard
 
 "sass@npm:^1.39.2":
-  version: 1.45.0
-  resolution: "sass@npm:1.45.0"
+  version: 1.48.0
+  resolution: "sass@npm:1.48.0"
   dependencies:
     chokidar: ">=3.0.0 <4.0.0"
     immutable: ^4.0.0
     source-map-js: ">=0.6.2 <2.0.0"
   bin:
     sass: sass.js
-  checksum: f20d22ddf91e3571926535cdec9e1092780b0bf133ee6a68d25ee21fd3fcb94f4b1df90823fdc60cabf468776d3a6bb693fd89305698e70609eb47bcfb905f10
+  checksum: 0fa57d17a9ac9eff914719a3c9cf986cb81c6714cc09214ace65e9f1af0bd47f750793dfc39bbd1b199c9b8c12b1e4aba669ba08dfbd649cfb581c55d20a839f
   languageName: node
   linkType: hard
 
@@ -2601,6 +2644,22 @@ typescript@^4.0.2:
     glob-to-regexp: ^0.4.1
     graceful-fs: ^4.1.2
   checksum: e275f48fae29edee3195c51a8312b609581b9be5ce323d3102ffd082cb124f48d7a393ce05e4110239e4354379e04d78a97ceb26ae367746e7e218bf258135c8
+  languageName: node
+  linkType: hard
+
+"wavefile@npm:^11.0.0":
+  version: 11.0.0
+  resolution: "wavefile@npm:11.0.0"
+  bin:
+    wavefile: ./bin/wavefile.js
+  checksum: 9693a05bd2c672de16df7ffb973b20af5c0a1bbd796c0c5fe9482716840c83d55c8fb4768e9e30a4e78c39a456b1220b4e944b0d9fda0edb1ae7196daddb892e
+  languageName: node
+  linkType: hard
+
+"wavesurfer.js@npm:^6.0.3":
+  version: 6.0.3
+  resolution: "wavesurfer.js@npm:6.0.3"
+  checksum: 4419c0a5cf5748ad13f0c3e9d1fbbabe1de4b1c8972801f40838b9bed1b8b76633803c1fa73cf2bab4b662e8d02c91d334f75489a2ac718fd27c1f7e6caa02a9
   languageName: node
   linkType: hard
 
