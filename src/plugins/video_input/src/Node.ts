@@ -94,23 +94,52 @@ export default class VideoInputNode extends CompositeAudioNode {
 
     config?: VideoExtensionOptions
     texture?: WebGLTexture
+    canvas?: HTMLCanvasElement
 
     attach(config: VideoExtensionOptions, input?: WebGLTexture): WebGLTexture {
 		this.config = config
         let gl = this.config.gl
                 
         this.texture = gl.createTexture();
+
+        var c = document.createElement("canvas");
+        c.width = config.width;
+        c.height = config.height;
+        var ctx = c.getContext("2d"); 
+        //ctx.fillStyle = "rgba(0, 0, 0, 1)";
+        //ctx.globalCompositeOperation = "destination-out";
+        //ctx.fillRect(0, 0, 64, 64);
+        //ctx.globalCompositeOperation = "source-over";
+        ctx.fillStyle = "rgb(255, 128, 64)";
+        ctx.font = "40px Arial";
+        ctx.fillText("some text", 128 - 64, 128);
+        this.canvas = c
+
+        document.body.appendChild(this.canvas)
+
+
         this.render()
 
 		return this.texture
 	}
 
     render() {
-        console.log("render")
-
         let gl = this.config.gl
 
-        gl.bindTexture(gl.TEXTURE_2D, this.texture);        
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+
+        // No, it's not a power of 2. Turn off mips and set
+       // wrapping to clamp to edge
+       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+       // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+        //gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+        //gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.sourceVideo);
+
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.sourceVideo);
     }
 

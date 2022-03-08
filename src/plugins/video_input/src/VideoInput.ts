@@ -30,12 +30,11 @@ class Uniform {
 class Rect {
     gl: WebGLRenderingContext
     verts: Float32Array
-    buffer: WebGLBuffer
 
     constructor(gl: WebGLRenderingContext) {
         this.gl = gl
-        this.buffer = gl.createBuffer();
-        gl.bindBuffer( gl.ARRAY_BUFFER, this.buffer );
+        var buffer = gl.createBuffer();
+        gl.bindBuffer( gl.ARRAY_BUFFER, buffer );
         this.verts = new Float32Array([
             -1, -1,
             1, -1,
@@ -46,7 +45,6 @@ class Rect {
     }
 
     render() {
-        
         this.gl.drawArrays( this.gl.TRIANGLE_STRIP, 0, 4 );
     }
 
@@ -64,7 +62,6 @@ export class VideoGenerator {
 
     output?: WebGLTexture
     framebuffer?: WebGLFramebuffer
-    positionLocation: number
 
     constructor(options: VideoExtensionOptions) {
         this.options = options
@@ -89,14 +86,17 @@ export class VideoGenerator {
         gl.linkProgram( program );
         gl.useProgram( program );
 
-        this.positionLocation = gl.getAttribLocation( this.program, 'a_position' );
-
         // create fragment uniforms
         this.uResolution = new Uniform( gl, program, 'u_resolution', '2f' );
         this.uTime = new Uniform(gl, program, 'u_time', '1f' );
 
         // create position attrib
         this.billboard = new Rect( gl );
+
+        var positionLocation = gl.getAttribLocation( program, 'a_position' );
+        
+        gl.enableVertexAttribArray( positionLocation );
+        gl.vertexAttribPointer( positionLocation, 2, gl.FLOAT, false, 0, 0 );
 
         // we want to render to a texture, not to the canvas
         this.setupOutput()
@@ -112,9 +112,8 @@ export class VideoGenerator {
 
         // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
         this.framebuffer = gl.createFramebuffer();
+        
         const texture = gl.createTexture();
-
-        this.output = texture
  
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.options.width, this.options.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
@@ -123,10 +122,7 @@ export class VideoGenerator {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
+        this.output = texture
     }
 
     render(currentTime: number) {
@@ -135,21 +131,11 @@ export class VideoGenerator {
         gl.useProgram( this.program );
         this.uTime.set( currentTime );
 
-        gl.enableVertexAttribArray( this.positionLocation );
-
-        gl.bindBuffer( gl.ARRAY_BUFFER, this.billboard.buffer );
-        gl.vertexAttribPointer( this.positionLocation, 2, gl.FLOAT, false, 0, 0 );
-
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.output, 0);
 
         // render
         this.billboard.render();
-
-        gl.bindTexture(gl.TEXTURE_2D, this.output);
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-        gl.bindTexture(gl.TEXTURE_2D, null);
     }
         
     // ----- resize ----- //    
@@ -163,7 +149,6 @@ export class VideoGenerator {
         var shader = gl.createShader( type );
         gl.shaderSource( shader, source );
         gl.compileShader( shader );
-        
         var isCompiled = gl.getShaderParameter( shader, gl.COMPILE_STATUS );
         if ( !isCompiled ) {
           throw new Error( 'Shader compile error: ' + gl.getShaderInfoLog( shader ) );
@@ -183,7 +168,7 @@ uniform float u_time;
 
 void main() {
   vec2 pixel = gl_FragCoord.xy / u_resolution.xy;
-  float brightness = fract((u_time+5.0) / 3.0);
+  float brightness = fract(u_time / 10.0);
   gl_FragColor = vec4( pixel.y, 0.0, pixel.x, 1.0 ) * brightness;
 }
         `
