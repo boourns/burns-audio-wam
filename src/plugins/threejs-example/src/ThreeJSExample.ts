@@ -16,6 +16,11 @@ export class ThreeJSExample {
         this.setup(options.gl)
     }
 
+    destroy() {
+        this.texture.dispose()
+        this.renderer.setRenderTarget(null)
+    }
+
     mesh: THREE.Mesh
     renderer: THREE.WebGLRenderer
     scene: THREE.Scene
@@ -25,7 +30,7 @@ export class ThreeJSExample {
     setup(gl: WebGLRenderingContext) {
         console.log("Calling setup")
 
-        const camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 10 );
+        const camera = new THREE.PerspectiveCamera( 70, this.options.width / this.options.height, 0.01, 10 );
         camera.position.z = 1;
 
         const scene = new THREE.Scene();
@@ -34,26 +39,24 @@ export class ThreeJSExample {
         const material = new THREE.MeshNormalMaterial();
 
         const mesh = new THREE.Mesh( geometry, material );
-        scene.add( mesh );
 
-    const renderer = new THREE.WebGLRenderer( { antialias: true, context: gl } );
+        //scene.add( mesh );
 
-        renderer.setSize( window.innerWidth, window.innerHeight );
-        renderer.setAnimationLoop( this.render.bind(this) );
+        const renderer = new THREE.WebGLRenderer( { antialias: true, context: gl } );
 
-        document.body.appendChild( renderer.domElement );
+        renderer.setSize( this.options.width, this.options.height );
+
+        //document.body.appendChild( renderer.domElement );
 
         // Create the texture that will store our result
         var texture = new THREE.WebGLRenderTarget( this.options.width, this.options.height, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter});
  
-        console.log("finished setup")
+        renderer.setRenderTarget(texture)
 
-        //renderer.setRenderTarget(texture)
         renderer.render( scene, camera);
 
-        console.log(texture)
-
         this.output = renderer.properties.get(texture.texture).__webglTexture
+        scene.add( mesh );
 
         this.renderer = renderer
         this.camera = camera
@@ -64,16 +67,36 @@ export class ThreeJSExample {
         console.log("Finished threejs setup!")
     }
 
+    count = 0
+
     render(time: number) {
+        this.renderer.resetState()
+        this.renderer.setRenderTarget(this.texture)
+
+        this.count++
+        if (this.count < 1234) {
+            return
+        }
+
         if (!this.renderer) {
             return
         }
-        this.mesh.rotation.x = time / 2000;
+
+        //this.scene.clear()
+
+        // const geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
+        // const material = new THREE.MeshNormalMaterial();
+
+        // const mesh = new THREE.Mesh( geometry, material );
+
+        // this.scene.add( mesh );
+
+        this.mesh.rotation.x = (time+856) / 2000;
 	    this.mesh.rotation.y = time / 1000;
 
-        this.renderer.resetState()
 
 	    this.renderer.render( this.scene, this.camera);
+
     }
     
 }

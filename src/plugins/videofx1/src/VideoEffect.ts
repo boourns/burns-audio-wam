@@ -131,7 +131,7 @@ export class VideoEffect {
         this.output = texture
     }
 
-    render(currentTime: number) {
+    render(inputs: WebGLTexture[], currentTime: number) {
         let gl = this.options.gl;
 
         gl.useProgram( this.program );

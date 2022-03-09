@@ -77,6 +77,8 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
 				},
 				disconnectVideo: () => {
 					console.log("disconnectVideo")
+					
+					this.generator.destroy()
 				},
 			})
 		}

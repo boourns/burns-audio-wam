@@ -45,9 +45,12 @@ class Rect {
         gl.bufferData( gl.ARRAY_BUFFER, this.verts, gl.STATIC_DRAW );
     }
 
-    render() {
-        
+    render() {   
         this.gl.drawArrays( this.gl.TRIANGLE_STRIP, 0, 4 );
+    }
+
+    destroy() {
+        this.gl.deleteBuffer(this.buffer)
     }
 
 }
@@ -69,6 +72,17 @@ export class VideoGenerator {
     constructor(options: VideoExtensionOptions) {
         this.options = options
         this.setup(options.gl)
+    }
+
+    destroy() {
+        let gl = this.options.gl
+        console.log("Calling destroy")
+
+        gl.deleteFramebuffer(this.framebuffer)
+        gl.deleteTexture(this.output)
+        gl.deleteProgram(this.program)
+
+        this.billboard.destroy()
     }
 
     setup(gl: WebGLRenderingContext) {
@@ -108,6 +122,7 @@ export class VideoGenerator {
     }
 
     setupOutput() {
+
         let gl = this.options.gl
 
         // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
