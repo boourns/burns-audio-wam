@@ -2533,7 +2533,7 @@ resolve@^1.9.0:
     three: ^0.138.3
     ts-loader: ^8.0.12
     typescript: ^4.0.2
-    wam-extensions: ^0.2.1
+    wam-extensions: "boourns/wam-extensions#commit=49937941c6f48e175de3e399d2059b30f34cb5ef"
     webpack: ^5.11.1
     webpack-cli: ^4.3.0
   languageName: unknown
@@ -2625,12 +2625,12 @@ typescript@^4.0.2:
   languageName: node
   linkType: hard
 
-"wam-extensions@npm:^0.2.1":
+"wam-extensions@boourns/wam-extensions#commit=49937941c6f48e175de3e399d2059b30f34cb5ef":
   version: 0.2.1
-  resolution: "wam-extensions@npm:0.2.1"
+  resolution: "wam-extensions@https://github.com/boourns/wam-extensions.git#commit=49937941c6f48e175de3e399d2059b30f34cb5ef"
   peerDependencies:
     "@webaudiomodules/api": "*"
-  checksum: 7cac2b0aa0f10ae0cdff972c6b5be6004cd90df72a2ffa3fb45b502782f052112c5a8c3aff0124fa215f1b0b9da303a5e39655894a04eecbdf13a545cb10ce3c
+  checksum: fc5e2600a763834fecef5fc991b9bf7e1a8a99ed215ecf3637cbcf9c73f6e2a271f59cf67a1cc3151bb66a7a0115cf2ed472a562c2dc5794eb18dd34ab2372dd
   languageName: node
   linkType: hard
 

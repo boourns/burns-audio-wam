@@ -122,7 +122,6 @@ export class VideoGenerator {
     }
 
     setupOutput() {
-
         let gl = this.options.gl
 
         // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
@@ -144,7 +143,7 @@ export class VideoGenerator {
 
     }
 
-    render(currentTime: number) {
+    render(inputs: WebGLTexture[], currentTime: number): WebGLTexture[] {
         let gl = this.options.gl;
 
         gl.useProgram( this.program );
@@ -165,6 +164,8 @@ export class VideoGenerator {
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
         gl.bindTexture(gl.TEXTURE_2D, null);
+
+        return [this.output!]
     }
         
     // ----- resize ----- //    

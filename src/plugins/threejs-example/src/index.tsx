@@ -68,12 +68,16 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
 
 		if (window.WAMExtensions && window.WAMExtensions.video) {
 			window.WAMExtensions.video.setDelegate(this.instanceId, {
-				connectVideo: (options: VideoExtensionOptions, input?: WebGLTexture) => {
+				connectVideo: (options: VideoExtensionOptions) => {
 					console.log("connectVideo!")
-					return this.attach(options, input)
+					this.attach(options)
+					return {
+						numberOfInputs: 1,
+						numberOfOutputs: 1,
+					}
 				},
-				render: (currentTime: number) => {
-					this.generator.render(currentTime)
+				render: (inputs: WebGLTexture[], currentTime: number): WebGLTexture[] => {
+					return this.generator.render(inputs, currentTime)
 				},
 				disconnectVideo: () => {
 					console.log("disconnectVideo")
@@ -89,8 +93,8 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
 	gl: WebGLRenderingContext
 	generator: ThreeJSExample
 
-	attach(options: VideoExtensionOptions, input?: WebGLTexture): WebGLTexture {
-		this.generator = new ThreeJSExample(options, input)
+	attach(options: VideoExtensionOptions): WebGLTexture {
+		this.generator = new ThreeJSExample(options)
 
 		// if (!this.generator.output) {
 		// 	throw new Error("VideoGenerator did not instantiate it's output texture!")

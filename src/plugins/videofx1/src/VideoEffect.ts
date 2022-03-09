@@ -131,7 +131,7 @@ export class VideoEffect {
         this.output = texture
     }
 
-    render(inputs: WebGLTexture[], currentTime: number) {
+    render(inputs: WebGLTexture[], currentTime: number): WebGLTexture[] {
         let gl = this.options.gl;
 
         gl.useProgram( this.program );
@@ -143,7 +143,7 @@ export class VideoEffect {
         gl.vertexAttribPointer( this.positionLocation, 2, gl.FLOAT, false, 0, 0 );
 
         // bind input after binding output?
-        gl.bindTexture(gl.TEXTURE_2D, this.input);
+        gl.bindTexture(gl.TEXTURE_2D, inputs[0]);
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
 
         // render
@@ -152,6 +152,8 @@ export class VideoEffect {
         gl.bindTexture(gl.TEXTURE_2D, this.output);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.bindTexture(gl.TEXTURE_2D, null);
+
+        return [this.output]
     }
         
     // ----- resize ----- //    

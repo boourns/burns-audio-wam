@@ -6,12 +6,10 @@ import * as THREE from 'three';
 export class ThreeJSExample {
     options: VideoExtensionOptions
 
-    input?: WebGLTexture
     output?: WebGLTexture
 
-    constructor(options: VideoExtensionOptions, input: WebGLTexture) {
+    constructor(options: VideoExtensionOptions) {
         this.options = options
-        this.input = input
 
         this.setup(options.gl)
     }
@@ -40,22 +38,18 @@ export class ThreeJSExample {
 
         const mesh = new THREE.Mesh( geometry, material );
 
-        //scene.add( mesh );
+        scene.add( mesh );
 
         const renderer = new THREE.WebGLRenderer( { antialias: true, context: gl } );
 
         renderer.setSize( this.options.width, this.options.height );
 
-        //document.body.appendChild( renderer.domElement );
-
         // Create the texture that will store our result
         var texture = new THREE.WebGLRenderTarget( this.options.width, this.options.height, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter});
  
         renderer.setRenderTarget(texture)
-
         renderer.render( scene, camera);
 
-        this.output = renderer.properties.get(texture.texture).__webglTexture
         scene.add( mesh );
 
         this.renderer = renderer
@@ -69,20 +63,13 @@ export class ThreeJSExample {
 
     count = 0
 
-    render(time: number) {
+    render(inputs: WebGLTexture[], time: number): WebGLTexture[] {
         this.renderer.resetState()
         this.renderer.setRenderTarget(this.texture)
 
-        this.count++
-        if (this.count < 1234) {
-            return
-        }
+        this.output = this.renderer.properties.get(this.texture.texture).__webglTexture
 
-        if (!this.renderer) {
-            return
-        }
-
-        //this.scene.clear()
+        // this.scene.clear()
 
         // const geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
         // const material = new THREE.MeshNormalMaterial();
@@ -94,9 +81,9 @@ export class ThreeJSExample {
         this.mesh.rotation.x = (time+856) / 2000;
 	    this.mesh.rotation.y = time / 1000;
 
-
 	    this.renderer.render( this.scene, this.camera);
 
+        return [this.output!]
     }
     
 }

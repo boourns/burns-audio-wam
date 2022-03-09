@@ -13,6 +13,7 @@ import { VideoGenerator } from './VideoGenerator';
 import { VideoExtensionOptions } from 'wam-extensions';
 import { VideoGeneratorView } from './VideoGeneratorView';
 import { WamEventMap } from '@webaudiomodules/api';
+import { VideoModuleConfig } from 'wam-extensions/dist/video/VideoExtension';
 	
 class VideoGeneratorNode extends WamNode {
 	destroyed = false;
@@ -68,12 +69,16 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
 
 		if (window.WAMExtensions && window.WAMExtensions.video) {
 			window.WAMExtensions.video.setDelegate(this.instanceId, {
-				connectVideo: (options: VideoExtensionOptions, input?: WebGLTexture) => {
+				connectVideo: (options: VideoExtensionOptions): VideoModuleConfig => {
 					console.log("connectVideo!")
-					return this.attach(options, input)
+					this.attach(options)
+					return {
+						numberOfInputs: 0,
+						numberOfOutputs: 1
+					}
 				},
-				render: (currentTime: number) => {
-					this.generator.render(currentTime)
+				render: (inputs: WebGLTexture[], currentTime: number): WebGLTexture[] => {
+					return this.generator.render(inputs, currentTime)
 				},
 				disconnectVideo: () => {
 					console.log("disconnectVideo")
