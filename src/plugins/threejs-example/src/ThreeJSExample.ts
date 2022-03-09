@@ -78,8 +78,8 @@ export class ThreeJSExample {
 
         // this.scene.add( mesh );
 
-        this.mesh.rotation.x = (time+856) / 2000;
-	    this.mesh.rotation.y = time / 1000;
+        this.mesh.rotation.x = (time+856) / 2;
+	    this.mesh.rotation.y = time / 10;
 
 	    this.renderer.render( this.scene, this.camera);
 
