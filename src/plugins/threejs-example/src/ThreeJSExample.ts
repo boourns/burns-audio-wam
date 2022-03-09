@@ -74,9 +74,9 @@ export class ThreeJSExample {
         // const geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
         // const material = new THREE.MeshNormalMaterial();
 
-        // const mesh = new THREE.Mesh( geometry, material );
+        // this.mesh = new THREE.Mesh( geometry, material );
 
-        // this.scene.add( mesh );
+        // this.scene.add( this.mesh );
 
         this.mesh.rotation.x = (time+856) / 2;
 	    this.mesh.rotation.y = time / 10;
