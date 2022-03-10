@@ -30,7 +30,7 @@ class ThreeJSExampleNode extends DynamicParameterNode {
 		}}, 
 {
 	"offset1": {
-		type: 'int',
+		type: 'float',
 		label: 'Offset 1',
 		defaultValue: 0,
 		minValue: -24,
