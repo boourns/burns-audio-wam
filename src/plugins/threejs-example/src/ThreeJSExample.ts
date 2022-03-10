@@ -63,7 +63,7 @@ export class ThreeJSExample {
 
     count = 0
 
-    render(inputs: WebGLTexture[], time: number): WebGLTexture[] {
+    render(inputs: WebGLTexture[], time: number, offset: number): WebGLTexture[] {
         this.renderer.resetState()
         this.renderer.setRenderTarget(this.texture)
 
@@ -78,6 +78,8 @@ export class ThreeJSExample {
 
         // this.scene.add( this.mesh );
 
+        this.mesh.position.setX(offset);
+        
         this.mesh.rotation.x = (time+856) / 2;
 	    this.mesh.rotation.y = time / 10;
 

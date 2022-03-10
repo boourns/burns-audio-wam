@@ -1,13 +1,13 @@
 import { Component, h } from 'preact';
 import { Knob } from '../../shared/ui/Knob'
-import VideoGeneratorModule from '.';
+import ThreeJSExampleModule from '.';
 
 import {debug} from "debug"
 
 var logger = debug("plugin:chorder:view")
 
 export interface VideoGeneratorProps {
-  plugin: VideoGeneratorModule
+  plugin: ThreeJSExampleModule
 }
 
 type ChorderParams = {
