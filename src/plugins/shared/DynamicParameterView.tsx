@@ -28,11 +28,7 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
     numberChanged(id: string, value: number) {
         this.props.plugin.pause = true
 
-        console.log("state currently is ", this.props.plugin.state, id, value)
-
         this.props.plugin.state[id].value = value
-
-        console.log("value is",  this.props.plugin.state[id].value)
 
         this.props.plugin.setParameterValues(this.state)
         this.props.plugin.pause = false
