@@ -18,7 +18,6 @@ const loadDynamicParameterProcessor = (moduleId: string) => {
 
         constructor(options: any) {
             super(options);
-            console.log("HERE 6")
 
             this.parameters = {}
 
@@ -55,7 +54,6 @@ const loadDynamicParameterProcessor = (moduleId: string) => {
         async _onMessage(message: any): Promise<void> {
             if (message.data && message.data.source == "dpp") {
                 if (message.data.parameters) {
-                    console.log("TOM got new parameters")
 
                     let input = message.data.parameters as Record<string, WamParameterConfiguration>
                     let output: WamParameterInfoMap = {}
@@ -65,8 +63,6 @@ const loadDynamicParameterProcessor = (moduleId: string) => {
                     }
                     this.parameters = output
                     
-                    console.log("parameters now ", this.parameters)
-
                 }
             } else {
                 // @ts-ignore
