@@ -15,6 +15,9 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 
 import { FunctionSeqView } from './FunctionSeqView';
 import getFunctionSequencerProcessor from './FunctionSeqProcessor';
+
+import {MultiplayerExtensionInterface, MultiplayerState} from "wam-extensions";
+import { MultiplayerHandler } from './MultiplayerHandler';
 	
 class FunctionSeqNode extends WamNode {
 	destroyed = false;
@@ -96,6 +99,7 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_functionProcessorUrl = `${this._baseURL}/FunctionSeqProcessor.js`;
 	sequencer: FunctionSeqNode
+	multiplayer?: MultiplayerHandler;
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -113,7 +117,6 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 		// @ts-ignore
 		self.MonacoEnvironment = {
 			getWorkerUrl: function (moduleId: any, label: string) {
-				console.log("in getWorkerUrl, baseURL is ", baseURL)
 				if (label === 'json') {
 					return `${baseURL}/json.worker.bundle.js`;
 				}
@@ -146,6 +149,12 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 		node.setState(initialState || {script: this.defaultScript()});
 
 		this.sequencer = node
+
+		if (window.WAMExtensions.multiplayer) {
+			this.multiplayer = new MultiplayerHandler(this.instanceId)
+		} else {
+			console.warn("host has not implemented multiplayer WAM extension")
+		}
 
 		return node
     }

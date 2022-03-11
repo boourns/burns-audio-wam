@@ -1,8 +1,6 @@
 import { Component, h } from 'preact';
-import { Knob } from '../../shared/ui/Knob'
 
 import * as monaco from 'monaco-editor';
-
 import FunctionSeqModule from '.';
 
 export interface FunctionSeqViewProps {
@@ -17,7 +15,7 @@ type FunctionSeqViewState = {
 export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeqViewState> {
   statePoller: number
   ref: HTMLDivElement | null
-  editor: any
+  editor: monaco.editor.IStandaloneCodeEditor
 
   constructor() {
     super();
@@ -45,6 +43,11 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
 
   // Lifecycle: Called just before our component will be destroyed
   componentWillUnmount() {
+    if (this.props.plugin.multiplayer) {
+      this.props.plugin.multiplayer.unregisterEditor()
+    }
+    
+    this.editor.dispose()
   }
 
   runPressed() {
@@ -73,8 +76,11 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
       automaticLayout: true
     });
 
+    if (this.props.plugin.multiplayer) {
+      this.props.plugin.multiplayer.registerEditor(this.editor)
+    }
+
     this.editor.onDidChangeModelContent(this.editorChanged)
-    
   }
 
   render() {

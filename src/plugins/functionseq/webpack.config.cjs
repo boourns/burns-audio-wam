@@ -56,7 +56,7 @@ const WAMPlugin = {
       
     ],
   },
-  mode: "development",
+  mode: "production",
   resolve: {
     extensions: [ '.tsx', '.ts', '.js', ".css", ".scss" ],
   },
@@ -78,7 +78,7 @@ const WAMPlugin = {
 };
 
 const monaco = {
-  mode: 'development',
+  mode: 'production',
   entry: {
     'editor.worker': 'monaco-editor/esm/vs/editor/editor.worker.js',
     'json.worker': 'monaco-editor/esm/vs/language/json/json.worker',
@@ -89,7 +89,7 @@ const monaco = {
   output: {
     globalObject: 'self',
     filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'dist/monaco')
   },
   module: {
     rules: [

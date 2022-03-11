@@ -11,10 +11,12 @@
     "build": "./node_modules/.bin/webpack"
   },
   "dependencies": {
+    "@convergencelabs/monaco-collab-ext": "^0.3.2",
     "@types/debug": "^4.1.6",
     "debug": "^4.3.1",
     "monaco-editor": "^0.25.2",
-    "preact": "^10.5.5"
+    "preact": "^10.5.5",
+    "wam-extensions": "boourns/wam-extensions#commit=a2e68821229748718da826d51d0a33ead22c0f2f"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^9.0.0",
