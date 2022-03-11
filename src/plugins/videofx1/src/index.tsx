@@ -9,14 +9,14 @@ import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
 import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
-import { VideoEffect } from './VideoEffect';
+import { DynamicParameterNode } from "../../shared/DynamicParameterNode";
+
+import { ScanPanEffect } from './ScanPanEffect';
 import { VideoExtensionOptions } from 'wam-extensions';
-import { VideoGeneratorView } from './VideoGeneratorView';
-import { WamEventMap } from '@webaudiomodules/api';
+import { DynamicParameterView } from '../../shared/DynamicParameterView';
 	
-class VideoGeneratorNode extends WamNode {
+class ScanPanVideoNode extends DynamicParameterNode {
 	destroyed = false;
-	_supportedEventTypes: Set<keyof WamEventMap>
 
 	/**
 	 * @param {WebAudioModule} module
@@ -27,19 +27,67 @@ class VideoGeneratorNode extends WamNode {
 			numberOfInputs: 1,
 			numberOfOutputs: 1,
 			outputChannelCount: [2],
-		}});
+		}}, 
+[
+	{
+		name: "Params",
+		params: [
+			{
+				id: "centerX",
+				config:{
+					type: 'float',
+					label: 'Source Center X',
+					defaultValue: 0.5,
+					minValue: 0,
+					maxValue: 1
+				}
+			},
+			{
+				id: "centerY",
+				config: {
+					type: 'float',
+					label: 'Source Center Y',
+					defaultValue: 0.5,
+					minValue: 0,
+					maxValue: 1
+				}
+			},
+			{
+				id: "width",
+				config: {
+					type: 'float',
+					label: 'Crop Width',
+					defaultValue: 1.0,
+					minValue: 0,
+					maxValue: 1.0
+				},
+			},
+			{			
+				id: "height",
+				config: {
+					type: 'float',
+					label: 'Crop Height',
+					defaultValue: 1.0,
+					minValue: 0,
+					maxValue: 1.0
+				},
+			}
+		]
+	}
+]);
 
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi']);
 	}
+	
 }
 
-export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
+export default class VideoGeneratorModule extends WebAudioModule<ScanPanVideoNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
-	_processorUrl = `${this._baseURL}/VideoGenProcessor.js`;
+	_processorUrl = `${this._baseURL}/ScanPanProcessor.js`;
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -58,11 +106,13 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
 	}
 
 	async createAudioNode(initialState: any) {
-		await VideoGeneratorNode.addModules(this.audioContext, this.moduleId)
+		await ScanPanVideoNode.addModules(this.audioContext, this.moduleId)
 		await this.audioContext.audioWorklet.addModule(this._processorUrl)
 
-		const node: VideoGeneratorNode = new VideoGeneratorNode(this, {});
+		const node: ScanPanVideoNode = new ScanPanVideoNode(this, {});
 		await node._initialize();
+
+		await node.updateState();
 
 		if (initialState) node.setState(initialState);
 
@@ -77,7 +127,7 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
 					}
 				},
 				render: (inputs: WebGLTexture[], currentTime: number) => {
-					return this.generator.render(inputs, currentTime)
+					return this.generator.render(inputs, currentTime, this._audioNode.state)
 				},
 				disconnectVideo: () => {
 					console.log("disconnectVideo")
@@ -89,10 +139,10 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
     }
 
 	gl: WebGLRenderingContext
-	generator: VideoEffect
+	generator: ScanPanEffect
 
 	attach(options: VideoExtensionOptions, input?: WebGLTexture): WebGLTexture {
-		this.generator = new VideoEffect(options, input)
+		this.generator = new ScanPanEffect(options, input)
 
 		if (!this.generator.output) {
 			throw new Error("VideoGenerator did not instantiate it's output texture!")
@@ -119,7 +169,7 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
 		
 		//shadow.appendChild(container)
 
-		render(<VideoGeneratorView plugin={this}></VideoGeneratorView>, div);
+		render(<DynamicParameterView plugin={this._audioNode}></DynamicParameterView>, div);
 		return div;
 	}
 

@@ -2,6 +2,7 @@
 import { CompositeAudioNode, ParamMgrNode } from '@webaudiomodules/sdk-parammgr';
 import {ScheduledMIDIEvent} from '../../shared/midi'
 import { VideoExtensionOptions } from 'wam-extensions';
+import { VideoModuleConfig } from 'wam-extensions/dist/video/VideoExtension';
 
 export default class VideoInputNode extends CompositeAudioNode {
 	_wamNode: ParamMgrNode<string, string> = undefined;
@@ -67,12 +68,16 @@ export default class VideoInputNode extends CompositeAudioNode {
 
             if (window.WAMExtensions && window.WAMExtensions.video) {
                 window.WAMExtensions.video.setDelegate(this.instanceId, {
-                    connectVideo: (options: VideoExtensionOptions, input?: WebGLTexture) => {
+                    connectVideo: (options: VideoExtensionOptions): VideoModuleConfig => {
                         console.log("connectVideo!")
-                        return this.attach(options, input)
+                        this.attach(options)
+                        return {
+                            numberOfInputs: 0,
+                            numberOfOutputs: 1,
+                        }
                     },
-                    render: (currentTime: number) => {
-                       this.render()
+                    render: (inputs: WebGLTexture[], currentTime: number): WebGLTexture[] => {
+                       return [this.render()]
                     },
                     disconnectVideo: () => {
                         console.log("disconnectVideo")
@@ -96,7 +101,7 @@ export default class VideoInputNode extends CompositeAudioNode {
     texture?: WebGLTexture
     canvas?: HTMLCanvasElement
 
-    attach(config: VideoExtensionOptions, input?: WebGLTexture): WebGLTexture {
+    attach(config: VideoExtensionOptions, input?: WebGLTexture) {
 		this.config = config
         let gl = this.config.gl
                 
@@ -119,11 +124,9 @@ export default class VideoInputNode extends CompositeAudioNode {
 
 
         this.render()
-
-		return this.texture
 	}
 
-    render() {
+    render(): WebGLTexture {
         let gl = this.config.gl
 
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
@@ -141,6 +144,8 @@ export default class VideoInputNode extends CompositeAudioNode {
         //gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.sourceVideo);
 
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, this.sourceVideo);
+
+        return this.texture
     }
 
     // MIDI handling

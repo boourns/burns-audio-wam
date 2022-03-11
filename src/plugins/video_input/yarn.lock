@@ -4952,18 +4952,18 @@ typescript@^4.0.2:
     rollup-plugin-node-builtins: ^2.1.2
     ts-loader: ^8.0.12
     typescript: ^4.0.2
-    wam-extensions: ^0.2.0
+    wam-extensions: "boourns/wam-extensions#commit=49937941c6f48e175de3e399d2059b30f34cb5ef"
     webpack: ^5.11.1
     webpack-cli: ^4.3.0
   languageName: unknown
   linkType: soft
 
-"wam-extensions@npm:^0.2.0":
-  version: 0.2.0
-  resolution: "wam-extensions@npm:0.2.0"
+"wam-extensions@boourns/wam-extensions#commit=49937941c6f48e175de3e399d2059b30f34cb5ef":
+  version: 0.2.1
+  resolution: "wam-extensions@https://github.com/boourns/wam-extensions.git#commit=49937941c6f48e175de3e399d2059b30f34cb5ef"
   peerDependencies:
     "@webaudiomodules/api": "*"
-  checksum: 0120b9399b0d4d53051b4436f00fb9a8f44fd5914965cda9ecdd0e07cda5ee27932528424ba123079f32c9582428d1a36ca25c9cabd22fdd5f36fe05c5ba4477
+  checksum: fc5e2600a763834fecef5fc991b9bf7e1a8a99ed215ecf3637cbcf9c73f6e2a271f59cf67a1cc3151bb66a7a0115cf2ed472a562c2dc5794eb18dd34ab2372dd
   languageName: node
   linkType: hard
 

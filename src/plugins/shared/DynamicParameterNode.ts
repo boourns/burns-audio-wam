@@ -2,12 +2,24 @@ import { WamParameterConfiguration, WamParameterDataMap, WamParameterInfo, WamPa
 import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk';
 import loadDynamicParameterProcessor from "./DynamicParameterProcessor"
 
+export type DynamicParamEntry = {
+    id: string
+    config: WamParameterConfiguration
+}
+
+export type DynamicParamGroup = {
+    name: string
+    params: DynamicParamEntry[]
+}
+
 export class DynamicParameterNode extends WamNode {
     destroyed = false;
-    wamParameters: Record<string, WamParameterConfiguration>
+    groupedParameters: DynamicParamGroup[]
     
     state: WamParameterDataMap
     statePoller: number
+    schemaUpdateCallback?: () => void
+    pause: boolean
 
     static async addModules(audioContext: BaseAudioContext, moduleId: string): Promise<void> {
         await super.addModules(audioContext, moduleId)
@@ -20,27 +32,49 @@ export class DynamicParameterNode extends WamNode {
 	 * @param {WebAudioModule} module
 	 * @param {AudioWorkletNodeOptions} options
 	 */
-	constructor(module: WebAudioModule, options: AudioWorkletNodeOptions, parameters: Record<string, WamParameterConfiguration>) {
+	constructor(module: WebAudioModule, options: AudioWorkletNodeOptions, groups: DynamicParamGroup[]) {
 		super(module, options);
+        this.pause = false
 
-        this.updateProcessor(parameters);
+        this.updateProcessor(groups);
 
         this.updateState = this.updateState.bind(this)
-        
-        this.updateState();
 	}
 
-    updateProcessor(parameters: Record<string, WamParameterConfiguration>) {
-        this.wamParameters = parameters;
+    initializeDefaultState() {
 
-        super.port.postMessage({source:"dpp", parameters: this.wamParameters})
+    }
+
+    updateProcessor(groups: DynamicParamGroup[]) {
+        this.groupedParameters = groups
+
+        let params: Record<string, WamParameterConfiguration> = {}
+        let state: WamParameterDataMap = {}
+
+        for (let g of groups) {
+            for (let p of g.params) {
+                params[p.id] = p.config
+                state[p.id] = {id: p.id, value: p.config.defaultValue ?? 0, normalized: false}
+            }
+        }
+
+        this.state = state
+
+        super.port.postMessage({source:"dpp", parameters: params})
+
+        if (this.schemaUpdateCallback) {
+            this.schemaUpdateCallback()
+        }
     }
 
     async updateState() {
-        this.state = await this.getParameterValues(false)
+        if (this.pause) {
+            this.state = await this.getParameterValues(false)
+        }
     
         if (!this.destroyed) {
             this.statePoller = window.requestAnimationFrame(this.updateState)
         }
     }
+
 }

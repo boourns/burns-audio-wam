@@ -25,7 +25,7 @@
     "rollup": "^2.42.1",
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-node-builtins": "^2.1.2",
-    "wam-extensions": "^0.2.0"
+    "wam-extensions": "boourns/wam-extensions#commit=49937941c6f48e175de3e399d2059b30f34cb5ef"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.12.13",
