@@ -4,6 +4,8 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
+import * as monaco from 'monaco-editor';
+
 import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk';
 import { h, render } from 'preact';
 
@@ -97,6 +99,7 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
+		console.log("descriptor url is ", url)
 		if (!url) throw new TypeError('Descriptor not found');
 		const response = await fetch(url);
 		const descriptor = await response.json();
@@ -105,8 +108,32 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 		return descriptor
 	}
 
+	configureMonaco() {
+		const baseURL = this._baseURL
+		// @ts-ignore
+		self.MonacoEnvironment = {
+			getWorkerUrl: function (moduleId: any, label: string) {
+				console.log("in getWorkerUrl, baseURL is ", baseURL)
+				if (label === 'json') {
+					return `${baseURL}/json.worker.bundle.js`;
+				}
+				if (label === 'css' || label === 'scss' || label === 'less') {
+					return `${baseURL}/css.worker.bundle.js`;
+				}
+				if (label === 'html' || label === 'handlebars' || label === 'razor') {
+					return `${baseURL}/html.worker.bundle.js`;
+				}
+				if (label === 'typescript' || label === 'javascript') {
+					return `${baseURL}/ts.worker.bundle.js`;
+				}
+				return `${baseURL}/editor.worker.bundle.js`;
+			}
+		}
+	}
+
 	async initialize(state: any) {
 		await this._loadDescriptor();
+		this.configureMonaco();
 
 		return super.initialize(state);
 	}

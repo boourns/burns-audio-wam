@@ -1,9 +1,9 @@
 import { Component, h } from 'preact';
 import { Knob } from '../../shared/ui/Knob'
 
+import * as monaco from 'monaco-editor';
+
 import FunctionSeqModule from '.';
-import type Monaco from '@monaco-editor/loader'
-import loader from '@monaco-editor/loader';
 
 export interface FunctionSeqViewProps {
   plugin: FunctionSeqModule
@@ -66,14 +66,15 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
       return
     }
     this.ref = ref
-    loader.init().then(monaco => {
-      this.editor = monaco.editor.create(ref, {
-        value: this.props.plugin.sequencer.script,
-        language: 'javascript',
-        automaticLayout: true
-      });
-      this.editor.onDidChangeModelContent(this.editorChanged)
-    });  
+
+    this.editor = monaco.editor.create(ref, {
+      value: this.props.plugin.sequencer.script,
+      language: 'javascript',
+      automaticLayout: true
+    });
+
+    this.editor.onDidChangeModelContent(this.editorChanged)
+    
   }
 
   render() {

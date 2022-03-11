@@ -17,7 +17,6 @@
     "preact": "^10.5.5"
   },
   "devDependencies": {
-    "@monaco-editor/loader": "^1.0.1",
     "copy-webpack-plugin": "^9.0.0",
     "css-loader": "^6.2.0",
     "css-modules-typescript-loader": "^4.0.1",
