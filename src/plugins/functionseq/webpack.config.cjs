@@ -56,7 +56,7 @@ const WAMPlugin = {
       
     ],
   },
-  mode: "production",
+  mode: "development",
   resolve: {
     extensions: [ '.tsx', '.ts', '.js', ".css", ".scss" ],
   },
@@ -78,7 +78,7 @@ const WAMPlugin = {
 };
 
 const monaco = {
-  mode: 'production',
+  mode: 'development',
   entry: {
     'editor.worker': 'monaco-editor/esm/vs/editor/editor.worker.js',
     'json.worker': 'monaco-editor/esm/vs/language/json/json.worker',
