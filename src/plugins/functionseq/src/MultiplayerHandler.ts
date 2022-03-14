@@ -12,11 +12,7 @@ type CursorState = {
     cursor?: any
     selection?: any
     
-    cursorOffset?: number
-    selectionOffset?: SelectionOffset
-
     userId: string
-    delete?: boolean
 }
 
 export class MultiplayerHandler {
@@ -27,11 +23,11 @@ export class MultiplayerHandler {
     cursorManager?: MonacoCollabExt.RemoteCursorManager
     selectionManager?: MonacoCollabExt.RemoteSelectionManager
 
-    cursors: CursorState[]
+    cursors: Map<string, CursorState>
 
     constructor(instanceId: string) {
         this.instanceId = instanceId
-        this.cursors = []
+        this.cursors = new Map()
 
         window.WAMExtensions.multiplayer.register(this.instanceId, {
             userListUpdated: (userState: MultiplayerState) => {
@@ -128,26 +124,61 @@ export class MultiplayerHandler {
         }
     }
 
+    deleteUserState(userId: string) {
+        let cursor = this.cursors.get(userId)
+        if (!cursor) {
+            return
+        }
+        if (cursor.cursor) {
+            cursor
+        }
+        this.cursors.delete(userId)
+
+    }
+
     updateCursor(userId: string, offset: number) {
-        let existing = this.cursors.find(c => c.userId == userId)
-        if (!existing) {
-            console.log("pushing new cursor for ", userId)
-            this.cursors.push({userId, cursorOffset: offset})
-        } else {
-            existing.cursorOffset = offset
+        if (!this.cursors.has(userId)) {
+            this.cursors.set(userId, {userId})
+        }
+        let cursor = this.cursors.get(userId)
+
+        let user = this.userState.users.find(u => u.id == cursor.userId)
+        if (!user) {
+            this.deleteUserState(userId)
+            return
         }
 
-        this.syncToEditor()
+        if (!cursor.cursor) {
+            cursor.cursor = this.cursorManager.addCursor(user.id, user.color, user.name);
+        }
+
+        cursor.cursor.setOffset(offset)
     }
 
     updateSelection(userId: string, start: number, end: number) {
-        let existing = this.cursors.find(c => c.userId == userId)
-        if (!existing) {
-            console.log("pushing new cursor for ", userId)
-            this.cursors.push({userId, selectionOffset: {start, end}})
-        } else {
-            existing.selectionOffset = {start, end}
+        if (!this.cursors.has(userId)) {
+            this.cursors.set(userId, {userId})
         }
+        let cursor = this.cursors.get(userId)
+
+        let user = this.userState.users.find(u => u.id == cursor.userId)
+        if (!user) {
+            if (cursor) {
+                this.cursorManager.removeCursor(cursor.cursor)
+                this.cursorManager.addCursor()
+                this.selectionManager.removeSelection(userId)
+            }
+            this.cursors.delete(userId)
+            
+            return
+        }
+
+        if (!cursor.selection) {
+            cursor.selection = this.selectionManager.addSelection(user.id, user.color, user.name);
+        }
+
+        this.selectionManager.setSelectionOffsets(user.id, start, end)
+
 
         this.syncToEditor()
     }
