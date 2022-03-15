@@ -5,6 +5,13 @@ __metadata:
   version: 5
   cacheKey: 8
 
+"@types/dom-mediacapture-record@npm:^1.0.11":
+  version: 1.0.11
+  resolution: "@types/dom-mediacapture-record@npm:1.0.11"
+  checksum: b2660de6fdaf21d854f148437b1be3c49bab989b7425a65d433afefa64cd5b263608d78e88140674fab8410c6278b705bdc8c78e5f1c851f8a29e55eb79fec4a
+  languageName: node
+  linkType: hard
+
 "@webaudiomodules/api@webaudiomodules/api#commit=3ca912e8e08e66917eba22c330e85554932de494":
   version: 2.0.0-alpha.3
   resolution: "@webaudiomodules/api@https://github.com/webaudiomodules/api.git#commit=3ca912e8e08e66917eba22c330e85554932de494"
@@ -30,6 +37,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "burns-audio-wam@workspace:."
   dependencies:
+    "@types/dom-mediacapture-record": ^1.0.11
     "@webaudiomodules/api": "webaudiomodules/api#commit=3ca912e8e08e66917eba22c330e85554932de494"
     "@webaudiomodules/sdk": "webaudiomodules/sdk#commit=810ba256f58385c0d50c16e36c82c7818bd01ead"
     "@webaudiomodules/sdk-parammgr": "webaudiomodules/sdk-parammgr#commit=6eb3bc85fc30144502043f456f47268a62d3db5a"

@@ -14,6 +14,8 @@ import { DynamicParameterNode } from "../../shared/DynamicParameterNode";
 import { ScanPanEffect } from './ScanPanEffect';
 import { VideoExtensionOptions } from 'wam-extensions';
 import { DynamicParameterView } from '../../shared/DynamicParameterView';
+import { MirrorEffect } from './MirrorEffect';
+import { ISFShader } from './ISFShader';
 	
 class ScanPanVideoNode extends DynamicParameterNode {
 	destroyed = false;
@@ -139,16 +141,10 @@ export default class VideoGeneratorModule extends WebAudioModule<ScanPanVideoNod
     }
 
 	gl: WebGLRenderingContext
-	generator: ScanPanEffect
+	generator: ISFShader
 
-	attach(options: VideoExtensionOptions, input?: WebGLTexture): WebGLTexture {
-		this.generator = new ScanPanEffect(options, input)
-
-		if (!this.generator.output) {
-			throw new Error("VideoGenerator did not instantiate it's output texture!")
-		}
-
-		return this.generator.output
+	attach(options: VideoExtensionOptions) {
+		this.generator = new ISFShader(options, "", undefined)
 	}
 
 	// Random color helper function.
