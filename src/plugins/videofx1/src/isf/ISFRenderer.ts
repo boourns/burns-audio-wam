@@ -125,12 +125,12 @@ export class ISFRenderer {
   }
   setupPaintToScreen() {
     this.paintProgram = new ISFGLProgram(this.gl, this.basicVertexShader, this.basicFragmentShader);
-    return this.paintProgram.bindVertices();
+    return this.paintProgram.initVertices();
   }
   setupGL() {
     this.cleanup();
     this.program = new ISFGLProgram(this.gl, this.vertexShader, this.fragmentShader);
-    this.program.bindVertices();
+    this.program.initVertices();
     this.generatePersistentBuffers();
   }
   generatePersistentBuffers() {
@@ -311,6 +311,7 @@ export class ISFRenderer {
   draw(width: number, height: number): WebGLTexture | undefined {
     this.contextState.reset();
     this.program.use();
+    this.program.bindVertices();
     this.setDateUniforms();
 
     const buffers = this.renderBuffers;

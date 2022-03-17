@@ -19,20 +19,30 @@ class ISFGLProgram {
   getUniformLocation(name: string) {
     return this.gl.getUniformLocation(this.program, name);
   }
-  bindVertices() {
+
+  initVertices() {
     this.use();
     const positionLocation = this.gl.getAttribLocation(this.program, 'isf_position');
     this.buffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
+
     const vertexArray = new Float32Array(
       [-1.0, -1.0, 1.0,
       -1.0, -1.0, 1.0,
       -1.0, 1.0, 1.0,
       -1.0, 1.0, 1.0]);
     this.gl.bufferData(this.gl.ARRAY_BUFFER, vertexArray, this.gl.STATIC_DRAW);
+
+  }
+  bindVertices() {
+    this.use();
+    const positionLocation = this.gl.getAttribLocation(this.program, 'isf_position');
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
+   
     this.gl.enableVertexAttribArray(positionLocation);
     this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
   }
+  
   cleanup() {
     this.gl.deleteShader(this.fShader);
     this.gl.deleteShader(this.vShader);
