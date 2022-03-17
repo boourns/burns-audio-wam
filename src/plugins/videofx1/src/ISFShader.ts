@@ -11,7 +11,7 @@ export class ISFShader {
         this.renderer = new ISFRenderer(options.gl)
         this.renderer.setupOutput(options.width, options.height)
         this.options = options
-        this.renderer.loadSource(this.exampleISF2(), vertexSrc);     
+        this.renderer.loadSource(this.exampleISF(), vertexSrc);     
         this.canvas = document.createElement("canvas")
         this.canvas.setAttribute("width", `${options.height}`)
         this.canvas.setAttribute("height", `${options.width}`)
@@ -23,9 +23,9 @@ export class ISFShader {
     }
 
     render(inputs: WebGLTexture[], currentTime: number, params: WamParameterDataMap): WebGLTexture[] {
-        //this.renderer.setValue("TIME", currentTime)
+        this.renderer.setValue("TIME", currentTime)
         
-        //this.renderer.setValue("inputImage", inputs[0])
+        this.renderer.setValue("inputImage", inputs[0])
         
         let output = this.renderer.draw(this.options.width, this.options.height)
         return [output]
