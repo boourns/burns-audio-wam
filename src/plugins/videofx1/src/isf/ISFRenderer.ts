@@ -29,8 +29,11 @@ export class ISFRenderer {
   basicFragmentShader: string;
   renderBuffers: any[];
 
+  outputFramebuffer: WebGLFramebuffer;
+  outputTexture: WebGLTexture;
+
   constructor(gl: WebGLRenderingContext) {
-    this.gl = gl;
+    this.gl = gl
     this.uniforms = [];
     this.contextState = new ISFGLState(this.gl);
     this.setupPaintToScreen();
@@ -305,7 +308,7 @@ export class ISFRenderer {
     this.setValue('DATE', [date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours() * 3600 + date.getMinutes() * 60 + date.getSeconds()]);
     this.lastRenderTime = now;
   }
-  draw(destination: HTMLCanvasElement) {
+  draw(width: number, height: number): WebGLTexture | undefined {
     this.contextState.reset();
     this.program.use();
     this.setDateUniforms();
@@ -329,8 +332,8 @@ export class ISFRenderer {
       this.setValue('PASSINDEX', i);
       const buffer = pass.buffer;
       if (pass.target) {
-        const w = this.evaluateSize(destination, pass.width);
-        const h = this.evaluateSize(destination, pass.height);
+        const w = this.evaluateSize(width, height, pass.width);
+        const h = this.evaluateSize(width, height, pass.height);
         buffer.setSize(w, h);
         const writeTexture = buffer.writeTexture();
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, buffer.fbo);
@@ -344,29 +347,61 @@ export class ISFRenderer {
         lastTarget = buffer;
         this.gl.viewport(0, 0, w, h);
       } else {
-        const renderWidth = destination.width;
-        const renderHeight = destination.height;
+        if (!this.outputFramebuffer) {
+          throw new Error("Must call this.setupOutput first!")
+        }
+        const renderWidth = width;
+        const renderHeight = height;
         this.gl.bindTexture(this.gl.TEXTURE_2D, null);
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.outputFramebuffer);
         this.setValue('RENDERSIZE', [renderWidth, renderHeight]);
         lastTarget = null;
         this.gl.viewport(0, 0, renderWidth, renderHeight);
       }
       this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
-      this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+
+      this.gl.bindTexture(this.gl.TEXTURE_2D, this.outputTexture);
       this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+      this.gl.bindTexture(this.gl.TEXTURE_2D, null);
     }
 
     for (let i = 0; i < buffers.length; ++i) {
       buffers[i].flip();
     }
     if (lastTarget) {
-      this.paintToScreen(destination, lastTarget);
+      // this happens only if we had a multi-pass render
+      return lastTarget.readTexture().texture
+    } else {
+      return this.outputTexture;
     }
   }
-  evaluateSize(destination: any, formula: string) {
+
+  setupOutput(width: number, height: number) {
+    let gl = this.gl
+
+    // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
+    this.outputFramebuffer = gl.createFramebuffer();
+    
+    const texture = gl.createTexture();
+
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.outputFramebuffer);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+    
+    gl.bindTexture(gl.TEXTURE_2D, null);
+
+    this.outputTexture = texture
+  }
+
+  evaluateSize(width: number, height: number, formula: string) {
     formula += '';
-    let s = formula.replace('$WIDTH', destination.offsetWidth || destination.width).replace('$HEIGHT', destination.offsetHeight || destination.height);
+    let s = formula.replace('$WIDTH', `${width}`).replace('$HEIGHT', `${height}`);
     for (const name in this.uniforms) {
       if ({}.hasOwnProperty.call(this.uniforms, name)) {
         const uniform = this.uniforms[name];
