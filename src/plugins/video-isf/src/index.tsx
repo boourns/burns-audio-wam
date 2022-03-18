@@ -110,7 +110,6 @@ export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
 	getRandomColor() {
 		return [Math.random(), Math.random(), Math.random()];
 	}
-	
 
 	async createGui() {
 		const div = document.createElement('div');

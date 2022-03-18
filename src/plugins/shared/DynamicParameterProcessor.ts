@@ -1,4 +1,4 @@
-import { AudioWorkletGlobalScope, WamParameterConfiguration, WamParameterInfo, WamParameterInfoMap } from "@webaudiomodules/api";
+import { AudioWorkletGlobalScope, WamParameterConfiguration, WamParameterData, WamParameterInfo, WamParameterInfoMap } from "@webaudiomodules/api";
 
 const loadDynamicParameterProcessor = (moduleId: string) => {
     const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
@@ -62,6 +62,22 @@ const loadDynamicParameterProcessor = (moduleId: string) => {
                         output[key] = new WamParameterInfo(key, input[key])
                     }
                     this.parameters = output
+                    let oldState = this._parameterState
+
+                    this._initialize()
+                    for (let paramID of Object.keys(oldState)) {
+                        if (!!this._parameterState[paramID]) {
+                            let update: WamParameterData = {
+                                id: oldState[paramID].id,
+                                value: oldState[paramID].value,
+                                normalized: false,
+                            }
+                            this._setParameterValue(update, false)
+
+                            // this is a hack and should be unnecessary.
+                            this._parameterState[paramID].value = oldState[paramID].value
+                        }
+                    }
                     
                 }
             } else {

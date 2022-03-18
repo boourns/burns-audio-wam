@@ -2,6 +2,7 @@ import { Component, h } from "preact";
 import { DynamicParamEntry, DynamicParameterNode, DynamicParamGroup } from "./DynamicParameterNode";
 import { Knob } from "../shared/ui/Knob"
 import { Select } from "../shared/ui/Select"
+import { WamParameterData, WamParameterDataMap } from "@webaudiomodules/api";
 
 
 export interface DPProps {
@@ -32,7 +33,10 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
 
         this.props.plugin.state[id].value = value
 
-        this.props.plugin.setParameterValues(this.state)
+        let update: WamParameterDataMap = {}
+        update[id] = this.props.plugin.state[id]
+
+        this.props.plugin.setParameterValues(update)
         this.props.plugin.pause = false
 
     }
@@ -63,8 +67,6 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
                                options={["off", "on"]}
                                value={() => this.props.plugin.state[p.id].value}
                                label={p.config.label || p.id}
-
-
                     >
                 </Select>  
                 default:

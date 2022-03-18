@@ -20,6 +20,7 @@ export class DynamicParameterNode extends WamNode {
     statePoller: number
     schemaUpdateCallback?: () => void
     pause: boolean
+    lastSetState?: any
 
     static async addModules(audioContext: BaseAudioContext, moduleId: string): Promise<void> {
         await super.addModules(audioContext, moduleId)
@@ -45,6 +46,11 @@ export class DynamicParameterNode extends WamNode {
 
     }
 
+    async setState(state: any): Promise<void> {
+        this.lastSetState = state
+        await super.setState(state)
+    }
+
     updateProcessor(groups: DynamicParamGroup[]) {
         this.groupedParameters = groups
 
@@ -62,18 +68,22 @@ export class DynamicParameterNode extends WamNode {
 
         super.port.postMessage({source:"dpp", parameters: params})
 
+        if (this.lastSetState) {
+            super.setState(this.lastSetState)
+        }
+
         if (this.schemaUpdateCallback) {
             this.schemaUpdateCallback()
         }
     }
 
     async updateState() {
-        if (this.pause) {
+        if (!this.pause) {
             this.state = await this.getParameterValues(false)
         }
     
         if (!this.destroyed) {
-            this.statePoller = window.requestAnimationFrame(this.updateState)
+            this.statePoller = window.setTimeout(this.updateState, 100)
         }
     }
 

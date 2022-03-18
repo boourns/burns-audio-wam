@@ -14,8 +14,6 @@ export class ISFShader {
         this.renderer.setupOutput(options.width, options.height)
         this.options = options
         this.renderer.loadSource(this.edgesFS(), this.edgesVS());     
-
-        console.log("uniforms are: ", this.renderer.uniforms)
     }
 
     wamParameters(): DynamicParamGroup[] {
@@ -31,7 +29,7 @@ export class ISFShader {
               config: {
                 type: "boolean",
                 defaultValue: !!input.DEFAULT ? 1 : 0,
-                label: input.NAME
+                label: input.NAME,
               }
             })
             break
