@@ -83,7 +83,7 @@ export class DynamicParameterNode extends WamNode {
         }
     
         if (!this.destroyed) {
-            this.statePoller = window.setTimeout(this.updateState, 100)
+            this.statePoller = window.requestAnimationFrame(this.updateState)
         }
     }
 

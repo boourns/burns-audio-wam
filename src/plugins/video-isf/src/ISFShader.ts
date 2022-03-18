@@ -13,7 +13,7 @@ export class ISFShader {
         this.renderer = new ISFRenderer(options.gl)
         this.renderer.setupOutput(options.width, options.height)
         this.options = options
-        this.renderer.loadSource(this.edgesFS(), this.edgesVS());     
+        this.renderer.loadSource(this.exampleISF(), this.edgesVS());     
     }
 
     wamParameters(): DynamicParamGroup[] {
