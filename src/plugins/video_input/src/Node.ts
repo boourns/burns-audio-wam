@@ -61,6 +61,7 @@ export default class VideoInputNode extends CompositeAudioNode {
             this.sourceVideo = document.createElement("video")
             this.sourceVideo.srcObject = stream;
             this.sourceVideo.play();
+            this.sourceVideo.setAttribute("style", "display: none;")
 
             document.body.appendChild(this.sourceVideo)
 
@@ -118,10 +119,10 @@ export default class VideoInputNode extends CompositeAudioNode {
         ctx.fillStyle = "rgb(255, 128, 64)";
         ctx.font = "40px Arial";
         ctx.fillText("some text", 128 - 64, 128);
+        c.setAttribute("style", "display: none;")
         this.canvas = c
 
         document.body.appendChild(this.canvas)
-
 
         this.render()
 	}
@@ -132,14 +133,14 @@ export default class VideoInputNode extends CompositeAudioNode {
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
         // No, it's not a power of 2. Turn off mips and set
-       // wrapping to clamp to edge
-       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        // wrapping to clamp to edge
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 
        // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
-        //gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
         //gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.sourceVideo);
 

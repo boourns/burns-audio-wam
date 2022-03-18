@@ -5,21 +5,15 @@ import {VideoExtensionOptions} from "wam-extensions"
 export class ISFShader {
     options: VideoExtensionOptions
     renderer: ISFRenderer
-    canvas: HTMLCanvasElement
 
     constructor(options: VideoExtensionOptions, fragmentSrc:string, vertexSrc?: string) {
         this.renderer = new ISFRenderer(options.gl)
         this.renderer.setupOutput(options.width, options.height)
         this.options = options
         this.renderer.loadSource(this.edgesFS(), this.edgesVS());     
-        this.canvas = document.createElement("canvas")
-        this.canvas.setAttribute("width", `${options.height}`)
-        this.canvas.setAttribute("height", `${options.width}`)
 
         console.log("TOM HERE")
         console.log("uniforms are: ", this.renderer.uniforms)
-
-        document.body.appendChild(this.canvas)
     }
 
     render(inputs: WebGLTexture[], currentTime: number, params: WamParameterDataMap): WebGLTexture[] {
