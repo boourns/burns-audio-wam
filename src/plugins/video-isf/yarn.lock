@@ -632,6 +632,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"complex.js@npm:2.0.11":
+  version: 2.0.11
+  resolution: "complex.js@npm:2.0.11"
+  checksum: 3c25d629b217bc30450a4f7d9e877550aadc21ac0cd7a8bee715675f71ec2f5d63b15edbfd1d49fab6239487a491ca032d7d5a0969d99a132c80458bc71b6acd
+  languageName: node
+  linkType: hard
+
 "concat-map@npm:0.0.1":
   version: 0.0.1
   resolution: "concat-map@npm:0.0.1"
@@ -738,6 +745,13 @@ __metadata:
     supports-color:
       optional: true
   checksum: 2c3352e37d5c46b0d203317cd45ea0e26b2c99f2d9dfec8b128e6ceba90dfb65425f5331bf3020fe9929d7da8c16758e737f4f3bfc0fce6b8b3d503bae03298b
+  languageName: node
+  linkType: hard
+
+"decimal.js@npm:10.2.0":
+  version: 10.2.0
+  resolution: "decimal.js@npm:10.2.0"
+  checksum: 4844fc8f8214a4a4a589317533af40a5ec42e6d3abf29f9d6692d09038f29eb0242d9389e406fcd977e783e457b046925fd077c673742407bb4412525e9fd615
   languageName: node
   linkType: hard
 
@@ -853,6 +867,13 @@ __metadata:
   version: 3.1.1
   resolution: "escalade@npm:3.1.1"
   checksum: a3e2a99f07acb74b3ad4989c48ca0c3140f69f923e56d0cba0526240ee470b91010f9d39001f2a4a313841d237ede70a729e92125191ba5d21e74b106800b133
+  languageName: node
+  linkType: hard
+
+"escape-latex@npm:1.2.0":
+  version: 1.2.0
+  resolution: "escape-latex@npm:1.2.0"
+  checksum: 73a787319f0965ecb8244bb38bf3a3cba872f0b9a5d3da8821140e9f39fe977045dc953a62b1a2bed4d12bfccbe75a7d8ec786412bf00739eaa2f627d0a8e0d6
   languageName: node
   linkType: hard
 
@@ -972,6 +993,13 @@ __metadata:
     locate-path: ^5.0.0
     path-exists: ^4.0.0
   checksum: 4c172680e8f8c1f78839486e14a43ef82e9decd0e74145f40707cc42e7420506d5ec92d9a11c22bd2c48fb0c384ea05dd30e10dd152fefeec6f2f75282a8b844
+  languageName: node
+  linkType: hard
+
+"fraction.js@npm:4.0.12":
+  version: 4.0.12
+  resolution: "fraction.js@npm:4.0.12"
+  checksum: 8848fa62a3b47846165875478b3dbd41e525a8890444070829b0dbbaf5b4dd3f15b8b8e01891732d65461068b92032bb9b20595b7e4c3d01a3ab228fe1619d48
   languageName: node
   linkType: hard
 
@@ -1373,6 +1401,13 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
+"javascript-natural-sort@npm:0.7.1":
+  version: 0.7.1
+  resolution: "javascript-natural-sort@npm:0.7.1"
+  checksum: 161e2c512cc7884bc055a582c6645d9032cab88497a76123d73cb23bfb03d97a04cf7772ecdb8bd3366fc07192c2f996366f479f725c23ef073fffe03d6a586a
+  languageName: node
+  linkType: hard
+
 "jest-worker@npm:^27.0.2":
   version: 27.0.6
   resolution: "jest-worker@npm:27.0.6"
@@ -1517,6 +1552,33 @@ fsevents@~2.3.2:
     socks-proxy-agent: ^5.0.0
     ssri: ^8.0.0
   checksum: 326fefde1aec1f1314e548be74baaaa322208718d1b51c9688a326f73dea70f57767b4f5423230e39408cfe7c6dcf7adcf86ca4798c919c3ea78f54532910434
+  languageName: node
+  linkType: hard
+
+"mathjs-expression-parser@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "mathjs-expression-parser@npm:1.0.2"
+  dependencies:
+    mathjs: ^5.2.3
+  checksum: a15f850c57c2138e66a6fa28d5d8838f7e8ba4ab097af4423b2dc2b4c515ef89c2312dfc827e132149f4c6c43d0d4106295ae3a59cd3c653a71c61a2ef3abe30
+  languageName: node
+  linkType: hard
+
+"mathjs@npm:^5.2.3":
+  version: 5.10.3
+  resolution: "mathjs@npm:5.10.3"
+  dependencies:
+    complex.js: 2.0.11
+    decimal.js: 10.2.0
+    escape-latex: 1.2.0
+    fraction.js: 4.0.12
+    javascript-natural-sort: 0.7.1
+    seed-random: 2.2.0
+    tiny-emitter: 2.1.0
+    typed-function: 1.1.0
+  bin:
+    mathjs: ./bin/cli.js
+  checksum: 347e5b79e71e07150570afcf6caeedc7deb955316777d8b8b7d447a54e93a93005160fea92f6484a580b4453386bcf2b32641d89b53a28fe3eb3da74b2320446
   languageName: node
   linkType: hard
 
@@ -2222,6 +2284,13 @@ resolve@^1.9.0:
   languageName: node
   linkType: hard
 
+"seed-random@npm:2.2.0":
+  version: 2.2.0
+  resolution: "seed-random@npm:2.2.0"
+  checksum: 74ddfb956021ce08726e127da5f30f2b3a133e0e8dab995a69893e5441bd17472856abd8242125a12d7b1773360dda7c80b6f54d39a2fc3de99734e079c646dc
+  languageName: node
+  linkType: hard
+
 "semver@npm:^7.3.4, semver@npm:^7.3.5":
   version: 7.3.5
   resolution: "semver@npm:7.3.5"
@@ -2502,6 +2571,13 @@ resolve@^1.9.0:
   languageName: node
   linkType: hard
 
+"tiny-emitter@npm:2.1.0":
+  version: 2.1.0
+  resolution: "tiny-emitter@npm:2.1.0"
+  checksum: fbcfb5145751a0e3b109507a828eb6d6d4501352ab7bb33eccef46e22e9d9ad3953158870a6966a59e57ab7c3f9cfac7cab8521db4de6a5e757012f4677df2dd
+  languageName: node
+  linkType: hard
+
 "to-regex-range@npm:^5.0.1":
   version: 5.0.1
   resolution: "to-regex-range@npm:5.0.1"
@@ -2524,6 +2600,13 @@ resolve@^1.9.0:
     typescript: "*"
     webpack: "*"
   checksum: 93dd15b553a2621f969c4c834e7eb085b9b079adb702cba68a7ee516bcd2c67620e62cc5a8c57345e90c644ff6b689ee5a09f0702e440284fdfe872e9aaeefd8
+  languageName: node
+  linkType: hard
+
+"typed-function@npm:1.1.0":
+  version: 1.1.0
+  resolution: "typed-function@npm:1.1.0"
+  checksum: 18d3bf17e19bfdac7b3b848aecc1c7508bac05df0ad003aea8d790ca4939635a1f9df0f22027737f72b66eda8c8ef6b98a978e583420596e4fed764d76772c6b
   languageName: node
   linkType: hard
 
@@ -2588,15 +2671,16 @@ typescript@^4.0.2:
   languageName: node
   linkType: hard
 
-"videogen1@workspace:.":
+"videofx1@workspace:.":
   version: 0.0.0-use.local
-  resolution: "videogen1@workspace:."
+  resolution: "videofx1@workspace:."
   dependencies:
     "@types/debug": ^4.1.6
     copy-webpack-plugin: ^9.0.0
     css-loader: ^6.2.0
     css-modules-typescript-loader: ^4.0.1
     debug: ^4.3.1
+    mathjs-expression-parser: ^1.0.2
     preact: ^10.5.5
     sass: ^1.39.2
     sass-loader: ^12.1.0

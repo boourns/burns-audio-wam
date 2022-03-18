@@ -1,0 +1,11 @@
+{
+    "name": "Video Input",
+    "vendor": "Tom Burns",
+    "description": "WAM2 Video Input",
+    "version": "1.0.0",
+    "sdkVersion": "1.0.0",
+    "thumbnail": "",
+    "keywords": ["video", "utility", "input"],
+    "isInstrument": false,
+    "website": ""
+}

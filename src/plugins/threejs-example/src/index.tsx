@@ -8,16 +8,15 @@ import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
 
 import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
+import { DynamicParameterNode } from "../../shared/DynamicParameterNode";
 
-import { VideoGenerator } from './VideoGenerator';
+import { ThreeJSExample } from './ThreeJSExample';
+
 import { VideoExtensionOptions } from 'wam-extensions';
 import { VideoGeneratorView } from './VideoGeneratorView';
-import { WamEventMap } from '@webaudiomodules/api';
-import { VideoModuleConfig } from 'wam-extensions/dist/video/VideoExtension';
 	
-class VideoGeneratorNode extends WamNode {
+class ThreeJSExampleNode extends DynamicParameterNode {
 	destroyed = false;
-	_supportedEventTypes: Set<keyof WamEventMap>
 
 	/**
 	 * @param {WebAudioModule} module
@@ -28,19 +27,38 @@ class VideoGeneratorNode extends WamNode {
 			numberOfInputs: 1,
 			numberOfOutputs: 1,
 			outputChannelCount: [2],
-		}});
+		}}, 
+[
+	{
+		name: "Parameters",
+		params: [
+			{
+				id: "offset1",
+				config: {
+					type: 'float',
+					label: 'Offset 1',
+					defaultValue: 0,
+					minValue: -24,
+					maxValue: 24
+				},
+			}
+		]
+	}
+]			
+		);
 
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi']);
 	}
+	
 }
 
-export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
+export default class ThreeJSExampleModule extends WebAudioModule<ThreeJSExampleNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
-	_processorUrl = `${this._baseURL}/VideoGenProcessor.js`;
+	_processorUrl = `${this._baseURL}/ThreeJSExampleProcessor.js`;
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -54,34 +72,41 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
 	async initialize(state: any) {
 		await this._loadDescriptor();
 
-
 		return super.initialize(state);
 	}
 
-	async createAudioNode(initialState: any) {
-		await VideoGeneratorNode.addModules(this.audioContext, this.moduleId)
+	async createAudioNode(initialState: any) {		
+		await ThreeJSExampleNode.addModules(this.audioContext, this.moduleId)
+		
 		await this.audioContext.audioWorklet.addModule(this._processorUrl)
 
-		const node: VideoGeneratorNode = new VideoGeneratorNode(this, {});
+		const node: ThreeJSExampleNode = new ThreeJSExampleNode(this, {});
 		await node._initialize();
 
 		if (initialState) node.setState(initialState);
 
 		if (window.WAMExtensions && window.WAMExtensions.video) {
 			window.WAMExtensions.video.setDelegate(this.instanceId, {
-				connectVideo: (options: VideoExtensionOptions): VideoModuleConfig => {
+				connectVideo: (options: VideoExtensionOptions) => {
 					console.log("connectVideo!")
 					this.attach(options)
 					return {
-						numberOfInputs: 0,
-						numberOfOutputs: 1
+						numberOfInputs: 1,
+						numberOfOutputs: 1,
 					}
 				},
 				render: (inputs: WebGLTexture[], currentTime: number): WebGLTexture[] => {
-					return this.generator.render(inputs, currentTime)
+					let offset = 0
+					if (this._audioNode.state && this._audioNode.state.offset1) {
+						offset = this._audioNode.state.offset1.value
+					}
+
+					return this.generator.render(inputs, currentTime, offset)
 				},
 				disconnectVideo: () => {
 					console.log("disconnectVideo")
+					
+					this.generator.destroy()
 				},
 			})
 		}
@@ -90,14 +115,14 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
     }
 
 	gl: WebGLRenderingContext
-	generator: VideoGenerator
+	generator: ThreeJSExample
 
-	attach(options: VideoExtensionOptions, input?: WebGLTexture): WebGLTexture {
-		this.generator = new VideoGenerator(options)
+	attach(options: VideoExtensionOptions): WebGLTexture {
+		this.generator = new ThreeJSExample(options)
 
-		if (!this.generator.output) {
-			throw new Error("VideoGenerator did not instantiate it's output texture!")
-		}
+		// if (!this.generator.output) {
+		// 	throw new Error("VideoGenerator did not instantiate it's output texture!")
+		// }
 
 		return this.generator.output
 	}

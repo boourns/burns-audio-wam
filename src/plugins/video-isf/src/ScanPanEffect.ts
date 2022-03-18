@@ -1,6 +1,11 @@
 // ----- Uniform ----- //
 
+// unused, but example of non-ISF shader being used as an effect filter.
+
+import { WamParameterDataMap } from "@webaudiomodules/api"
 import { VideoExtensionOptions } from "wam-extensions"
+
+const glsl = (x:any) => x;
 
 class Uniform {
     gl: WebGLRenderingContext
@@ -26,7 +31,6 @@ class Uniform {
 }
 
 // ----- Rect ----- //
-
 class Rect {
     gl: WebGLRenderingContext
     verts: Float32Array
@@ -45,17 +49,14 @@ class Rect {
         gl.bufferData( gl.ARRAY_BUFFER, this.verts, gl.STATIC_DRAW );
     }
 
-    render() {   
+    render() {
+        
         this.gl.drawArrays( this.gl.TRIANGLE_STRIP, 0, 4 );
-    }
-
-    destroy() {
-        this.gl.deleteBuffer(this.buffer)
     }
 
 }
 
-export class VideoGenerator {
+export class ScanPanEffect {
     options: VideoExtensionOptions
     program: WebGLProgram
     billboard: Rect
@@ -63,26 +64,21 @@ export class VideoGenerator {
     startTime: number
     uResolution: Uniform
     uTime: Uniform
-    uMouse: Uniform
 
+    uPosition: Uniform
+    uDimensions: Uniform   
+
+    input?: WebGLTexture
     output?: WebGLTexture
     framebuffer?: WebGLFramebuffer
+
     positionLocation: number
 
-    constructor(options: VideoExtensionOptions) {
+    constructor(options: VideoExtensionOptions, input: WebGLTexture) {
         this.options = options
+        this.input = input
+
         this.setup(options.gl)
-    }
-
-    destroy() {
-        let gl = this.options.gl
-        console.log("Calling destroy")
-
-        gl.deleteFramebuffer(this.framebuffer)
-        gl.deleteTexture(this.output)
-        gl.deleteProgram(this.program)
-
-        this.billboard.destroy()
     }
 
     setup(gl: WebGLRenderingContext) {
@@ -103,11 +99,12 @@ export class VideoGenerator {
         gl.linkProgram( program );
         gl.useProgram( program );
 
-        this.positionLocation = gl.getAttribLocation( this.program, 'a_position' );
-
         // create fragment uniforms
         this.uResolution = new Uniform( gl, program, 'u_resolution', '2f' );
         this.uTime = new Uniform(gl, program, 'u_time', '1f' );
+
+        this.uPosition = new Uniform(gl, program, 'u_position', '2f' );
+        this.uDimensions = new Uniform(gl, program, 'u_dimensions', '2f' );
 
         // create position attrib
         this.billboard = new Rect( gl );
@@ -126,9 +123,8 @@ export class VideoGenerator {
 
         // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
         this.framebuffer = gl.createFramebuffer();
+        
         const texture = gl.createTexture();
-
-        this.output = texture
  
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.options.width, this.options.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
@@ -139,33 +135,43 @@ export class VideoGenerator {
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        
+        gl.bindTexture(gl.TEXTURE_2D, null);
 
+        this.output = texture
     }
 
-    render(inputs: WebGLTexture[], currentTime: number): WebGLTexture[] {
+    render(inputs: WebGLTexture[], currentTime: number, params: WamParameterDataMap): WebGLTexture[] {
         let gl = this.options.gl;
 
         gl.useProgram( this.program );
+
         this.uTime.set( currentTime );
+        if (params && params.width) {
+            this.uDimensions.set(params.width.value, params.height.value)
+            this.uPosition.set(params.centerX.value, params.centerY.value)
+        } else {
+            this.uDimensions.set(1.0, 1.0)
+            this.uPosition.set(0.5, 0.5)
+        }
 
         gl.enableVertexAttribArray( this.positionLocation );
 
         gl.bindBuffer( gl.ARRAY_BUFFER, this.billboard.buffer );
         gl.vertexAttribPointer( this.positionLocation, 2, gl.FLOAT, false, 0, 0 );
 
+        // bind input after binding output?
+        gl.bindTexture(gl.TEXTURE_2D, inputs[0]);
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
 
         // render
         this.billboard.render();
 
         gl.bindTexture(gl.TEXTURE_2D, this.output);
-
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
         gl.bindTexture(gl.TEXTURE_2D, null);
 
-        return [this.output!]
+        return [this.output]
     }
         
     // ----- resize ----- //    
@@ -179,7 +185,6 @@ export class VideoGenerator {
         var shader = gl.createShader( type );
         gl.shaderSource( shader, source );
         gl.compileShader( shader );
-        
         var isCompiled = gl.getShaderParameter( shader, gl.COMPILE_STATUS );
         if ( !isCompiled ) {
           throw new Error( 'Shader compile error: ' + gl.getShaderInfoLog( shader ) );
@@ -188,19 +193,25 @@ export class VideoGenerator {
     }
 
     fragmentShader(): string {
-        return `
+        return glsl`
 #ifdef GL_ES
   precision mediump float;
 #endif
 
+uniform sampler2D texture;
 uniform vec2 u_resolution;
-uniform vec2 u_mouse;
-uniform float u_time;
+
+uniform vec2 u_position;
+uniform vec2 u_dimensions;
+
 
 void main() {
-  vec2 pixel = gl_FragCoord.xy / u_resolution.xy;
-  float brightness = fract((u_time+5.0) / 3.0);
-  gl_FragColor = vec4( pixel.y, 0.0, pixel.x, 1.0 ) * brightness;
+    vec2 src = gl_FragCoord.xy / u_resolution;
+    vec2 origin = vec2(0.5, 0.5);
+
+    vec2 dst = ((src - origin) * u_dimensions) + u_position;
+    
+    gl_FragColor = texture2D(texture, abs(dst));
 }
         `
     }

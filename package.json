@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/boourns/burns-audio-wam#readme",
   "dependencies": {
+    "@types/dom-mediacapture-record": "^1.0.11",
     "@webaudiomodules/api": "webaudiomodules/api#commit=3ca912e8e08e66917eba22c330e85554932de494",
     "preact": "^10.5.5"
   },

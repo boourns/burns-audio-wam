@@ -9,15 +9,14 @@ import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
 import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
-import { VideoGenerator } from './VideoGenerator';
+import { DynamicParameterNode } from "../../shared/DynamicParameterNode";
+
 import { VideoExtensionOptions } from 'wam-extensions';
-import { VideoGeneratorView } from './VideoGeneratorView';
-import { WamEventMap } from '@webaudiomodules/api';
-import { VideoModuleConfig } from 'wam-extensions/dist/video/VideoExtension';
+import { DynamicParameterView } from '../../shared/DynamicParameterView';
+import { ISFShader } from './ISFShader';
 	
-class VideoGeneratorNode extends WamNode {
+class ISFVideoNode extends DynamicParameterNode {
 	destroyed = false;
-	_supportedEventTypes: Set<keyof WamEventMap>
 
 	/**
 	 * @param {WebAudioModule} module
@@ -28,19 +27,26 @@ class VideoGeneratorNode extends WamNode {
 			numberOfInputs: 1,
 			numberOfOutputs: 1,
 			outputChannelCount: [2],
-		}});
+		}}, 
+[
+	{
+		name: "Parameters",
+		params: []
+	}
+]);
 
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi']);
 	}
+	
 }
 
-export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
+export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
-	_processorUrl = `${this._baseURL}/VideoGenProcessor.js`;
+	_processorUrl = `${this._baseURL}/ISFVideoProcessor.js`;
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -54,31 +60,32 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
 	async initialize(state: any) {
 		await this._loadDescriptor();
 
-
 		return super.initialize(state);
 	}
 
 	async createAudioNode(initialState: any) {
-		await VideoGeneratorNode.addModules(this.audioContext, this.moduleId)
+		await ISFVideoNode.addModules(this.audioContext, this.moduleId)
 		await this.audioContext.audioWorklet.addModule(this._processorUrl)
 
-		const node: VideoGeneratorNode = new VideoGeneratorNode(this, {});
+		const node: ISFVideoNode = new ISFVideoNode(this, {});
 		await node._initialize();
+
+		await node.updateState();
 
 		if (initialState) node.setState(initialState);
 
 		if (window.WAMExtensions && window.WAMExtensions.video) {
 			window.WAMExtensions.video.setDelegate(this.instanceId, {
-				connectVideo: (options: VideoExtensionOptions): VideoModuleConfig => {
+				connectVideo: (options: VideoExtensionOptions) => {
 					console.log("connectVideo!")
 					this.attach(options)
 					return {
-						numberOfInputs: 0,
+						numberOfInputs: 1,
 						numberOfOutputs: 1
 					}
 				},
-				render: (inputs: WebGLTexture[], currentTime: number): WebGLTexture[] => {
-					return this.generator.render(inputs, currentTime)
+				render: (inputs: WebGLTexture[], currentTime: number) => {
+					return this.generator.render(inputs, currentTime, this._audioNode.state)
 				},
 				disconnectVideo: () => {
 					console.log("disconnectVideo")
@@ -90,23 +97,19 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
     }
 
 	gl: WebGLRenderingContext
-	generator: VideoGenerator
+	generator: ISFShader
 
-	attach(options: VideoExtensionOptions, input?: WebGLTexture): WebGLTexture {
-		this.generator = new VideoGenerator(options)
+	attach(options: VideoExtensionOptions) {
+		this.generator = new ISFShader(options, "", undefined)
+		let params = this.generator.wamParameters()
 
-		if (!this.generator.output) {
-			throw new Error("VideoGenerator did not instantiate it's output texture!")
-		}
-
-		return this.generator.output
+		this._audioNode.updateProcessor(params)
 	}
 
 	// Random color helper function.
 	getRandomColor() {
 		return [Math.random(), Math.random(), Math.random()];
 	}
-	
 
 	async createGui() {
 		const div = document.createElement('div');
@@ -120,7 +123,7 @@ export default class VideoGeneratorModule extends WebAudioModule<WamNode> {
 		
 		//shadow.appendChild(container)
 
-		render(<VideoGeneratorView plugin={this}></VideoGeneratorView>, div);
+		render(<DynamicParameterView plugin={this._audioNode}></DynamicParameterView>, div);
 		return div;
 	}
 

@@ -111,6 +111,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/three@npm:^0.138.0":
+  version: 0.138.0
+  resolution: "@types/three@npm:0.138.0"
+  checksum: 49107459571a8b38e1ff4adc3cff1127286d2990d78584ceb5a161ad9d43689190011938d0c3623b28e23628cf1963e9a201596d41f2875096c5c2626db6bfd1
+  languageName: node
+  linkType: hard
+
 "@webassemblyjs/ast@npm:1.11.0":
   version: 1.11.0
   resolution: "@webassemblyjs/ast@npm:1.11.0"
@@ -2502,6 +2509,36 @@ resolve@^1.9.0:
   languageName: node
   linkType: hard
 
+"three@npm:^0.138.3":
+  version: 0.138.3
+  resolution: "three@npm:0.138.3"
+  checksum: beef4db3914c98f02f87c18743a24c994f093132b6c9b959150d017a1835a7360b2a98ede080b9deb0ca41c3c969d7a2ee08fff35d880fb1f94a0cc343a843b1
+  languageName: node
+  linkType: hard
+
+"threejs-example-wam@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "threejs-example-wam@workspace:."
+  dependencies:
+    "@types/debug": ^4.1.6
+    "@types/three": ^0.138.0
+    copy-webpack-plugin: ^9.0.0
+    css-loader: ^6.2.0
+    css-modules-typescript-loader: ^4.0.1
+    debug: ^4.3.1
+    preact: ^10.5.5
+    sass: ^1.39.2
+    sass-loader: ^12.1.0
+    style-loader: ^3.2.1
+    three: ^0.138.3
+    ts-loader: ^8.0.12
+    typescript: ^4.0.2
+    wam-extensions: "boourns/wam-extensions#commit=49937941c6f48e175de3e399d2059b30f34cb5ef"
+    webpack: ^5.11.1
+    webpack-cli: ^4.3.0
+  languageName: unknown
+  linkType: soft
+
 "to-regex-range@npm:^5.0.1":
   version: 5.0.1
   resolution: "to-regex-range@npm:5.0.1"
@@ -2587,27 +2624,6 @@ typescript@^4.0.2:
   checksum: adb0a271eaa2297f2f4c536acbfee872d0dd26ec2d76f66921aa7fc437319132773483344207bdbeee169225f4739016d8d2dbf0553913a52bb34da6d0334f8e
   languageName: node
   linkType: hard
-
-"videogen1@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "videogen1@workspace:."
-  dependencies:
-    "@types/debug": ^4.1.6
-    copy-webpack-plugin: ^9.0.0
-    css-loader: ^6.2.0
-    css-modules-typescript-loader: ^4.0.1
-    debug: ^4.3.1
-    preact: ^10.5.5
-    sass: ^1.39.2
-    sass-loader: ^12.1.0
-    style-loader: ^3.2.1
-    ts-loader: ^8.0.12
-    typescript: ^4.0.2
-    wam-extensions: "boourns/wam-extensions#commit=49937941c6f48e175de3e399d2059b30f34cb5ef"
-    webpack: ^5.11.1
-    webpack-cli: ^4.3.0
-  languageName: unknown
-  linkType: soft
 
 "wam-extensions@boourns/wam-extensions#commit=49937941c6f48e175de3e399d2059b30f34cb5ef":
   version: 0.2.1
