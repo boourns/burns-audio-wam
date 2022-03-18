@@ -26,8 +26,6 @@ export class ThreeJSExample {
     texture: THREE.WebGLRenderTarget
 
     setup(gl: WebGLRenderingContext) {
-        console.log("Calling setup")
-
         const camera = new THREE.PerspectiveCamera( 70, this.options.width / this.options.height, 0.01, 10 );
         camera.position.z = 1;
 
@@ -57,8 +55,6 @@ export class ThreeJSExample {
         this.scene = scene
         this.mesh = mesh
         this.texture = texture
-
-        console.log("Finished threejs setup!")
     }
 
     count = 0
@@ -68,15 +64,6 @@ export class ThreeJSExample {
         this.renderer.setRenderTarget(this.texture)
 
         this.output = this.renderer.properties.get(this.texture.texture).__webglTexture
-
-        // this.scene.clear()
-
-        // const geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
-        // const material = new THREE.MeshNormalMaterial();
-
-        // this.mesh = new THREE.Mesh( geometry, material );
-
-        // this.scene.add( this.mesh );
 
         this.mesh.position.setX(offset);
         

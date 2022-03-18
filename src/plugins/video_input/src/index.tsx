@@ -8,7 +8,7 @@ import { WebAudioModule } from '@webaudiomodules/sdk';
 import {ParamMgrFactory } from '@webaudiomodules/sdk-parammgr'
 import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
-import { AudioInputView } from './AudioInputView';
+import { VideoInputView } from './VideoInputView';
 import VideoInputNode from './Node';
 
 export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
@@ -54,7 +54,7 @@ export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
-		render(<AudioInputView plugin={this}></AudioInputView>, shadow);
+		render(<VideoInputView plugin={this}></VideoInputView>, shadow);
 
 		return div;
 	}
