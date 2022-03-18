@@ -93,7 +93,7 @@ export class ISFRenderer {
     }
     this.pushTextures();
   }
-  setValue(name:string, value:any) {
+  setValue(name:string, value:any, isTexture:boolean = false) {
     this.program.use();
 
     const uniform = this.uniforms[name];
@@ -104,6 +104,7 @@ export class ISFRenderer {
     uniform.value = value;
     if (uniform.type === 't') {
       uniform.textureLoaded = false;
+      uniform.sourceIsTexture = isTexture;
     }
     this.pushUniform(uniform);
   }
@@ -164,32 +165,36 @@ export class ISFRenderer {
       return;
     }
 
-    if (uniform.value.constructor.name !== 'OffscreenCanvas' &&
-      (
-        uniform.value.tagName !== 'CANVAS' &&
-        !uniform.value.complete &&
-        uniform.value.readyState !== 4)) {
-      return;
-    }
-
     const loc = this.program.getUniformLocation(uniform.name);
-    uniform.texture.bind(loc);
-    this.gl.texImage2D(
-      this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, uniform.value);
-    if (!uniform.textureLoaded) {
-      const img = uniform.value;
-      uniform.textureLoaded = true;
-      const w = img.naturalWidth || img.width || img.videoWidth;
-      const h = img.naturalHeight || img.height || img.videoHeight;
-      this.setValue(`_${uniform.name}_imgSize`, [w, h]);
-      this.setValue(`_${uniform.name}_imgRect`, [0, 0, 1, 1]);
-      this.setValue(`_${uniform.name}_flip`, false);
+
+    if (!uniform.sourceIsTexture) {
+      if (uniform.value.constructor.name !== 'OffscreenCanvas' &&
+        (
+          uniform.value.tagName !== 'CANVAS' &&
+          !uniform.value.complete &&
+          uniform.value.readyState !== 4)) {
+        return;
+      }
+
+      uniform.texture.bind(loc);
+      this.gl.texImage2D(
+        this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, uniform.value);
+      if (!uniform.textureLoaded) {
+        const img = uniform.value;
+        uniform.textureLoaded = true;
+        const w = img.naturalWidth || img.width || img.videoWidth;
+        const h = img.naturalHeight || img.height || img.videoHeight;
+        this.setValue(`_${uniform.name}_imgSize`, [w, h]);
+        this.setValue(`_${uniform.name}_imgRect`, [0, 0, 1, 1]);
+        this.setValue(`_${uniform.name}_flip`, false);
+      }
+    } else {
+      uniform.texture.bind(loc, uniform.value);
     }
   }
   pushUniforms() {
     // @ts-ignore
     for (const uniform of this.uniforms) {
-      console.log("TOM not sure this will work ", uniform)
       this.pushUniform(uniform);
     }
   }

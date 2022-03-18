@@ -25,7 +25,10 @@ export class ISFShader {
     render(inputs: WebGLTexture[], currentTime: number, params: WamParameterDataMap): WebGLTexture[] {
         this.renderer.setValue("TIME", currentTime)
         
-        this.renderer.setValue("inputImage", inputs[0])
+        this.renderer.setValue("inputImage", inputs[0], true)
+        this.renderer.setValue(`_inputImage_imgSize`, [this.options.width, this.options.height]);
+        this.renderer.setValue(`_inputImage_imgRect`, [0, 0, 1, 1]);
+        this.renderer.setValue(`_inputImage_flip`, false);
         
         let output = this.renderer.draw(this.options.width, this.options.height)
         return [output]
@@ -39,6 +42,10 @@ export class ISFShader {
                 "Glitch"
             ],
             "INPUTS": [
+                {
+                    "NAME": "inputImage",
+                    "TYPE": "image"
+                }
             ]
         }*/
         
@@ -75,8 +82,12 @@ export class ISFShader {
         
         void main() {
             
-            gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+            //gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
         
+            vec2 adjusted = isf_FragNormCoord;
+
+            vec4 result = IMG_NORM_PIXEL(inputImage, adjusted);
+            gl_FragColor = result;
         }
         `
     }

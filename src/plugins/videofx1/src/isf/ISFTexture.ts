@@ -5,7 +5,7 @@ class ISFTexture {
   float: boolean;
   gl: WebGLRenderingContext;
 
-  texture: any;
+  texture: WebGLTexture;
   width: number;
   height: number;
 
@@ -25,13 +25,13 @@ class ISFTexture {
     this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
     this.gl.bindTexture(this.gl.TEXTURE_2D, null);
   }
-  bind(location?: WebGLUniformLocation) {
+  bind(location?: WebGLUniformLocation, overridingTexture: WebGLTexture | undefined = undefined) {
     if (location === null || location === undefined) {
       location = -1;
     }
     const newTexUnit = this.contextState.newTextureIndex();
     this.gl.activeTexture(this.gl.TEXTURE0 + newTexUnit);
-    this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+    this.gl.bindTexture(this.gl.TEXTURE_2D, overridingTexture || this.texture);
     if (location !== -1) {
       this.gl.uniform1i(location, newTexUnit);
     }
