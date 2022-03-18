@@ -30,49 +30,8 @@ class ISFVideoNode extends DynamicParameterNode {
 		}}, 
 [
 	{
-		name: "Params",
-		params: [
-			{
-				id: "centerX",
-				config:{
-					type: 'float',
-					label: 'Source Center X',
-					defaultValue: 0.5,
-					minValue: 0,
-					maxValue: 1
-				}
-			},
-			{
-				id: "centerY",
-				config: {
-					type: 'float',
-					label: 'Source Center Y',
-					defaultValue: 0.5,
-					minValue: 0,
-					maxValue: 1
-				}
-			},
-			{
-				id: "width",
-				config: {
-					type: 'float',
-					label: 'Crop Width',
-					defaultValue: 1.0,
-					minValue: 0,
-					maxValue: 1.0
-				},
-			},
-			{			
-				id: "height",
-				config: {
-					type: 'float',
-					label: 'Crop Height',
-					defaultValue: 1.0,
-					minValue: 0,
-					maxValue: 1.0
-				},
-			}
-		]
+		name: "Parameters",
+		params: []
 	}
 ]);
 
@@ -142,6 +101,9 @@ export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
 
 	attach(options: VideoExtensionOptions) {
 		this.generator = new ISFShader(options, "", undefined)
+		let params = this.generator.wamParameters()
+
+		this._audioNode.updateProcessor(params)
 	}
 
 	// Random color helper function.

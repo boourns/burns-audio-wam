@@ -32,9 +32,12 @@ type RenderPass = {
   buffer?: ISFBuffer
 }
 
-type ISFUniform = {
+export type ISFUniform = {
   NAME: string
   TYPE: ISFUniformType
+  MIN?: number
+  MAX?: number
+  DEFAULT?: number | number[]
 }
 
 class ISFParser {
@@ -47,7 +50,7 @@ class ISFParser {
   metadata: any;
   credit: any;
   categories: any;
-  inputs: any;
+  inputs: ISFUniform[];
   imports: any;
   description: any;
   passes: RenderPass[];

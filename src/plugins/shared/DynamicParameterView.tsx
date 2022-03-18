@@ -1,6 +1,8 @@
 import { Component, h } from "preact";
 import { DynamicParamEntry, DynamicParameterNode, DynamicParamGroup } from "./DynamicParameterNode";
 import { Knob } from "../shared/ui/Knob"
+import { Select } from "../shared/ui/Select"
+
 
 export interface DPProps {
     plugin: DynamicParameterNode
@@ -25,7 +27,7 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
         this.props.plugin.schemaUpdateCallback = undefined
     }
 
-    numberChanged(id: string, value: number) {
+    valueChanged(id: string, value: number) {
         this.props.plugin.pause = true
 
         this.props.plugin.state[id].value = value
@@ -38,7 +40,7 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
     renderParam(p: DynamicParamEntry) {
         switch(p.config.type) {
             case "float":
-                return <Knob onChange={(v) => this.numberChanged(p.id, v)} 
+                return <Knob onChange={(v) => this.valueChanged(p.id, v)} 
                              minimumValue={p.config.minValue} 
                              maximumValue={p.config.maxValue}
                              value={() => this.props.plugin.state[p.id].value}
@@ -47,7 +49,7 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
                              >
                         </Knob>
             case "int":
-                return <Knob onChange={(v) => this.numberChanged(p.id, Math.round(v))} 
+                return <Knob onChange={(v) => this.valueChanged(p.id, Math.round(v))} 
                              minimumValue={p.config.minValue} 
                              maximumValue={p.config.maxValue}
                              value={() => this.props.plugin.state[p.id].value}
@@ -55,7 +57,16 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
                              bipolar={p.config.minValue < 0}
                              integer={true}
                              >
-                        </Knob>           
+                        </Knob>
+            case "boolean":
+                return <Select onChange={(v) => this.valueChanged(p.id, parseInt(v))}
+                               options={["off", "on"]}
+                               value={() => this.props.plugin.state[p.id].value}
+                               label={p.config.label || p.id}
+
+
+                    >
+                </Select>  
                 default:
                 return <div>unknown!</div>
         }

@@ -69,8 +69,8 @@ const wamNode = {
 const processor = {
   entry: {
     processor: {
-      import: './src/ScanPanProcessor.ts',
-      filename: 'ScanPanProcessor.js'
+      import: './src/ISFVideoProcessor.ts',
+      filename: 'ISFVideoProcessor.js'
     }
   },
   module: {

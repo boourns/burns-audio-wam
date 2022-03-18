@@ -28,16 +28,23 @@ class ThreeJSExampleNode extends DynamicParameterNode {
 			numberOfOutputs: 1,
 			outputChannelCount: [2],
 		}}, 
-{
-	"offset1": {
-		type: 'float',
-		label: 'Offset 1',
-		defaultValue: 0,
-		minValue: -24,
-		maxValue: 24
-	},
-}
-			
+[
+	{
+		name: "Parameters",
+		params: [
+			{
+				id: "offset1",
+				config: {
+					type: 'float',
+					label: 'Offset 1',
+					defaultValue: 0,
+					minValue: -24,
+					maxValue: 24
+				},
+			}
+		]
+	}
+]			
 		);
 
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';

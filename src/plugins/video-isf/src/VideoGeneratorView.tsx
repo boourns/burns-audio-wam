@@ -1,16 +1,13 @@
 import { Component, h } from 'preact';
 import { Knob } from '../../shared/ui/Knob'
-import VideoGeneratorModule from '.';
+import ISFVideoModule from '.';
 
 import {debug} from "debug"
 
 var logger = debug("plugin:chorder:view")
 
 export interface VideoGeneratorProps {
-  plugin: VideoGeneratorModule
-}
-
-type ChorderParams = {
+  plugin: ISFVideoModule
 }
 
 export class VideoGeneratorView extends Component<VideoGeneratorProps, any> {
