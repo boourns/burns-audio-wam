@@ -1,5 +1,7 @@
 // ----- Uniform ----- //
 
+// unused, but example of non-ISF shader being used as an effect filter.
+
 import { WamParameterDataMap } from "@webaudiomodules/api"
 import { VideoExtensionOptions } from "wam-extensions"
 

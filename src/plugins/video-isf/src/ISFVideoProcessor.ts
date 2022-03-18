@@ -1,6 +1,6 @@
 import { AudioWorkletGlobalScope } from "@webaudiomodules/api";
 
-const moduleId = 'TomBurnsVideoScanPan'
+const moduleId = 'TomBurnsISFVideo'
 
 const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
 const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
@@ -8,11 +8,11 @@ const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(modul
 const DynamicParameterProcessor = ModuleScope.DynamicParameterProcessor
 const WamProcessor = ModuleScope.WamProcessor
 
-class ScanPanVideoProcessor extends DynamicParameterProcessor {
+class ISFVideoProcessor extends DynamicParameterProcessor {
 }
 
 try {
-	audioWorkletGlobalScope.registerProcessor(moduleId, ScanPanVideoProcessor as typeof WamProcessor);
+	audioWorkletGlobalScope.registerProcessor(moduleId, ISFVideoProcessor as typeof WamProcessor);
 } catch (error) {
 	// eslint-disable-next-line no-console
 	console.warn(error);

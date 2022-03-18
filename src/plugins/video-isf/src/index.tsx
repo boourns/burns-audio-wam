@@ -11,13 +11,11 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 
 import { DynamicParameterNode } from "../../shared/DynamicParameterNode";
 
-import { ScanPanEffect } from './ScanPanEffect';
 import { VideoExtensionOptions } from 'wam-extensions';
 import { DynamicParameterView } from '../../shared/DynamicParameterView';
-import { MirrorEffect } from './MirrorEffect';
 import { ISFShader } from './ISFShader';
 	
-class ScanPanVideoNode extends DynamicParameterNode {
+class ISFVideoNode extends DynamicParameterNode {
 	destroyed = false;
 
 	/**
@@ -84,12 +82,12 @@ class ScanPanVideoNode extends DynamicParameterNode {
 	
 }
 
-export default class VideoGeneratorModule extends WebAudioModule<ScanPanVideoNode> {
+export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
-	_processorUrl = `${this._baseURL}/ScanPanProcessor.js`;
+	_processorUrl = `${this._baseURL}/ISFVideoProcessor.js`;
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -103,15 +101,14 @@ export default class VideoGeneratorModule extends WebAudioModule<ScanPanVideoNod
 	async initialize(state: any) {
 		await this._loadDescriptor();
 
-
 		return super.initialize(state);
 	}
 
 	async createAudioNode(initialState: any) {
-		await ScanPanVideoNode.addModules(this.audioContext, this.moduleId)
+		await ISFVideoNode.addModules(this.audioContext, this.moduleId)
 		await this.audioContext.audioWorklet.addModule(this._processorUrl)
 
-		const node: ScanPanVideoNode = new ScanPanVideoNode(this, {});
+		const node: ISFVideoNode = new ISFVideoNode(this, {});
 		await node._initialize();
 
 		await node.updateState();
