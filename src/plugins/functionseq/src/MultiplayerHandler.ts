@@ -22,6 +22,7 @@ export class MultiplayerHandler {
 
     cursorManager?: MonacoCollabExt.RemoteCursorManager
     selectionManager?: MonacoCollabExt.RemoteSelectionManager
+    contentManager: MonacoCollabExt.EditorContentManager
 
     cursors: Map<string, CursorState>
 
@@ -35,12 +36,33 @@ export class MultiplayerHandler {
             },
             receiveMessage: (userId: string, message: any) => {
                 console.log("5 - Plugin received message ", message, ", from user ", userId)
+                if (!this.userState) {
+                    return
+                }
+                if (userId == this.userState.userId) {
+                    return
+                }
+
                 switch (message.action) {
                     case "cursor":
                         this.updateCursor(userId, message.offset)
+
                         break
                     case "selection":
                         this.updateSelection(userId, message.start, message.end)
+
+                        break
+                    case "insert":
+                        this.contentManager.insert(message.index, message.text)
+
+                        break
+                    case "replace":
+                        this.contentManager.replace(message.index, message.length, message.text)
+
+                        break
+                    case "delete":
+                        this.contentManager.delete(message.index, message.length)
+
                         break
                     default:
                         console.error("Unknown custom message to plugin: ", message)
@@ -62,6 +84,34 @@ export class MultiplayerHandler {
         // @ts-ignore
         this.selectionManager = new MonacoCollabExt.RemoteSelectionManager({editor})
 
+        let instanceId = this.instanceId
+
+        this.contentManager = new MonacoCollabExt.EditorContentManager({
+            // @ts-ignore
+            editor,
+            onInsert(index, text) {
+              //target.updateOptions({readOnly: false});
+
+              window.WAMExtensions.multiplayer.broadcastMessage(instanceId, {action:"insert", index, text})
+
+              //target.updateOptions({readOnly: true});
+            },
+            onReplace(index, length, text) {
+              //target.updateOptions({readOnly: false});
+
+              window.WAMExtensions.multiplayer.broadcastMessage(instanceId, {action:"replace", index, length, text})
+
+              //target.updateOptions({readOnly: true});
+            },
+            onDelete(index, length) {
+              //target.updateOptions({readOnly: false});
+
+              window.WAMExtensions.multiplayer.broadcastMessage(instanceId, {action:"delete", index, length})
+
+              //target.updateOptions({readOnly: true});
+            }
+          });
+
         this.editor.onDidChangeCursorPosition((e: any) => {
             const offset = this.editor.getModel().getOffsetAt(e.position);
             
@@ -74,54 +124,12 @@ export class MultiplayerHandler {
 
             window.WAMExtensions.multiplayer.broadcastMessage(this.instanceId, {action:"selection", start:startOffset, end: endOffset})
         });
+
+        
     }
 
     unregisterEditor() {
         this.editor = undefined
-    }
-
-    syncToEditor() {
-        if (!this.editor || !this.cursorManager) {
-            return
-        }
-
-        for (let cursor of this.cursors) {
-            let user = this.userState.users.find(u => u.id == cursor.userId)
-
-            if (!user || !cursor.cursorOffset) {
-                cursor.delete = true
-                if (cursor.cursor) {
-                    this.cursorManager.removeCursor(user.id)
-                }
-            } else {
-                if (user.id == this.userState.userId) {
-                    continue
-                }
-                if (!cursor.cursor) {
-                    cursor.cursor = this.cursorManager.addCursor(user.id, user.color, user.name);
-                }
-                if (cursor.cursorOffset) {
-                    cursor.cursor.setOffset(cursor.cursorOffset);
-                } else {
-                    this.cursorManager.hideCursor(user.id)
-                }
-
-                if (!cursor.selection) {
-                    cursor.selection = this.selectionManager.addSelection(user.id, user.color, user.name);
-                }
-
-                if (cursor.selectionOffset) {
-                    this.selectionManager.setSelectionOffsets(user.id, cursor.selectionOffset.start, cursor.selectionOffset.end)
-                } else {
-                    this.selectionManager.hideSelection(user.id)
-                }
-
-
-
-            }
-
-            this.cursors = this.cursors.filter(c => !c.delete)
-        }
     }
 
     deleteUserState(userId: string) {
@@ -130,10 +138,10 @@ export class MultiplayerHandler {
             return
         }
         if (cursor.cursor) {
-            cursor
+            this.cursorManager.removeCursor(cursor.cursor)
         }
-        this.cursors.delete(userId)
 
+        this.cursors.delete(userId)
     }
 
     updateCursor(userId: string, offset: number) {
@@ -152,6 +160,8 @@ export class MultiplayerHandler {
             cursor.cursor = this.cursorManager.addCursor(user.id, user.color, user.name);
         }
 
+        this.selectionManager.removeSelection(userId)
+
         cursor.cursor.setOffset(offset)
     }
 
@@ -163,13 +173,7 @@ export class MultiplayerHandler {
 
         let user = this.userState.users.find(u => u.id == cursor.userId)
         if (!user) {
-            if (cursor) {
-                this.cursorManager.removeCursor(cursor.cursor)
-                this.cursorManager.addCursor()
-                this.selectionManager.removeSelection(userId)
-            }
-            this.cursors.delete(userId)
-            
+            this.deleteUserState(userId)
             return
         }
 
@@ -178,9 +182,6 @@ export class MultiplayerHandler {
         }
 
         this.selectionManager.setSelectionOffsets(user.id, start, end)
-
-
-        this.syncToEditor()
     }
 
 
