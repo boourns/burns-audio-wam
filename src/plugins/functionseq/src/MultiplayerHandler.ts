@@ -1,28 +1,27 @@
 import {MultiplayerState} from "wam-extensions"
-
+import * as Y from 'yjs'
 import * as monaco from 'monaco-editor';
-import Firepad, { IDatabaseAdapter, IEditorAdapter, IFirepadConstructorOptions, MonacoAdapter } from "@hackerrank/firepad";
-
-type CursorState = {    
-    userId: string
-}
+import { SequencerPartyProvider } from "./yjs-SequencerParty";
 
 export class MultiplayerHandler {
     instanceId: string
     userState: MultiplayerState
     editor?: monaco.editor.ICodeEditor
-
-    cursors: Map<string, CursorState>
+    provider: SequencerPartyProvider
 
     constructor(instanceId: string) {
         this.instanceId = instanceId
-        this.cursors = new Map()
+
+        const doc = new Y.Doc()
+        this.provider = new SequencerPartyProvider(this, 'my-roomname', doc)
+
+        this.provider.on('status', (event: any) => {
+            console.log(event.status) // logs "connected" or "disconnected"
+        })
 
         window.WAMExtensions.multiplayer.register(this.instanceId, {
             userListUpdated: (userState: MultiplayerState) => {
                 this.userState = userState
-
-                this.createFirepad()
             },
             receiveMessage: (userId: string, message: any) => {
                 if (!this.userState) {
@@ -31,19 +30,19 @@ export class MultiplayerHandler {
                 if (userId == this.userState.userId) {
                     return
                 }
+                console.log("<=== Rx: length ", message.length, " message ", message)
 
-                // switch (message.action) {
-                //     case "cursor":
-                //         this.updateCursor(userId, message.offset)
-
-                //         break
-                   
-                //     default:
-                //         console.error("Unknown custom message to plugin: ", message)
-                // }
-                
-            }
+                this.provider.onMessage(message)
+            },
+            onConnect: () => {
+            },
+            onDisconnect: () => {
+                this.provider.onClose("disconnected")
+            },
         })
+
+        this.provider.onOpen()
+
     }
 
     registerEditor(editor: monaco.editor.ICodeEditor) {
@@ -62,26 +61,19 @@ export class MultiplayerHandler {
             console.error(`Have userID ${this.userState.userId} but no user state?`)
             return
         }
-
-        const databaseAdapter: IDatabaseAdapter = ...; // Database Adapter instance
-
-        const options: IFirepadConstructorOptions = {
-            /** Unique Identifier for current User */
-            userId: user.id,
-            /** Unique Hexadecimal color code for current User */
-            userColor: user.color,
-            /** Name/Short Name of the current User (optional) */
-            userName: user.name // string
-        };
-
-        // @ts-ignore
-        const editorAdapter = new MonacoAdapter(this.editor, false)
-
-        const firepad = new Firepad(databaseAdapter, editorAdapter, options)
     }
 
     unregisterEditor() {
         this.editor = undefined
+    }
+    
+    send(message: any) {
+        console.log("===> Tx: length ", message.length, " message ", message)
+        window.WAMExtensions.multiplayer.broadcastMessage(this.instanceId, Array.from(message))
+    }
+
+    close() {
+        console.error("YJS handler requested to close connection")
     }
 
 }

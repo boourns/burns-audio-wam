@@ -16,7 +16,7 @@
     "lib0": "^0.2.47",
     "monaco-editor": "^0.25.2",
     "preact": "^10.5.5",
-    "wam-extensions": "boourns/wam-extensions#commit=a2e68821229748718da826d51d0a33ead22c0f2f",
+    "wam-extensions": "boourns/wam-extensions#commit=cf3fc4e51a161a4fb456910e4ed069b19f6da393",
     "y-protocols": "^1.0.5",
     "yjs": "^13.5.29"
   },

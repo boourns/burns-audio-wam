@@ -4,8 +4,6 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
-import * as monaco from 'monaco-editor';
-
 import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk';
 import { h, render } from 'preact';
 
@@ -16,7 +14,6 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import { FunctionSeqView } from './FunctionSeqView';
 import getFunctionSequencerProcessor from './FunctionSeqProcessor';
 
-import {MultiplayerExtensionInterface, MultiplayerState} from "wam-extensions";
 import { MultiplayerHandler } from './MultiplayerHandler';
 	
 class FunctionSeqNode extends WamNode {
@@ -88,8 +85,6 @@ class FunctionSeqNode extends WamNode {
 			super._onMessage(message)
 		}
 	}
-
-
 }
 
 export default class FunctionSeqModule extends WebAudioModule<WamNode> {
@@ -114,22 +109,23 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 
 	configureMonaco() {
 		const baseURL = this._baseURL
+
 		// @ts-ignore
 		self.MonacoEnvironment = {
 			getWorkerUrl: function (moduleId: any, label: string) {
 				if (label === 'json') {
-					return `${baseURL}/json.worker.bundle.js`;
+					return `${baseURL}/monaco/json.worker.bundle.js`;
 				}
 				if (label === 'css' || label === 'scss' || label === 'less') {
-					return `${baseURL}/css.worker.bundle.js`;
+					return `${baseURL}/monaco/css.worker.bundle.js`;
 				}
 				if (label === 'html' || label === 'handlebars' || label === 'razor') {
-					return `${baseURL}/html.worker.bundle.js`;
+					return `${baseURL}/monaco/html.worker.bundle.js`;
 				}
 				if (label === 'typescript' || label === 'javascript') {
-					return `${baseURL}/ts.worker.bundle.js`;
+					return `${baseURL}/monaco/ts.worker.bundle.js`;
 				}
-				return `${baseURL}/editor.worker.bundle.js`;
+				return `${baseURL}/monaco/editor.worker.bundle.js`;
 			}
 		}
 	}
