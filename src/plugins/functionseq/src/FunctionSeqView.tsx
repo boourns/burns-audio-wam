@@ -1,6 +1,9 @@
 import { Component, h } from 'preact';
 
 import * as monaco from 'monaco-editor';
+import Firepad, { IDatabaseAdapter, IEditorAdapter, IFirepadConstructorOptions } from "@hackerrank/firepad";
+
+
 import FunctionSeqModule from '.';
 
 export interface FunctionSeqViewProps {

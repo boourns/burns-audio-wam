@@ -5,15 +5,6 @@ __metadata:
   version: 5
   cacheKey: 8
 
-"@convergencelabs/monaco-collab-ext@npm:^0.3.2":
-  version: 0.3.2
-  resolution: "@convergencelabs/monaco-collab-ext@npm:0.3.2"
-  dependencies:
-    monaco-editor: ">=0.15.6"
-  checksum: 43ce7bf2976a2ef13138e99a490677b53b7d51eb2465bd4a7cadcec848e1a840fb6ab05cf2bace713fd77ca99c35bd83340b2b9ceb518db86a24ba979fbdb8e8
-  languageName: node
-  linkType: hard
-
 "@discoveryjs/json-ext@npm:^0.5.0":
   version: 0.5.3
   resolution: "@discoveryjs/json-ext@npm:0.5.3"
@@ -1039,12 +1030,12 @@ fsevents@~2.3.2:
   version: 0.0.0-use.local
   resolution: "functionseq@workspace:."
   dependencies:
-    "@convergencelabs/monaco-collab-ext": ^0.3.2
     "@types/debug": ^4.1.6
     copy-webpack-plugin: ^9.0.0
     css-loader: ^6.2.0
     css-modules-typescript-loader: ^4.0.1
     debug: ^4.3.1
+    lib0: ^0.2.47
     monaco-editor: ^0.25.2
     preact: ^10.5.5
     sass: ^1.39.2
@@ -1055,6 +1046,8 @@ fsevents@~2.3.2:
     wam-extensions: "boourns/wam-extensions#commit=a2e68821229748718da826d51d0a33ead22c0f2f"
     webpack: ^5.11.1
     webpack-cli: ^4.3.0
+    y-protocols: ^1.0.5
+    yjs: ^13.5.29
   languageName: unknown
   linkType: soft
 
@@ -1414,6 +1407,13 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
+"isomorphic.js@npm:^0.2.4":
+  version: 0.2.4
+  resolution: "isomorphic.js@npm:0.2.4"
+  checksum: 7adb91495de1ff0af9a524cb7ffccde7984ea7c547f3b9fe387b51a2be6c3f607a086d253224a985cf55a28e41d57f5cb22e285543e95ab97e7ba36783f2cd81
+  languageName: node
+  linkType: hard
+
 "jest-worker@npm:^27.0.2":
   version: 27.0.6
   resolution: "jest-worker@npm:27.0.6"
@@ -1479,6 +1479,15 @@ fsevents@~2.3.2:
   version: 1.0.0
   resolution: "levdist@npm:1.0.0"
   checksum: 44fa3d761578da7a262bbb725972eb7d60e24d0f3d6e8ba408ed256c6cfc5d79e8b0757560d274267873455957af17333d192f734b13f251656c84fe5532de90
+  languageName: node
+  linkType: hard
+
+"lib0@npm:^0.2.42, lib0@npm:^0.2.43, lib0@npm:^0.2.47":
+  version: 0.2.47
+  resolution: "lib0@npm:0.2.47"
+  dependencies:
+    isomorphic.js: ^0.2.4
+  checksum: 0d0a0126716345d24421d5899070a32d552c375bc82acc9cf69b382f892f44329ef5bd042dcf3131dae2676a7e0bb179c43a80202722c744b1a9e0beeb58b5d5
   languageName: node
   linkType: hard
 
@@ -1710,13 +1719,6 @@ fsevents@~2.3.2:
   bin:
     mkdirp: bin/cmd.js
   checksum: a96865108c6c3b1b8e1d5e9f11843de1e077e57737602de1b82030815f311be11f96f09cce59bd5b903d0b29834733e5313f9301e3ed6d6f6fba2eae0df4298f
-  languageName: node
-  linkType: hard
-
-"monaco-editor@npm:>=0.15.6":
-  version: 0.33.0
-  resolution: "monaco-editor@npm:0.33.0"
-  checksum: f88fd1c9be0d6845436aa92ee7f7bcc49f9e9bf452f73bb5efbbe52e50678d1c2aec4d612a943310f5e2282c1d9fcc41b792b65a5b9008e6054908e7e10311ea
   languageName: node
   linkType: hard
 
@@ -2786,10 +2788,28 @@ typescript@^4.0.2:
   languageName: node
   linkType: hard
 
+"y-protocols@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "y-protocols@npm:1.0.5"
+  dependencies:
+    lib0: ^0.2.42
+  checksum: d19404a4ebafcf3761c28b881abe8c32ab6e457db0e5ffc7dbb749cbc2c3bb98e003a43f3e8eba7f245b2698c76f2c4cdd1c2db869f8ec0c6ef94736d9a88652
+  languageName: node
+  linkType: hard
+
 "yallist@npm:^4.0.0":
   version: 4.0.0
   resolution: "yallist@npm:4.0.0"
   checksum: 343617202af32df2a15a3be36a5a8c0c8545208f3d3dfbc6bb7c3e3b7e8c6f8e7485432e4f3b88da3031a6e20afa7c711eded32ddfb122896ac5d914e75848d5
+  languageName: node
+  linkType: hard
+
+"yjs@npm:^13.5.29":
+  version: 13.5.29
+  resolution: "yjs@npm:13.5.29"
+  dependencies:
+    lib0: ^0.2.43
+  checksum: 98f4c50b33094888128e1487e566922143950784653acc52639f7ed458d4ba0e19b9885f5e31348bac2c6a071a7ede0c6559a7dd331e321f00e0334dc4eb8686
   languageName: node
   linkType: hard
 
