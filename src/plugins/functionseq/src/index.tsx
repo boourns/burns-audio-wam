@@ -21,6 +21,7 @@ class FunctionSeqNode extends WamNode {
 	_supportedEventTypes: Set<keyof WamEventMap>
 	renderCallback?: (script: string | undefined, error: string | undefined) => void
 	script: string
+	multiplayer?: MultiplayerHandler
 
 	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
 		const { audioWorklet } = audioContext;
@@ -51,19 +52,16 @@ class FunctionSeqNode extends WamNode {
 		this.script = source
 	}
 
-	// TODO: sync idea
-	// only update the getState when user presses 'Upload'
-	// if user has edited the text at any point,
-	//  and a new state comes in they are presented with a modal about what to do
-
 	async getState(): Promise<any> {
 		return {
-			script: this.script
+			script: this.multiplayer.documentState()
 		}
 	}
 
 	async setState(state: any): Promise<void> {
 		if (state.script !== undefined) {
+			this.multiplayer.setDocumentState(state.script)
+
 			this.upload(state.script)
 			if (this.renderCallback) {
 				this.renderCallback(state.script, undefined)
@@ -98,7 +96,6 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
-		console.log("descriptor url is ", url)
 		if (!url) throw new TypeError('Descriptor not found');
 		const response = await fetch(url);
 		const descriptor = await response.json();
@@ -142,15 +139,16 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 		const node: FunctionSeqNode = new FunctionSeqNode(this, {});
 		await node._initialize();
 
-		node.setState(initialState || {script: this.defaultScript()});
-
-		this.sequencer = node
-
 		if (window.WAMExtensions.multiplayer) {
-			this.multiplayer = new MultiplayerHandler(this.instanceId)
+			this.multiplayer = new MultiplayerHandler(this.instanceId, ["script"])
+			node.multiplayer = this.multiplayer
 		} else {
 			console.warn("host has not implemented multiplayer WAM extension")
 		}
+
+		node.setState(initialState || {});
+
+		this.sequencer = node
 
 		return node
     }

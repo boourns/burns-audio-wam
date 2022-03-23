@@ -1043,11 +1043,9 @@ fsevents@~2.3.2:
     style-loader: ^3.2.1
     ts-loader: ^8.0.12
     typescript: ^4.0.2
-    wam-extensions: "boourns/wam-extensions#commit=cf3fc4e51a161a4fb456910e4ed069b19f6da393"
+    wam-extensions: "boourns/wam-extensions#commit=c1e332f25cd60370a0e5918dfce99b2015caa068"
     webpack: ^5.11.1
     webpack-cli: ^4.3.0
-    y-protocols: ^1.0.5
-    yjs: ^13.5.29
   languageName: unknown
   linkType: soft
 
@@ -1482,7 +1480,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"lib0@npm:^0.2.42, lib0@npm:^0.2.43, lib0@npm:^0.2.47":
+"lib0@npm:^0.2.47":
   version: 0.2.47
   resolution: "lib0@npm:0.2.47"
   dependencies:
@@ -2645,12 +2643,12 @@ typescript@^4.0.2:
   languageName: node
   linkType: hard
 
-"wam-extensions@boourns/wam-extensions#commit=cf3fc4e51a161a4fb456910e4ed069b19f6da393":
+"wam-extensions@boourns/wam-extensions#commit=c1e332f25cd60370a0e5918dfce99b2015caa068":
   version: 0.2.1
-  resolution: "wam-extensions@https://github.com/boourns/wam-extensions.git#commit=cf3fc4e51a161a4fb456910e4ed069b19f6da393"
+  resolution: "wam-extensions@https://github.com/boourns/wam-extensions.git#commit=c1e332f25cd60370a0e5918dfce99b2015caa068"
   peerDependencies:
     "@webaudiomodules/api": "*"
-  checksum: 0d7eaa121e11f1516948047028630892145872904db12fe231f9d6fc165c116f065abf800f7b65af1089515b977687849ea88e64f5cd902310b1e27ddf259075
+  checksum: 00ac801cbc78c4b8753891bad67c7dee32a82ea677c212d29d91dab64736374df5d9d49096e96b68a3da1bb00f748b019785c7ba3196a6abaef2563692623c2b
   languageName: node
   linkType: hard
 
@@ -2788,28 +2786,10 @@ typescript@^4.0.2:
   languageName: node
   linkType: hard
 
-"y-protocols@npm:^1.0.5":
-  version: 1.0.5
-  resolution: "y-protocols@npm:1.0.5"
-  dependencies:
-    lib0: ^0.2.42
-  checksum: d19404a4ebafcf3761c28b881abe8c32ab6e457db0e5ffc7dbb749cbc2c3bb98e003a43f3e8eba7f245b2698c76f2c4cdd1c2db869f8ec0c6ef94736d9a88652
-  languageName: node
-  linkType: hard
-
 "yallist@npm:^4.0.0":
   version: 4.0.0
   resolution: "yallist@npm:4.0.0"
   checksum: 343617202af32df2a15a3be36a5a8c0c8545208f3d3dfbc6bb7c3e3b7e8c6f8e7485432e4f3b88da3031a6e20afa7c711eded32ddfb122896ac5d914e75848d5
-  languageName: node
-  linkType: hard
-
-"yjs@npm:^13.5.29":
-  version: 13.5.29
-  resolution: "yjs@npm:13.5.29"
-  dependencies:
-    lib0: ^0.2.43
-  checksum: 98f4c50b33094888128e1487e566922143950784653acc52639f7ed458d4ba0e19b9885f5e31348bac2c6a071a7ede0c6559a7dd331e321f00e0334dc4eb8686
   languageName: node
   linkType: hard
 
