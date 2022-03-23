@@ -1043,7 +1043,7 @@ fsevents@~2.3.2:
     style-loader: ^3.2.1
     ts-loader: ^8.0.12
     typescript: ^4.0.2
-    wam-extensions: "boourns/wam-extensions#commit=c1e332f25cd60370a0e5918dfce99b2015caa068"
+    wam-extensions: "boourns/wam-extensions#commit=b5a700b726466229de2c5371ce5bbfee14c92941"
     webpack: ^5.11.1
     webpack-cli: ^4.3.0
   languageName: unknown
@@ -2643,12 +2643,12 @@ typescript@^4.0.2:
   languageName: node
   linkType: hard
 
-"wam-extensions@boourns/wam-extensions#commit=c1e332f25cd60370a0e5918dfce99b2015caa068":
+"wam-extensions@boourns/wam-extensions#commit=b5a700b726466229de2c5371ce5bbfee14c92941":
   version: 0.2.1
-  resolution: "wam-extensions@https://github.com/boourns/wam-extensions.git#commit=c1e332f25cd60370a0e5918dfce99b2015caa068"
+  resolution: "wam-extensions@https://github.com/boourns/wam-extensions.git#commit=b5a700b726466229de2c5371ce5bbfee14c92941"
   peerDependencies:
     "@webaudiomodules/api": "*"
-  checksum: 00ac801cbc78c4b8753891bad67c7dee32a82ea677c212d29d91dab64736374df5d9d49096e96b68a3da1bb00f748b019785c7ba3196a6abaef2563692623c2b
+  checksum: c6c29012a8c647871e006e397786b2f3202ea4ecc7c6a0663c830b5ee0828df08eb93c43fa056d296ee8048afde8a1297df765790065c4044c2365ba0de900f9
   languageName: node
   linkType: hard
 

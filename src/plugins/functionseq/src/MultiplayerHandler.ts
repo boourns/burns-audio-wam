@@ -20,7 +20,8 @@ export class MultiplayerHandler {
     }
 
     async getDocumentFromHost() {
-        let doc = await window.WAMExtensions.collaboration.getDocument(this.instanceId, this.documentId)
+        console.log("getDocumentFromHost")
+        let doc = window.WAMExtensions.collaboration.getDocument(this.instanceId, this.documentId)
 
         this.doc = doc
         this.attachEditor()
@@ -37,11 +38,14 @@ export class MultiplayerHandler {
             return
         }
 
+        console.log("attachEditor")
 
-        
+        this.binding = new MonacoBinding(this.editor, this.doc)
+        this.binding.attach()
     }
 
     unregisterEditor() {
+        this.binding.detach()
         this.editor = undefined
     }
 }

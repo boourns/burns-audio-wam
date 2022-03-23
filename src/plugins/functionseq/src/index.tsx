@@ -54,14 +54,12 @@ class FunctionSeqNode extends WamNode {
 
 	async getState(): Promise<any> {
 		return {
-			script: this.multiplayer.documentState()
+			script: "",
 		}
 	}
 
 	async setState(state: any): Promise<void> {
 		if (state.script !== undefined) {
-			this.multiplayer.setDocumentState(state.script)
-
 			this.upload(state.script)
 			if (this.renderCallback) {
 				this.renderCallback(state.script, undefined)
@@ -93,6 +91,8 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 	_functionProcessorUrl = `${this._baseURL}/FunctionSeqProcessor.js`;
 	sequencer: FunctionSeqNode
 	multiplayer?: MultiplayerHandler;
+
+	get instanceId() { return "TomBurnsFunctionSequencer" + this._timestamp; }
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -139,11 +139,14 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 		const node: FunctionSeqNode = new FunctionSeqNode(this, {});
 		await node._initialize();
 
-		if (window.WAMExtensions.multiplayer) {
-			this.multiplayer = new MultiplayerHandler(this.instanceId, ["script"])
+		console.log("collaboration extension: ", window.WAMExtensions.collaboration)
+
+		if (window.WAMExtensions.collaboration) {
+			this.multiplayer = new MultiplayerHandler(this.instanceId, "script")
+			this.multiplayer.getDocumentFromHost()
 			node.multiplayer = this.multiplayer
 		} else {
-			console.warn("host has not implemented multiplayer WAM extension")
+			console.warn("host has not implemented collaboration WAM extension")
 		}
 
 		node.setState(initialState || {});

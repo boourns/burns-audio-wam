@@ -1,6 +1,7 @@
 import { CollaborationDocumentInterface } from "wam-extensions";
 import * as monaco from 'monaco-editor';
 import { createMutex } from 'lib0/mutex'
+import { CollaborationOperation } from "wam-extensions/dist/collaboration/CollaborationExtension";
 
 export class MonacoBinding {
     editor: monaco.editor.ICodeEditor
@@ -17,62 +18,65 @@ export class MonacoBinding {
     }
 
     attach() {
-        this.document.onUpdate((event) => {
+        console.log("MonacoBinding.attach()")
+        this.document.onUpdate((events: CollaborationOperation[]) => {
             this.mux(() => {
-              let index = 0
-              event.delta.forEach((op: any) => {
-                if (op.retain !== undefined) {
-                  index += op.retain
-                } else if (op.insert !== undefined) {
-                  const pos = this.model.getPositionAt(index)
-                  const range = new monaco.Selection(pos.lineNumber, pos.column, pos.lineNumber, pos.column)
-                  this.model.applyEdits([{ range, text: op.insert }])
-                  index += op.insert.length
-                } else if (op.delete !== undefined) {
-                  const pos = this.model.getPositionAt(index)
-                  const endPos = this.model.getPositionAt(index + op.delete)
-                  const range = new monaco.Selection(pos.lineNumber, pos.column, endPos.lineNumber, endPos.column)
-                  this.model.applyEdits([{ range, text: '' }])
-                } else {
-                  throw new Error("Unexpected event")
-                }
-              })
+                console.log("MonacoBinding: onUpdate")
+                let index = 0
 
-            //   this._savedSelections.forEach((rsel, editor) => {
-            //     const sel = createMonacoSelectionFromRelativeSelection(editor, ytext, rsel, this.doc)
-            //     if (sel !== null) {
-            //       editor.setSelection(sel)
-            //     }
-            //   })
+                events.forEach(op => {
+                    if (op.operation == "INSERT") {
+                        const pos = this.model.getPositionAt(op.position)
+                        const range = new monaco.Selection(pos.lineNumber, pos.column, pos.lineNumber, pos.column)
+                        this.model.applyEdits([{ range, text: op.text }])
+                    } else if (op.operation == "DELETE") {
+                        const pos = this.model.getPositionAt(op.position)
+                        const endPos = this.model.getPositionAt(op.position + op.length)
+                        const range = new monaco.Selection(pos.lineNumber, pos.column, endPos.lineNumber, endPos.column)
+                        this.model.applyEdits([{ range, text: '' }])
+                    }
+                })
 
-                // hard force check - necessary?
                 const source = this.document.toString()
 
                 if (this.model.getValue() !== source) {
-                this.model.setValue(source)
+                    console.warn("TOM: monaco and document do not match, hard fixing!")
+                    this.model.setValue(source)
                 }
             })
 
             //this._rerenderDecorations()
           })
 
-          this._monacoChangeHandler = this.model.onDidChangeContent(event => {
-            // apply changes from right to left
-            this.mux(() => {
-                this.document.applyOperations()
-                
-              this.doc.transact(() => {
-                event.changes.sort((change1, change2) => change2.rangeOffset - change1.rangeOffset).forEach(change => {
-                  ytext.delete(change.rangeOffset, change.rangeLength)
-                  ytext.insert(change.rangeOffset, change.text)
+            this._monacoChangeHandler = this.model.onDidChangeContent(event => {
+                console.log("monacoChangeHandler")
+                // apply changes from right to left
+
+                this.mux(() => {
+                    let operations: CollaborationOperation[] = []
+                    
+                    event.changes.sort((change1, change2) => change2.rangeOffset - change1.rangeOffset).forEach(change => {
+                        operations.push({
+                            operation: "DELETE",
+                            position: change.rangeOffset,
+                            length: change.rangeLength
+                        })
+                        operations.push({
+                            operation: "INSERT",
+                            position: change.rangeOffset,
+                            text: change.text
+                        })
+                    })
+
+                    this.document.applyOperations(operations)
                 })
-              }, this)
             })
-          })
 
     }
 
     detach() {
+        this._monacoChangeHandler.dispose()
+        
         this.document.onUpdate(undefined)
     }
 

@@ -16,7 +16,7 @@
     "lib0": "^0.2.47",
     "monaco-editor": "^0.25.2",
     "preact": "^10.5.5",
-    "wam-extensions": "boourns/wam-extensions#commit=c1e332f25cd60370a0e5918dfce99b2015caa068"
+    "wam-extensions": "boourns/wam-extensions#commit=b5a700b726466229de2c5371ce5bbfee14c92941"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^9.0.0",
