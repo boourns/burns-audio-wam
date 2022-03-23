@@ -10,18 +10,19 @@ export class MonacoBinding {
     model: monaco.editor.ITextModel;
     _monacoChangeHandler: monaco.IDisposable;
 
+    decorations: string[]
+
     constructor(editor: monaco.editor.ICodeEditor, document: CollaborationDocumentInterface) {
         this.editor = editor
         this.model = editor.getModel()
         this.document = document
         this.mux = createMutex()
+        this.decorations = []
     }
 
     attach() {
-        console.log("MonacoBinding.attach()")
         this.document.onUpdate((events: CollaborationOperation[]) => {
             this.mux(() => {
-                console.log("MonacoBinding: onUpdate")
                 let index = 0
 
                 events.forEach(op => {
@@ -40,38 +41,53 @@ export class MonacoBinding {
                 const source = this.document.toString()
 
                 if (this.model.getValue() !== source) {
-                    console.warn("TOM: monaco and document do not match, hard fixing!")
+                    console.warn("monaco and document do not match, hard reassign!")
                     this.model.setValue(source)
                 }
             })
 
-            //this._rerenderDecorations()
-          })
+            this.rerenderDecorations()
+        })
 
-            this._monacoChangeHandler = this.model.onDidChangeContent(event => {
-                console.log("monacoChangeHandler")
-                // apply changes from right to left
-
-                this.mux(() => {
-                    let operations: CollaborationOperation[] = []
-                    
-                    event.changes.sort((change1, change2) => change2.rangeOffset - change1.rangeOffset).forEach(change => {
-                        operations.push({
-                            operation: "DELETE",
-                            position: change.rangeOffset,
-                            length: change.rangeLength
-                        })
-                        operations.push({
-                            operation: "INSERT",
-                            position: change.rangeOffset,
-                            text: change.text
-                        })
+        this._monacoChangeHandler = this.model.onDidChangeContent(event => {
+            // apply changes from right to left
+            this.mux(() => {
+                let operations: CollaborationOperation[] = []
+                
+                event.changes.sort((change1, change2) => change2.rangeOffset - change1.rangeOffset).forEach(change => {
+                    operations.push({
+                        operation: "DELETE",
+                        position: change.rangeOffset,
+                        length: change.rangeLength
                     })
-
-                    this.document.applyOperations(operations)
+                    operations.push({
+                        operation: "INSERT",
+                        position: change.rangeOffset,
+                        text: change.text
+                    })
                 })
-            })
 
+                this.document.applyOperations(operations)
+            })
+        })
+
+        this.editor.onDidChangeCursorSelection(() => {
+            if (this.editor.getModel() === this.model) {
+                const sel = this.editor.getSelection()
+                if (sel === null) {
+                    return
+                }
+                let anchor = this.model.getOffsetAt(sel.getStartPosition())
+                let head = this.model.getOffsetAt(sel.getEndPosition())
+                if (sel.getDirection() === monaco.SelectionDirection.RTL) {
+                    const tmp = anchor
+                    anchor = head
+                    head = tmp
+                }
+
+                this.document.updateSelection(anchor, head)
+            }
+        })
     }
 
     detach() {
@@ -80,5 +96,35 @@ export class MonacoBinding {
         this.document.onUpdate(undefined)
     }
 
+    rerenderDecorations() {
+        let newDecorations: monaco.editor.IModelDeltaDecoration[] = []
+
+        this.document.selections().forEach((selection, clientID) => {
+            let start, end, afterContentClassName, beforeContentClassName
+            if (selection.anchor < selection.head) {
+                start = this.model.getPositionAt(selection.anchor)
+                end = this.model.getPositionAt(selection.head)
+                afterContentClassName = 'yRemoteSelectionHead yRemoteSelectionHead-' + clientID
+                beforeContentClassName = null
+            } else {
+                start = this.model.getPositionAt(selection.head)
+                end = this.model.getPositionAt(selection.anchor)
+                afterContentClassName = null
+                beforeContentClassName = 'yRemoteSelectionHead yRemoteSelectionHead-' + clientID
+            }
+
+            newDecorations.push({
+                range: new monaco.Range(start.lineNumber, start.column, end.lineNumber, end.column),
+                options: {
+                    className: 'yRemoteSelection yRemoteSelection-' + clientID,
+                    afterContentClassName,
+                    beforeContentClassName
+                }
+            })
+        })
+
+        this.decorations = this.editor.deltaDecorations(this.decorations, newDecorations)
+    }
+    
     
 }
