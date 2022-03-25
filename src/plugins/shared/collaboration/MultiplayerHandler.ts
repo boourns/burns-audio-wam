@@ -19,8 +19,8 @@ export class MultiplayerHandler {
         }        
     }
 
-    async getDocumentFromHost() {
-        let doc = window.WAMExtensions.collaboration.getDocument(this.instanceId, this.documentId)
+    async getDocumentFromHost(initialContent: string) {
+        let doc = window.WAMExtensions.collaboration.getDocument(this.instanceId, this.documentId, initialContent)
 
         this.doc = doc
         this.attachEditor()
@@ -44,5 +44,6 @@ export class MultiplayerHandler {
     unregisterEditor() {
         this.binding.detach()
         this.editor = undefined
+        this.binding = undefined
     }
 }

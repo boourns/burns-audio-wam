@@ -18,12 +18,16 @@ import getFunctionSequencerProcessor from './FunctionSeqProcessor';
 
 import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
 	
+type FunctionSeqState = {
+	runCount: number
+}
+
 class FunctionSeqNode extends WamNode {
 	destroyed = false;
 	_supportedEventTypes: Set<keyof WamEventMap>
 	renderCallback?: (error: string | undefined) => void
-	script: string
 	multiplayer?: MultiplayerHandler
+	runCount: number
 
 	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
 		const { audioWorklet } = audioContext;
@@ -44,27 +48,43 @@ class FunctionSeqNode extends WamNode {
 			outputChannelCount: [2],
 		}});
 
+		this.runCount = 0
+
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
 	}
 
-	upload(source: string) {
-		// @ts-ignore
+	upload() {
+		let source = this.multiplayer.doc.toString()
+
+		console.log("Uploading source: ", source)
+
 		this.port.postMessage({action:"function", code: source})
-		this.script = source
 	}
 
-	async getState(): Promise<any> {
+	async runPressed() {
+		this.setState({
+			runCount: this.runCount+1
+		})
+	}
+
+	async getState(): Promise<FunctionSeqState> {
 		return {
+			runCount: this.runCount
 		}
 	}
 
-	async setState(state: any): Promise<void> {
-		if (state.script !== undefined) {
-			this.upload(state.script)
-			if (this.renderCallback) {
-				this.renderCallback(undefined)
-			}
+	async setState(state?: FunctionSeqState): Promise<void> {
+		if (!state || !state.runCount) {
+			return
+		}
+
+		if (state.runCount != this.runCount) {
+			console.log("setState, runCount changed! now ", this.runCount)
+
+			this.runCount = state.runCount
+
+			this.upload()
 		}
 	}
 
@@ -84,7 +104,7 @@ class FunctionSeqNode extends WamNode {
 	}
 }
 
-export default class FunctionSeqModule extends WebAudioModule<WamNode> {
+export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
@@ -142,13 +162,18 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 
 		if (window.WAMExtensions.collaboration) {
 			this.multiplayer = new MultiplayerHandler(this.instanceId, "script")
-			this.multiplayer.getDocumentFromHost()
+			this.multiplayer.getDocumentFromHost(this.defaultScript())
+
 			node.multiplayer = this.multiplayer
 		} else {
 			console.warn("host has not implemented collaboration WAM extension")
 		}
 
-		node.setState(initialState || {});
+		node.setState(initialState || {
+			runCount: 0
+		});
+
+		node.upload()
 
 		this.sequencer = node
 
