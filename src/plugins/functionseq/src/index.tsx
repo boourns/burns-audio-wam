@@ -4,6 +4,8 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
+import * as monaco from 'monaco-editor';
+
 import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk';
 import { h, render } from 'preact';
 
@@ -95,6 +97,7 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
+		console.log("descriptor url is ", url)
 		if (!url) throw new TypeError('Descriptor not found');
 		const response = await fetch(url);
 		const descriptor = await response.json();
@@ -105,7 +108,6 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 
 	configureMonaco() {
 		const baseURL = this._baseURL
-
 		// @ts-ignore
 		self.MonacoEnvironment = {
 			getWorkerUrl: function (moduleId: any, label: string) {
@@ -137,8 +139,6 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 		await FunctionSeqNode.addModules(this.audioContext, this.moduleId)
 		const node: FunctionSeqNode = new FunctionSeqNode(this, {});
 		await node._initialize();
-
-		console.log("collaboration extension: ", window.WAMExtensions.collaboration)
 
 		if (window.WAMExtensions.collaboration) {
 			this.multiplayer = new MultiplayerHandler(this.instanceId, "script")

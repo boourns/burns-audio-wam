@@ -5,6 +5,15 @@ __metadata:
   version: 5
   cacheKey: 8
 
+"@convergencelabs/monaco-collab-ext@npm:^0.3.2":
+  version: 0.3.2
+  resolution: "@convergencelabs/monaco-collab-ext@npm:0.3.2"
+  dependencies:
+    monaco-editor: ">=0.15.6"
+  checksum: 43ce7bf2976a2ef13138e99a490677b53b7d51eb2465bd4a7cadcec848e1a840fb6ab05cf2bace713fd77ca99c35bd83340b2b9ceb518db86a24ba979fbdb8e8
+  languageName: node
+  linkType: hard
+
 "@discoveryjs/json-ext@npm:^0.5.0":
   version: 0.5.3
   resolution: "@discoveryjs/json-ext@npm:0.5.3"
@@ -1717,6 +1726,13 @@ fsevents@~2.3.2:
   bin:
     mkdirp: bin/cmd.js
   checksum: a96865108c6c3b1b8e1d5e9f11843de1e077e57737602de1b82030815f311be11f96f09cce59bd5b903d0b29834733e5313f9301e3ed6d6f6fba2eae0df4298f
+  languageName: node
+  linkType: hard
+
+"monaco-editor@npm:>=0.15.6":
+  version: 0.33.0
+  resolution: "monaco-editor@npm:0.33.0"
+  checksum: f88fd1c9be0d6845436aa92ee7f7bcc49f9e9bf452f73bb5efbbe52e50678d1c2aec4d612a943310f5e2282c1d9fcc41b792b65a5b9008e6054908e7e10311ea
   languageName: node
   linkType: hard
 
