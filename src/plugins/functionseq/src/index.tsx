@@ -16,7 +16,7 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import { FunctionSeqView } from './FunctionSeqView';
 import getFunctionSequencerProcessor from './FunctionSeqProcessor';
 
-import { MultiplayerHandler } from './MultiplayerHandler';
+import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
 	
 class FunctionSeqNode extends WamNode {
 	destroyed = false;
