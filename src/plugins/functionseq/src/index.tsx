@@ -57,8 +57,6 @@ class FunctionSeqNode extends WamNode {
 	upload() {
 		let source = this.multiplayer.doc.toString()
 
-		console.log("Uploading source: ", source)
-
 		this.port.postMessage({action:"function", code: source})
 	}
 
@@ -80,8 +78,6 @@ class FunctionSeqNode extends WamNode {
 		}
 
 		if (state.runCount != this.runCount) {
-			console.log("setState, runCount changed! now ", this.runCount)
-
 			this.runCount = state.runCount
 
 			this.upload()
