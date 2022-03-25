@@ -41,13 +41,48 @@ __metadata:
     "@webaudiomodules/api": "webaudiomodules/api#commit=3ca912e8e08e66917eba22c330e85554932de494"
     "@webaudiomodules/sdk": "webaudiomodules/sdk#commit=810ba256f58385c0d50c16e36c82c7818bd01ead"
     "@webaudiomodules/sdk-parammgr": "webaudiomodules/sdk-parammgr#commit=6eb3bc85fc30144502043f456f47268a62d3db5a"
+    lib0: ^0.2.47
+    monaco-editor: ^0.25.2
     preact: ^10.5.5
+    wam-extensions: "boourns/wam-extensions#commit=9f0b69ffc0661e19addb07b4e870f420afceab22"
   languageName: unknown
   linkType: soft
+
+"isomorphic.js@npm:^0.2.4":
+  version: 0.2.4
+  resolution: "isomorphic.js@npm:0.2.4"
+  checksum: 7adb91495de1ff0af9a524cb7ffccde7984ea7c547f3b9fe387b51a2be6c3f607a086d253224a985cf55a28e41d57f5cb22e285543e95ab97e7ba36783f2cd81
+  languageName: node
+  linkType: hard
+
+"lib0@npm:^0.2.47":
+  version: 0.2.47
+  resolution: "lib0@npm:0.2.47"
+  dependencies:
+    isomorphic.js: ^0.2.4
+  checksum: 0d0a0126716345d24421d5899070a32d552c375bc82acc9cf69b382f892f44329ef5bd042dcf3131dae2676a7e0bb179c43a80202722c744b1a9e0beeb58b5d5
+  languageName: node
+  linkType: hard
+
+"monaco-editor@npm:^0.25.2":
+  version: 0.25.2
+  resolution: "monaco-editor@npm:0.25.2"
+  checksum: 27a581f147984d3fca1f2d036a81a4265fe3f8fa65fcfa5d92f67473177ae87ff9e08891260d54efe765a2b534eece1f1d5f1751992f4e80bfb795f40abe6c27
+  languageName: node
+  linkType: hard
 
 "preact@npm:^10.5.5":
   version: 10.5.14
   resolution: "preact@npm:10.5.14"
   checksum: d936f83a2afad13aa5870812d7fa8fec111d4a1bb6b0bea6485f2656a062bcc01717398d8184c4bc589cba455f3b2def8e43ba23db846b208d9823e3804658ad
+  languageName: node
+  linkType: hard
+
+"wam-extensions@boourns/wam-extensions#commit=9f0b69ffc0661e19addb07b4e870f420afceab22":
+  version: 0.2.1
+  resolution: "wam-extensions@https://github.com/boourns/wam-extensions.git#commit=9f0b69ffc0661e19addb07b4e870f420afceab22"
+  peerDependencies:
+    "@webaudiomodules/api": "*"
+  checksum: 4770764a03926850b10b75e26a7728c779dc2f0889ce8ab85d2036c23f0de6dd71e368ad2ad20d458bf42cf69bf7d123523875103c7381b66fe19f196a3591c0
   languageName: node
   linkType: hard

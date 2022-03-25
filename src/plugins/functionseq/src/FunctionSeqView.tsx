@@ -1,9 +1,8 @@
 import { Component, h } from 'preact';
-import { Knob } from '../../shared/ui/Knob'
+
+import * as monaco from 'monaco-editor';
 
 import FunctionSeqModule from '.';
-import type Monaco from '@monaco-editor/loader'
-import loader from '@monaco-editor/loader';
 
 export interface FunctionSeqViewProps {
   plugin: FunctionSeqModule
@@ -11,30 +10,24 @@ export interface FunctionSeqViewProps {
 
 type FunctionSeqViewState = {
   error: string | undefined
-  contentChanged: boolean
 }
 
 export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeqViewState> {
   statePoller: number
   ref: HTMLDivElement | null
-  editor: any
+  editor: monaco.editor.IStandaloneCodeEditor
 
   constructor() {
     super();
     this.state = {
       error: undefined,
-      contentChanged: false
     }
     this.runPressed = this.runPressed.bind(this)
-    this.editorChanged = this.editorChanged.bind(this)
   }
 
   // Lifecycle: Called whenever our component is created
   componentDidMount() {
-    this.props.plugin.sequencer.renderCallback = (script, error) => {
-      if (script != undefined && this.editor != undefined) {
-        this.editor.setValue(script)
-      }
+    this.props.plugin.sequencer.renderCallback = (error) => {
       if (error != undefined) {
         this.setState({
           error
@@ -45,15 +38,17 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
 
   // Lifecycle: Called just before our component will be destroyed
   componentWillUnmount() {
+    if (this.props.plugin.multiplayer) {
+      this.props.plugin.multiplayer.unregisterEditor()
+    }
+    
+    this.editor.dispose()
   }
 
   runPressed() {
-    this.props.plugin.sequencer.upload(this.editor.getValue())
-    this.setState({error: undefined, contentChanged: false})
-  }
+    this.props.plugin.audioNode.runPressed()
 
-  editorChanged() {
-    this.setState({contentChanged: true})
+    this.setState({error: undefined})
   }
 
   setupEditor(ref: HTMLDivElement | null) {
@@ -66,28 +61,31 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
       return
     }
     this.ref = ref
-    loader.init().then(monaco => {
-      this.editor = monaco.editor.create(ref, {
-        value: this.props.plugin.sequencer.script,
-        language: 'javascript',
-        automaticLayout: true
-      });
-      this.editor.onDidChangeModelContent(this.editorChanged)
-    });  
+
+    this.editor = monaco.editor.create(ref, {
+      language: 'javascript',
+      automaticLayout: true
+    });
+
+    if (this.props.plugin.multiplayer) {
+      this.props.plugin.multiplayer.registerEditor(this.editor)
+    }
   }
 
   render() {
     h("div", {})
 
-    const statusStyle = "padding: 2px; margin: 4px; " + (this.state.error ? "background-color: yellow;" : this.state.contentChanged ? "background-color: gray;" : "background-color: green;")
+    let contentChanged = false
+
+    const statusStyle = "padding: 2px; margin: 4px; " + (this.state.error ? "background-color: yellow;" : contentChanged ? "background-color: gray;" : "background-color: green;")
 
     return (
     <div class="function-sequencer-module">
       <div style="display: flex; flex-direction: column">
         <div style="display: flex; justify-content: space-between; width: 100%">
-          <button onClick={this.runPressed} style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)">Save &amp; Run</button> 
+          <button onClick={this.runPressed} style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)">Run</button> 
           <div style={statusStyle}>
-            { this.state.error != undefined ? this.state.error : this.state.contentChanged ? "Unsaved changes" : "Loaded" }
+            { this.state.error != undefined ? this.state.error : "Running" }
           </div>
         </div>
       </div>

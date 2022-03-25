@@ -4,6 +4,8 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
+import * as monaco from 'monaco-editor';
+
 import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk';
 import { h, render } from 'preact';
 
@@ -13,12 +15,19 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 
 import { FunctionSeqView } from './FunctionSeqView';
 import getFunctionSequencerProcessor from './FunctionSeqProcessor';
+
+import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
 	
+type FunctionSeqState = {
+	runCount: number
+}
+
 class FunctionSeqNode extends WamNode {
 	destroyed = false;
 	_supportedEventTypes: Set<keyof WamEventMap>
-	renderCallback?: (script: string | undefined, error: string | undefined) => void
-	script: string
+	renderCallback?: (error: string | undefined) => void
+	multiplayer?: MultiplayerHandler
+	runCount: number
 
 	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
 		const { audioWorklet } = audioContext;
@@ -39,33 +48,43 @@ class FunctionSeqNode extends WamNode {
 			outputChannelCount: [2],
 		}});
 
+		this.runCount = 0
+
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
 	}
 
-	upload(source: string) {
-		// @ts-ignore
+	upload() {
+		let source = this.multiplayer.doc.toString()
+
+		console.log("Uploading source: ", source)
+
 		this.port.postMessage({action:"function", code: source})
-		this.script = source
 	}
 
-	// TODO: sync idea
-	// only update the getState when user presses 'Upload'
-	// if user has edited the text at any point,
-	//  and a new state comes in they are presented with a modal about what to do
+	async runPressed() {
+		this.setState({
+			runCount: this.runCount+1
+		})
+	}
 
-	async getState(): Promise<any> {
+	async getState(): Promise<FunctionSeqState> {
 		return {
-			script: this.script
+			runCount: this.runCount
 		}
 	}
 
-	async setState(state: any): Promise<void> {
-		if (state.script !== undefined) {
-			this.upload(state.script)
-			if (this.renderCallback) {
-				this.renderCallback(state.script, undefined)
-			}
+	async setState(state?: FunctionSeqState): Promise<void> {
+		if (!state || !state.runCount) {
+			return
+		}
+
+		if (state.runCount != this.runCount) {
+			console.log("setState, runCount changed! now ", this.runCount)
+
+			this.runCount = state.runCount
+
+			this.upload()
 		}
 	}
 
@@ -76,27 +95,29 @@ class FunctionSeqNode extends WamNode {
 	 _onMessage(message: MessageEvent) {
 		if (message.data && message.data.action == "error") {
 			if (this.renderCallback) {
-				this.renderCallback(undefined, message.data.error)
+				this.renderCallback(message.data.error)
 			}
 		} else {
 			// @ts-ignore
 			super._onMessage(message)
 		}
 	}
-
-
 }
 
-export default class FunctionSeqModule extends WebAudioModule<WamNode> {
+export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_functionProcessorUrl = `${this._baseURL}/FunctionSeqProcessor.js`;
 	sequencer: FunctionSeqNode
+	multiplayer?: MultiplayerHandler;
+
+	get instanceId() { return "TomBurnsFunctionSequencer" + this._timestamp; }
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
+		console.log("descriptor url is ", url)
 		if (!url) throw new TypeError('Descriptor not found');
 		const response = await fetch(url);
 		const descriptor = await response.json();
@@ -105,8 +126,31 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 		return descriptor
 	}
 
+	configureMonaco() {
+		const baseURL = this._baseURL
+		// @ts-ignore
+		self.MonacoEnvironment = {
+			getWorkerUrl: function (moduleId: any, label: string) {
+				if (label === 'json') {
+					return `${baseURL}/monaco/json.worker.bundle.js`;
+				}
+				if (label === 'css' || label === 'scss' || label === 'less') {
+					return `${baseURL}/monaco/css.worker.bundle.js`;
+				}
+				if (label === 'html' || label === 'handlebars' || label === 'razor') {
+					return `${baseURL}/monaco/html.worker.bundle.js`;
+				}
+				if (label === 'typescript' || label === 'javascript') {
+					return `${baseURL}/monaco/ts.worker.bundle.js`;
+				}
+				return `${baseURL}/monaco/editor.worker.bundle.js`;
+			}
+		}
+	}
+
 	async initialize(state: any) {
 		await this._loadDescriptor();
+		this.configureMonaco();
 
 		return super.initialize(state);
 	}
@@ -116,7 +160,20 @@ export default class FunctionSeqModule extends WebAudioModule<WamNode> {
 		const node: FunctionSeqNode = new FunctionSeqNode(this, {});
 		await node._initialize();
 
-		node.setState(initialState || {script: this.defaultScript()});
+		if (window.WAMExtensions.collaboration) {
+			this.multiplayer = new MultiplayerHandler(this.instanceId, "script")
+			this.multiplayer.getDocumentFromHost(this.defaultScript())
+
+			node.multiplayer = this.multiplayer
+		} else {
+			console.warn("host has not implemented collaboration WAM extension")
+		}
+
+		node.setState(initialState || {
+			runCount: 0
+		});
+
+		node.upload()
 
 		this.sequencer = node
 

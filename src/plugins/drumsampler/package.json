@@ -12,9 +12,6 @@
     "build": "./node_modules/.bin/webpack",
     "watch": "./node_modules/.bin/webpack -w"
   },
-  "dependencies": {
-    "wam-extensions": "^0.2.1"
-  },
   "devDependencies": {
     "copy-webpack-plugin": "^9.0.0",
     "css-loader": "^6.2.0",
