@@ -2,6 +2,7 @@ import { CollaborationDocumentInterface } from "wam-extensions";
 import * as monaco from 'monaco-editor';
 import { createMutex } from 'lib0/mutex'
 import { CollaborationOperation } from "wam-extensions/dist/collaboration/CollaborationExtension";
+import { toChildArray } from "preact";
 
 export class MonacoBinding {
     editor: monaco.editor.ICodeEditor
@@ -21,7 +22,9 @@ export class MonacoBinding {
     }
 
     attach() {
-        this.document.onUpdate((events: CollaborationOperation[]) => {
+        this.model.setValue(this.document.toString())
+        
+        this.document.onUpdate((events: CollaborationOperation[]) => {            
             this.mux(() => {
                 let index = 0
 

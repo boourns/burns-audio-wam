@@ -30,10 +30,7 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
 
   // Lifecycle: Called whenever our component is created
   componentDidMount() {
-    this.props.plugin.sequencer.renderCallback = (script, error) => {
-      if (script != undefined && this.editor != undefined) {
-        this.editor.setValue(script)
-      }
+    this.props.plugin.sequencer.renderCallback = (error) => {
       if (error != undefined) {
         this.setState({
           error

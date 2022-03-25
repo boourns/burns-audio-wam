@@ -19,7 +19,7 @@ import { MultiplayerHandler } from './MultiplayerHandler';
 class FunctionSeqNode extends WamNode {
 	destroyed = false;
 	_supportedEventTypes: Set<keyof WamEventMap>
-	renderCallback?: (script: string | undefined, error: string | undefined) => void
+	renderCallback?: (error: string | undefined) => void
 	script: string
 	multiplayer?: MultiplayerHandler
 
@@ -54,7 +54,6 @@ class FunctionSeqNode extends WamNode {
 
 	async getState(): Promise<any> {
 		return {
-			script: "",
 		}
 	}
 
@@ -62,7 +61,7 @@ class FunctionSeqNode extends WamNode {
 		if (state.script !== undefined) {
 			this.upload(state.script)
 			if (this.renderCallback) {
-				this.renderCallback(state.script, undefined)
+				this.renderCallback(undefined)
 			}
 		}
 	}
@@ -74,7 +73,7 @@ class FunctionSeqNode extends WamNode {
 	 _onMessage(message: MessageEvent) {
 		if (message.data && message.data.action == "error") {
 			if (this.renderCallback) {
-				this.renderCallback(undefined, message.data.error)
+				this.renderCallback(message.data.error)
 			}
 		} else {
 			// @ts-ignore
