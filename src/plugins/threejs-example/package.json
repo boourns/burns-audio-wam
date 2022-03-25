@@ -15,8 +15,7 @@
     "@types/three": "^0.138.0",
     "debug": "^4.3.1",
     "preact": "^10.5.5",
-    "three": "^0.138.3",
-    "wam-extensions": "boourns/wam-extensions#commit=49937941c6f48e175de3e399d2059b30f34cb5ef"
+    "three": "^0.138.3"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^9.0.0",
