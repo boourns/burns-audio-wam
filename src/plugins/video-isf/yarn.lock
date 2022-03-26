@@ -2687,20 +2687,10 @@ typescript@^4.0.2:
     style-loader: ^3.2.1
     ts-loader: ^8.0.12
     typescript: ^4.0.2
-    wam-extensions: "boourns/wam-extensions#commit=49937941c6f48e175de3e399d2059b30f34cb5ef"
     webpack: ^5.11.1
     webpack-cli: ^4.3.0
   languageName: unknown
   linkType: soft
-
-"wam-extensions@boourns/wam-extensions#commit=49937941c6f48e175de3e399d2059b30f34cb5ef":
-  version: 0.2.1
-  resolution: "wam-extensions@https://github.com/boourns/wam-extensions.git#commit=49937941c6f48e175de3e399d2059b30f34cb5ef"
-  peerDependencies:
-    "@webaudiomodules/api": "*"
-  checksum: fc5e2600a763834fecef5fc991b9bf7e1a8a99ed215ecf3637cbcf9c73f6e2a271f59cf67a1cc3151bb66a7a0115cf2ed472a562c2dc5794eb18dd34ab2372dd
-  languageName: node
-  linkType: hard
 
 "watchpack@npm:^2.2.0":
   version: 2.2.0

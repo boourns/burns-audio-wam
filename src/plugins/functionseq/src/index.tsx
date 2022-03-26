@@ -113,7 +113,6 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
-		console.log("descriptor url is ", url)
 		if (!url) throw new TypeError('Descriptor not found');
 		const response = await fetch(url);
 		const descriptor = await response.json();
@@ -202,7 +201,12 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 // To make a sequencer, at the end of the script return an object that responds to
 // the onTick method.  This is run in the audio thread, not the main thread.
 
+/** @implements {FunctionSequencer} */
 class RandomNoteSequencer {
+
+	/**
+	 * @param tick {number}
+	 * */
 	onTick(tick) {
 		// onTick is called once every sequencer tick, which is 96 PPQN
 		// it returns an array of {note, velocity, duration}
