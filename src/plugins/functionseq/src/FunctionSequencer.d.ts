@@ -26,5 +26,5 @@ export type ParameterDefinition = {
 
 export interface FunctionSequencer {
     parameter(): WAMParameterDefinition[]
-    onTick(tick: number): MIDINote[]
+    onTick(tick: number, params: Record<string, any>): MIDINote[]
 }

@@ -202,15 +202,15 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
   editorDefinition(): string {
     return `
 export type MIDINote = {
-  /** MIDI Note number, 0-127 */
+    /** MIDI Note number, 0-127 */
     note: number
-  /** Note velocity, 0: off, 1-127: note on strength */
+    /** Note velocity, 0: off, 1-127: note on strength */
     velocity: number
-  /** Note duration, measured in sequencer ticks (24 PPQN) */
+    /** Note duration, measured in sequencer ticks (24 PPQN) */
     duration: number
 }
 
-export type ParameterDefinition = {
+export type WAMParameterDefinition = {
     /** An identifier for the parameter, unique to this plugin instance */
     id: string
     /** The parameter's human-readable name. */
@@ -225,9 +225,14 @@ export type ParameterDefinition = {
     maxValue?: number
 }
 
+export type ParameterDefinition = {
+    id: string
+    config: WAMParameterDefinition
+}
+
 export interface FunctionSequencer {
-    parameterDefinitions(): ParameterDefinition[]
-    onTick(tick: number): MIDINote[]
+    parameter(): ParameterDefinition[]
+    onTick(tick: number, params: Record<string, any>): MIDINote[]
 }
     `
   }
