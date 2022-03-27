@@ -17,12 +17,13 @@ import { FunctionSeqView } from './FunctionSeqView';
 import getFunctionSequencerProcessor from './FunctionSeqProcessor';
 
 import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
+import { DynamicParameterNode } from '../../shared/DynamicParameterNode';
 	
 type FunctionSeqState = {
 	runCount: number
 }
 
-class FunctionSeqNode extends WamNode {
+class FunctionSeqNode extends DynamicParameterNode {
 	destroyed = false;
 	_supportedEventTypes: Set<keyof WamEventMap>
 	renderCallback?: (error: string | undefined) => void
@@ -42,11 +43,13 @@ class FunctionSeqNode extends WamNode {
 	 * @param {AudioWorkletNodeOptions} options
 	 */
 	 constructor(module: WebAudioModule, options: AudioWorkletNodeOptions) {
-		super(module, {...options, processorOptions: {
-			numberOfInputs: 1,
-			numberOfOutputs: 1,
-			outputChannelCount: [2],
-		}});
+		super(module, 
+			{...options, processorOptions: {
+				numberOfInputs: 1,
+				numberOfOutputs: 1,
+				outputChannelCount: [2],
+			}}, 
+		[]);
 
 		this.runCount = 0
 

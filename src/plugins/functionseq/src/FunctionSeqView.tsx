@@ -1,5 +1,7 @@
 import { Component, h } from 'preact';
 
+import {DynamicParameterView} from "../../shared/DynamicParameterView"
+
 import * as monaco from 'monaco-editor';
 
 import FunctionSeqModule from '.';
@@ -10,6 +12,7 @@ export interface FunctionSeqViewProps {
 
 type FunctionSeqViewState = {
   error: string | undefined
+  panel: "GUI" | "CODE"
 }
 
 export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeqViewState> {
@@ -21,8 +24,11 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
     super();
     this.state = {
       error: undefined,
+      panel: "GUI"
     }
     this.runPressed = this.runPressed.bind(this)
+    this.panelPressed = this.panelPressed.bind(this)
+
   }
 
   // Lifecycle: Called whenever our component is created
@@ -49,6 +55,21 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
     this.props.plugin.audioNode.runPressed()
 
     this.setState({error: undefined})
+  }
+
+  panelPressed() {
+    let newState: "CODE" | "GUI"
+
+    switch(this.state.panel) {
+      case "GUI":
+        newState = "CODE"
+        break
+      case "CODE":
+        newState = "GUI"
+        break
+    }
+
+    this.setState({panel:newState})
   }
 
   setupEditor(ref: HTMLDivElement | null) {
@@ -85,6 +106,15 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
     }
   }
 
+  renderEditor() {
+    return <div style="width: 100%; height: 100%; flex: 1;" ref={(ref) => this.setupEditor(ref)}>
+    </div>
+  }
+
+  renderParameters() {
+    return <DynamicParameterView plugin={this.props.plugin.audioNode}></DynamicParameterView>
+  }
+
   render() {
     h("div", {})
 
@@ -92,19 +122,33 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
 
     const statusStyle = "padding: 2px; margin: 4px; " + (this.state.error ? "background-color: yellow;" : contentChanged ? "background-color: gray;" : "background-color: green;")
 
+    let panelLabel
+    let panel
+    switch(this.state.panel) {
+      case "CODE":
+        panelLabel = "GUI"
+        panel = this.renderEditor()
+        break
+      case "GUI":
+        panelLabel = "CODE"
+        panel = this.renderParameters()
+    }
+
     return (
     <div class="function-sequencer-module">
       <div style="display: flex; flex-direction: column">
         <div style="display: flex; justify-content: space-between; width: 100%">
-          <button onClick={this.runPressed} style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)">Run</button> 
+          <div>
+            <button onClick={this.runPressed} style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)">Run</button>
+            <button onClick={this.panelPressed} style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)">{panelLabel}</button> 
+          </div>
+
           <div style={statusStyle}>
             { this.state.error != undefined ? this.state.error : "Running" }
           </div>
         </div>
       </div>
-      <div style="width: 100%; height: 100%; flex: 1;" ref={(ref) => this.setupEditor(ref)}>
-      </div>
-
+      {panel}
       <style>
         {this.css()}
       </style>

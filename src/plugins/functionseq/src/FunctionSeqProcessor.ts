@@ -24,7 +24,9 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
  		WamParameterInfo,
  	} = ModuleScope;
 
-    class FunctionSequencerProcessor extends WamProcessor {
+    const DynamicParameterProcessor = ModuleScope.DynamicParameterProcessor
+
+    class FunctionSequencerProcessor extends DynamicParameterProcessor {
         // @ts-ignore
         _generateWamParameterInfo() {
             return {
@@ -36,24 +38,6 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
         ticks: number
         function: FunctionSequencer
         transportData?: WamTransportData
-
-        constructor(options: any) {
-            super(options);
-
-            const {
-                moduleId,
-                instanceId,
-            } = options.processorOptions;
-
-            // this.port.onmessage = (ev) => {
-            //     console.log("Received message %o", ev.data)
-
-            //     if (ev.data.action == "function") {
-            //         console.log("HERE - received event ", ev.data)
-            //         this.function = new Function()
-            //     } 
-            // }
-        }
 
         count = 0;
 
