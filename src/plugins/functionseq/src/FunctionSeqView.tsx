@@ -48,7 +48,9 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
       this.props.plugin.multiplayer.unregisterEditor()
     }
     
-    this.editor.dispose()
+    if (this.editor) {
+      this.editor.dispose()
+    }
   }
 
   runPressed() {

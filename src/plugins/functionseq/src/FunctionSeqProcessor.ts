@@ -78,7 +78,7 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
                     try {
                         if (this.function.onTick) {
                             let params: any = {}
-                            for (let id in this.parameterIds) {
+                            for (let id of this.parameterIds) {
                                 params[id] = this._parameterInterpolators[id].values[startSample]
                             }
                             var notes = this.function.onTick(this.ticks, params)
@@ -94,7 +94,7 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
                         }
                         
                     } catch (e) {
-                        this.port.postMessage({action:"error", error: e.toString()})
+                        this.port.postMessage({source: "functionSeq", action:"error", error: e.toString()})
                         this.function = undefined
                     }
                     
