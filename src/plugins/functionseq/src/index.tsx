@@ -116,8 +116,6 @@ class FunctionSeqNode extends DynamicParameterNode {
 				}
 
 				this.state = state
-
-				console.log("Updated groupParams on main thread")
 			}
 			if (this.renderCallback) {
 				this.renderCallback(message.data.error)
