@@ -28,16 +28,17 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
     }
     this.runPressed = this.runPressed.bind(this)
     this.panelPressed = this.panelPressed.bind(this)
-
   }
 
   // Lifecycle: Called whenever our component is created
   componentDidMount() {
     this.props.plugin.sequencer.renderCallback = (error) => {
-      if (error != undefined) {
+      if (error != this.state.error) {
         this.setState({
           error
         })
+      } else {
+        this.forceUpdate()
       }
     }
   }
