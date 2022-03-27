@@ -109,12 +109,15 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
   }
 
   renderEditor() {
-    return <div style="width: 100%; height: 100%; flex: 1;" ref={(ref) => this.setupEditor(ref)}>
+    return <div style="width: 100%; height: 100%; flex: 1;">
+      <div style="width: 100%; height: 100%; flex: 1;" ref={(ref) => this.setupEditor(ref)}></div>
     </div>
   }
 
   renderParameters() {
-    return <DynamicParameterView plugin={this.props.plugin.audioNode}></DynamicParameterView>
+    return <div style="display: flex; flex: 1;">
+        <DynamicParameterView plugin={this.props.plugin.audioNode}></DynamicParameterView>
+      </div>
   }
 
   render() {
@@ -134,6 +137,7 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
       case "GUI":
         panelLabel = "CODE"
         panel = this.renderParameters()
+        break
     }
 
     return (
