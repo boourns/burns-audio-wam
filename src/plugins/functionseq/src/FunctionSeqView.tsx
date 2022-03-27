@@ -28,16 +28,17 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
     }
     this.runPressed = this.runPressed.bind(this)
     this.panelPressed = this.panelPressed.bind(this)
-
   }
 
   // Lifecycle: Called whenever our component is created
   componentDidMount() {
     this.props.plugin.sequencer.renderCallback = (error) => {
-      if (error != undefined) {
+      if (error != this.state.error) {
         this.setState({
           error
         })
+      } else {
+        this.forceUpdate()
       }
     }
   }
@@ -48,7 +49,9 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
       this.props.plugin.multiplayer.unregisterEditor()
     }
     
-    this.editor.dispose()
+    if (this.editor) {
+      this.editor.dispose()
+    }
   }
 
   runPressed() {
@@ -107,12 +110,15 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
   }
 
   renderEditor() {
-    return <div style="width: 100%; height: 100%; flex: 1;" ref={(ref) => this.setupEditor(ref)}>
+    return <div style="width: 100%; height: 100%; flex: 1;">
+      <div style="width: 100%; height: 100%; flex: 1;" ref={(ref) => this.setupEditor(ref)}></div>
     </div>
   }
 
   renderParameters() {
-    return <DynamicParameterView plugin={this.props.plugin.audioNode}></DynamicParameterView>
+    return <div style="display: flex; flex: 1;">
+        <DynamicParameterView plugin={this.props.plugin.audioNode}></DynamicParameterView>
+      </div>
   }
 
   render() {
@@ -132,6 +138,7 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
       case "GUI":
         panelLabel = "CODE"
         panel = this.renderParameters()
+        break
     }
 
     return (
@@ -195,15 +202,15 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
   editorDefinition(): string {
     return `
 export type MIDINote = {
-  /** MIDI Note number, 0-127 */
+    /** MIDI Note number, 0-127 */
     note: number
-  /** Note velocity, 0: off, 1-127: note on strength */
+    /** Note velocity, 0: off, 1-127: note on strength */
     velocity: number
-  /** Note duration, measured in sequencer ticks (24 PPQN) */
+    /** Note duration, measured in sequencer ticks (24 PPQN) */
     duration: number
 }
 
-export type ParameterDefinition = {
+export type WAMParameterDefinition = {
     /** An identifier for the parameter, unique to this plugin instance */
     id: string
     /** The parameter's human-readable name. */
@@ -218,9 +225,14 @@ export type ParameterDefinition = {
     maxValue?: number
 }
 
+export type ParameterDefinition = {
+    id: string
+    config: WAMParameterDefinition
+}
+
 export interface FunctionSequencer {
-    parameterDefinitions(): ParameterDefinition[]
-    onTick(tick: number): MIDINote[]
+    parameter(): ParameterDefinition[]
+    onTick(tick: number, params: Record<string, any>): MIDINote[]
 }
     `
   }

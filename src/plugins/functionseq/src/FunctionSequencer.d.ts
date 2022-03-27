@@ -4,7 +4,7 @@ export type MIDINote = {
     duration: number
 }
 
-export type ParameterDefinition = {
+export type WAMParameterDefinition = {
     /** An identifier for the parameter, unique to this plugin instance */
     id: string
     /** The parameter's human-readable name. */
@@ -19,7 +19,12 @@ export type ParameterDefinition = {
     maxValue?: number
 }
 
+export type ParameterDefinition = {
+    id: string
+    config: WAMParameterDefinition
+}
+
 export interface FunctionSequencer {
-    parameterDefinitions(): ParameterDefinition[]
-    onTick(tick: number): MIDINote[]
+    parameter(): WAMParameterDefinition[]
+    onTick(tick: number, params: Record<string, any>): MIDINote[]
 }

@@ -9,7 +9,7 @@ import * as monaco from 'monaco-editor';
 import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk';
 import { h, render } from 'preact';
 
-import {WamEventMap} from '@webaudiomodules/api';
+import {WamEventMap, WamParameterDataMap} from '@webaudiomodules/api';
 
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
@@ -21,6 +21,7 @@ import { DynamicParameterNode } from '../../shared/DynamicParameterNode';
 	
 type FunctionSeqState = {
 	runCount: number
+	params: any
 }
 
 class FunctionSeqNode extends DynamicParameterNode {
@@ -71,19 +72,24 @@ class FunctionSeqNode extends DynamicParameterNode {
 
 	async getState(): Promise<FunctionSeqState> {
 		return {
-			runCount: this.runCount
+			runCount: this.runCount,
+			params: await super.getState()
 		}
 	}
 
-	async setState(state?: FunctionSeqState): Promise<void> {
-		if (!state || !state.runCount) {
+	async setState(state?: Partial<FunctionSeqState>): Promise<void> {
+		if (!state) {
 			return
 		}
 
-		if (state.runCount != this.runCount) {
+		if (state.runCount && state.runCount != this.runCount) {
 			this.runCount = state.runCount
 
 			this.upload()
+		}
+
+		if (state.params) {
+			await super.setState(state.params)
 		}
 	}
 
@@ -92,7 +98,25 @@ class FunctionSeqNode extends DynamicParameterNode {
 	 * @param {MessageEvent} message
 	 * */
 	 _onMessage(message: MessageEvent) {
-		if (message.data && message.data.action == "error") {
+		if (message.data && message.data.source == "functionSeq") {
+			if (message.data.params) {
+				this.groupedParameters = [
+					{
+						name: "Parameters",
+						params: message.data.params
+					}
+				]
+
+				let state: WamParameterDataMap = {}
+
+				for (let g of this.groupedParameters) {
+					for (let p of g.params) {
+						state[p.id] = {id: p.id, value: p.config.defaultValue ?? 0, normalized: false}
+					}
+				}
+
+				this.state = state
+			}
 			if (this.renderCallback) {
 				this.renderCallback(message.data.error)
 			}
@@ -195,8 +219,7 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 
 	defaultScript(): string {
 		return `
-		
-// Write code in pure ES6 javascript.
+// Write a MIDI sequencer in pure ES6 javascript.
 // Press "Save & Run" to load changes.  This also distributes changes to other users.
 // It is loaded directly into the browser's audio thread, no transpilation occurs.
 // For better error reporting check your console.
@@ -206,25 +229,52 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 
 /** @implements {FunctionSequencer} */
 class RandomNoteSequencer {
+	/**
+	 * @returns {WAMParameterDefinition[]}
+	 */
+	parameters() {
+		return [
+			{
+				id: "base",
+				config: {
+					label: "Base Note",
+					type: "int",
+					defaultValue: 32,
+					minValue: 0,
+					maxValue: 100
+				}
+			},
+			{
+				id: "range",
+				config:{
+					label: "Note Range",
+					type: "int",
+					defaultValue: 24,
+					minValue: 1,
+					maxValue: 48    
+				}
+			}
+		]
+	}
 
 	/**
 	 * @param tick {number}
+	 * @param params {Record<string, any>}
 	 * */
-	onTick(tick) {
+	onTick(tick, params) {
 		// onTick is called once every sequencer tick, which is 96 PPQN
 		// it returns an array of {note, velocity, duration}
 		// where note is the MIDI note number, velocity is an integer from 0 to 127, and duration is the length of the note in ticks.
-		
+
 		if (tick % 24 == 0) {
 			return [
-				{note: 36 + Math.floor(Math.random() * 48), velocity: 100, duration: 20}
+				{note: params.base + Math.floor(Math.random() * params.range), velocity: 100, duration: 20}
 			]
 		}
 	}
 }
 
 return new RandomNoteSequencer()
-		
-		`
+`
 	}
 }

@@ -42,7 +42,10 @@ export class MultiplayerHandler {
     }
 
     unregisterEditor() {
-        this.binding.detach()
+        if (this.binding) {
+            this.binding.detach()
+        }
+        
         this.editor = undefined
         this.binding = undefined
     }

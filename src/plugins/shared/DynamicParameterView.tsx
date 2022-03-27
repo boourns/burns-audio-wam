@@ -75,9 +75,9 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
     }
 
     renderGroup(group: DynamicParamGroup) {
-        return <div style="display: flex; flex-direction: column;">
-            {group.name}
-            <div style="display: flex; flex-direction: row;">
+        return <div style="display: flex; flex-direction: column; margin: 10px; border: 1px solid black; border-radius: 1%; padding: 5px;">
+            <b>{group.name}</b>
+            <div style="display: flex; flex-direction: row; margin: 5px;">
                 {group.params.map(p => this.renderParam(p))}
             </div>
         </div>
@@ -89,6 +89,5 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
         return <div style="display: flex; flex-direction: column">
             {groups.map(g => this.renderGroup(g))}
         </div>
-        
     }
 }
