@@ -259,8 +259,6 @@ class RandomNoteSequencer {
 		]
 	}
 
-	count = 0
-
 	/**
 	 * @param tick {number}
 	 * @param params {Record<string, any>}
@@ -269,10 +267,6 @@ class RandomNoteSequencer {
 		// onTick is called once every sequencer tick, which is 96 PPQN
 		// it returns an array of {note, velocity, duration}
 		// where note is the MIDI note number, velocity is an integer from 0 to 127, and duration is the length of the note in ticks.
-		// if (count % 100 == 0) {
-		//     console.log("PARAMS ", params)
-		// }
-		// count++
 
 		if (tick % 24 == 0) {
 			return [
