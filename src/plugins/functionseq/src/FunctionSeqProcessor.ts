@@ -1,8 +1,14 @@
 import { WamTransportData } from "@webaudiomodules/api";
-import { AudioWorkletGlobalScope, WamMidiEvent } from "@webaudiomodules/api";
+import { AudioWorkletGlobalScope, WamParameterConfiguration } from "@webaudiomodules/api";
 
-export type FunctionSequencer = {
-    onTick?(ticks: number): {note: number, velocity: number, duration: number}[]
+type ParameterDefinition = {
+    id: string
+    config: WamParameterConfiguration
+}
+
+type FunctionSequencer = {
+    parameters?(): ParameterDefinition[]
+    onTick?(ticks: number, params: Record<string, any>): {note: number, velocity: number, duration: number}[]
 }
 
 const getFunctionSequencerProcessor = (moduleId: string) => {
@@ -38,6 +44,7 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
         ticks: number
         function: FunctionSequencer
         transportData?: WamTransportData
+        parameterIds: string[] = []
 
         count = 0;
 
@@ -70,7 +77,11 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
                     this.ticks = tickPosition;
                     try {
                         if (this.function.onTick) {
-                            var notes = this.function.onTick(this.ticks)
+                            let params: any = {}
+                            for (let id in this.parameterIds) {
+                                params[id] = this._parameterInterpolators[id].values[startSample]
+                            }
+                            var notes = this.function.onTick(this.ticks, params)
                             
                             if (notes) {
                                 for (let note of notes) {
@@ -102,8 +113,26 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
             if (message.data && message.data.action == "function") {
                 try {
                     this.function = new Function(message.data.code)()
+                    if (!this.function.onTick) {
+                        throw new Error("onTick function missing")
+                    }
+                    if (!!this.function.parameters) {
+                        let parameters = this.function.parameters()
+                        let map: Record<string, WamParameterConfiguration> = {}
+                        this.parameterIds = []
+                        for (let p of parameters) {
+                            map[p.id] = p.config
+                            this.parameterIds.push(p.id)
+                        }
+
+                        this.port.postMessage({source: "functionSeq", action:"newParams", params: parameters})
+
+                        this.updateParameters(map)
+                    } else {
+                        console.warn("parameters() function missing, sequencer has no parameters.")
+                    }
                 } catch(e) {
-                    this.port.postMessage({action:"error", error: e.toString()})
+                    this.port.postMessage({source: "functionSeq", action:"error", error: e.toString()})
                     this.function = undefined
                 }
             } else {

@@ -7,6 +7,8 @@ const loadDynamicParameterProcessor = (moduleId: string) => {
 	const {
 		WamProcessor,
 		WamParameterInfo,
+        WamParameter,
+        WamParameterInterpolator
 	} = ModuleScope;
 
     class DynamicParameterProcessor extends WamProcessor {
@@ -54,36 +56,50 @@ const loadDynamicParameterProcessor = (moduleId: string) => {
         async _onMessage(message: any): Promise<void> {
             if (message.data && message.data.source == "dpp") {
                 if (message.data.parameters) {
-
-                    let input = message.data.parameters as Record<string, WamParameterConfiguration>
-                    let output: WamParameterInfoMap = {}
-                    
-                    for (let key of Object.keys(input)) {
-                        output[key] = new WamParameterInfo(key, input[key])
-                    }
-                    this.parameters = output
-                    let oldState = this._parameterState
-
-                    this._initialize()
-                    for (let paramID of Object.keys(oldState)) {
-                        if (!!this._parameterState[paramID]) {
-                            let update: WamParameterData = {
-                                id: oldState[paramID].id,
-                                value: oldState[paramID].value,
-                                normalized: false,
-                            }
-                            this._setParameterValue(update, false)
-
-                            // this is a hack and should be unnecessary.
-                            this._parameterState[paramID].value = oldState[paramID].value
-                        }
-                    }
-                    
+                    this.updateParameters(message.data.parameters)
                 }
             } else {
                 // @ts-ignore
                 super._onMessage(message)
             }
+        }
+
+        updateParameters(input: Record<string, WamParameterConfiguration>) {
+            let output: WamParameterInfoMap = {}
+            
+            for (let key of Object.keys(input)) {
+                output[key] = new WamParameterInfo(key, input[key])
+            }
+
+            this.parameters = output
+            let oldState = this._parameterState
+
+            this.reinitialize()
+
+            for (let paramID of Object.keys(oldState)) {
+                if (!!this._parameterState[paramID]) {
+                    let update: WamParameterData = {
+                        id: oldState[paramID].id,
+                        value: oldState[paramID].value,
+                        normalized: false,
+                    }
+                    this._setParameterValue(update, false)
+
+                    // this is a hack and should be unnecessary.
+                    this._parameterState[paramID].value = oldState[paramID].value
+                }
+            }
+        }
+
+        reinitialize() {
+            this._parameterState = {};
+			this._parameterInterpolators = {};
+			this._parameterInfo = this.parameters;
+			Object.keys(this._parameterInfo).forEach((parameterId) => {
+				const info = this._parameterInfo[parameterId];
+				this._parameterState[parameterId] = new WamParameter(this._parameterInfo[parameterId]);
+				this._parameterInterpolators[parameterId] = new WamParameterInterpolator(info, 256);
+			});
         }
     }
 

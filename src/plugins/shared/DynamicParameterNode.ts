@@ -46,9 +46,18 @@ export class DynamicParameterNode extends WamNode {
 
     }
 
+    async getState(): Promise<any> {
+        return {
+            paramState: await super.getState()
+        }
+    }
+
     async setState(state: any): Promise<void> {
-        this.lastSetState = state
-        await super.setState(state)
+        if (!state.paramState) {
+            return
+        }
+        this.lastSetState = state.paramState
+        await super.setState(state.paramState)
     }
 
     updateProcessor(groups: DynamicParamGroup[]) {

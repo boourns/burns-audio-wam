@@ -89,6 +89,5 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
         return <div style="display: flex; flex-direction: column">
             {groups.map(g => this.renderGroup(g))}
         </div>
-        
     }
 }
