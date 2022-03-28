@@ -1,21 +1,28 @@
 import { Component, h } from 'preact';
-
-import {DynamicParameterView} from "../../shared/DynamicParameterView"
+import {DynamicParameterView} from "./DynamicParameterView"
 
 import * as monaco from 'monaco-editor';
+import { MultiplayerHandler } from './collaboration/MultiplayerHandler';
+import { DynamicParameterNode } from './DynamicParameterNode';
 
-import FunctionSeqModule from '.';
-
-export interface FunctionSeqViewProps {
-  plugin: FunctionSeqModule
+export interface LiveCoderNode extends DynamicParameterNode {
+  renderCallback?: (e: any) => void
+  multiplayer?: MultiplayerHandler
+  runPressed(): void
+	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor
 }
 
-type FunctionSeqViewState = {
+export interface LiveCoderViewProps {
+  plugin: LiveCoderNode
+}
+
+type LiveCoderViewState = {
   error: string | undefined
   panel: "GUI" | "CODE"
+  runCount: number
 }
 
-export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeqViewState> {
+export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewState> {
   statePoller: number
   ref: HTMLDivElement | null
   editor: monaco.editor.IStandaloneCodeEditor
@@ -24,7 +31,8 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
     super();
     this.state = {
       error: undefined,
-      panel: "GUI"
+      panel: "GUI",
+      runCount: 0
     }
     this.runPressed = this.runPressed.bind(this)
     this.panelPressed = this.panelPressed.bind(this)
@@ -32,7 +40,7 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
 
   // Lifecycle: Called whenever our component is created
   componentDidMount() {
-    this.props.plugin.sequencer.renderCallback = (error) => {
+    this.props.plugin.renderCallback = (error) => {
       if (error != this.state.error) {
         this.setState({
           error
@@ -55,7 +63,7 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
   }
 
   runPressed() {
-    this.props.plugin.audioNode.runPressed()
+    this.props.plugin.runPressed()
 
     this.setState({error: undefined})
   }
@@ -86,23 +94,7 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
     }
     this.ref = ref
 
-    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-      allowJs: true
-
-    })
-
-    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-      noSemanticValidation: false,
-      noSyntaxValidation: false,
-    });
-
-    monaco.languages.typescript.javascriptDefaults.addExtraLib(this.editorDefinition(), "")
-
-    this.editor = monaco.editor.create(ref, {
-      language: 'javascript',
-      automaticLayout: true
-    });
-
+    this.editor = this.props.plugin.createEditor(ref)
 
     if (this.props.plugin.multiplayer) {
       this.props.plugin.multiplayer.registerEditor(this.editor)
@@ -117,7 +109,7 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
 
   renderParameters() {
     return <div style="display: flex; flex: 1;">
-        <DynamicParameterView plugin={this.props.plugin.audioNode}></DynamicParameterView>
+        <DynamicParameterView plugin={this.props.plugin}></DynamicParameterView>
       </div>
   }
 
@@ -199,42 +191,6 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
       `
   }
 
-  editorDefinition(): string {
-    return `
-export type MIDINote = {
-    /** MIDI Note number, 0-127 */
-    note: number
-    /** Note velocity, 0: off, 1-127: note on strength */
-    velocity: number
-    /** Note duration, measured in sequencer ticks (24 PPQN) */
-    duration: number
-}
-
-export type WAMParameterDefinition = {
-    /** An identifier for the parameter, unique to this plugin instance */
-    id: string
-    /** The parameter's human-readable name. */
-    label?: string
-    /** The parameter's data type */
-    type?: "float" | "int"
-    /** The default value for the parameter */
-    defaultValue: number
-    /** The lowest possible value for the parameter */
-    minValue?: number
-    /** The highest possible value for the parameter */
-    maxValue?: number
-}
-
-export type ParameterDefinition = {
-    id: string
-    config: WAMParameterDefinition
-}
-
-export interface FunctionSequencer {
-    parameter(): ParameterDefinition[]
-    onTick(tick: number, params: Record<string, any>): MIDINote[]
-}
-    `
-  }
+  
   
 }

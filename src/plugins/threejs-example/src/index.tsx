@@ -16,7 +16,7 @@ import { DynamicParameterNode, DynamicParamGroup } from "../../shared/DynamicPar
 import { ThreeJSGenerator, ThreeJSRunner } from './ThreeJSRunner';
 
 import { VideoExtensionOptions } from 'wam-extensions';
-import { LiveCoderNode, LiveCoderView } from './LiveCoderView';
+import { LiveCoderNode, LiveCoderView } from '../../shared/LiveCoderView';
 
 import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
 import getThreeJSProcessor from './ThreeJSProcessor';
