@@ -1,8 +1,6 @@
 import { AudioWorkletGlobalScope, WamParameterConfiguration, WamParameterData, WamParameterInfo, WamParameterInfoMap } from "@webaudiomodules/api";
 
 const loadDynamicParameterProcessor = (moduleId: string) => {
-    console.log("Registering DPP on ", moduleId)
-
     const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
 
     const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
