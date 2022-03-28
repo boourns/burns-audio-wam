@@ -24,9 +24,10 @@ type FunctionSeqState = {
 
 class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	destroyed = false;
-	renderCallback?: (error: string | undefined) => void
+	renderCallback?: () => void
 	multiplayer?: MultiplayerHandler
 	runCount: number
+	error?: any;
 
 	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
 		const { audioWorklet } = audioContext;
@@ -144,8 +145,9 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 
 				this.state = state
 			}
+			this.error = message.data.error
 			if (this.renderCallback) {
-				this.renderCallback(message.data.error)
+				this.renderCallback()
 			}
 		} else {
 			// @ts-ignore

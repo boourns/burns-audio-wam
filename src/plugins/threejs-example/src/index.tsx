@@ -28,9 +28,10 @@ type ThreeJSState = {
 
 class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 	destroyed = false;
-	renderCallback?: (error: string | undefined) => void
+	renderCallback?: () => void
 	multiplayer?: MultiplayerHandler
 	runCount: number
+	error?: any
 
 	gl: WebGLRenderingContext
 
@@ -132,11 +133,15 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 				generator.initialize(THREE, this.options)
 			}
 			this.generator = generator
+			this.error = undefined
+
 		} catch(e) {
 			console.error("Error creating threejs generator: ", e)
 
+			this.error = e
+
 			if (this.renderCallback) {
-				this.renderCallback(e)
+				this.renderCallback()
 			}
 		}
 
