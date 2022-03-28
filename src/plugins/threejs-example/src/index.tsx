@@ -15,7 +15,7 @@ import { DynamicParameterNode, DynamicParamGroup } from "../../shared/DynamicPar
 import { ThreeJSGenerator, ThreeJSRunner } from './ThreeJSRunner';
 
 import { VideoExtensionOptions } from 'wam-extensions';
-import { VideoGeneratorView } from './VideoGeneratorView';
+import { LiveCoderView } from './LiveCoderView';
 
 import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
 import getThreeJSProcessor from './ThreeJSProcessor';
@@ -59,6 +59,8 @@ class ThreeJSNode extends DynamicParameterNode {
 		}}, 
 		[]			
 		);
+
+		this.runCount = 0
 
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi']);
@@ -314,7 +316,7 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 		h("div", {})
 		div.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
 
-		render(<VideoGeneratorView plugin={this}></VideoGeneratorView>, div);
+		render(<LiveCoderView plugin={this.audioNode}></LiveCoderView>, div);
 		return div;
 	}
 
