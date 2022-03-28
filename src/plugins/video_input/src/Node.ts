@@ -42,7 +42,7 @@ export default class VideoInputNode extends CompositeAudioNode {
         if (navigator.mediaDevices) {
             console.log('getUserMedia supported.');
             let stream = await navigator.mediaDevices.getUserMedia ({
-                audio: false,
+                audio: true,
                 video: true,
             })
             this.stream = stream
@@ -91,7 +91,7 @@ export default class VideoInputNode extends CompositeAudioNode {
         }
 
         this._input = this.context.createGain()
-        this._output = this.streamNode
+        this._output = this.context.createGain() // this.streamNode
 
         //super.connect(this._input)
 
@@ -122,7 +122,7 @@ export default class VideoInputNode extends CompositeAudioNode {
         c.setAttribute("style", "display: none;")
         this.canvas = c
 
-        document.body.appendChild(this.canvas)
+        //document.body.appendChild(this.canvas)
 
         this.render()
 	}
