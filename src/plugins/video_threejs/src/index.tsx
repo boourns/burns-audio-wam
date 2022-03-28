@@ -20,6 +20,7 @@ import { LiveCoderNode, LiveCoderView } from '../../shared/LiveCoderView';
 
 import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
 import getThreeJSProcessor from './ThreeJSProcessor';
+import { defaultScript } from './editorDefaults';
 
 type ThreeJSState = {
 	runCount: number
@@ -69,7 +70,7 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 	registerExtensions() {
 		if (window.WAMExtensions.collaboration) {
 			this.multiplayer = new MultiplayerHandler(this.instanceId, "script")
-			this.multiplayer.getDocumentFromHost(this.defaultScript())
+			this.multiplayer.getDocumentFromHost(defaultScript())
 
 		} else {
 			console.warn("host has not implemented collaboration WAM extension")
@@ -192,78 +193,6 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 			language: 'javascript',
 			automaticLayout: true
 		});
-	}
-
-	defaultScript(): string {
-		return `
-
-/** @implements {ThreeJSGenerator} */
-class CubeGenerator {
-	/**
-	 * @returns {WAMParameterDefinition[]}
-	 */
-	parameters() {
-		return [
-			{
-				id: "base",
-				config: {
-					label: "Base Note",
-					type: "int",
-					defaultValue: 32,
-					minValue: 0,
-					maxValue: 100
-				}
-			},
-			{
-				id: "range",
-				config: {
-					label: "Note Range",
-					type: "int",
-					defaultValue: 24,
-					minValue: 1,
-					maxValue: 48    
-				}
-			}
-		]
-	}
-
-	initialize(THREE, options) {
-		this.THREE = THREE
-		this.options = options
-
-		const camera = new THREE.PerspectiveCamera( 70, options.width / options.height, 0.01, 10 );
-        camera.position.z = 1;
-
-        const scene = new THREE.Scene();
-
-        const geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
-        const material = new THREE.MeshNormalMaterial();
-
-        const mesh = new THREE.Mesh( geometry, material );
-
-        scene.add( mesh );
-
-		this.scene = scene
-		this.camera = camera
-		this.mesh = mesh
-	}
-
-	/**
-	 * @param tick {number}
-	 * @param params {Record<string, any>}
-	 * */
-	render(renderer, time, params) {
-		this.mesh.position.setX(params.offset);
-		     
-		this.mesh.rotation.x = (time+856) / 2;
-		this.mesh.rotation.y = time / 10;
-		
-		renderer.render( this.scene, this.camera);
-	}
-}
-
-return new CubeGenerator()
-`
 	}
 
 	editorDefinition(): string {
