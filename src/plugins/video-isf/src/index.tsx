@@ -4,6 +4,7 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
+import * as monaco from 'monaco-editor';
 import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
 
 import { h, render } from 'preact';
@@ -12,11 +13,27 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import { DynamicParameterNode } from "../../shared/DynamicParameterNode";
 
 import { VideoExtensionOptions } from 'wam-extensions';
-import { DynamicParameterView } from '../../shared/DynamicParameterView';
+import { LiveCoderNode, LiveCoderView } from '../../shared/LiveCoderView';
+
 import { ISFShader } from './ISFShader';
+import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
+import { defaultFragmentShader, defaultVertexShader } from './defaultShaders';
 	
-class ISFVideoNode extends DynamicParameterNode {
+type ISFVideoState = {
+	runCount: number
+	params: any
+}
+
+class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 	destroyed = false;
+	renderCallback?: (e: string | undefined) => void;
+	runCount: number
+
+	gl: WebGLRenderingContext
+	shader: ISFShader
+	options: VideoExtensionOptions;
+	multiplayer?: MultiplayerHandler;
+	multiplayerVertex?: MultiplayerHandler;
 
 	/**
 	 * @param {WebAudioModule} module
@@ -38,7 +55,109 @@ class ISFVideoNode extends DynamicParameterNode {
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi']);
 	}
-	
+
+	registerExtensions() {
+		if (window.WAMExtensions.collaboration) {
+			this.multiplayer = new MultiplayerHandler(this.instanceId, "fragment")
+			this.multiplayer.getDocumentFromHost(defaultFragmentShader())
+
+			this.multiplayerVertex = new MultiplayerHandler(this.instanceId, "vertex")
+			this.multiplayerVertex.getDocumentFromHost(defaultVertexShader())
+
+			this.upload()
+		} else {
+			console.warn("host has not implemented collaboration WAM extension")
+		}
+
+		if (window.WAMExtensions && window.WAMExtensions.video) {
+			window.WAMExtensions.video.setDelegate(this.instanceId, {
+				connectVideo: (options: VideoExtensionOptions) => {
+					console.log("connectVideo!")
+
+					this.options = options
+
+					this.upload()
+
+					return {
+						numberOfInputs: 1,
+						numberOfOutputs: 1
+					}
+				},
+				render: (inputs: WebGLTexture[], currentTime: number) => {
+					if (this.shader) {
+						return this.shader.render(inputs, currentTime, this.state)
+					} else {
+						return inputs
+					}
+				},
+				disconnectVideo: () => {
+					console.log("disconnectVideo")
+				},
+			})
+		}
+	}
+
+	upload() {
+		if (!this.options || !this.multiplayer || !this.multiplayerVertex) {
+			return
+		}
+
+		let fragmentSource = this.multiplayer.doc.toString()
+		let vertexSource = this.multiplayerVertex.doc.toString()
+
+		try {
+			this.shader = new ISFShader(this.options, fragmentSource, vertexSource)
+			let params = this.shader.wamParameters()
+
+			this.updateProcessor(params)
+
+		} catch(e) {
+			console.error("Error creating ISF Shader: ", e)
+			this.shader = undefined
+
+			if (this.renderCallback) {
+				this.renderCallback(e)
+			}
+		}
+	}
+
+	async runPressed() {
+		this.setState({
+			runCount: this.runCount+1
+		})
+	}
+
+	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor {
+		let editor = monaco.editor.create(ref, {
+			language: 'javascript',
+			automaticLayout: true
+		});
+
+		return editor
+	}
+
+	async getState(): Promise<ISFVideoState> {
+		return {
+			runCount: this.runCount,
+			params: await super.getState()
+		}
+	}
+
+	async setState(state?: Partial<ISFVideoState>): Promise<void> {
+		if (!state) {
+			return
+		}
+
+		if (state.runCount && state.runCount != this.runCount) {
+			this.runCount = state.runCount
+
+			this.upload()
+		}
+
+		if (state.params) {
+			await super.setState(state.params)
+		}
+	}
 }
 
 export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
@@ -47,6 +166,8 @@ export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_processorUrl = `${this._baseURL}/ISFVideoProcessor.js`;
+
+	get instanceId() { return "TomBurnsISFVideo" + this._timestamp; }
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -57,8 +178,31 @@ export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
 		return descriptor
 	}
 
+	configureMonaco() {
+		const baseURL = this._baseURL
+		// @ts-ignore
+		self.MonacoEnvironment = {
+			getWorkerUrl: function (moduleId: any, label: string) {
+				if (label === 'json') {
+					return `${baseURL}/monaco/json.worker.bundle.js`;
+				}
+				if (label === 'css' || label === 'scss' || label === 'less') {
+					return `${baseURL}/monaco/css.worker.bundle.js`;
+				}
+				if (label === 'html' || label === 'handlebars' || label === 'razor') {
+					return `${baseURL}/monaco/html.worker.bundle.js`;
+				}
+				if (label === 'typescript' || label === 'javascript') {
+					return `${baseURL}/monaco/ts.worker.bundle.js`;
+				}
+				return `${baseURL}/monaco/editor.worker.bundle.js`;
+			}
+		}
+	}
+
 	async initialize(state: any) {
 		await this._loadDescriptor();
+		this.configureMonaco();
 
 		return super.initialize(state);
 	}
@@ -70,46 +214,12 @@ export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
 		const node: ISFVideoNode = new ISFVideoNode(this, {});
 		await node._initialize();
 
-		await node.updateState();
+		node.registerExtensions()
 
 		if (initialState) node.setState(initialState);
 
-		if (window.WAMExtensions && window.WAMExtensions.video) {
-			window.WAMExtensions.video.setDelegate(this.instanceId, {
-				connectVideo: (options: VideoExtensionOptions) => {
-					console.log("connectVideo!")
-					this.attach(options)
-					return {
-						numberOfInputs: 1,
-						numberOfOutputs: 1
-					}
-				},
-				render: (inputs: WebGLTexture[], currentTime: number) => {
-					return this.generator.render(inputs, currentTime, this._audioNode.state)
-				},
-				disconnectVideo: () => {
-					console.log("disconnectVideo")
-				},
-			})
-		}
-
 		return node
     }
-
-	gl: WebGLRenderingContext
-	generator: ISFShader
-
-	attach(options: VideoExtensionOptions) {
-		this.generator = new ISFShader(options, "", undefined)
-		let params = this.generator.wamParameters()
-
-		this._audioNode.updateProcessor(params)
-	}
-
-	// Random color helper function.
-	getRandomColor() {
-		return [Math.random(), Math.random(), Math.random()];
-	}
 
 	async createGui() {
 		const div = document.createElement('div');
@@ -117,13 +227,7 @@ export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
 		h("div", {})
 		div.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
 
-		//var shadow = div.attachShadow({mode: 'open'});
-		//const container = document.createElement('div');
-		//container.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
-		
-		//shadow.appendChild(container)
-
-		render(<DynamicParameterView plugin={this._audioNode}></DynamicParameterView>, div);
+		render(<LiveCoderView plugin={this._audioNode}></LiveCoderView>, div);
 		return div;
 	}
 

@@ -345,6 +345,7 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 
 	async initialize(state: any) {
 		await this._loadDescriptor();
+		this.configureMonaco();
 
 		return super.initialize(state);
 	}
