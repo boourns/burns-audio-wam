@@ -4,6 +4,9 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
+import * as monaco from 'monaco-editor';
+import * as THREE from 'three';
+
 import { WebAudioModule, addFunctionModule } from '@webaudiomodules/sdk';
 import { h, render } from 'preact';
 
@@ -13,19 +16,17 @@ import { DynamicParameterNode, DynamicParamGroup } from "../../shared/DynamicPar
 import { ThreeJSGenerator, ThreeJSRunner } from './ThreeJSRunner';
 
 import { VideoExtensionOptions } from 'wam-extensions';
-import { LiveCoderView } from './LiveCoderView';
+import { LiveCoderNode, LiveCoderView } from './LiveCoderView';
 
 import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
 import getThreeJSProcessor from './ThreeJSProcessor';
-
-import * as THREE from 'three';
 
 type ThreeJSState = {
 	runCount: number
 	params: any
 }
 
-class ThreeJSNode extends DynamicParameterNode {
+class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 	destroyed = false;
 	renderCallback?: (error: string | undefined) => void
 	multiplayer?: MultiplayerHandler
@@ -170,6 +171,24 @@ class ThreeJSNode extends DynamicParameterNode {
 		}
 	}
 
+	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor {
+		monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+			allowJs: true
+		})
+	  
+		monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+			noSemanticValidation: false,
+			noSyntaxValidation: false,
+		});
+	
+		monaco.languages.typescript.javascriptDefaults.addExtraLib(this.editorDefinition(), "")
+	
+		return monaco.editor.create(ref, {
+			language: 'javascript',
+			automaticLayout: true
+		});
+	}
+
 	defaultScript(): string {
 		return `
 
@@ -241,6 +260,44 @@ class CubeGenerator {
 return new CubeGenerator()
 `
 	}
+
+	editorDefinition(): string {
+		return `
+	export type MIDINote = {
+		/** MIDI Note number, 0-127 */
+		note: number
+		/** Note velocity, 0: off, 1-127: note on strength */
+		velocity: number
+		/** Note duration, measured in sequencer ticks (24 PPQN) */
+		duration: number
+	}
+	
+	export type WAMParameterDefinition = {
+		/** An identifier for the parameter, unique to this plugin instance */
+		id: string
+		/** The parameter's human-readable name. */
+		label?: string
+		/** The parameter's data type */
+		type?: "float" | "int"
+		/** The default value for the parameter */
+		defaultValue: number
+		/** The lowest possible value for the parameter */
+		minValue?: number
+		/** The highest possible value for the parameter */
+		maxValue?: number
+	}
+	
+	export type ParameterDefinition = {
+		id: string
+		config: WAMParameterDefinition
+	}
+	
+	export interface FunctionSequencer {
+		parameter(): ParameterDefinition[]
+		onTick(tick: number, params: Record<string, any>): MIDINote[]
+	}
+		`
+	  }
 }
 
 export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {

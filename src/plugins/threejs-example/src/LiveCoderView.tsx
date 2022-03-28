@@ -9,6 +9,7 @@ export interface LiveCoderNode extends DynamicParameterNode {
   renderCallback?: (e: any) => void
   multiplayer?: MultiplayerHandler
   runPressed(): void
+	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor
 }
 
 export interface LiveCoderViewProps {
@@ -93,23 +94,7 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
     }
     this.ref = ref
 
-    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-      allowJs: true
-
-    })
-
-    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-      noSemanticValidation: false,
-      noSyntaxValidation: false,
-    });
-
-    monaco.languages.typescript.javascriptDefaults.addExtraLib(this.editorDefinition(), "")
-
-    this.editor = monaco.editor.create(ref, {
-      language: 'javascript',
-      automaticLayout: true
-    });
-
+    this.editor = this.props.plugin.createEditor(ref)
 
     if (this.props.plugin.multiplayer) {
       this.props.plugin.multiplayer.registerEditor(this.editor)
@@ -206,42 +191,6 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
       `
   }
 
-  editorDefinition(): string {
-    return `
-export type MIDINote = {
-    /** MIDI Note number, 0-127 */
-    note: number
-    /** Note velocity, 0: off, 1-127: note on strength */
-    velocity: number
-    /** Note duration, measured in sequencer ticks (24 PPQN) */
-    duration: number
-}
-
-export type WAMParameterDefinition = {
-    /** An identifier for the parameter, unique to this plugin instance */
-    id: string
-    /** The parameter's human-readable name. */
-    label?: string
-    /** The parameter's data type */
-    type?: "float" | "int"
-    /** The default value for the parameter */
-    defaultValue: number
-    /** The lowest possible value for the parameter */
-    minValue?: number
-    /** The highest possible value for the parameter */
-    maxValue?: number
-}
-
-export type ParameterDefinition = {
-    id: string
-    config: WAMParameterDefinition
-}
-
-export interface FunctionSequencer {
-    parameter(): ParameterDefinition[]
-    onTick(tick: number, params: Record<string, any>): MIDINote[]
-}
-    `
-  }
+  
   
 }
