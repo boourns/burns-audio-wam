@@ -47,20 +47,22 @@ export default class VideoInputNode extends CompositeAudioNode {
             })
             this.stream = stream
             
-            for (let t of stream.getAudioTracks()) {
-                let constraints = t.getConstraints()
-                constraints.autoGainControl = false
-                constraints.echoCancellation = false
-                constraints.noiseSuppression = false
-                await t.applyConstraints(constraints)
-            }
+            // for (let t of stream.getAudioTracks()) {
+            //     let constraints = t.getConstraints()
+            //     constraints.autoGainControl = false
+            //     constraints.echoCancellation = false
+            //     constraints.noiseSuppression = false
+            //     await t.applyConstraints(constraints)
+            // }
 
             // Create a MediaStreamAudioSourceNode  
             this.streamNode = ctx.createMediaStreamSource(stream);
 
             this.sourceVideo = document.createElement("video")
+
             this.sourceVideo.srcObject = stream;
             this.sourceVideo.play();
+            this.sourceVideo.volume = 0;
             this.sourceVideo.setAttribute("style", "display: none;")
 
             document.body.appendChild(this.sourceVideo)
