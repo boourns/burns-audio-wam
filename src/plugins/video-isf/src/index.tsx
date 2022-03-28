@@ -26,7 +26,7 @@ type ISFVideoState = {
 
 class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 	destroyed = false;
-	renderCallback?: (e: string | undefined) => void;
+	renderCallback?: () => void;
 	runCount: number
 
 	gl: WebGLRenderingContext
@@ -34,6 +34,7 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 	options: VideoExtensionOptions;
 	multiplayer?: MultiplayerHandler;
 	multiplayerVertex?: MultiplayerHandler;
+	error?: any
 
 	/**
 	 * @param {WebAudioModule} module
@@ -52,6 +53,8 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 	}
 ]);
 
+		this.runCount = 0
+
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi']);
 	}
@@ -65,6 +68,10 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 			this.multiplayerVertex.getDocumentFromHost(defaultVertexShader())
 
 			this.upload()
+
+			if (this.renderCallback) {
+				this.renderCallback()
+			}
 		} else {
 			console.warn("host has not implemented collaboration WAM extension")
 		}
@@ -110,14 +117,11 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 			let params = this.shader.wamParameters()
 
 			this.updateProcessor(params)
-
 		} catch(e) {
 			console.error("Error creating ISF Shader: ", e)
 			this.shader = undefined
 
-			if (this.renderCallback) {
-				this.renderCallback(e)
-			}
+			this.error = e
 		}
 	}
 
@@ -129,7 +133,7 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 
 	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor {
 		let editor = monaco.editor.create(ref, {
-			language: 'javascript',
+			language: '',
 			automaticLayout: true
 		});
 
@@ -156,6 +160,10 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 
 		if (state.params) {
 			await super.setState(state.params)
+		}
+
+		if (this.renderCallback) {
+			this.renderCallback()
 		}
 	}
 }

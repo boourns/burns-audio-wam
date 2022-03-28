@@ -6,7 +6,8 @@ import { MultiplayerHandler } from './collaboration/MultiplayerHandler';
 import { DynamicParameterNode } from './DynamicParameterNode';
 
 export interface LiveCoderNode extends DynamicParameterNode {
-  renderCallback?: (e: any) => void
+  error?: any
+  renderCallback?: () => void
   multiplayer?: MultiplayerHandler
   runPressed(): void
 	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor
@@ -17,7 +18,6 @@ export interface LiveCoderViewProps {
 }
 
 type LiveCoderViewState = {
-  error: string | undefined
   panel: "GUI" | "CODE"
   runCount: number
 }
@@ -30,7 +30,6 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
   constructor() {
     super();
     this.state = {
-      error: undefined,
       panel: "GUI",
       runCount: 0
     }
@@ -40,14 +39,12 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
 
   // Lifecycle: Called whenever our component is created
   componentDidMount() {
-    this.props.plugin.renderCallback = (error) => {
-      if (error != this.state.error) {
-        this.setState({
-          error
-        })
-      } else {
+    this.props.plugin.renderCallback = () => {
+      window.setTimeout(() => {
+        
+        // for some reason this did not like being inline, would cause an exception in preact and never render again
         this.forceUpdate()
-      }
+      }, 1)
     }
   }
 
@@ -64,8 +61,6 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
 
   runPressed() {
     this.props.plugin.runPressed()
-
-    this.setState({error: undefined})
   }
 
   panelPressed() {
@@ -109,8 +104,8 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
 
   renderParameters() {
     return <div style="display: flex; flex: 1;">
-        <DynamicParameterView plugin={this.props.plugin}></DynamicParameterView>
-      </div>
+       <DynamicParameterView plugin={this.props.plugin}></DynamicParameterView>
+     </div>
   }
 
   render() {
@@ -118,7 +113,7 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
 
     let contentChanged = false
 
-    const statusStyle = "padding: 2px; margin: 4px; " + (this.state.error ? "background-color: yellow;" : contentChanged ? "background-color: gray;" : "background-color: green;")
+    const statusStyle = "padding: 2px; margin: 4px; " + (this.props.plugin.error ? "background-color: yellow;" : contentChanged ? "background-color: gray;" : "background-color: green;")
 
     let panelLabel
     let panel
@@ -133,7 +128,7 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
         break
     }
 
-    return (
+    let result = (
     <div class="function-sequencer-module">
       <div style="display: flex; flex-direction: column">
         <div style="display: flex; justify-content: space-between; width: 100%">
@@ -143,7 +138,7 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
           </div>
 
           <div style={statusStyle}>
-            { this.state.error != undefined ? this.state.error : "Running" }
+            { this.props.plugin.error != undefined ? this.props.plugin.error : "Running" }
           </div>
         </div>
       </div>
@@ -152,6 +147,8 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
         {this.css()}
       </style>
     </div>)
+
+    return result
   }
 
   css(): string {

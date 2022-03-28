@@ -77,13 +77,17 @@ export class ISFShader {
     render(inputs: WebGLTexture[], currentTime: number, params: WamParameterDataMap): WebGLTexture[] {
         this.renderer.setValue("TIME", currentTime)
         
-        this.renderer.setValue("inputImage", inputs[0], true)
-        this.renderer.setValue(`_inputImage_imgSize`, [this.options.width, this.options.height]);
-        this.renderer.setValue(`_inputImage_imgRect`, [0, 0, 1, 1]);
-        this.renderer.setValue(`_inputImage_flip`, false);
+        if (this.renderer.uniforms["inputImage"]) {
+          this.renderer.setValue("inputImage", inputs[0], true)
+          this.renderer.setValue(`_inputImage_imgSize`, [this.options.width, this.options.height]);
+          this.renderer.setValue(`_inputImage_imgRect`, [0, 0, 1, 1]);
+          this.renderer.setValue(`_inputImage_flip`, false);
+        }
         
         for (let p of this.params) {
-          this.renderer.setValue(p.id, params[p.id].value)
+          if (params[p.id]) {
+            this.renderer.setValue(p.id, params[p.id].value)
+          }
         }
         
         let output = this.renderer.draw(this.options.width, this.options.height)
