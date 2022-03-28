@@ -42,7 +42,7 @@ export default class VideoInputNode extends CompositeAudioNode {
         if (navigator.mediaDevices) {
             console.log('getUserMedia supported.');
             let stream = await navigator.mediaDevices.getUserMedia ({
-                audio: true,
+                audio: false,
                 video: true,
             })
             this.stream = stream
