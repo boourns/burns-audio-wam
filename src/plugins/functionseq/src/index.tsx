@@ -4,9 +4,7 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
-import * as monaco from 'monaco-editor';
-
-import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk';
+import { WebAudioModule, addFunctionModule } from '@webaudiomodules/sdk';
 import { h, render } from 'preact';
 
 import {WamEventMap, WamParameterDataMap} from '@webaudiomodules/api';
@@ -26,7 +24,6 @@ type FunctionSeqState = {
 
 class FunctionSeqNode extends DynamicParameterNode {
 	destroyed = false;
-	_supportedEventTypes: Set<keyof WamEventMap>
 	renderCallback?: (error: string | undefined) => void
 	multiplayer?: MultiplayerHandler
 	runCount: number
