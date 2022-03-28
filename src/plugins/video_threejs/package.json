@@ -15,7 +15,7 @@
     "@types/three": "^0.138.0",
     "debug": "^4.3.1",
     "preact": "^10.5.5",
-    "three": "^0.138.3"
+    "three": "^0.139.0"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^9.0.0",

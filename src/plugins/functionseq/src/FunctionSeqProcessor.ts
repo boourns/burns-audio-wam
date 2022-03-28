@@ -33,12 +33,6 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
     const DynamicParameterProcessor = ModuleScope.DynamicParameterProcessor
 
     class FunctionSequencerProcessor extends DynamicParameterProcessor {
-        // @ts-ignore
-        _generateWamParameterInfo() {
-            return {
-            }
-        }
-
         lastTime: number
         proxyId: string
         ticks: number
@@ -97,8 +91,6 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
                         this.port.postMessage({source: "functionSeq", action:"error", error: e.toString()})
                         this.function = undefined
                     }
-                    
-
                 }
             }
 

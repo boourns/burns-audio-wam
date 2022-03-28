@@ -1,21 +1,28 @@
 import { Component, h } from 'preact';
-
-import {DynamicParameterView} from "../../shared/DynamicParameterView"
+import {DynamicParameterView} from "./DynamicParameterView"
 
 import * as monaco from 'monaco-editor';
+import { MultiplayerHandler } from './collaboration/MultiplayerHandler';
+import { DynamicParameterNode } from './DynamicParameterNode';
 
-import FunctionSeqModule from '.';
-
-export interface FunctionSeqViewProps {
-  plugin: FunctionSeqModule
+export interface LiveCoderNode extends DynamicParameterNode {
+  error?: any
+  renderCallback?: () => void
+  multiplayer?: MultiplayerHandler
+  runPressed(): void
+	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor
 }
 
-type FunctionSeqViewState = {
-  error: string | undefined
+export interface LiveCoderViewProps {
+  plugin: LiveCoderNode
+}
+
+type LiveCoderViewState = {
   panel: "GUI" | "CODE"
+  runCount: number
 }
 
-export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeqViewState> {
+export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewState> {
   statePoller: number
   ref: HTMLDivElement | null
   editor: monaco.editor.IStandaloneCodeEditor
@@ -23,8 +30,8 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
   constructor() {
     super();
     this.state = {
-      error: undefined,
-      panel: "GUI"
+      panel: "GUI",
+      runCount: 0
     }
     this.runPressed = this.runPressed.bind(this)
     this.panelPressed = this.panelPressed.bind(this)
@@ -32,14 +39,12 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
 
   // Lifecycle: Called whenever our component is created
   componentDidMount() {
-    this.props.plugin.sequencer.renderCallback = (error) => {
-      if (error != this.state.error) {
-        this.setState({
-          error
-        })
-      } else {
+    this.props.plugin.renderCallback = () => {
+      window.setTimeout(() => {
+        
+        // for some reason this did not like being inline, would cause an exception in preact and never render again
         this.forceUpdate()
-      }
+      }, 1)
     }
   }
 
@@ -55,9 +60,7 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
   }
 
   runPressed() {
-    this.props.plugin.audioNode.runPressed()
-
-    this.setState({error: undefined})
+    this.props.plugin.runPressed()
   }
 
   panelPressed() {
@@ -86,23 +89,7 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
     }
     this.ref = ref
 
-    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-      allowJs: true
-
-    })
-
-    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-      noSemanticValidation: false,
-      noSyntaxValidation: false,
-    });
-
-    monaco.languages.typescript.javascriptDefaults.addExtraLib(this.editorDefinition(), "")
-
-    this.editor = monaco.editor.create(ref, {
-      language: 'javascript',
-      automaticLayout: true
-    });
-
+    this.editor = this.props.plugin.createEditor(ref)
 
     if (this.props.plugin.multiplayer) {
       this.props.plugin.multiplayer.registerEditor(this.editor)
@@ -117,8 +104,8 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
 
   renderParameters() {
     return <div style="display: flex; flex: 1;">
-        <DynamicParameterView plugin={this.props.plugin.audioNode}></DynamicParameterView>
-      </div>
+       <DynamicParameterView plugin={this.props.plugin}></DynamicParameterView>
+     </div>
   }
 
   render() {
@@ -126,7 +113,7 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
 
     let contentChanged = false
 
-    const statusStyle = "padding: 2px; margin: 4px; " + (this.state.error ? "background-color: yellow;" : contentChanged ? "background-color: gray;" : "background-color: green;")
+    const statusStyle = "padding: 2px; margin: 4px; " + (this.props.plugin.error ? "background-color: yellow;" : contentChanged ? "background-color: gray;" : "background-color: green;")
 
     let panelLabel
     let panel
@@ -141,7 +128,7 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
         break
     }
 
-    return (
+    let result = (
     <div class="function-sequencer-module">
       <div style="display: flex; flex-direction: column">
         <div style="display: flex; justify-content: space-between; width: 100%">
@@ -151,7 +138,7 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
           </div>
 
           <div style={statusStyle}>
-            { this.state.error != undefined ? this.state.error : "Running" }
+            { this.props.plugin.error != undefined ? this.props.plugin.error : "Running" }
           </div>
         </div>
       </div>
@@ -160,6 +147,8 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
         {this.css()}
       </style>
     </div>)
+
+    return result
   }
 
   css(): string {
@@ -199,42 +188,6 @@ export class FunctionSeqView extends Component<FunctionSeqViewProps, FunctionSeq
       `
   }
 
-  editorDefinition(): string {
-    return `
-export type MIDINote = {
-    /** MIDI Note number, 0-127 */
-    note: number
-    /** Note velocity, 0: off, 1-127: note on strength */
-    velocity: number
-    /** Note duration, measured in sequencer ticks (24 PPQN) */
-    duration: number
-}
-
-export type WAMParameterDefinition = {
-    /** An identifier for the parameter, unique to this plugin instance */
-    id: string
-    /** The parameter's human-readable name. */
-    label?: string
-    /** The parameter's data type */
-    type?: "float" | "int"
-    /** The default value for the parameter */
-    defaultValue: number
-    /** The lowest possible value for the parameter */
-    minValue?: number
-    /** The highest possible value for the parameter */
-    maxValue?: number
-}
-
-export type ParameterDefinition = {
-    id: string
-    config: WAMParameterDefinition
-}
-
-export interface FunctionSequencer {
-    parameter(): ParameterDefinition[]
-    onTick(tick: number, params: Record<string, any>): MIDINote[]
-}
-    `
-  }
+  
   
 }

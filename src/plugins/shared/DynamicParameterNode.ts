@@ -40,6 +40,7 @@ export class DynamicParameterNode extends WamNode {
         this.updateProcessor(groups);
 
         this.updateState = this.updateState.bind(this)
+        this.updateState()
 	}
 
     initializeDefaultState() {
@@ -89,8 +90,8 @@ export class DynamicParameterNode extends WamNode {
     async updateState() {
         if (!this.pause) {
             this.state = await this.getParameterValues(false)
-        }
-    
+        } 
+
         if (!this.destroyed) {
             this.statePoller = window.requestAnimationFrame(this.updateState)
         }

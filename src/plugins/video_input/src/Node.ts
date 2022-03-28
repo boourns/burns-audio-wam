@@ -47,20 +47,22 @@ export default class VideoInputNode extends CompositeAudioNode {
             })
             this.stream = stream
             
-            for (let t of stream.getAudioTracks()) {
-                let constraints = t.getConstraints()
-                constraints.autoGainControl = false
-                constraints.echoCancellation = false
-                constraints.noiseSuppression = false
-                await t.applyConstraints(constraints)
-            }
+            // for (let t of stream.getAudioTracks()) {
+            //     let constraints = t.getConstraints()
+            //     constraints.autoGainControl = false
+            //     constraints.echoCancellation = false
+            //     constraints.noiseSuppression = false
+            //     await t.applyConstraints(constraints)
+            // }
 
             // Create a MediaStreamAudioSourceNode  
             this.streamNode = ctx.createMediaStreamSource(stream);
 
             this.sourceVideo = document.createElement("video")
+
             this.sourceVideo.srcObject = stream;
             this.sourceVideo.play();
+            this.sourceVideo.volume = 0;
             this.sourceVideo.setAttribute("style", "display: none;")
 
             document.body.appendChild(this.sourceVideo)
@@ -91,7 +93,7 @@ export default class VideoInputNode extends CompositeAudioNode {
         }
 
         this._input = this.context.createGain()
-        this._output = this.streamNode
+        this._output = this.context.createGain() // this.streamNode
 
         //super.connect(this._input)
 
@@ -122,7 +124,7 @@ export default class VideoInputNode extends CompositeAudioNode {
         c.setAttribute("style", "display: none;")
         this.canvas = c
 
-        document.body.appendChild(this.canvas)
+        //document.body.appendChild(this.canvas)
 
         this.render()
 	}

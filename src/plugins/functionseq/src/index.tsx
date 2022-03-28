@@ -5,31 +5,29 @@
 /* eslint-disable no-underscore-dangle */
 
 import * as monaco from 'monaco-editor';
-
-import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk';
 import { h, render } from 'preact';
 
-import {WamEventMap, WamParameterDataMap} from '@webaudiomodules/api';
-
+import { WebAudioModule, addFunctionModule } from '@webaudiomodules/sdk';
+import {WamParameterDataMap} from '@webaudiomodules/api';
 import { getBaseUrl } from '../../shared/getBaseUrl';
-
-import { FunctionSeqView } from './FunctionSeqView';
-import getFunctionSequencerProcessor from './FunctionSeqProcessor';
-
 import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
 import { DynamicParameterNode } from '../../shared/DynamicParameterNode';
+import { LiveCoderNode, LiveCoderView } from "../../shared/LiveCoderView"
+
+import getFunctionSequencerProcessor from './FunctionSeqProcessor';
+import { defaultScript, editorDefinition } from './editor';
 	
 type FunctionSeqState = {
 	runCount: number
 	params: any
 }
 
-class FunctionSeqNode extends DynamicParameterNode {
+class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	destroyed = false;
-	_supportedEventTypes: Set<keyof WamEventMap>
-	renderCallback?: (error: string | undefined) => void
+	renderCallback?: () => void
 	multiplayer?: MultiplayerHandler
 	runCount: number
+	error?: any;
 
 	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
 		const { audioWorklet } = audioContext;
@@ -58,10 +56,40 @@ class FunctionSeqNode extends DynamicParameterNode {
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
 	}
 
-	upload() {
-		let source = this.multiplayer.doc.toString()
+	registerExtensions() {
+		if (window.WAMExtensions.collaboration) {
+			this.multiplayer = new MultiplayerHandler(this.instanceId, "script")
+			this.multiplayer.getDocumentFromHost(this.defaultScript())
 
-		this.port.postMessage({action:"function", code: source})
+			this.upload()
+		} else {
+			console.warn("host has not implemented collaboration WAM extension")
+		}
+	}
+
+	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor {
+		monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+			allowJs: true
+		})
+	  
+		monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+			noSemanticValidation: false,
+			noSyntaxValidation: false,
+		});
+	
+		monaco.languages.typescript.javascriptDefaults.addExtraLib(this.editorDefinition(), "")
+	
+		return monaco.editor.create(ref, {
+			language: 'javascript',
+			automaticLayout: true
+		});	
+	}
+
+	upload() {
+		if (this.multiplayer) {
+			let source = this.multiplayer.doc.toString()
+			this.port.postMessage({action:"function", code: source})
+		}
 	}
 
 	async runPressed() {
@@ -117,14 +145,24 @@ class FunctionSeqNode extends DynamicParameterNode {
 
 				this.state = state
 			}
+			this.error = message.data.error
 			if (this.renderCallback) {
-				this.renderCallback(message.data.error)
+				this.renderCallback()
 			}
 		} else {
 			// @ts-ignore
 			super._onMessage(message)
 		}
 	}
+
+	defaultScript(): string {
+		return defaultScript()
+	}
+
+	editorDefinition(): string {
+		return editorDefinition()
+	}
+
 }
 
 export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
@@ -134,7 +172,6 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_functionProcessorUrl = `${this._baseURL}/FunctionSeqProcessor.js`;
 	sequencer: FunctionSeqNode
-	multiplayer?: MultiplayerHandler;
 
 	get instanceId() { return "TomBurnsFunctionSequencer" + this._timestamp; }
 
@@ -182,19 +219,11 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 		const node: FunctionSeqNode = new FunctionSeqNode(this, {});
 		await node._initialize();
 
-		if (window.WAMExtensions.collaboration) {
-			this.multiplayer = new MultiplayerHandler(this.instanceId, "script")
-			this.multiplayer.getDocumentFromHost(this.defaultScript())
-
-			node.multiplayer = this.multiplayer
-		} else {
-			console.warn("host has not implemented collaboration WAM extension")
-		}
-
 		node.setState(initialState || {
 			runCount: 0
 		});
 
+		node.registerExtensions()
 		node.upload()
 
 		this.sequencer = node
@@ -208,7 +237,7 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 		h("div", {})
 		div.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
 
-		render(<FunctionSeqView plugin={this}></FunctionSeqView>, div);
+		render(<LiveCoderView plugin={this.audioNode}></LiveCoderView>, div);
 
 		return div;
 	}
@@ -217,64 +246,8 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 		render(null, el)
 	}
 
-	defaultScript(): string {
-		return `
-// Write a MIDI sequencer in pure ES6 javascript.
-// Press "Save & Run" to load changes.  This also distributes changes to other users.
-// It is loaded directly into the browser's audio thread, no transpilation occurs.
-// For better error reporting check your console.
 
-// To make a sequencer, at the end of the script return an object that responds to
-// the onTick method.  This is run in the audio thread, not the main thread.
-
-/** @implements {FunctionSequencer} */
-class RandomNoteSequencer {
-	/**
-	 * @returns {WAMParameterDefinition[]}
-	 */
-	parameters() {
-		return [
-			{
-				id: "base",
-				config: {
-					label: "Base Note",
-					type: "int",
-					defaultValue: 32,
-					minValue: 0,
-					maxValue: 100
-				}
-			},
-			{
-				id: "range",
-				config:{
-					label: "Note Range",
-					type: "int",
-					defaultValue: 24,
-					minValue: 1,
-					maxValue: 48    
-				}
-			}
-		]
-	}
-
-	/**
-	 * @param tick {number}
-	 * @param params {Record<string, any>}
-	 * */
-	onTick(tick, params) {
-		// onTick is called once every sequencer tick, which is 96 PPQN
-		// it returns an array of {note, velocity, duration}
-		// where note is the MIDI note number, velocity is an integer from 0 to 127, and duration is the length of the note in ticks.
-
-		if (tick % 24 == 0) {
-			return [
-				{note: params.base + Math.floor(Math.random() * params.range), velocity: 100, duration: 20}
-			]
-		}
-	}
 }
 
-return new RandomNoteSequencer()
-`
-	}
-}
+
+

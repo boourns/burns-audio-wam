@@ -417,6 +417,7 @@ export class ISFRenderer {
 
     return mathJsEval(s);
   }
+  
   cleanup() {
     this.contextState.reset();
     if (this.renderBuffers) {

@@ -1,25 +1,16 @@
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-const WAMPlugin = {
+
+const wamNode = {
   entry: {
     app: {
       import: './src/index.tsx',
       filename: 'index.js'
-    }
+    },
   },
   module: {
     rules: [
-      {
-        test: /\.worklet\.(ts|js)$/,
-        use: [{
-          loader: 'worklet-loader',
-          options: {
-            name: '[fullhash].worklet.js'
-          }
-        }],
-        exclude: /node_modules/
-      },
       {
         test: /\.tsx?$/,
         use: 'ts-loader',
@@ -27,10 +18,8 @@ const WAMPlugin = {
       },
       {
         test: /\.(sa|sc|c)ss$/,
-        use: ['style-loader', 'css-loader']
-        ,
+        use: ['style-loader', 'css-loader'],
       },
-      
     ],
   },
   mode: "development",
@@ -41,9 +30,9 @@ const WAMPlugin = {
     outputModule: true
   },
   output: {
-    path: path.resolve(__dirname, './dist'),
-    libraryTarget: 'module',
-    publicPath: 'auto',
+      path: path.resolve(__dirname, './dist'),
+      publicPath: 'auto',
+      libraryTarget: 'module',
   },
   plugins: [
     new CopyWebpackPlugin({
@@ -82,4 +71,31 @@ const monaco = {
   }
 };
 
-module.exports = [WAMPlugin, monaco];
+const processor = {
+  entry: {
+    processor: {
+      import: './src/ISFVideoProcessor.ts',
+      filename: 'ISFVideoProcessor.js'
+    }
+  },
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
+    ],
+  },
+  mode: "development",
+  devtool: false,
+  resolve: {
+    extensions: [ '.tsx', '.ts', '.js' ],
+  },
+  output: {
+    path: path.resolve(__dirname, './dist'),
+    publicPath: 'auto',
+  }
+};
+
+module.exports = [wamNode, monaco, processor]

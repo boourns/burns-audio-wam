@@ -27,8 +27,7 @@ const WAMPlugin = {
       },
       {
         test: /\.(sa|sc|c)ss$/,
-        use: ['style-loader', 'css-loader']
-        ,
+        use: ['style-loader', 'css-loader'],
       },
       
     ],
