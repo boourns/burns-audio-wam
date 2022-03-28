@@ -7,13 +7,12 @@
 import { WebAudioModule, addFunctionModule } from '@webaudiomodules/sdk';
 import { h, render } from 'preact';
 
-import {WamEventMap, WamParameterDataMap} from '@webaudiomodules/api';
+import {WamParameterDataMap} from '@webaudiomodules/api';
 
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
 import { FunctionSeqView } from './FunctionSeqView';
 import getFunctionSequencerProcessor from './FunctionSeqProcessor';
-
 import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
 import { DynamicParameterNode } from '../../shared/DynamicParameterNode';
 	

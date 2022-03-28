@@ -1,14 +1,14 @@
 import { AudioWorkletGlobalScope, WamParameterConfiguration, WamParameterData, WamParameterInfo, WamParameterInfoMap } from "@webaudiomodules/api";
 
 const loadDynamicParameterProcessor = (moduleId: string) => {
+    console.log("Registering DPP on ", moduleId)
+
     const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
 
     const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
 	const {
 		WamProcessor,
 		WamParameterInfo,
-        WamParameter,
-        WamParameterInterpolator
 	} = ModuleScope;
 
     class DynamicParameterProcessor extends WamProcessor {
@@ -74,7 +74,7 @@ const loadDynamicParameterProcessor = (moduleId: string) => {
             this.parameters = output
             let oldState = this._parameterState
 
-            this.reinitialize()
+            this._initialize()
 
             for (let paramID of Object.keys(oldState)) {
                 if (!!this._parameterState[paramID]) {
@@ -89,17 +89,6 @@ const loadDynamicParameterProcessor = (moduleId: string) => {
                     this._parameterState[paramID].value = oldState[paramID].value
                 }
             }
-        }
-
-        reinitialize() {
-            this._parameterState = {};
-			this._parameterInterpolators = {};
-			this._parameterInfo = this.parameters;
-			Object.keys(this._parameterInfo).forEach((parameterId) => {
-				const info = this._parameterInfo[parameterId];
-				this._parameterState[parameterId] = new WamParameter(this._parameterInfo[parameterId]);
-				this._parameterInterpolators[parameterId] = new WamParameterInterpolator(info, 256);
-			});
         }
     }
 

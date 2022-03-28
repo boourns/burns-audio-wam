@@ -1,15 +1,16 @@
 import { AudioWorkletGlobalScope } from "@webaudiomodules/api";
 
-
 const getThreeJSProcessor = (moduleId: string) => {
 	
 	const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
 	const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
 
-	const DynamicParameterProcessor = ModuleScope.DynamicParameterProcessor
 	const WamProcessor = ModuleScope.WamProcessor
 
+	const DynamicParameterProcessor = ModuleScope.DynamicParameterProcessor
+
 	class ThreeJSExampleProcessor extends DynamicParameterProcessor {
+
 	}
 
 	try {
@@ -18,6 +19,8 @@ const getThreeJSProcessor = (moduleId: string) => {
 		// eslint-disable-next-line no-console
 		console.warn(error);
 	}
+
+	return ThreeJSExampleProcessor
 
 }
 

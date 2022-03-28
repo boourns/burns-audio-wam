@@ -7,8 +7,6 @@
 import { WebAudioModule, addFunctionModule } from '@webaudiomodules/sdk';
 import { h, render } from 'preact';
 
-import {WamEventMap, WamParameterDataMap} from '@webaudiomodules/api';
-
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
 import { DynamicParameterNode, DynamicParamGroup } from "../../shared/DynamicParameterNode";
@@ -93,12 +91,11 @@ class ThreeJSNode extends DynamicParameterNode {
 					}
 				},
 				render: (inputs: WebGLTexture[], currentTime: number): WebGLTexture[] => {
-					let offset = 0
-					if (this.state && this.state.offset1) {
-						offset = this.state.offset1.value
+					let params: Record<string, any> = {}
+					for (let p of Object.keys(this.state)) {
+						params[p] = this.state[p].value
 					}
-
-					return this.runner.render(inputs, this.generator, currentTime, {offset})
+					return this.runner.render(inputs, this.generator, currentTime, params)
 				},
 				disconnectVideo: () => {
 					console.log("disconnectVideo")
@@ -297,7 +294,6 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 
 	async createAudioNode(initialState: any) {		
 		await ThreeJSNode.addModules(this.audioContext, this.moduleId)
-		await this.audioContext.audioWorklet.addModule(this._processorUrl)
 
 		const node: ThreeJSNode = new ThreeJSNode(this, {});
 		await node._initialize();
