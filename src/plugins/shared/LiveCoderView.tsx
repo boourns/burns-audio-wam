@@ -39,12 +39,8 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
 
   // Lifecycle: Called whenever our component is created
   componentDidMount() {
-    this.props.plugin.renderCallback = () => {
-      window.setTimeout(() => {
-        
-        // for some reason this did not like being inline, would cause an exception in preact and never render again
+    this.props.plugin.renderCallback = () => {        
         this.forceUpdate()
-      }, 1)
     }
   }
 
@@ -53,6 +49,8 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
     if (this.props.plugin.multiplayer) {
       this.props.plugin.multiplayer.unregisterEditor()
     }
+
+    this.props.plugin.renderCallback = undefined
     
     if (this.editor) {
       this.editor.dispose()
@@ -64,18 +62,20 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
   }
 
   panelPressed() {
-    let newState: "CODE" | "GUI"
+    let newPanel: "CODE" | "GUI"
 
     switch(this.state.panel) {
       case "GUI":
-        newState = "CODE"
+        newPanel = "CODE"
         break
       case "CODE":
-        newState = "GUI"
+        newPanel = "GUI"
         break
     }
 
-    this.setState({panel:newState})
+    this.setState({panel:newPanel})
+
+    //this.forceUpdate()
   }
 
   setupEditor(ref: HTMLDivElement | null) {

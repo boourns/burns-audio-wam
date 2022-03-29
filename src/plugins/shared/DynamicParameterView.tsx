@@ -41,13 +41,24 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
 
     }
 
+    getValue(param: DynamicParamEntry) {
+        if (this.props.plugin.state && this.props.plugin.state[param.id]) {
+            let entry = this.props.plugin.state[param.id]
+            if (entry.value !== undefined) {
+                return entry.value
+            }
+        }
+
+        return param.config.defaultValue
+    }
+
     renderParam(p: DynamicParamEntry) {
         switch(p.config.type) {
             case "float":
                 return <Knob onChange={(v) => this.valueChanged(p.id, v)} 
                              minimumValue={p.config.minValue} 
                              maximumValue={p.config.maxValue}
-                             value={() => this.props.plugin.state[p.id].value}
+                             value={() => this.getValue(p)}
                              label={p.config.label || p.id}
                              bipolar={p.config.minValue < 0}
                              >
@@ -56,7 +67,7 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
                 return <Knob onChange={(v) => this.valueChanged(p.id, Math.round(v))} 
                              minimumValue={p.config.minValue} 
                              maximumValue={p.config.maxValue}
-                             value={() => this.props.plugin.state[p.id].value}
+                             value={() => this.getValue(p)}
                              label={p.config.label || p.id}
                              bipolar={p.config.minValue < 0}
                              integer={true}
@@ -65,7 +76,7 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
             case "boolean":
                 return <Select onChange={(v) => this.valueChanged(p.id, parseInt(v))}
                                options={["off", "on"]}
-                               value={() => this.props.plugin.state[p.id].value}
+                               value={() => this.getValue(p)}
                                label={p.config.label || p.id}
                     >
                 </Select>  

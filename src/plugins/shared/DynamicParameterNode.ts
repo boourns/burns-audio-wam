@@ -43,10 +43,6 @@ export class DynamicParameterNode extends WamNode {
         this.updateState()
 	}
 
-    initializeDefaultState() {
-
-    }
-
     async getState(): Promise<any> {
         return {
             paramState: await super.getState()

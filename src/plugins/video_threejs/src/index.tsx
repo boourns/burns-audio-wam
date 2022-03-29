@@ -95,9 +95,12 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 				},
 				render: (inputs: WebGLTexture[], currentTime: number): WebGLTexture[] => {
 					let params: Record<string, any> = {}
-					for (let p of Object.keys(this.state)) {
-						params[p] = this.state[p].value
+					if (this.state) {
+						for (let p of Object.keys(this.state)) {
+							params[p] = this.state[p].value
+						}
 					}
+
 					return this.runner.render(inputs, this.generator, currentTime, params)
 				},
 				disconnectVideo: () => {
@@ -139,13 +142,12 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 		} catch(e) {
 			console.error("Error creating threejs generator: ", e)
 
-			this.error = e
-
-			if (this.renderCallback) {
-				this.renderCallback()
-			}
+			this.error = e.toString()
 		}
 
+		if (this.renderCallback) {
+			this.renderCallback()
+		}
 	}
 
 	async runPressed() {
