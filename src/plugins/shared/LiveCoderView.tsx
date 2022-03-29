@@ -138,7 +138,7 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
           </div>
 
           <div style={statusStyle}>
-            { this.props.plugin.error != undefined ? this.props.plugin.error : "Running" }
+            { this.props.plugin.error != undefined ? this.props.plugin.error.toString() : "Running" }
           </div>
         </div>
       </div>
