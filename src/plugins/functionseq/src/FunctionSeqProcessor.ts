@@ -6,6 +6,20 @@ type ParameterDefinition = {
     config: WamParameterConfiguration
 }
 
+let parameterTypes = ['float', 'int', 'boolean','choice']
+
+function validateParameter(p: ParameterDefinition) {
+    if (p.id === undefined || p.config === undefined) {
+        throw new Error(`Invalid parameter ${p}: must have id and config defined`)
+    }
+    if (p.id.length == 0) {
+        throw new Error("Invalid parameter: id must be string and not blank")
+    }
+    if (parameterTypes.findIndex(t => t == p.config.type) == -1) {
+        throw new Error(`Invalid parameter type ${p.config.type}`)
+    }
+}
+
 type FunctionSequencer = {
     parameters?(): ParameterDefinition[]
     onTick?(ticks: number, params: Record<string, any>): {note: number, velocity: number, duration: number}[]
@@ -110,9 +124,13 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
                     }
                     if (!!this.function.parameters) {
                         let parameters = this.function.parameters()
+
                         let map: Record<string, WamParameterConfiguration> = {}
                         this.parameterIds = []
+
                         for (let p of parameters) {
+                            validateParameter(p)
+
                             map[p.id] = p.config
                             this.parameterIds.push(p.id)
                         }
