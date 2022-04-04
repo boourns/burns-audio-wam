@@ -55,8 +55,7 @@ class PianoRollProcessor extends WamProcessor {
 	 * @param {Float32Array[][]} outputs
 	 */
      _process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
-        // @ts-ignore
-        const { webAudioModules, currentTime } = audioWorkletGlobalScope;
+        const { currentTime } = audioWorkletGlobalScope;
         
         if (this.pendingClipChange && this.pendingClipChange.timestamp <= currentTime) {
             this.currentClipId = this.pendingClipChange.id

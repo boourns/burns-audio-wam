@@ -9,7 +9,6 @@ export interface AudioRecorderViewProps {
 }
 
 type AudioRecorderViewState = {
-  recording: boolean
 }
 
 export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRecorderViewState> {
@@ -21,6 +20,7 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
 
   componentDidMount() {
     this.props.plugin.audioNode.editor.callback = () => {
+      console.log("Forcing redraw")
       this.forceUpdate()
     }
   }
@@ -29,10 +29,13 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
       this.props.plugin.audioNode.editor.callback = undefined
   }
 
-  toggleRecording() {
-    let recording = !this.state.recording
+  isRecording(): boolean {
+    return this.props.plugin._audioNode.recordingArmed
+  }
 
-    console.log("Recording: ", recording)
+  toggleRecording() {
+    let recording = !this.isRecording()
+
     this.props.plugin.audioNode.setRecording(recording)
 
     this.setState({recording})
@@ -50,7 +53,6 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
     let backupState = editor.getState()
     
     window.WAMExtensions.assets.pickAsset(this.props.plugin.instanceId, "AUDIO", async (asset: WamAsset) => {
-      console.log("in loadAssets callback")
       if (asset && asset.content) {
         let buffer = await asset.content.arrayBuffer()
 
@@ -73,17 +75,22 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
   render() {
     h("div", {})
 
+    console.log("Rendering")
+
     let samples: h.JSX.Element[] = this.props.plugin.audioNode.editor.samples.map((s, i) => {
       return <SampleView index={i} editor={this.props.plugin.audioNode.editor} context={this.props.plugin.audioContext as AudioContext} sample={s}></SampleView>
     })
 
-    return (
-    <div style="overflow-y: scroll; height: 100%; ">
-        <button onClick={(e) => this.toggleRecording()}>{this.state.recording ? "Stop Recording" : "Start Recording"}</button>
-        <button onClick={(e) => this.loadAssets()}>Load</button>
+    let result = (
+    <div style="overflow-y: scroll; height: 100%; background-color: #190933; ">
+        <button style="padding: 5px; border: 1px solid; border-radius: 5%; margin: 5px; font-weight: bold;" onClick={(e) => this.loadAssets()}>Load Track</button>
+        <button style="padding: 5px; border: 1px solid; border-radius: 5%; margin: 5px; font-weight: bold;" onClick={(e) => this.toggleRecording()}>{this.isRecording() ? "🔴 Armed" : "⭕️ Not Armed"}</button>
 
         {samples.reverse()}
     </div>)
+
+    console.log("done rendering")
+    return result
   }
 
   css(): string {

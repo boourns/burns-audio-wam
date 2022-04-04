@@ -10,6 +10,7 @@ export type SampleState = {
     name: string
     seekPos?: number
     zoom: number
+    assetUrl?: string
 }
 
 export class SampleEditor {

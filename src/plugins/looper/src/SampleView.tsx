@@ -20,10 +20,12 @@ export class SampleView extends Component<SampleViewProps, SampleViewState> {
         this.transport = transport
     }
 
-    saveSample() {
+    async saveSample() {
         let blob = this.props.sample.sample.saveWav(32)
         if (window.WAMExtensions && window.WAMExtensions.assets) {
-            window.WAMExtensions.assets.saveAsset("", "AUDIO", blob)
+            let savedAsset = await window.WAMExtensions.assets.saveAsset("", "AUDIO", blob)
+            console.log("Saved asset: ", savedAsset)
+
         } else {
             var blobUrl = URL.createObjectURL(blob);
             window.location.replace(blobUrl)
