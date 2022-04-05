@@ -4,10 +4,11 @@ import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk
 import getAudioRecorderProcessor from "./AudioRecorderProcessor";
 import { RecordingBuffer } from "./RecordingBuffer";
 import { Sample } from './Sample';
-import { SampleEditor } from './SampleEditor';
+import { SampleEditor, SampleState } from './SampleEditor';
 
 export type AudioRecorderState = {
 	recordingArmed: boolean
+	samples: string[]
 }
 
 export class AudioRecorderNode extends WamNode {
@@ -54,14 +55,69 @@ export class AudioRecorderNode extends WamNode {
 	}
 
 	async getState(): Promise<AudioRecorderState> {
+		let savedAssetUris = this.editor.samples.filter(s => !!s.assetUrl).map(s => s.assetUrl)
+
 		return {
-			recordingArmed: this.recordingArmed
+			recordingArmed: this.recordingArmed,
+			samples: savedAssetUris
 		}
 	}
 
 	async setState(state: AudioRecorderState) {
-		if (state) {
-			this.setRecording(!!state.recordingArmed)
+		if (!state) {
+			return
+		}
+
+		this.setRecording(!!state.recordingArmed)
+
+		if (state.samples !== undefined) {
+			let keptSamples: SampleState[] = []
+
+			for (let existingSample of this.editor.samples) {
+				if (!existingSample.assetUrl) {
+					console.log("keeping unsaved sample")
+					// keep unsaved samples
+					keptSamples.push(existingSample)
+				} else {
+					// is this sample in the new list?
+					if (state.samples.some(s => s == existingSample.assetUrl)) {
+						// keep it in our new sample list
+						keptSamples.push(existingSample)
+
+						// it has been found, remove it from the new state list of samples
+						state.samples = state.samples.filter(s => s != existingSample.assetUrl)
+					} else {
+						console.log("not keeping sample ", existingSample)
+						console.log("because new sample list is ", state.samples)
+
+						// we're not keeping this sample, it has been removed.
+
+						//TODO: remove this existingSample from the processor as well
+					}
+				}
+			}
+
+			for (let newSample of state.samples) {
+				console.log("Loading newSample ", newSample)
+				let asset = await window.WAMExtensions.assets.loadAsset(this.instanceId, newSample)
+				if (asset && asset.content) {
+					let buffer = await asset.content.arrayBuffer()
+			
+					this.context.decodeAudioData(buffer, (buffer: AudioBuffer) => {
+					  let sample = new Sample(this.context, buffer)
+			
+					  let sampleState = this.editor.defaultSampleState(sample, asset.name)
+			
+					  keptSamples.push(sampleState)
+					})
+					
+					console.log("done loading sample")
+				}
+			}
+
+			console.log("Setting editor samples to ", keptSamples)
+
+			this.editor.setState({samples: keptSamples})
 		}
 	}
 
@@ -79,7 +135,6 @@ export class AudioRecorderNode extends WamNode {
 					this.recordingBuffer = undefined
 					
 					if (this.editor.callback) {
-						
 						this.editor.callback()
 					}
 				}
