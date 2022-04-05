@@ -7,7 +7,6 @@ import { Sample } from './Sample';
 import { SampleEditor, SampleState } from './SampleEditor';
 
 export type AudioRecorderState = {
-	recordingArmed: boolean
 	samples: string[]
 }
 
@@ -38,7 +37,8 @@ export class AudioRecorderNode extends WamNode {
 			outputChannelCount: [2],
 		}});
 
-		this.editor = new SampleEditor()
+		this.editor = new SampleEditor(this.instanceId, this.context)
+
 		this.recordingArmed = false
 
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
@@ -58,7 +58,6 @@ export class AudioRecorderNode extends WamNode {
 		let savedAssetUris = this.editor.samples.filter(s => !!s.assetUrl).map(s => s.assetUrl)
 
 		return {
-			recordingArmed: this.recordingArmed,
 			samples: savedAssetUris
 		}
 	}
@@ -67,8 +66,6 @@ export class AudioRecorderNode extends WamNode {
 		if (!state) {
 			return
 		}
-
-		this.setRecording(!!state.recordingArmed)
 
 		if (state.samples !== undefined) {
 			let keptSamples: SampleState[] = []
@@ -98,21 +95,15 @@ export class AudioRecorderNode extends WamNode {
 			}
 
 			for (let newSample of state.samples) {
-				console.log("Loading newSample ", newSample)
-				let asset = await window.WAMExtensions.assets.loadAsset(this.instanceId, newSample)
-				if (asset && asset.content) {
-					let buffer = await asset.content.arrayBuffer()
-			
-					this.context.decodeAudioData(buffer, (buffer: AudioBuffer) => {
-					  let sample = new Sample(this.context, buffer)
-			
-					  let sampleState = this.editor.defaultSampleState(sample, asset.name)
-			
-					  keptSamples.push(sampleState)
-					})
-					
-					console.log("done loading sample")
+				let sampleState: SampleState = {
+					state: "INIT",
+					assetUrl: newSample,
+					zoom: 1,
+					name: "",
+					height: 0,
 				}
+
+				keptSamples.push(sampleState)
 			}
 
 			console.log("Setting editor samples to ", keptSamples)
@@ -127,6 +118,7 @@ export class AudioRecorderNode extends WamNode {
 				if (this.recordingBuffer) {
 					this.editor.samples.push({
 						height: 150,
+						state: "LOADED",
 						sample: new Sample(this.context, this.recordingBuffer.render(this.context)),
 						name: `Sample ${this.editor.samples.length+1}`,
 						zoom: 1,
