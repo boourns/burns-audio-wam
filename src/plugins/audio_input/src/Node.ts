@@ -9,8 +9,11 @@ export default class AudioInputNode extends CompositeAudioNode {
     streamNode!: MediaStreamAudioSourceNode
     stream!: MediaStream
 
+    muted: boolean
+
     state = {
     }
+    muteControl: GainNode;
 
 	get paramMgr(): ParamMgrNode {
 		return this._wamNode;
@@ -68,17 +71,28 @@ export default class AudioInputNode extends CompositeAudioNode {
         }
 
         this._input = this.context.createGain()
-        this._output = this.streamNode
+        this.muteControl = this.context.createGain()
+        this._output = this.muteControl
+
+        this.streamNode.connect(this._output)
+
+        this.setMute(true)
 
         //super.connect(this._input)
 
         // this.updateFromState()
 	}
 
+    setMute(mute: boolean) {
+        this.muted = mute
+        this.muteControl.gain.value = (mute ? 0 : 1.0)
+    }
+
     // MIDI handling
     processMIDIEvents(midiEvents: ScheduledMIDIEvent[]) {
 		
     }
+
 
     async getState(): Promise<any> {
         let params = await super.getState()

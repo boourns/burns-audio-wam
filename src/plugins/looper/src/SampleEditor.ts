@@ -1,3 +1,4 @@
+import { Token } from "monaco-editor"
 import { Sample } from "./Sample"
 
 export type SampleEditorState = {
@@ -5,6 +6,7 @@ export type SampleEditorState = {
 }
 
 export type SampleState = {
+    token: string
     sample?: Sample
     assetUrl?: string
     state: "INIT" | "LOADING" | "DECODING" | "LOADED"
@@ -19,11 +21,13 @@ export class SampleEditor {
     callback?: () => void
     instanceId: string
     context: BaseAudioContext
+    port: MessagePort
 
-    constructor(instanceId: string, context: BaseAudioContext) {
+    constructor(instanceId: string, context: BaseAudioContext, port: MessagePort) {
         this.context = context
         this.instanceId = instanceId
         this.samples = []
+        this.port = port
     }
 
     getState(): SampleEditorState {
@@ -42,11 +46,14 @@ export class SampleEditor {
     
             this.context.decodeAudioData(buffer, (buffer: AudioBuffer) => {
                 let sampleData = new Sample(this.context, buffer)
-
+                
                 sample.sample = sampleData
                 sample.height = 30 + (100 * sampleData.buffer.numberOfChannels)
                 sample.name = asset.name
                 sample.state = "LOADED"
+                
+                this.sendSampleToProcessor(sample)
+
                 if (this.callback) {
                     this.callback()
                 }
@@ -54,6 +61,20 @@ export class SampleEditor {
 
             console.log("done loading sample")
         }
+    }
+
+    sendSampleToProcessor(sample: SampleState) {
+        let channelData: Float32Array[] = []
+        for (let i = 0; i < sample.sample.buffer.numberOfChannels; i++) {
+            channelData.push(sample.sample.buffer.getChannelData(i))
+        }
+
+        console.log("Channel lengths are ", JSON.stringify(channelData.map(c => c.length)))
+
+        let message = {source:"ar", action:"load", token: sample.token, buffer: channelData}
+
+        console.log("Attempting to transfer ", message)
+        this.port.postMessage(message)
     }
 
     setState(state: SampleEditorState) {
@@ -70,6 +91,7 @@ export class SampleEditor {
 
     defaultSampleState(sample: Sample, name: string): SampleState {
         return {
+            token: token(),
             sample,
             state: "LOADED",
             height: 30 + (100 * sample.buffer.numberOfChannels),
@@ -78,4 +100,8 @@ export class SampleEditor {
             zoom: 1
         }
     }
+}
+
+function token() {
+	return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 16)
 }

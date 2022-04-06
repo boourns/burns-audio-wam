@@ -10,6 +10,10 @@ export type AudioRecorderState = {
 	samples: string[]
 }
 
+function token() {
+	return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 16)
+}
+
 export class AudioRecorderNode extends WamNode {
 	destroyed = false;
 	_supportedEventTypes: Set<keyof WamEventMap>
@@ -37,7 +41,7 @@ export class AudioRecorderNode extends WamNode {
 			outputChannelCount: [2],
 		}});
 
-		this.editor = new SampleEditor(this.instanceId, this.context)
+		this.editor = new SampleEditor(this.instanceId, this.context, this.port)
 
 		this.recordingArmed = false
 
@@ -46,7 +50,7 @@ export class AudioRecorderNode extends WamNode {
 	}
 
 	setRecording(recording: boolean) {
-		this.port.postMessage({source:"ar", recording})
+		this.port.postMessage({source:"ar", action: "record", recording})
 		this.recordingArmed = recording
 
         if (this.editor.callback) {
@@ -96,6 +100,7 @@ export class AudioRecorderNode extends WamNode {
 
 			for (let newSample of state.samples) {
 				let sampleState: SampleState = {
+					token: token(),
 					state: "INIT",
 					assetUrl: newSample,
 					zoom: 1,
@@ -116,14 +121,18 @@ export class AudioRecorderNode extends WamNode {
 		if (message.data && message.data.source == "ar") {
 			if (message.data.action == "finalize") {
 				if (this.recordingBuffer) {
-					this.editor.samples.push({
+					let sample: SampleState = {
+						token: token(),
 						height: 150,
 						state: "LOADED",
 						sample: new Sample(this.context, this.recordingBuffer.render(this.context)),
 						name: `Sample ${this.editor.samples.length+1}`,
 						zoom: 1,
-					})
-		
+					}
+
+					this.editor.samples.push(sample)
+					this.editor.sendSampleToProcessor(sample)
+
 					this.recordingBuffer = undefined
 					
 					if (this.editor.callback) {
