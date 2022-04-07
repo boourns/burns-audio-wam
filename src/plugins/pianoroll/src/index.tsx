@@ -100,7 +100,7 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 		return node
     }
 
-	async createGui(clipId?: string) {		
+	async createGui(clipId?: string) {
 		const div = document.createElement('div');
 		// hack because h() is getting stripped for non-use despite it being what the JSX compiles to
 		h("div", {})

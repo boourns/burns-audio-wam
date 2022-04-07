@@ -6,6 +6,7 @@ import { Sample } from './Sample';
 
 export interface AudioRecorderViewProps {
   plugin: AudioRecorderModule
+  clipId: string
 }
 
 type AudioRecorderViewState = {
@@ -59,7 +60,7 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
         context.decodeAudioData(buffer, (buffer: AudioBuffer) => {
           let sample = new Sample(this.props.plugin.audioContext, buffer)
 
-          let sampleState = editor.defaultSampleState(sample, asset.name)
+          let sampleState = editor.defaultSampleState(sample, asset.name, this.props.clipId)
 
           this.props.plugin.audioNode.editor.setState({samples: backupState.samples.concat(sampleState)})
         })

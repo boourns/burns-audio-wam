@@ -7,6 +7,7 @@ export type SampleEditorState = {
 
 export type SampleState = {
     token: string
+    clipId: string
     sample?: Sample
     assetUrl?: string
     state: "INIT" | "LOADING" | "DECODING" | "LOADED"
@@ -89,9 +90,10 @@ export class SampleEditor {
         }
     }
 
-    defaultSampleState(sample: Sample, name: string): SampleState {
+    defaultSampleState(sample: Sample, name: string, clipId: string): SampleState {
         return {
             token: token(),
+            clipId,
             sample,
             state: "LOADED",
             height: 30 + (100 * sample.buffer.numberOfChannels),

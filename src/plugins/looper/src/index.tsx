@@ -1,6 +1,8 @@
 import { WebAudioModule } from '@webaudiomodules/sdk';
+import { id } from 'lib0/function';
 
 import { h, render } from 'preact';
+import { PatternDelegate } from 'wam-extensions';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 import { AudioRecorderNode } from './AudioRecorderNode';
 
@@ -37,10 +39,12 @@ export default class AudioRecorderModule extends WebAudioModule<AudioRecorderNod
 
 		if (initialState) node.setState(initialState);
 
+		this.updatePatternExtension()
+
 		return node
     }
 
-	async createGui() {
+	async createGui(clipId?: string) {
 		const div = document.createElement('div');
 		// hack because h() is getting stripped for non-use despite it being what the JSX compiles to
 		h("div", {})
@@ -53,11 +57,46 @@ export default class AudioRecorderModule extends WebAudioModule<AudioRecorderNod
 		//shadow.appendChild(container)
 
 		//render(<ChorderView plugin={this}></ChorderView>, div);
-		render(<AudioRecorderView plugin={this}></AudioRecorderView>, div)
+		render(<AudioRecorderView plugin={this} clipId={clipId}></AudioRecorderView>, div)
 		return div;
 	}
 
 	destroyGui(el: Element) {
 		render(null, el)
+	}
+
+	updatePatternExtension() {
+		if (!(window.WAMExtensions && window.WAMExtensions.patterns)) {
+			return
+		}
+
+		let patternDelegate: PatternDelegate = {
+			getPatternList: () => {
+				let clipMap: Record<string, string> = {}
+
+				for (let sample of this.audioNode.editor.samples) {
+					clipMap[sample.clipId] = sample.name
+				}
+
+				return Object.keys(clipMap).map(c => { return {id: c, name: clipMap[c]}})
+			},
+			createPattern: (id: string) => {
+				
+			},
+			deletePattern: (id: string) => {
+				console.error("TODO: deletePattern for looper ")
+			},
+			playPattern: (clipId: string | undefined) => {
+				this.audioNode.port.postMessage({source:"ar", action: "play", clipId})
+			},
+			getPatternState: (id: string) => {
+				return this.audioNode.editor.samples.filter(s => s.clipId == id && !!s.assetUrl).map(s => s.assetUrl)
+			},
+			setPatternState: (id: string, state: any) => {
+				console.error("TODO: looper setPatternState")
+			}
+		}
+
+		window.WAMExtensions.patterns.setPatternDelegate(this.instanceId, patternDelegate)
 	}
 }

@@ -1,13 +1,19 @@
 import { WamEventMap } from '@webaudiomodules/api';
 import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk';
+import { string } from 'lib0';
 
 import getAudioRecorderProcessor from "./AudioRecorderProcessor";
 import { RecordingBuffer } from "./RecordingBuffer";
 import { Sample } from './Sample';
 import { SampleEditor, SampleState } from './SampleEditor';
 
+export type ARSampleState = {
+	assetUrl: string
+	clipId: string
+}
+
 export type AudioRecorderState = {
-	samples: string[]
+	samples: ARSampleState[]
 }
 
 function token() {
@@ -18,6 +24,7 @@ export class AudioRecorderNode extends WamNode {
 	destroyed = false;
 	_supportedEventTypes: Set<keyof WamEventMap>
 	recordingArmed: boolean
+	clipIdAtRecordingStart: string
 
 	recordingBuffer?: RecordingBuffer
 	editor: SampleEditor
@@ -59,7 +66,7 @@ export class AudioRecorderNode extends WamNode {
 	}
 
 	async getState(): Promise<AudioRecorderState> {
-		let savedAssetUris = this.editor.samples.filter(s => !!s.assetUrl).map(s => s.assetUrl)
+		let savedAssetUris: ARSampleState[] = this.editor.samples.filter(s => !!s.assetUrl).map(s => { return {assetUrl: s.assetUrl, clipId: s.clipId}})
 
 		return {
 			samples: savedAssetUris
@@ -81,12 +88,12 @@ export class AudioRecorderNode extends WamNode {
 					keptSamples.push(existingSample)
 				} else {
 					// is this sample in the new list?
-					if (state.samples.some(s => s == existingSample.assetUrl)) {
+					if (state.samples.some(s => s.assetUrl == existingSample.assetUrl && s.clipId == existingSample.clipId)) {
 						// keep it in our new sample list
 						keptSamples.push(existingSample)
 
 						// it has been found, remove it from the new state list of samples
-						state.samples = state.samples.filter(s => s != existingSample.assetUrl)
+						state.samples = state.samples.filter(s => !(s.assetUrl == existingSample.assetUrl && s.clipId == existingSample.clipId))
 					} else {
 						console.log("not keeping sample ", existingSample)
 						console.log("because new sample list is ", state.samples)
@@ -94,6 +101,7 @@ export class AudioRecorderNode extends WamNode {
 						// we're not keeping this sample, it has been removed.
 
 						//TODO: remove this existingSample from the processor as well
+						this.port.postMessage({source:"ar", action:"delete", token: existingSample.token})
 					}
 				}
 			}
@@ -101,8 +109,9 @@ export class AudioRecorderNode extends WamNode {
 			for (let newSample of state.samples) {
 				let sampleState: SampleState = {
 					token: token(),
+					clipId: newSample.clipId,
 					state: "INIT",
-					assetUrl: newSample,
+					assetUrl: newSample.assetUrl,
 					zoom: 1,
 					name: "",
 					height: 0,
@@ -122,6 +131,7 @@ export class AudioRecorderNode extends WamNode {
 			if (message.data.action == "finalize") {
 				if (this.recordingBuffer) {
 					let sample: SampleState = {
+						clipId: this.clipIdAtRecordingStart,
 						token: token(),
 						height: 150,
 						state: "LOADED",

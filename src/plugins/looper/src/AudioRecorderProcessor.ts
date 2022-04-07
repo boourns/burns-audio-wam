@@ -174,6 +174,8 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                 } else if (message.data.action == "delete") {
                     console.log("Processor removing track ", message.data.token)
                     this.takes[message.data.token] = undefined
+                } else if (message.data.action == "play") {
+                    console.log("received play message for clipId %s", message.data.clipId)
                 }
 
             } else {

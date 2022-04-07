@@ -41,30 +41,6 @@ export class SampleView extends Component<SampleViewProps, SampleViewState> {
         this.props.editor.setState(state)
     }
 
-    splitSamples() {
-        let split = this.props.sample.sample.splitChannels()
-        let state = this.props.editor.getState()
-
-        let add = split.map((s, i) => this.props.editor.defaultSampleState(s, `${this.props.sample.name} - Ch #${i+1}`))
-
-        state.samples = state.samples.concat(add)
-        this.props.editor.setState(state)
-    }
-
-    split() {
-        let split = this.props.sample.sample.split([
-            {start: 0, end: this.props.sample.seekPos},
-            {start: this.props.sample.seekPos, end: 1}
-        ])
-
-        let state = this.props.editor.getState()
-
-        let add = split.map((s, i) => this.props.editor.defaultSampleState(s, `${this.props.sample.name} - Part ${i+1}`))
-
-        state.samples = state.samples.concat(add)
-        this.props.editor.setState(state)
-    }
-
     trimLeft() {
         if (!this.props.sample.seekPos) {
             return
@@ -129,10 +105,8 @@ export class SampleView extends Component<SampleViewProps, SampleViewState> {
 
                 <button onClick={() => this.saveSample()}>Save</button>
                 <button onClick={() => this.deleteSample()}>Delete</button>
-                <button onClick={() => this.splitSamples()}>Split Channels</button>
                 <button onClick={() => this.trimLeft()}>Trim left</button>
                 <button onClick={() => this.trimRight()}>Trim right</button>
-                <button onClick={() => this.split()}>Split</button>
 
                 <button onClick={() => this.zoomIn()}>Zoom In</button>
                 <button onClick={() => this.zoomOut()}>Zoom Out</button>
