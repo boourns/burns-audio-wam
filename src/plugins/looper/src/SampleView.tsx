@@ -92,12 +92,15 @@ export class SampleView extends Component<SampleViewProps, SampleViewState> {
     render() {
         if (this.props.sample.state == "LOADED") {
             return this.renderLoadedSample()
+        } else if (this.props.sample.state == "ERROR") {
+            return <div>Error loading sample: {this.props.sample.error.message}</div>
         } else {
             return <div>{this.props.sample.state}</div>
         }
     }
 
     renderLoadedSample() {
+
         return <div style={`border: 2px; height: ${this.props.sample.height}px; display: flex; flex-direction: column;`}>
             <div style="display: flex; flex-direction: row; height: 30px;">
                 <div>{this.props.sample.name}</div>

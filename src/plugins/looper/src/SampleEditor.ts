@@ -10,7 +10,8 @@ export type SampleState = {
     clipId: string
     sample?: Sample
     assetUrl?: string
-    state: "INIT" | "LOADING" | "DECODING" | "LOADED"
+    state: "INIT" | "LOADING" | "DECODING" | "LOADED" | "ERROR"
+    error?: DOMException
     height: number
     name: string
     seekPos?: number
@@ -60,6 +61,9 @@ export class SampleEditor {
                 if (this.callback) {
                     this.callback()
                 }
+            }, (error: DOMException) => {
+                sample.error = error
+                sample.state = "ERROR"
             })
         }
     }

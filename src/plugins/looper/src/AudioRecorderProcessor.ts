@@ -156,11 +156,30 @@ const getAudioRecorderProcessor = (moduleId: string) => {
             if (currentBar != this.lastBar) {
                 // we just crossed the bar threshold
 
+                let recordingJustStarted = false
+
+                if (this.recordingActive && !this.recordingArmed) {                
+                    // we were recording but they unclicked the 'rec' button
+
+                    // finalize the sample and stop recording
+                    this.finalizeSample()
+
+                    this.recordingActive = false
+                }
+
+                
+                if (!this.recordingActive && this.recordingArmed) {
+                    // we were not recording but they clicked the 'rec' button
+
+                    this.recordingActive = true
+                    recordingJustStarted = true
+                }
+
                 if (this.pendingClipId) {
                     // there is a pending clip change
 
-                    // if we're recording, finalize the old recording and start a new recording for the new clip
-                    if (this.recordingActive) {
+                    // if we're recording and didn't just start recording, finalize the old recording and start a new recording for the new clip
+                    if (this.recordingActive && !recordingJustStarted) {
                         this.finalizeSample()
                     }
 
@@ -168,11 +187,11 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                     this.pendingClipId = undefined
                 }
 
+
                 // TODO: adjust loop positions if our playing clips loop back at this position
 
                 this.lastBar = currentBar
             }
-
             
             if (this.recordingActive && channels.length > 0) {
                 // not 100% necessary right now but if we change this to keep audio on processor side always then
