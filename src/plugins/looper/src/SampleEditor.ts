@@ -72,7 +72,7 @@ export class SampleEditor {
 
         console.log("Channel lengths are ", JSON.stringify(channelData.map(c => c.length)))
 
-        let message = {source:"ar", action:"load", token: sample.token, buffer: channelData}
+        let message = {source:"ar", action:"load", token: sample.token, clipId: sample.clipId, buffer: channelData}
 
         console.log("Attempting to transfer ", message)
         this.port.postMessage(message)

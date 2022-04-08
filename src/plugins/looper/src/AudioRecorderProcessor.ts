@@ -43,10 +43,12 @@ const getAudioRecorderProcessor = (moduleId: string) => {
         recordingActive: boolean
         
         transportData?: WamTransportData
-        takes: Record<string, AudioRecording>
+        clips: Map<string, AudioRecording[]>
 
         samplesElapsed: number
         playing: boolean
+        playingClipId: string
+        recordingClipId: string
 
         constructor(options: any) {
             super(options);
@@ -57,7 +59,7 @@ const getAudioRecorderProcessor = (moduleId: string) => {
             } = options.processorOptions;
 
             this.recordingArmed = false
-            this.takes = {}
+            this.clips = new Map()
 
             super.port.start();
         }
@@ -82,7 +84,8 @@ const getAudioRecorderProcessor = (moduleId: string) => {
 
             if (!this.transportData || !this.transportData.playing) {
                 if (this.recordingActive) {
-                    this.port.postMessage({source: "ar", action: "finalize"})
+                    console.log("Finalizing sample")
+                    this.port.postMessage({source: "ar", clipId: this.recordingClipId, action: "finalize"})
 
                     // transport has stopped, we were recording.. now we are not
                     this.recordingActive = false
@@ -98,12 +101,16 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                 this.playing = true
                 this.samplesElapsed = 0
 
-                if (this.recordingArmed && inputs[0].length > 0) {
+                console.log("transport just started")
+
+                if (this.recordingArmed) {
+                    console.log("setting recordingActive, setting recordingClipId to ", this.playingClipId)
+                    this.recordingClipId = this.playingClipId
                     this.recordingActive = true
                 }
             }
 
-            if (this.recordingActive) {
+            if (this.recordingActive && channels.length > 0) {
                 // not 100% necessary right now but if we change this to keep audio on processor side always then
                 // it will be required again since I/O buffers get reused
 
@@ -118,8 +125,10 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                 this.port.postMessage({source: "ar", buffer: {startSample, endSample, channels: copy}})
             }
 
-            for (let takeId of Object.keys(this.takes)) {
-                this.takes[takeId].writeInto(this.samplesElapsed, startSample, endSample, outputs[0])
+            let clips = this.clips.get(this.playingClipId) ?? []
+            
+            for (let take of clips) {
+                take.writeInto(this.samplesElapsed, startSample, endSample, outputs[0])
             }
 
             this.samplesElapsed += (endSample - startSample)
@@ -160,6 +169,7 @@ const getAudioRecorderProcessor = (moduleId: string) => {
         async _onMessage(message: any): Promise<void> {
             if (message.data && message.data.source == "ar") {
                 if (message.data.action == "record") {
+                    console.log("Received recording message: ", message.data)
                     if (message.data.recording) {
                         this.startRecording()
                     } else {
@@ -170,12 +180,19 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                 if (message.data.action == "load") {
                     console.log("Received track load for token ", message.data.token)
 
-                    this.takes[message.data.token] = new AudioRecording(message.data.token, message.data.buffer)
+                    if (!this.clips.get(message.data.clipId)) {
+                        this.clips.set(message.data.clipId, [])
+                    }
+                    this.clips.get(message.data.clipId).push(new AudioRecording(message.data.token, message.data.buffer))
                 } else if (message.data.action == "delete") {
-                    console.log("Processor removing track ", message.data.token)
-                    this.takes[message.data.token] = undefined
+                    console.log("Processor removing track ", message.data.token, "on clip ", message.data.clipId)
+
+                    let existing = this.clips.get(message.data.clipId)
+                    existing = existing.filter(s => s.token !== message.data.token)
+                    this.clips.set(message.data.clipId, existing)
                 } else if (message.data.action == "play") {
                     console.log("received play message for clipId %s", message.data.clipId)
+                    this.playingClipId = message.data.clipId
                 }
 
             } else {

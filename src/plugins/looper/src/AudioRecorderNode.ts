@@ -24,7 +24,6 @@ export class AudioRecorderNode extends WamNode {
 	destroyed = false;
 	_supportedEventTypes: Set<keyof WamEventMap>
 	recordingArmed: boolean
-	clipIdAtRecordingStart: string
 
 	recordingBuffer?: RecordingBuffer
 	editor: SampleEditor
@@ -101,7 +100,7 @@ export class AudioRecorderNode extends WamNode {
 						// we're not keeping this sample, it has been removed.
 
 						//TODO: remove this existingSample from the processor as well
-						this.port.postMessage({source:"ar", action:"delete", token: existingSample.token})
+						this.port.postMessage({source:"ar", action:"delete", clipId: existingSample.clipId, token: existingSample.token})
 					}
 				}
 			}
@@ -131,7 +130,7 @@ export class AudioRecorderNode extends WamNode {
 			if (message.data.action == "finalize") {
 				if (this.recordingBuffer) {
 					let sample: SampleState = {
-						clipId: this.clipIdAtRecordingStart,
+						clipId: message.data.clipId,
 						token: token(),
 						height: 150,
 						state: "LOADED",

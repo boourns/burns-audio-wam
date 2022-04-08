@@ -34,6 +34,6 @@
   "devDependencies": {
     "@webaudiomodules/sdk": "webaudiomodules/sdk#commit=810ba256f58385c0d50c16e36c82c7818bd01ead",
     "@webaudiomodules/sdk-parammgr": "webaudiomodules/sdk-parammgr#commit=6eb3bc85fc30144502043f456f47268a62d3db5a",
-    "wam-extensions": "boourns/wam-extensions#commit=9f0b69ffc0661e19addb07b4e870f420afceab22"
+    "wam-extensions": "boourns/wam-extensions#commit=f3566f5d2acea4924bbc8a0ce5e013ce859bbb7b"
   }
 }
