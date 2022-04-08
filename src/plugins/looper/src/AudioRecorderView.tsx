@@ -6,10 +6,10 @@ import { Sample } from './Sample';
 
 export interface AudioRecorderViewProps {
   plugin: AudioRecorderModule
+  clipId: string
 }
 
 type AudioRecorderViewState = {
-  recording: boolean
 }
 
 export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRecorderViewState> {
@@ -21,6 +21,7 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
 
   componentDidMount() {
     this.props.plugin.audioNode.editor.callback = () => {
+      console.log("Forcing redraw")
       this.forceUpdate()
     }
   }
@@ -29,10 +30,13 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
       this.props.plugin.audioNode.editor.callback = undefined
   }
 
-  toggleRecording() {
-    let recording = !this.state.recording
+  isRecording(): boolean {
+    return this.props.plugin._audioNode.recordingArmed
+  }
 
-    console.log("Recording: ", recording)
+  toggleRecording() {
+    let recording = !this.isRecording()
+
     this.props.plugin.audioNode.setRecording(recording)
 
     this.setState({recording})
@@ -50,14 +54,13 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
     let backupState = editor.getState()
     
     window.WAMExtensions.assets.pickAsset(this.props.plugin.instanceId, "AUDIO", async (asset: WamAsset) => {
-      console.log("in loadAssets callback")
       if (asset && asset.content) {
         let buffer = await asset.content.arrayBuffer()
 
         context.decodeAudioData(buffer, (buffer: AudioBuffer) => {
           let sample = new Sample(this.props.plugin.audioContext, buffer)
 
-          let sampleState = editor.defaultSampleState(sample, asset.name)
+          let sampleState = editor.defaultSampleState(sample, asset.name, this.props.clipId)
 
           this.props.plugin.audioNode.editor.setState({samples: backupState.samples.concat(sampleState)})
         })
@@ -69,21 +72,32 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
     })
   }
 
+  renderNoClipsMessage() {
+    let message = "Clip is empty. Arm recording on the mixer page, press record ● to record incoming audio."
+
+    if (this.props.plugin.audioNode.recordingArmed) {
+      message = "Clip is empty.  Press record ● to record incoming audio."
+    }
+    return <div style="color: white; padding: 10px;">{message}</div>
+  }
 
   render() {
     h("div", {})
 
-    let samples: h.JSX.Element[] = this.props.plugin.audioNode.editor.samples.map((s, i) => {
+    console.log("Rendering clipid ", this.props.clipId)
+
+    let samples: h.JSX.Element[] = this.props.plugin.audioNode.editor.samples.reverse().filter(s => s.clipId == this.props.clipId).map((s, i) => {
       return <SampleView index={i} editor={this.props.plugin.audioNode.editor} context={this.props.plugin.audioContext as AudioContext} sample={s}></SampleView>
     })
 
-    return (
-    <div style="overflow-y: scroll; height: 100%; ">
-        <button onClick={(e) => this.toggleRecording()}>{this.state.recording ? "Stop Recording" : "Start Recording"}</button>
-        <button onClick={(e) => this.loadAssets()}>Load</button>
+    let result = (
+    <div style="overflow-y: scroll; height: 100%; background-color: #190933; ">
+        <button style="padding: 5px; border: 1px solid; border-radius: 5%; margin: 5px; font-weight: bold;" onClick={(e) => this.loadAssets()}>Load Track</button>
 
-        {samples.reverse()}
+        {samples.length > 0 ? samples : this.renderNoClipsMessage()}
     </div>)
+
+    return result
   }
 
   css(): string {

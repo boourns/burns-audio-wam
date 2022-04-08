@@ -20,10 +20,14 @@ export class SampleView extends Component<SampleViewProps, SampleViewState> {
         this.transport = transport
     }
 
-    saveSample() {
+    async saveSample() {
         let blob = this.props.sample.sample.saveWav(32)
         if (window.WAMExtensions && window.WAMExtensions.assets) {
-            window.WAMExtensions.assets.saveAsset("", "AUDIO", blob)
+            let savedAsset = await window.WAMExtensions.assets.saveAsset("", "AUDIO", blob)
+            if (!!savedAsset) {
+                this.props.sample.name = savedAsset.name
+                this.props.sample.assetUrl = savedAsset.uri
+            }
         } else {
             var blobUrl = URL.createObjectURL(blob);
             window.location.replace(blobUrl)
@@ -34,30 +38,6 @@ export class SampleView extends Component<SampleViewProps, SampleViewState> {
         let state = this.props.editor.getState()
         let arr = state.samples.filter((v, i) => i != this.props.index)
         state.samples = arr
-        this.props.editor.setState(state)
-    }
-
-    splitSamples() {
-        let split = this.props.sample.sample.splitChannels()
-        let state = this.props.editor.getState()
-
-        let add = split.map((s, i) => this.props.editor.defaultSampleState(s, `${this.props.sample.name} - Ch #${i+1}`))
-
-        state.samples = state.samples.concat(add)
-        this.props.editor.setState(state)
-    }
-
-    split() {
-        let split = this.props.sample.sample.split([
-            {start: 0, end: this.props.sample.seekPos},
-            {start: this.props.sample.seekPos, end: 1}
-        ])
-
-        let state = this.props.editor.getState()
-
-        let add = split.map((s, i) => this.props.editor.defaultSampleState(s, `${this.props.sample.name} - Part ${i+1}`))
-
-        state.samples = state.samples.concat(add)
         this.props.editor.setState(state)
     }
 
@@ -110,6 +90,17 @@ export class SampleView extends Component<SampleViewProps, SampleViewState> {
     }
 
     render() {
+        if (this.props.sample.state == "LOADED") {
+            return this.renderLoadedSample()
+        } else if (this.props.sample.state == "ERROR") {
+            return <div>Error loading sample: {this.props.sample.error.message}</div>
+        } else {
+            return <div>{this.props.sample.state}</div>
+        }
+    }
+
+    renderLoadedSample() {
+
         return <div style={`border: 2px; height: ${this.props.sample.height}px; display: flex; flex-direction: column;`}>
             <div style="display: flex; flex-direction: row; height: 30px;">
                 <div>{this.props.sample.name}</div>
@@ -117,10 +108,8 @@ export class SampleView extends Component<SampleViewProps, SampleViewState> {
 
                 <button onClick={() => this.saveSample()}>Save</button>
                 <button onClick={() => this.deleteSample()}>Delete</button>
-                <button onClick={() => this.splitSamples()}>Split Channels</button>
                 <button onClick={() => this.trimLeft()}>Trim left</button>
                 <button onClick={() => this.trimRight()}>Trim right</button>
-                <button onClick={() => this.split()}>Split</button>
 
                 <button onClick={() => this.zoomIn()}>Zoom In</button>
                 <button onClick={() => this.zoomOut()}>Zoom Out</button>

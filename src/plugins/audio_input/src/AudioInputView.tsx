@@ -3,6 +3,7 @@ import { Knob } from '../../shared/ui/Knob'
 import { Select } from '../../shared/ui/Select'
 
 import AudioInputModule from '.';
+import { StereoVUMeter } from './StereoVUMeter';
 
 export interface AudioInputViewProps {
   plugin: AudioInputModule
@@ -11,6 +12,12 @@ export interface AudioInputViewProps {
 export class AudioInputView extends Component<AudioInputViewProps, any> {
   constructor() {
     super();
+  }
+
+  mutePressed() {
+    this.props.plugin.audioNode.setMute(!this.props.plugin.audioNode.muted)
+
+    this.forceUpdate()
   }
 
   render() {
@@ -24,9 +31,18 @@ export class AudioInputView extends Component<AudioInputViewProps, any> {
     let tracks = node.stream.getAudioTracks().map(t => <div>{t.label}</div>)
 
     return <div>
-      Stream: {node.stream.id}<br />
-      Tracks: {tracks}
+      
+      <div style="display: flex; flex-direction: row; padding: 8px;">
+        <div>
+          <StereoVUMeter node={this.props.plugin._audioNode.streamNode} width={40} height={200}></StereoVUMeter>
+        </div>
+        <div style="margin: 10px;">
+          <button style="margin-bottom: 5px;" onClick={() => this.mutePressed()}>{this.props.plugin.audioNode.muted ? "Unmute" : "Mute"}</button>
+          {tracks}<br />
+        </div>
+      </div>
     </div>
+
 
   }
 
