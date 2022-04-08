@@ -1,5 +1,11 @@
 import { AudioWorkletGlobalScope, WamTransportData } from "@webaudiomodules/api";
 
+type Loop = {
+    enabled: boolean
+    startBar: number
+    loopLength: number
+}
+
 const getAudioRecorderProcessor = (moduleId: string) => {
     const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
     const { registerProcessor } = audioWorkletGlobalScope;
@@ -11,10 +17,31 @@ const getAudioRecorderProcessor = (moduleId: string) => {
         channels: Float32Array[]
         playhead: number
         token: string;
+        loop: Loop;
+
+        loopStartSample: number
+        loopLengthSamples: number
 
         constructor(token: string, channels: Float32Array[]) {
             this.token = token
             this.channels = channels
+            this.loop = {
+                enabled: false,
+                startBar: 0,
+                loopLength: 8,
+            }
+        }
+
+        setLoop(loop: Loop, transport: WamTransportData) {
+            const {sampleRate} = audioWorkletGlobalScope
+
+            this.loop.enabled = loop.enabled
+            if (loop.enabled) {
+                const loopStartTime = (loop.startBar * transport.timeSigNumerator) * 60 / transport.tempo
+                this.loopStartSample = Math.floor(loopStartTime * sampleRate)
+                const loopLength = (loop.loopLength * transport.timeSigNumerator) * 60 / transport.tempo
+                this.loopLengthSamples = Math.floor(loopLength)
+            }
         }
 
         writeInto(playhead: number, startSample: number, endSample: number, output: Float32Array[]) {
@@ -193,6 +220,13 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                 } else if (message.data.action == "play") {
                     console.log("received play message for clipId %s", message.data.clipId)
                     this.playingClipId = message.data.clipId
+                } else if (message.data.action == "loop") {
+                    console.log("Received looper settings for track %s", message.data.token)
+                    let existing = this.clips.get(message.data.clipId).find(take => take.token == message.data.token)
+                    if (existing) {
+                        existing.loop = message.data.loop
+                        
+                    }
                 }
 
             } else {
