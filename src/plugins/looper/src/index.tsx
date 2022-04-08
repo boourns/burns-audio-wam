@@ -1,5 +1,4 @@
 import { WebAudioModule } from '@webaudiomodules/sdk';
-import { id } from 'lib0/function';
 
 import { h, render } from 'preact';
 import { PatternDelegate } from 'wam-extensions';
