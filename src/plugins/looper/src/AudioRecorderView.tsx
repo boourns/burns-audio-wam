@@ -73,10 +73,10 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
   }
 
   renderNoClipsMessage() {
-    let message = "Clip is empty.  Arm recording + press play ▶︎ to record incoming audio."
+    let message = "Clip is empty. Arm recording on the mixer page, press record ● to record incoming audio."
 
     if (this.props.plugin.audioNode.recordingArmed) {
-      message = "Clip is empty.  Press play ▶︎ to record incoming audio."
+      message = "Clip is empty.  Press record ● to record incoming audio."
     }
     return <div style="color: white; padding: 10px;">{message}</div>
   }
@@ -93,7 +93,6 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
     let result = (
     <div style="overflow-y: scroll; height: 100%; background-color: #190933; ">
         <button style="padding: 5px; border: 1px solid; border-radius: 5%; margin: 5px; font-weight: bold;" onClick={(e) => this.loadAssets()}>Load Track</button>
-        <button style="padding: 5px; border: 1px solid; border-radius: 5%; margin: 5px; font-weight: bold;" onClick={(e) => this.toggleRecording()}>{this.isRecording() ? "🔴 Armed" : "⭕️ Not Armed"}</button>
 
         {samples.length > 0 ? samples : this.renderNoClipsMessage()}
     </div>)
