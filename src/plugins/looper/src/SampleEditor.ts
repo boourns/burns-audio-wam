@@ -44,6 +44,8 @@ export class SampleEditor {
 
         if (asset && asset.content) {
             let buffer = await asset.content.arrayBuffer()
+
+            console.log("downloaded buffer is bytes: ", buffer.byteLength)
     
             this.context.decodeAudioData(buffer, (buffer: AudioBuffer) => {
                 let sampleData = new Sample(this.context, buffer)
@@ -59,8 +61,6 @@ export class SampleEditor {
                     this.callback()
                 }
             })
-
-            console.log("done loading sample")
         }
     }
 
@@ -79,6 +79,8 @@ export class SampleEditor {
     }
 
     setState(state: SampleEditorState) {
+        console.log("called SampleEditor.setState")
+
         this.samples = [...state.samples]
         for (let sample of this.samples) {
             if (sample.state == "INIT") {
@@ -86,6 +88,7 @@ export class SampleEditor {
             }
         }
         if (this.callback) {
+            console.log("Calling callback")
             this.callback()
         }
     }

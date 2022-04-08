@@ -1,4 +1,4 @@
-import { WamEventMap } from '@webaudiomodules/api';
+import { WamEventMap, WamTransportData } from '@webaudiomodules/api';
 import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk';
 import { string } from 'lib0';
 
@@ -27,6 +27,7 @@ export class AudioRecorderNode extends WamNode {
 
 	recordingBuffer?: RecordingBuffer
 	editor: SampleEditor
+	transport?: WamTransportData
 
 	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
 		const { audioWorklet } = audioContext;
@@ -127,6 +128,10 @@ export class AudioRecorderNode extends WamNode {
 
 	_onMessage(message: MessageEvent<any>): void {
 		if (message.data && message.data.source == "ar") {
+			if (message.data.action == "transport") {
+				this.transport = message.data.transport
+			}
+
 			if (message.data.action == "finalize") {
 				if (this.recordingBuffer) {
 					let sample: SampleState = {

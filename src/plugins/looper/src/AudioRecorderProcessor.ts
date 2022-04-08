@@ -74,8 +74,9 @@ const getAudioRecorderProcessor = (moduleId: string) => {
 
         samplesElapsed: number
         playing: boolean
-        playingClipId: string
-        recordingClipId: string
+        pendingClipId?: string
+        currentClipId: string
+        lastBar: number
 
         constructor(options: any) {
             super(options);
@@ -99,6 +100,11 @@ const getAudioRecorderProcessor = (moduleId: string) => {
             this.recordingArmed = false
         }
 
+        finalizeSample() {
+            console.log("Finalizing sample")
+            this.port.postMessage({source: "ar", clipId: this.currentClipId, action: "finalize"})
+        }
+
         /**
          * Implement custom DSP here.
          * @param {number} startSample beginning of processing slice
@@ -109,10 +115,11 @@ const getAudioRecorderProcessor = (moduleId: string) => {
         _process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
             let channels = inputs[0]
 
+            // we are not playing
             if (!this.transportData || !this.transportData.playing) {
+                // we were recording
                 if (this.recordingActive) {
-                    console.log("Finalizing sample")
-                    this.port.postMessage({source: "ar", clipId: this.recordingClipId, action: "finalize"})
+                    this.finalizeSample()
 
                     // transport has stopped, we were recording.. now we are not
                     this.recordingActive = false
@@ -123,20 +130,50 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                 return
             }
 
-            if (!this.playing && this.transportData.playing) {
+            // we are playing
+            let {currentTime} = audioWorkletGlobalScope
+            var timeElapsed = currentTime - this.transportData!.currentBarStarted
+            var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
+            var currentBar = Math.floor(beatPosition / this.transportData.timeSigNumerator)
+
+            // we just started playing
+            if (!this.playing) {
                 // transport just started
                 this.playing = true
                 this.samplesElapsed = 0
+                if (this.pendingClipId) {
+                    this.currentClipId = this.pendingClipId
+                    this.pendingClipId = undefined
+                }
 
-                console.log("transport just started")
-
+                // recording is fully armed 
                 if (this.recordingArmed) {
-                    console.log("setting recordingActive, setting recordingClipId to ", this.playingClipId)
-                    this.recordingClipId = this.playingClipId
                     this.recordingActive = true
                 }
+                this.lastBar = currentBar
             }
 
+            if (currentBar != this.lastBar) {
+                // we just crossed the bar threshold
+
+                if (this.pendingClipId) {
+                    // there is a pending clip change
+
+                    // if we're recording, finalize the old recording and start a new recording for the new clip
+                    if (this.recordingActive) {
+                        this.finalizeSample()
+                    }
+
+                    this.currentClipId = this.pendingClipId
+                    this.pendingClipId = undefined
+                }
+
+                // TODO: adjust loop positions if our playing clips loop back at this position
+
+                this.lastBar = currentBar
+            }
+
+            
             if (this.recordingActive && channels.length > 0) {
                 // not 100% necessary right now but if we change this to keep audio on processor side always then
                 // it will be required again since I/O buffers get reused
@@ -149,10 +186,10 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                     return result
                 })
                 
-                this.port.postMessage({source: "ar", buffer: {startSample, endSample, channels: copy}})
+                this.port.postMessage({source: "ar", clipId: this.currentClipId, buffer: {startSample, endSample, channels: copy}})
             }
 
-            let clips = this.clips.get(this.playingClipId) ?? []
+            let clips = this.clips.get(this.currentClipId) ?? []
             
             for (let take of clips) {
                 take.writeInto(this.samplesElapsed, startSample, endSample, outputs[0])
@@ -184,7 +221,8 @@ const getAudioRecorderProcessor = (moduleId: string) => {
             this.transportData = transportData
     
             super.port.postMessage({
-                event:"transport",
+                source:"ar",
+                action:"transport",
                 transport: transportData
             })
         }
@@ -219,7 +257,7 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                     this.clips.set(message.data.clipId, existing)
                 } else if (message.data.action == "play") {
                     console.log("received play message for clipId %s", message.data.clipId)
-                    this.playingClipId = message.data.clipId
+                    this.pendingClipId = message.data.clipId
                 } else if (message.data.action == "loop") {
                     console.log("Received looper settings for track %s", message.data.token)
                     let existing = this.clips.get(message.data.clipId).find(take => take.token == message.data.token)
