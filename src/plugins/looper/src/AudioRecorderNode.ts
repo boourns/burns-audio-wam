@@ -1,7 +1,5 @@
 import { WamEventMap, WamTransportData } from '@webaudiomodules/api';
 import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk';
-import { string } from 'lib0';
-
 import getAudioRecorderProcessor from "./AudioRecorderProcessor";
 import { RecordingBuffer } from "./RecordingBuffer";
 import { Sample } from './Sample';
@@ -22,7 +20,6 @@ function token() {
 
 export class AudioRecorderNode extends WamNode {
 	destroyed = false;
-	_supportedEventTypes: Set<keyof WamEventMap>
 	recordingArmed: boolean
 
 	recordingBuffer?: RecordingBuffer
@@ -100,7 +97,7 @@ export class AudioRecorderNode extends WamNode {
 
 						// we're not keeping this sample, it has been removed.
 
-						//TODO: remove this existingSample from the processor as well
+						// remove this existingSample from the processor as well
 						this.port.postMessage({source:"ar", action:"delete", clipId: existingSample.clipId, token: existingSample.token})
 					}
 				}
@@ -133,7 +130,8 @@ export class AudioRecorderNode extends WamNode {
 			}
 
 			if (message.data.action == "finalize") {
-				if (this.recordingBuffer) {
+				if (this.recordingBuffer && this.recordingBuffer.channels.length > 0) {
+
 					let sample: SampleState = {
 						clipId: message.data.clipId,
 						token: token(),
@@ -146,12 +144,12 @@ export class AudioRecorderNode extends WamNode {
 
 					this.editor.samples.push(sample)
 					this.editor.sendSampleToProcessor(sample)
+				}
 
-					this.recordingBuffer = undefined
+				this.recordingBuffer = undefined
 					
-					if (this.editor.callback) {
-						this.editor.callback()
-					}
+				if (this.editor.callback) {
+					this.editor.callback()
 				}
 			}
 
