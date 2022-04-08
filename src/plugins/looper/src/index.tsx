@@ -39,7 +39,7 @@ export default class AudioRecorderModule extends WebAudioModule<AudioRecorderNod
 
 		if (initialState) node.setState(initialState);
 
-		this.updatePatternExtension()
+		this.updateExtensions()
 
 		return node
     }
@@ -65,8 +65,8 @@ export default class AudioRecorderModule extends WebAudioModule<AudioRecorderNod
 		render(null, el)
 	}
 
-	updatePatternExtension() {
-		if (!(window.WAMExtensions && window.WAMExtensions.patterns)) {
+	updateExtensions() {
+		if (!(window.WAMExtensions && window.WAMExtensions.patterns && window.WAMExtensions.recording)) {
 			return
 		}
 
@@ -98,5 +98,12 @@ export default class AudioRecorderModule extends WebAudioModule<AudioRecorderNod
 		}
 
 		window.WAMExtensions.patterns.setPatternDelegate(this.instanceId, patternDelegate)
+
+		window.WAMExtensions.recording.register(this.instanceId, {
+			armRecording: (armed: boolean) => {
+				this.audioNode.setRecording(armed)
+			}
+		})
+
 	}
 }
