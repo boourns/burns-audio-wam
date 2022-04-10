@@ -69,8 +69,11 @@ class PianoRollProcessor extends WamProcessor {
             return
         }
 
-		if (this.transportData!.playing) {
-			var timeElapsed = currentTime - this.transportData!.currentBarStarted
+        // lookahead
+        var schedulerTime = currentTime + 0.05
+
+		if (this.transportData!.playing && this.transportData!.currentBarStarted <= schedulerTime) {
+			var timeElapsed = schedulerTime - this.transportData!.currentBarStarted
             var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
             var tickPosition = Math.floor(beatPosition * PPQN)
 
@@ -82,8 +85,8 @@ class PianoRollProcessor extends WamProcessor {
                 this.ticks = clipPosition;
                 clip.notesForTick(clipPosition).forEach(note => {
                     this.emitEvents(
-                        { type: 'wam-midi', time: currentTime, data: { bytes: [MIDI.NOTE_ON, note.number, note.velocity] } },
-                        { type: 'wam-midi', time: currentTime+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF, note.number, note.velocity] } }
+                        { type: 'wam-midi', time: schedulerTime, data: { bytes: [MIDI.NOTE_ON, note.number, note.velocity] } },
+                        { type: 'wam-midi', time: schedulerTime+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF, note.number, note.velocity] } }
                     )
                 })
             }
