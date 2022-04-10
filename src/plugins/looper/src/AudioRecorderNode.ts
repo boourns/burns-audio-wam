@@ -76,50 +76,52 @@ export class AudioRecorderNode extends WamNode {
 		}
 
 		if (state.samples !== undefined) {
-			let keptSamples: SampleState[] = []
+			let newSampleList: SampleState[] = []
 
-			for (let existingSample of this.editor.samples) {
-				if (!existingSample.assetUrl) {
-					console.log("keeping unsaved sample")
-					// keep unsaved samples
-					keptSamples.push(existingSample)
+			let currentSamples = [...this.editor.samples]
+
+			// iterating over the 'new' list of samples
+			for (let sample of state.samples) {
+				let existingSample = currentSamples.find(s => s.assetUrl == sample.assetUrl && s.clipId == sample.clipId)
+
+				if (!!existingSample) {
+					// we already have that sample, remove it from the delete list
+					currentSamples = currentSamples.filter(s => !(s.assetUrl == sample.assetUrl && s.clipId == sample.clipId))
+
+					// push this sample into the new internal state
+					newSampleList.push(existingSample)
 				} else {
-					// is this sample in the new list?
-					if (state.samples.some(s => s.assetUrl == existingSample.assetUrl && s.clipId == existingSample.clipId)) {
-						// keep it in our new sample list
-						keptSamples.push(existingSample)
+					// we do not have this sample yet, add it to our internal list
 
-						// it has been found, remove it from the new state list of samples
-						state.samples = state.samples.filter(s => !(s.assetUrl == existingSample.assetUrl && s.clipId == existingSample.clipId))
-					} else {
-						console.log("not keeping sample ", existingSample)
-						console.log("because new sample list is ", state.samples)
-
-						// we're not keeping this sample, it has been removed.
-
-						// remove this existingSample from the processor as well
-						this.port.postMessage({source:"ar", action:"delete", clipId: existingSample.clipId, token: existingSample.token})
+					let sampleState: SampleState = {
+						token: token(),
+						clipId: sample.clipId,
+						state: "INIT",
+						assetUrl: sample.assetUrl,
+						zoom: 1,
+						name: "",
+						height: 0,
 					}
+	
+					newSampleList.push(sampleState)
 				}
 			}
 
-			for (let newSample of state.samples) {
-				let sampleState: SampleState = {
-					token: token(),
-					clipId: newSample.clipId,
-					state: "INIT",
-					assetUrl: newSample.assetUrl,
-					zoom: 1,
-					name: "",
-					height: 0,
+			// keep all of our samples we have not saved.
+			for (let existing of currentSamples) {
+				if (!existing.assetUrl) {
+					newSampleList.push(existing)
 				}
-
-				keptSamples.push(sampleState)
 			}
 
-			console.log("Setting editor samples to ", keptSamples)
+			// saved samples we used to have that are not in the new state, delete them
+			for (let oldSample of currentSamples) {
+				this.port.postMessage({source:"ar", action:"delete", clipId: oldSample.clipId, token: oldSample.token})
+			}
 
-			this.editor.setState({samples: keptSamples})
+			console.log("Setting editor samples to ", newSampleList)
+
+			this.editor.setState({samples: newSampleList})
 		}
 	}
 
