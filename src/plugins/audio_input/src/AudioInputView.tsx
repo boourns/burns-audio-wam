@@ -4,6 +4,7 @@ import { Select } from '../../shared/ui/Select'
 
 import AudioInputModule from '.';
 import { StereoVUMeter } from './StereoVUMeter';
+import { VUMeter } from './VUMeter';
 
 export interface AudioInputViewProps {
   plugin: AudioInputModule
@@ -12,6 +13,16 @@ export interface AudioInputViewProps {
 export class AudioInputView extends Component<AudioInputViewProps, any> {
   constructor() {
     super();
+  }
+
+  componentDidMount(): void {
+    this.props.plugin.audioNode.callback = () => {
+      this.forceUpdate()
+    }
+  }
+
+  componentWillUnmount(): void {
+    this.props.plugin.audioNode.callback = undefined
   }
 
   mutePressed() {
@@ -30,11 +41,18 @@ export class AudioInputView extends Component<AudioInputViewProps, any> {
     
     let tracks = node.stream.getAudioTracks().map(t => <div>{t.label}</div>)
 
+    let meter
+
+    if (this.props.plugin.audioNode.channelCounter?.stereo) {
+      meter = <StereoVUMeter node={this.props.plugin._audioNode.channelCounter.channelCounter} width={40} height={200}></StereoVUMeter>
+    } else {
+      meter = <VUMeter node={this.props.plugin._audioNode.channelCounter.channelCounter} width={20} height={200}></VUMeter>
+    }
+
     return <div>
-      
       <div style="display: flex; flex-direction: row; padding: 8px;">
         <div>
-          <StereoVUMeter node={this.props.plugin._audioNode.streamNode} width={40} height={200}></StereoVUMeter>
+          {meter}
         </div>
         <div style="margin: 10px;">
           <button style="margin-bottom: 5px;" onClick={() => this.mutePressed()}>{this.props.plugin.audioNode.muted ? "Unmute" : "Mute"}</button>
@@ -42,8 +60,6 @@ export class AudioInputView extends Component<AudioInputViewProps, any> {
         </div>
       </div>
     </div>
-
-
   }
 
   css(): string {
