@@ -119,8 +119,6 @@ export class AudioRecorderNode extends WamNode {
 				this.port.postMessage({source:"ar", action:"delete", clipId: oldSample.clipId, token: oldSample.token})
 			}
 
-			console.log("Setting editor samples to ", newSampleList)
-
 			this.editor.setState({samples: newSampleList})
 		}
 	}

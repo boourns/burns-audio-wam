@@ -35,7 +35,7 @@ class ChannelCountProcessor extends AudioWorkletProcessor {
             return true
         }
         
-        if (inputs[0].length != this.channelCount) {
+        if (inputs[0].length != this.channelCount && inputs[0].length > 0) {
             this.channelCount = inputs[0].length
 
             // @ts-ignore
@@ -64,7 +64,7 @@ export class ChannelCounter {
     context: BaseAudioContext
     channelCounter?: AudioWorkletNode
     callback?: () => void
-    count: number
+    count?: number
 
     stereo: boolean
 
@@ -77,8 +77,10 @@ export class ChannelCounter {
     }
 
     createOutput(stereo: boolean) {
-        if (!!this.channelCounter && this.stereo == stereo) {
-            return
+        if (!!this.channelCounter) {
+            if (this.stereo == stereo) {
+                return
+            }
         }
 
         this.stereo = stereo
@@ -91,7 +93,13 @@ export class ChannelCounter {
 
         this.channelCounter.port.onmessage = (ev: MessageEvent<any>) => {
             if (ev.data.action == "count") {
-                this.count = ev.data.count
+                if (ev.data.count != this.count) {
+                    if (this.callback) {
+                        this.count = ev.data.count
+
+                        this.callback()
+                    }
+                }
             }
         }
     }
