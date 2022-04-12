@@ -130,8 +130,15 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                 return
             }
 
-            // we are playing
+            // playing is true
+            // but is it starting in the future?
             let {currentTime} = audioWorkletGlobalScope
+
+            if (this.transportData.currentBarStarted > currentTime) {
+                // we are in count-in
+                return
+            }
+
             var timeElapsed = currentTime - this.transportData!.currentBarStarted
             var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
             var currentBar = Math.floor(beatPosition / this.transportData.timeSigNumerator)

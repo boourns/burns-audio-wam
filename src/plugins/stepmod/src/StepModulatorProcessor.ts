@@ -144,7 +144,7 @@ class StepModulatorProcessor extends WamProcessor {
             return
         }
         
-		if (this.transportData!.playing) {
+		if (this.transportData!.playing && currentTime > this.transportData.currentBarStarted) {
 			var timeElapsed = currentTime - this.transportData!.currentBarStarted
             var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
             var tickPosition = Math.floor(beatPosition * PPQN)
