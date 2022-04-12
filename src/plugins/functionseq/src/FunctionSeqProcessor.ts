@@ -6,7 +6,6 @@ type ParameterDefinition = {
     config: WamParameterConfiguration
 }
 
-let parameterTypes = ['float', 'int', 'boolean','choice']
 
 
 
@@ -152,7 +151,7 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
             if (p.id.length == 0) {
                 throw new Error("Invalid parameter: id must be string and not blank")
             }
-            if (parameterTypes.findIndex(t => t == p.config.type) == -1) {
+            if (['float', 'int', 'boolean','choice'].findIndex(t => t == p.config.type) == -1) {
                 throw new Error(`Invalid parameter type ${p.config.type}`)
             }
         }
