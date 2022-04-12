@@ -24,12 +24,6 @@ export class AudioInputView extends Component<AudioInputViewProps, any> {
     this.props.plugin.audioNode.callback = undefined
   }
 
-  mutePressed() {
-    this.props.plugin.audioNode.setMute(!this.props.plugin.audioNode.muted)
-
-    this.forceUpdate()
-  }
-
   selectChannels(index: string) {
     this.props.plugin.audioNode.channelMapIndex = parseInt(index)
 
@@ -65,7 +59,6 @@ export class AudioInputView extends Component<AudioInputViewProps, any> {
           {meter}
         </div>
         <div style="margin: 10px;">
-          <button style="margin-bottom: 5px;" onClick={() => this.mutePressed()}>{this.props.plugin.audioNode.muted ? "Unmute" : "Mute"}</button>
           {tracks}<br />
           <Select label="Input" value={() => this.props.plugin.audioNode.channelMapIndex} options={channelSelectOptions} onChange={(i) => this.selectChannels(i)}></Select>
         </div>
