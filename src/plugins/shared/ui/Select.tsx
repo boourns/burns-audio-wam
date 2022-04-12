@@ -1,3 +1,4 @@
+import { realpathSync } from 'fs';
 import { Component, h } from 'preact';
 
 export type HTMLInputEvent = Event & {target: HTMLInputElement }
@@ -18,6 +19,9 @@ export class Select<T> extends Component<SelectProps, any> {
 
     ref?: HTMLDivElement
     select?: HTMLSelectElement
+
+    renderedOptions?: string[]
+    renderedValues?: any[]
 
     constructor() {
         super();
@@ -79,8 +83,8 @@ export class Select<T> extends Component<SelectProps, any> {
         if (ref == null) {
             return
         }
-
-        if (ref == this.ref) {
+        
+        if (ref == this.ref && this.sameArray(this.props.options, this.renderedOptions) && this.sameArray(this.props.values, this.renderedValues)) {
             return
         }
 
@@ -91,18 +95,34 @@ export class Select<T> extends Component<SelectProps, any> {
             throw `Select with label ${this.props.label} values ${this.props.values} has null value`
         }
 
-        this.select = document.createElement("select");
+        if (!this.select) {
+            this.select = document.createElement("select");
+            this.select.addEventListener("change", e => this.onChange(e as HTMLInputEvent))
+        } else {
+            while (this.select.firstChild) {
+                this.select.removeChild(this.select.firstChild);
+            }
+
+            try {
+                this.ref.removeChild(this.select)
+            } catch (e) {
+
+            }
+        }
+
+        this.ref.appendChild(this.select)
 
         this.props.options.forEach((name, index) => {
             let option = document.createElement("option");
             option.text = name
             option.value = (this.props.values) ? this.props.values[index].toString() : index.toString()
+            console.log("Adding option ", option.text, "value ", option.value)
             this.select.appendChild(option)
         })
 
-        this.select.addEventListener("change", e => this.onChange(e as HTMLInputEvent))
-
-        this.ref.appendChild(this.select)
+        this.lastRenderedValue = "-1"
+        this.renderedOptions = this.props.options
+        this.renderedValues = this.props.values
 
         this.cancelAnimation()
         this.animationFrame()
@@ -118,5 +138,20 @@ export class Select<T> extends Component<SelectProps, any> {
             <div ref={(e) => this.setup(e)} style="color: black;" class="component-select">
             </div>
         </div>
+    }
+
+    sameArray(lhs?: any[], rhs?: any[]): boolean {
+        // if both are undefined, return true
+        if (lhs === undefined && rhs === undefined) {
+            return true
+        }
+
+        // if only one is undefined, return false
+        if (lhs === undefined || rhs === undefined) {
+            return false
+        }
+
+        // same length and all items match
+        return (lhs.length == rhs.length && lhs.every((l, i) => l == rhs[i]))
     }
 }

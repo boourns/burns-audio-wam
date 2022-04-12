@@ -110,8 +110,6 @@ export default class AudioInputNode extends CompositeAudioNode {
     updateFromState() {        
         this.streamNode.disconnect()
 
-        this.channelCounter.channelCounter?.disconnect()
-
         this.generateChannelOptions()
 
         let channels = this.channelMapOptions[this.channelMapIndex]

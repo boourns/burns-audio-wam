@@ -57,8 +57,7 @@ export class AudioInputView extends Component<AudioInputViewProps, any> {
     }
 
     let audioNode = this.props.plugin.audioNode
-    let channelSelectValues = [...Array(audioNode.channelMapOptions.length).keys()]
-    let channelSelectOptions = channelSelectValues.map(i => audioNode.channelMapOptions[i].map(i=>i+1).join(" / "))
+    let channelSelectOptions = audioNode.channelMapOptions.map(c => c.map(i=>i+1).join(" / "))
 
     return <div>
       <div style="display: flex; flex-direction: row; padding: 8px;">
@@ -68,7 +67,7 @@ export class AudioInputView extends Component<AudioInputViewProps, any> {
         <div style="margin: 10px;">
           <button style="margin-bottom: 5px;" onClick={() => this.mutePressed()}>{this.props.plugin.audioNode.muted ? "Unmute" : "Mute"}</button>
           {tracks}<br />
-          <Select value={() => this.props.plugin.audioNode.channelMapIndex} values={channelSelectValues} options={channelSelectOptions} onChange={(i) => this.selectChannels(i)}></Select>
+          <Select value={() => this.props.plugin.audioNode.channelMapIndex} options={channelSelectOptions} onChange={(i) => this.selectChannels(i)}></Select>
         </div>
       </div>
     </div>

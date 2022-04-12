@@ -81,6 +81,7 @@ export class ChannelCounter {
             if (this.stereo == stereo) {
                 return
             }
+            this.channelCounter.disconnect()
         }
 
         this.stereo = stereo
@@ -92,6 +93,7 @@ export class ChannelCounter {
         });
 
         this.channelCounter.port.onmessage = (ev: MessageEvent<any>) => {
+
             if (ev.data.action == "count") {
                 if (ev.data.count != this.count) {
                     if (this.callback) {
