@@ -74,6 +74,7 @@ export default class AudioInputNode extends CompositeAudioNode {
             this.updateFromState()
         }
 
+        this.channelMapIndex = -1
         this.updateFromState()
 
         //super.connect(this._input)
@@ -81,15 +82,26 @@ export default class AudioInputNode extends CompositeAudioNode {
 
     generateChannelOptions() {
         let count = this.channelCounter?.count
+        let existingChannelSelection
+        
         if (!count) {
             count = 2
             this.channelMapIndex = -1
+        } else {
+            // we have previously generated a channel map index list
+            if (this.channelMapIndex >= 0 && this.channelMapIndex < this.channelMapOptions.length) {
+                // keep a copy of our original selection, if it's in the updated count, select the same channel again
+                existingChannelSelection = this.channelMapOptions[this.channelMapIndex]
+            }
         }
 
         let defaultIndex = 0
         let results: number[][] = []
         for (let i = 0; i < count; i++) {
             results.push([i])
+            if (existingChannelSelection && existingChannelSelection.length == 1 && existingChannelSelection[0] == i) {
+                this.channelMapIndex = i
+            }
         }
 
         if (count > 1) {
@@ -98,6 +110,10 @@ export default class AudioInputNode extends CompositeAudioNode {
 
             for (let i = 0; i < count; i += 2) {
                 results.push([i, i + 1])
+                
+                if (existingChannelSelection && existingChannelSelection.length == 2 && existingChannelSelection[0] == i) {
+                    this.channelMapIndex = i
+                }
             }
         }
 
