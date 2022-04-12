@@ -8,17 +8,7 @@ type ParameterDefinition = {
 
 let parameterTypes = ['float', 'int', 'boolean','choice']
 
-function validateParameter(p: ParameterDefinition) {
-    if (p.id === undefined || p.config === undefined) {
-        throw new Error(`Invalid parameter ${p}: must have id and config defined`)
-    }
-    if (p.id.length == 0) {
-        throw new Error("Invalid parameter: id must be string and not blank")
-    }
-    if (parameterTypes.findIndex(t => t == p.config.type) == -1) {
-        throw new Error(`Invalid parameter type ${p.config.type}`)
-    }
-}
+
 
 type FunctionSequencer = {
     parameters?(): ParameterDefinition[]
@@ -75,7 +65,7 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
                 return
             }
 
-            if (this.transportData!.playing) {
+            if (this.transportData!.playing && currentTime >= this.transportData!.currentBarStarted) {
                 var timeElapsed = currentTime - this.transportData!.currentBarStarted
                 var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
                 var tickPosition = Math.floor(beatPosition * PPQN)
@@ -129,7 +119,7 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
                         this.parameterIds = []
 
                         for (let p of parameters) {
-                            validateParameter(p)
+                            this.validateParameter(p)
 
                             map[p.id] = p.config
                             this.parameterIds.push(p.id)
@@ -153,6 +143,18 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
 
         _onTransport(transportData: WamTransportData) {
             this.transportData = transportData
+        }
+
+        validateParameter(p: ParameterDefinition) {
+            if (p.id === undefined || p.config === undefined) {
+                throw new Error(`Invalid parameter ${p}: must have id and config defined`)
+            }
+            if (p.id.length == 0) {
+                throw new Error("Invalid parameter: id must be string and not blank")
+            }
+            if (parameterTypes.findIndex(t => t == p.config.type) == -1) {
+                throw new Error(`Invalid parameter type ${p.config.type}`)
+            }
         }
     }
 

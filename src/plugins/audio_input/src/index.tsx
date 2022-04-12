@@ -13,7 +13,7 @@ import AudioInputNode from './Node';
 
 export default class AudioInputModule extends WebAudioModule<AudioInputNode> {
 	//@ts-ignore
-	_baseURL = getBaseUrl(new URL('.', import.meta.url));
+	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 
