@@ -215,23 +215,26 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                 this.port.postMessage({source: "ar", clipId: this.currentClipId, buffer: {startSample, endSample, channels: copy}})
             }
 
-            let clips = this.clips.get(this.currentClipId) ?? []
+            if (!this.recordingActive) {
+                // do not play back track if currently recording
+                let clips = this.clips.get(this.currentClipId) ?? []
             
-            for (let take of clips) {
-                take.writeInto(this.samplesElapsed, startSample, endSample, outputs[0])
-            }
-
-            this.samplesElapsed += (endSample - startSample)
-
-            for (let i = 0; i < inputs.length; i++) {
-                for (let j = 0; j < inputs[i].length; j++) {
-                    // iterate over channels L/R/A/B/C/...
-
-                    for (let k = 0; k < inputs[i][j].length; k++) {
-                        // iterate over individual samples
-
-                        // TODO faster copy is available im sure
-                        outputs[i][j][k] += inputs[i][j][k]
+                for (let take of clips) {
+                    take.writeInto(this.samplesElapsed, startSample, endSample, outputs[0])
+                }
+    
+                this.samplesElapsed += (endSample - startSample)
+    
+                for (let i = 0; i < inputs.length; i++) {
+                    for (let j = 0; j < inputs[i].length; j++) {
+                        // iterate over channels L/R/A/B/C/...
+    
+                        for (let k = 0; k < inputs[i][j].length; k++) {
+                            // iterate over individual samples
+    
+                            // TODO faster copy is available im sure
+                            outputs[i][j][k] += inputs[i][j][k]
+                        }
                     }
                 }
             }
