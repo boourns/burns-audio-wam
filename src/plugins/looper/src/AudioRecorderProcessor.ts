@@ -305,16 +305,21 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                 if (message.data.action == "load") {
                     console.log("Received track load: ", message.data)
 
+                    let newClip = new AudioClip(message.data.token, message.data.buffer)
+                    newClip.setClipSettings(message.data.settings)
+
                     if (!this.clips.get(message.data.clipId)) {
                         this.clips.set(message.data.clipId, [])
                     }
-                    let newClip = new AudioClip(message.data.token, message.data.buffer)
-                    newClip.setClipSettings(message.data.settings)
                     this.clips.get(message.data.clipId).push(newClip)
+                    
                 } else if (message.data.action == "delete") {
                     console.log("Processor removing track ", message.data.token, "on clip ", message.data.clipId)
 
                     let existing = this.clips.get(message.data.clipId)
+                    if (!existing) {
+                        return
+                    }
                     existing = existing.filter(s => s.token !== message.data.token)
                     this.clips.set(message.data.clipId, existing)
                 } else if (message.data.action == "play") {
@@ -322,7 +327,11 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                     this.pendingClipId = message.data.clipId
                 } else if (message.data.action == "clipSettings") {
                     console.log("Received clip settings for track %s", message.data.token)
-                    let existing = this.clips.get(message.data.clipId).find(take => take.token == message.data.token)
+                    let clip = this.clips.get(message.data.clipId)
+                    if (!clip) {
+                        return
+                    }
+                    let existing = clip.find(take => take.token == message.data.token)
                     if (existing) {
                         existing.setClipSettings(message.data.clipSettings)
                     }
@@ -337,7 +346,6 @@ const getAudioRecorderProcessor = (moduleId: string) => {
     try {
         registerProcessor('TomBurnsAudioRecorder', (AudioRecorderProcessor as typeof WamProcessor));
     } catch (error) {
-        console.warn(error);
     }
 
     return AudioRecorderProcessor;
