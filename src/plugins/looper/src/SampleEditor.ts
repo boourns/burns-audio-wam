@@ -58,6 +58,7 @@ export class SampleEditor {
     
             this.context.decodeAudioData(buffer, (buffer: AudioBuffer) => {
                 let sampleData = new Sample(this.context, buffer)
+                console.log("sample decoded! clipSettings is", sample.clipSettings)
                 
                 sample.sample = sampleData
                 sample.height = 30 + (100 * sampleData.buffer.numberOfChannels)
@@ -97,6 +98,27 @@ export class SampleEditor {
         if (this.callback) {
             this.callback()
         }
+    }
+
+    setClipSettings(token: string, settings: ClipSettings) {
+        let existing = this.samples.find(s => s.token == token)
+        if (!existing) {
+            console.error("Setting clip settings for missing sample: token ", token)
+            return
+        }
+        existing.clipSettings = settings
+
+        this.sendClipSettingsToProcessor(existing)
+
+        if (this.callback) {
+            this.callback()
+        }
+    }
+
+    sendClipSettingsToProcessor(sample: SampleState) {
+        let message = {source:"ar", action:"clipSettings", token: sample.token, clipId: sample.clipId, clipSettings: sample.clipSettings}
+
+        this.port.postMessage(message)
     }
 
     defaultSampleState(sample: Sample, name: string, clipId: string): SampleState {

@@ -42,7 +42,10 @@ export class SampleView extends Component<SampleViewProps, SampleViewState> {
     }
 
     toggleSampleEnabled() {
-        
+        let newSettings = {...this.props.sample.clipSettings}
+        newSettings.clipEnabled = !newSettings.clipEnabled
+
+        this.props.editor.setClipSettings(this.props.sample.token, newSettings) 
     }
 
     trimLeft() {
@@ -112,7 +115,6 @@ export class SampleView extends Component<SampleViewProps, SampleViewState> {
             </div>
             <button onClick={() => this.saveSample()}>Save</button>
         </div>
-        
     }
 
     renderLoadedSample() {

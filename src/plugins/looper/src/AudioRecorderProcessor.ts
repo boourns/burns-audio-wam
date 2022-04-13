@@ -265,9 +265,7 @@ const getAudioRecorderProcessor = (moduleId: string) => {
 
                 this.samplesElapsed += (endSample - startSample)
             }
-
-
-
+            
             return;
         }
 
@@ -305,7 +303,7 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                 }
 
                 if (message.data.action == "load") {
-                    console.log("Received track load for token ", message.data.token)
+                    console.log("Received track load: ", message.data)
 
                     if (!this.clips.get(message.data.clipId)) {
                         this.clips.set(message.data.clipId, [])

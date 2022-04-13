@@ -66,11 +66,13 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
         let buffer = await asset.content.arrayBuffer()
 
         context.decodeAudioData(buffer, (buffer: AudioBuffer) => {
-          let sample = new Sample(this.props.plugin.audioContext, buffer)
+          let sampleData = new Sample(this.props.plugin.audioContext, buffer)
 
-          let sampleState = editor.defaultSampleState(sample, asset.name, this.props.clipId)
+          let sample = editor.defaultSampleState(sampleData, asset.name, this.props.clipId)
 
-          this.props.plugin.audioNode.editor.setState({samples: backupState.samples.concat(sampleState)})
+          this.props.plugin.audioNode.editor.setState({samples: backupState.samples.concat(sample)})
+          
+          this.props.plugin.audioNode.editor.sendSampleToProcessor(sample)
         })
       } else {
         editor.setState(backupState)
