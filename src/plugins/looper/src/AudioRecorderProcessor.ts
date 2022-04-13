@@ -72,6 +72,8 @@ const getAudioRecorderProcessor = (moduleId: string) => {
         transportData?: WamTransportData
         clips: Map<string, AudioRecording[]>
 
+        monitor: boolean
+
         samplesElapsed: number
         playing: boolean
         pendingClipId?: string
@@ -87,6 +89,8 @@ const getAudioRecorderProcessor = (moduleId: string) => {
             } = options.processorOptions;
 
             this.recordingArmed = false
+            this.monitor = false
+
             this.clips = new Map()
 
             super.port.start();
@@ -224,7 +228,9 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                 }
     
                 this.samplesElapsed += (endSample - startSample)
+            }
     
+            if (this.monitor) {
                 for (let i = 0; i < inputs.length; i++) {
                     for (let j = 0; j < inputs[i].length; j++) {
                         // iterate over channels L/R/A/B/C/...
@@ -269,6 +275,10 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                     } else {
                         this.stopRecording()
                     }
+                }
+
+                if (message.data.action == "monitor") {
+                    this.monitor = message.data.monitor
                 }
 
                 if (message.data.action == "load") {

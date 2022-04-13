@@ -21,6 +21,7 @@ function token() {
 export class AudioRecorderNode extends WamNode {
 	destroyed = false;
 	recordingArmed: boolean
+	monitor: boolean
 
 	recordingBuffer?: RecordingBuffer
 	editor: SampleEditor
@@ -58,6 +59,15 @@ export class AudioRecorderNode extends WamNode {
 		this.recordingArmed = recording
 
         if (this.editor.callback) {
+            this.editor.callback()
+        }
+	}
+
+	setMonitor(monitor: boolean) {
+		this.port.postMessage({source:"ar", action:"monitor", monitor})
+		this.monitor = monitor
+
+		if (this.editor.callback) {
             this.editor.callback()
         }
 	}
@@ -137,7 +147,7 @@ export class AudioRecorderNode extends WamNode {
 						token: token(),
 						height: 150,
 						state: "LOADED",
-						sample: new Sample(this.context, this.recordingBuffer.render(this.context)),
+						sample: new Sample(this.context, this.recordingBuffer.render(this.context as AudioContext)),
 						name: `Sample ${this.editor.samples.length+1}`,
 						zoom: 1,
 					}

@@ -42,6 +42,13 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
     this.setState({recording})
   }
 
+  toggleMonitor() {
+    let monitor = !this.props.plugin.audioNode.monitor
+    this.props.plugin.audioNode.setMonitor(monitor)
+
+    this.forceUpdate()
+  }
+
   loadAssets() {
     if (!window.WAMExtensions.assets) {
       console.error("Host must implement asset WAM extension")
@@ -93,6 +100,7 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
     let result = (
     <div style="overflow-y: scroll; height: 100%; background-color: #190933; ">
         <button style="padding: 5px; border: 1px solid; border-radius: 5%; margin: 5px; font-weight: bold;" onClick={(e) => this.loadAssets()}>Load Track</button>
+        <button style="padding: 5px; border: 1px solid; border-radius: 5%; margin: 5px; font-weight: bold;" onClick={(e) => this.toggleMonitor()}>Monitor: <b>{this.props.plugin.audioNode.monitor ? "On" : "Off"}</b></button>
 
         {samples.length > 0 ? samples : this.renderNoClipsMessage()}
     </div>)

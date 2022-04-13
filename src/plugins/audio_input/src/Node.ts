@@ -34,11 +34,13 @@ export default class AudioInputNode extends CompositeAudioNode {
         }
 
         let stream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
+            audio: {
+                latency: {ideal: 0.003},
+            },
             video: false,
         })
         this.stream = stream
-
+        
         console.log("stream is ", stream)
         console.log("tracks are ", stream.getAudioTracks())
         for (let t of stream.getAudioTracks()) {
@@ -54,6 +56,11 @@ export default class AudioInputNode extends CompositeAudioNode {
         // Create a MediaStreamAudioSourceNode  
         // Feed the HTMLMediaElement into it
         this.streamNode = ctx.createMediaStreamSource(stream);
+
+        console.log("AudioContext base latency is: ", ctx.baseLatency)
+        // @ts-ignore
+        console.log("AudioContext output latency is: ", ctx.outputLatency)
+
 
         console.log("streamNode has ", this.streamNode.numberOfInputs, " inputs and ", this.streamNode.numberOfOutputs, " outputs")
 
