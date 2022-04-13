@@ -1,9 +1,11 @@
 import { AudioWorkletGlobalScope, WamTransportData } from "@webaudiomodules/api";
 
-type Loop = {
-    enabled: boolean
-    startBar: number
-    loopLength: number
+type ClipSettings = {
+    clipEnabled: boolean
+    loopEnabled: boolean
+    startingOffset: number // in samples
+    loopStartBar: number // in bars
+    loopLengthBars: number // in bars
 }
 
 const getAudioRecorderProcessor = (moduleId: string) => {
@@ -11,66 +13,85 @@ const getAudioRecorderProcessor = (moduleId: string) => {
     const { registerProcessor } = audioWorkletGlobalScope;
 
     const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
-	const WamProcessor = ModuleScope.WamProcessor
-    
-    class AudioRecording {
-        channels: Float32Array[]
-        playhead: number
-        token: string;
-        loop: Loop;
+    const WamProcessor = ModuleScope.WamProcessor
 
-        loopStartSample: number
-        loopLengthSamples: number
+    class AudioClip {
+        channels: Float32Array[]
+        token: string;
+
+        clipSettings: ClipSettings;
 
         constructor(token: string, channels: Float32Array[]) {
             this.token = token
             this.channels = channels
-            this.loop = {
-                enabled: false,
-                startBar: 0,
-                loopLength: 8,
+            this.clipSettings = {
+                clipEnabled: false,
+                loopEnabled: false,
+                startingOffset: 0,
+                loopStartBar: 0,
+                loopLengthBars: 8,
             }
         }
 
-        setLoop(loop: Loop, transport: WamTransportData) {
-            const {sampleRate} = audioWorkletGlobalScope
-
-            this.loop.enabled = loop.enabled
-            if (loop.enabled) {
-                const loopStartTime = (loop.startBar * transport.timeSigNumerator) * 60 / transport.tempo
-                this.loopStartSample = Math.floor(loopStartTime * sampleRate)
-                const loopLength = (loop.loopLength * transport.timeSigNumerator) * 60 / transport.tempo
-                this.loopLengthSamples = Math.floor(loopLength)
-            }
+        setClipSettings(settings: ClipSettings) {
+            this.clipSettings = settings   
         }
 
-        writeInto(playhead: number, startSample: number, endSample: number, output: Float32Array[]) {
-            if (this.channels.length == 0 || this.channels[0].length == 0) {
+        writeInto(transport: WamTransportData, playhead: number, startSample: number, endSample: number, output: Float32Array[]) {
+            const { sampleRate } = audioWorkletGlobalScope
+
+            if (!this.clipSettings.clipEnabled || this.channels.length == 0 || this.channels[0].length == 0) {
                 return
             }
 
-            for (let chan = 0; chan < output.length; chan++) {
-                let readChan = chan % this.channels.length
+            if (this.clipSettings.loopEnabled) {
+                const loopStartTime = (this.clipSettings.loopStartBar * transport.timeSigNumerator) * 60 / transport.tempo
+                const loopStartSample = this.clipSettings.startingOffset + Math.floor(loopStartTime * sampleRate)
+                const loopLength = (this.clipSettings.loopLengthBars * transport.timeSigNumerator) * 60 / transport.tempo
+                const loopLengthSamples = Math.floor(loopLength)
 
-                let pos = playhead % this.channels[0].length
+                for (let chan = 0; chan < output.length; chan++) {
+                    let pos = loopStartSample + (playhead % loopLengthSamples)
+                    let readChan = chan % this.channels.length
 
-                for (let i = startSample; i <= endSample; i++) {
-                    output[chan][i] = this.channels[readChan][pos]
-                    pos++
-                    if (pos > this.channels[readChan].length) {
-                        pos = pos % this.channels[0].length
+                    for (let i = startSample; i <= endSample; i++) {
+                        if (pos < this.channels[readChan].length) {
+                            output[chan][i] += this.channels[readChan][pos]
+                        }
+                        pos++
+                        if (pos > loopStartSample + loopLengthSamples) {
+                            pos = loopStartSample + (playhead % loopLengthSamples)
+                        }
+                    }
+                }
+            } else {
+                playhead += this.clipSettings.startingOffset
+
+                if (playhead > this.channels[0].length) {
+                    return
+                }
+
+                for (let chan = 0; chan < output.length; chan++) {
+                    let pos = playhead
+                    let readChan = chan % this.channels.length
+                    for (let i = startSample; i <= endSample; i++) {
+                        output[chan][i] += this.channels[readChan][pos]
+                        pos++
+                        if (pos > this.channels[0].length) {
+                            i = endSample
+                        }
                     }
                 }
             }
         }
     }
-		
+
     class AudioRecorderProcessor extends WamProcessor {
         recordingArmed: boolean
         recordingActive: boolean
-        
+
         transportData?: WamTransportData
-        clips: Map<string, AudioRecording[]>
+        clips: Map<string, AudioClip[]>
 
         monitor: boolean
 
@@ -106,7 +127,7 @@ const getAudioRecorderProcessor = (moduleId: string) => {
 
         finalizeSample() {
             console.log("Finalizing sample")
-            this.port.postMessage({source: "ar", clipId: this.currentClipId, action: "finalize"})
+            this.port.postMessage({ source: "ar", clipId: this.currentClipId, action: "finalize" })
         }
 
         /**
@@ -118,6 +139,21 @@ const getAudioRecorderProcessor = (moduleId: string) => {
          */
         _process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
             let channels = inputs[0]
+
+            if (this.monitor) {
+                for (let i = 0; i < inputs.length; i++) {
+                    for (let j = 0; j < inputs[i].length; j++) {
+                        // iterate over channels L/R/A/B/C/...
+
+                        for (let k = 0; k < inputs[i][j].length; k++) {
+                            // iterate over individual samples
+
+                            // TODO faster copy is available im sure
+                            outputs[i][j][k] = inputs[i][j][k]
+                        }
+                    }
+                }
+            }
 
             // we are not playing
             if (!this.transportData || !this.transportData.playing) {
@@ -136,7 +172,7 @@ const getAudioRecorderProcessor = (moduleId: string) => {
 
             // playing is true
             // but is it starting in the future?
-            let {currentTime} = audioWorkletGlobalScope
+            let { currentTime } = audioWorkletGlobalScope
 
             if (this.transportData.currentBarStarted > currentTime) {
                 // we are in count-in
@@ -144,7 +180,7 @@ const getAudioRecorderProcessor = (moduleId: string) => {
             }
 
             var timeElapsed = currentTime - this.transportData!.currentBarStarted
-            var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
+            var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo / 60.0) * timeElapsed)
             var currentBar = Math.floor(beatPosition / this.transportData.timeSigNumerator)
 
             // we just started playing
@@ -169,7 +205,7 @@ const getAudioRecorderProcessor = (moduleId: string) => {
 
                 let recordingJustStarted = false
 
-                if (this.recordingActive && !this.recordingArmed) {                
+                if (this.recordingActive && !this.recordingArmed) {
                     // we were recording but they unclicked the 'rec' button
 
                     // finalize the sample and stop recording
@@ -178,7 +214,7 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                     this.recordingActive = false
                 }
 
-                
+
                 if (!this.recordingActive && this.recordingArmed) {
                     // we were not recording but they clicked the 'rec' button
 
@@ -203,7 +239,7 @@ const getAudioRecorderProcessor = (moduleId: string) => {
 
                 this.lastBar = currentBar
             }
-            
+
             if (this.recordingActive && channels.length > 0) {
                 // not 100% necessary right now but if we change this to keep audio on processor side always then
                 // it will be required again since I/O buffers get reused
@@ -215,49 +251,36 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                     }
                     return result
                 })
-                
-                this.port.postMessage({source: "ar", clipId: this.currentClipId, buffer: {startSample, endSample, channels: copy}})
+
+                this.port.postMessage({ source: "ar", clipId: this.currentClipId, buffer: { startSample, endSample, channels: copy } })
             }
 
             if (!this.recordingActive) {
                 // do not play back track if currently recording
                 let clips = this.clips.get(this.currentClipId) ?? []
-            
+
                 for (let take of clips) {
-                    take.writeInto(this.samplesElapsed, startSample, endSample, outputs[0])
+                    take.writeInto(this.transportData, this.samplesElapsed, startSample, endSample, outputs[0])
                 }
-    
+
                 this.samplesElapsed += (endSample - startSample)
             }
-    
-            if (this.monitor) {
-                for (let i = 0; i < inputs.length; i++) {
-                    for (let j = 0; j < inputs[i].length; j++) {
-                        // iterate over channels L/R/A/B/C/...
-    
-                        for (let k = 0; k < inputs[i][j].length; k++) {
-                            // iterate over individual samples
-    
-                            // TODO faster copy is available im sure
-                            outputs[i][j][k] += inputs[i][j][k]
-                        }
-                    }
-                }
-            }
+
+
 
             return;
         }
 
-        _onMidi(midiData: any) {        
-            
+        _onMidi(midiData: any) {
+
         }
 
         _onTransport(transportData: WamTransportData) {
             this.transportData = transportData
-    
+
             super.port.postMessage({
-                source:"ar",
-                action:"transport",
+                source: "ar",
+                action: "transport",
                 transport: transportData
             })
         }
@@ -287,7 +310,9 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                     if (!this.clips.get(message.data.clipId)) {
                         this.clips.set(message.data.clipId, [])
                     }
-                    this.clips.get(message.data.clipId).push(new AudioRecording(message.data.token, message.data.buffer))
+                    let newClip = new AudioClip(message.data.token, message.data.buffer)
+                    newClip.setClipSettings(message.data.settings)
+                    this.clips.get(message.data.clipId).push(newClip)
                 } else if (message.data.action == "delete") {
                     console.log("Processor removing track ", message.data.token, "on clip ", message.data.clipId)
 
@@ -297,15 +322,13 @@ const getAudioRecorderProcessor = (moduleId: string) => {
                 } else if (message.data.action == "play") {
                     console.log("received play message for clipId %s", message.data.clipId)
                     this.pendingClipId = message.data.clipId
-                } else if (message.data.action == "loop") {
-                    console.log("Received looper settings for track %s", message.data.token)
+                } else if (message.data.action == "clipSettings") {
+                    console.log("Received clip settings for track %s", message.data.token)
                     let existing = this.clips.get(message.data.clipId).find(take => take.token == message.data.token)
                     if (existing) {
-                        existing.loop = message.data.loop
-                        
+                        existing.setClipSettings(message.data.clipSettings)
                     }
                 }
-
             } else {
                 // @ts-ignore
                 super._onMessage(message)
@@ -314,12 +337,12 @@ const getAudioRecorderProcessor = (moduleId: string) => {
     }
 
     try {
-		registerProcessor('TomBurnsAudioRecorder', (AudioRecorderProcessor as typeof WamProcessor));
-	} catch (error) {
-		console.warn(error);
-	}
+        registerProcessor('TomBurnsAudioRecorder', (AudioRecorderProcessor as typeof WamProcessor));
+    } catch (error) {
+        console.warn(error);
+    }
 
-	return AudioRecorderProcessor;
+    return AudioRecorderProcessor;
 }
 
 export default getAudioRecorderProcessor

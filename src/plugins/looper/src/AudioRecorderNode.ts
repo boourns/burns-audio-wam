@@ -3,11 +3,12 @@ import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk
 import getAudioRecorderProcessor from "./AudioRecorderProcessor";
 import { RecordingBuffer } from "./RecordingBuffer";
 import { Sample } from './Sample';
-import { SampleEditor, SampleState } from './SampleEditor';
+import { ClipSettings, SampleEditor, SampleState } from './SampleEditor';
 
 export type ARSampleState = {
 	assetUrl: string
 	clipId: string
+	settings: ClipSettings
 }
 
 export type AudioRecorderState = {
@@ -73,7 +74,17 @@ export class AudioRecorderNode extends WamNode {
 	}
 
 	async getState(): Promise<AudioRecorderState> {
-		let savedAssetUris: ARSampleState[] = this.editor.samples.filter(s => !!s.assetUrl).map(s => { return {assetUrl: s.assetUrl, clipId: s.clipId}})
+		let savedAssetUris: ARSampleState[] = this.editor.samples.filter(s => !!s.assetUrl).map(s => { 
+			return {
+				assetUrl: s.assetUrl, 
+				clipId: s.clipId, settings: s.clipSettings ?? {
+					clipEnabled: true,
+					loopEnabled: false,
+					startingOffset: 0,
+					loopLengthBars: 1,
+					loopStartBar: 0
+				}
+		}})
 
 		return {
 			samples: savedAssetUris
@@ -111,6 +122,7 @@ export class AudioRecorderNode extends WamNode {
 						zoom: 1,
 						name: "",
 						height: 0,
+						clipSettings: sample.settings
 					}
 	
 					newSampleList.push(sampleState)
@@ -150,6 +162,13 @@ export class AudioRecorderNode extends WamNode {
 						sample: new Sample(this.context, this.recordingBuffer.render(this.context as AudioContext)),
 						name: `Sample ${this.editor.samples.length+1}`,
 						zoom: 1,
+						clipSettings: {
+							clipEnabled: true,
+							loopEnabled: false,
+							loopLengthBars: 1,
+							loopStartBar: 0,
+							startingOffset: 0,
+						}
 					}
 
 					this.editor.samples.push(sample)

@@ -3,6 +3,7 @@ import AudioRecorderModule from '.';
 import { SampleView } from './SampleView';
 import { WamAsset } from 'wam-extensions';
 import { Sample } from './Sample';
+import { json } from 'lib0';
 
 export interface AudioRecorderViewProps {
   plugin: AudioRecorderModule
@@ -82,7 +83,9 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
   renderNoClipsMessage() {
     let message = "Clip is empty. Arm recording on the mixer page, press record ● to record incoming audio."
 
-    if (this.props.plugin.audioNode.recordingArmed) {
+    if (this.props.plugin.audioNode.recordingBuffer) {
+      message = "Recording..."
+    } else if (this.props.plugin.audioNode.recordingArmed) {
       message = "Clip is empty.  Press record ● to record incoming audio."
     }
     return <div style="color: white; padding: 10px;">{message}</div>
@@ -97,12 +100,17 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
       return <SampleView index={i} editor={this.props.plugin.audioNode.editor} context={this.props.plugin.audioContext as AudioContext} sample={s}></SampleView>
     })
 
+    let content: h.JSX.Element | h.JSX.Element[] = this.renderNoClipsMessage()
+    if (samples.length > 0) {
+      content = samples
+    }
+
     let result = (
     <div style="overflow-y: scroll; height: 100%; background-color: #190933; ">
         <button style="padding: 5px; border: 1px solid; border-radius: 5%; margin: 5px; font-weight: bold;" onClick={(e) => this.loadAssets()}>Load Track</button>
         <button style="padding: 5px; border: 1px solid; border-radius: 5%; margin: 5px; font-weight: bold;" onClick={(e) => this.toggleMonitor()}>Monitor: <b>{this.props.plugin.audioNode.monitor ? "On" : "Off"}</b></button>
 
-        {samples.length > 0 ? samples : this.renderNoClipsMessage()}
+        {content}
     </div>)
 
     return result

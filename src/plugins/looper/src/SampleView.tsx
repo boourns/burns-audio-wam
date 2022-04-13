@@ -41,6 +41,10 @@ export class SampleView extends Component<SampleViewProps, SampleViewState> {
         this.props.editor.setState(state)
     }
 
+    toggleSampleEnabled() {
+        
+    }
+
     trimLeft() {
         if (!this.props.sample.seekPos) {
             return
@@ -99,25 +103,37 @@ export class SampleView extends Component<SampleViewProps, SampleViewState> {
         }
     }
 
+    renderClipSettings() {
+        return <div style="width: 200px; display: flex; flex-direction: column; background-color: gray;">
+            <div style="display: flex; flex-direction: row; align-items: first baseline;">
+                <button style="font-weight: bolder; margin: 2px; padding: 2px;" onClick={() => this.toggleSampleEnabled()}>{this.props.sample.clipSettings.clipEnabled ? "◼︎" : "◻︎"}</button>
+                <span style="flex: 1;">{this.props.sample.name}</span>
+                <button style="font-weight: bolder; margin: 2px; padding: 2px;" onClick={() => this.deleteSample()}>Ⅹ</button>
+            </div>
+            <button onClick={() => this.saveSample()}>Save</button>
+        </div>
+        
+    }
+
     renderLoadedSample() {
+        let oldButtons = <div style="display: flex; flex-direction: row; height: 30px;">
+            <div>{this.props.sample.name}</div>
+            <button onClick={() => this.transport?.play()}>Play</button>
+            <button onClick={() => this.trimLeft()}>Trim left</button>
+            <button onClick={() => this.trimRight()}>Trim right</button>
+
+            <button onClick={() => this.zoomIn()}>Zoom In</button>
+            <button onClick={() => this.zoomOut()}>Zoom Out</button>
+        </div>
 
         return <div style={`border: 2px; height: ${this.props.sample.height}px; display: flex; flex-direction: column;`}>
-            <div style="display: flex; flex-direction: row; height: 30px;">
-                <div>{this.props.sample.name}</div>
-                <button onClick={() => this.transport?.play()}>Play</button>
-
-                <button onClick={() => this.saveSample()}>Save</button>
-                <button onClick={() => this.deleteSample()}>Delete</button>
-                <button onClick={() => this.trimLeft()}>Trim left</button>
-                <button onClick={() => this.trimRight()}>Trim right</button>
-
-                <button onClick={() => this.zoomIn()}>Zoom In</button>
-                <button onClick={() => this.zoomOut()}>Zoom Out</button>
-
+            <div style="display: flex; flex-direction: row;">
+                {this.renderClipSettings()}
+                <div style="flex: 1;">
+                    <WaveformEditorView transport={(t) => this.updateTransport(t)} regionActions={[]} context={this.props.context} audioBuffer={this.props.sample.sample.buffer} onSeek={(pos) => this.onSeek(pos)} height={this.props.sample.height-30} zoom={100 * this.props.sample.zoom}></WaveformEditorView>
+                </div>
             </div>
-            <WaveformEditorView transport={(t) => this.updateTransport(t)} regionActions={[]} context={this.props.context} audioBuffer={this.props.sample.sample.buffer} onSeek={(pos) => this.onSeek(pos)} height={this.props.sample.height-30} zoom={100 * this.props.sample.zoom}></WaveformEditorView>
-
-            <Resizer vertical={true} resize={(w, h) => this.resize(w, h)} finished={() => this.resizeFinished()}></Resizer>
+             <Resizer vertical={true} resize={(w, h) => this.resize(w, h)} finished={() => this.resizeFinished()}></Resizer>
         </div>
     }
 }
