@@ -42,6 +42,13 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
     this.setState({recording})
   }
 
+  toggleMonitor() {
+    let monitor = !this.props.plugin.audioNode.monitor
+    this.props.plugin.audioNode.setMonitor(monitor)
+
+    this.forceUpdate()
+  }
+
   loadAssets() {
     if (!window.WAMExtensions.assets) {
       console.error("Host must implement asset WAM extension")
@@ -58,11 +65,14 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
         let buffer = await asset.content.arrayBuffer()
 
         context.decodeAudioData(buffer, (buffer: AudioBuffer) => {
-          let sample = new Sample(this.props.plugin.audioContext, buffer)
+          let sampleData = new Sample(this.props.plugin.audioContext, buffer)
 
-          let sampleState = editor.defaultSampleState(sample, asset.name, this.props.clipId)
+          let sample = editor.defaultSampleState(sampleData, asset.name, this.props.clipId)
+          sample.assetUrl = asset.uri
 
-          this.props.plugin.audioNode.editor.setState({samples: backupState.samples.concat(sampleState)})
+          this.props.plugin.audioNode.editor.setState({samples: backupState.samples.concat(sample)})
+          
+          this.props.plugin.audioNode.editor.sendSampleToProcessor(sample)
         })
       } else {
         editor.setState(backupState)
@@ -75,7 +85,9 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
   renderNoClipsMessage() {
     let message = "Clip is empty. Arm recording on the mixer page, press record ● to record incoming audio."
 
-    if (this.props.plugin.audioNode.recordingArmed) {
+    if (this.props.plugin.audioNode.recordingBuffer) {
+      message = "Recording..."
+    } else if (this.props.plugin.audioNode.recordingArmed) {
       message = "Clip is empty.  Press record ● to record incoming audio."
     }
     return <div style="color: white; padding: 10px;">{message}</div>
@@ -90,11 +102,17 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
       return <SampleView index={i} editor={this.props.plugin.audioNode.editor} context={this.props.plugin.audioContext as AudioContext} sample={s}></SampleView>
     })
 
+    let content: h.JSX.Element | h.JSX.Element[] = this.renderNoClipsMessage()
+    if (samples.length > 0) {
+      content = samples
+    }
+
     let result = (
     <div style="overflow-y: scroll; height: 100%; background-color: #190933; ">
         <button style="padding: 5px; border: 1px solid; border-radius: 5%; margin: 5px; font-weight: bold;" onClick={(e) => this.loadAssets()}>Load Track</button>
+        <button style="padding: 5px; border: 1px solid; border-radius: 5%; margin: 5px; font-weight: bold;" onClick={(e) => this.toggleMonitor()}>Monitor: <b>{this.props.plugin.audioNode.monitor ? "On" : "Off"}</b></button>
 
-        {samples.length > 0 ? samples : this.renderNoClipsMessage()}
+        {content}
     </div>)
 
     return result

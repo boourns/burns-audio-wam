@@ -41,6 +41,13 @@ export class SampleView extends Component<SampleViewProps, SampleViewState> {
         this.props.editor.setState(state)
     }
 
+    toggleSampleEnabled() {
+        let newSettings = {...this.props.sample.clipSettings}
+        newSettings.clipEnabled = !newSettings.clipEnabled
+
+        this.props.editor.setClipSettings(this.props.sample.token, newSettings) 
+    }
+
     trimLeft() {
         if (!this.props.sample.seekPos) {
             return
@@ -90,34 +97,45 @@ export class SampleView extends Component<SampleViewProps, SampleViewState> {
     }
 
     render() {
-        if (this.props.sample.state == "LOADED") {
-            return this.renderLoadedSample()
-        } else if (this.props.sample.state == "ERROR") {
-            return <div>Error loading sample: {this.props.sample.error.message}</div>
-        } else {
-            return <div>{this.props.sample.state}</div>
-        }
-    }
+        let oldButtons = <div style="display: flex; flex-direction: row; height: 30px;">
+            <div>{this.props.sample.name}</div>
+            <button onClick={() => this.transport?.play()}>Play</button>
+            <button onClick={() => this.trimLeft()}>Trim left</button>
+            <button onClick={() => this.trimRight()}>Trim right</button>
 
-    renderLoadedSample() {
+            <button onClick={() => this.zoomIn()}>Zoom In</button>
+            <button onClick={() => this.zoomOut()}>Zoom Out</button>
+        </div>
+
+        let innerContent
+        switch(this.props.sample.state) {
+            case "LOADED":
+                innerContent = <WaveformEditorView transport={(t) => this.updateTransport(t)} regionActions={[]} context={this.props.context} audioBuffer={this.props.sample.sample.buffer} onSeek={(pos) => this.onSeek(pos)} height={this.props.sample.height-30} zoom={100 * this.props.sample.zoom}></WaveformEditorView>
+                break
+            default:
+                innerContent = <div style="color: white; padding: 5px;">{this.props.sample.state}</div>
+                break
+        }
 
         return <div style={`border: 2px; height: ${this.props.sample.height}px; display: flex; flex-direction: column;`}>
-            <div style="display: flex; flex-direction: row; height: 30px;">
-                <div>{this.props.sample.name}</div>
-                <button onClick={() => this.transport?.play()}>Play</button>
-
-                <button onClick={() => this.saveSample()}>Save</button>
-                <button onClick={() => this.deleteSample()}>Delete</button>
-                <button onClick={() => this.trimLeft()}>Trim left</button>
-                <button onClick={() => this.trimRight()}>Trim right</button>
-
-                <button onClick={() => this.zoomIn()}>Zoom In</button>
-                <button onClick={() => this.zoomOut()}>Zoom Out</button>
-
+            <div style="display: flex; flex-direction: row;">
+                {this.renderClipSettings()}
+                <div style="flex: 1;">
+                    {innerContent}
+                </div>
             </div>
-            <WaveformEditorView transport={(t) => this.updateTransport(t)} regionActions={[]} context={this.props.context} audioBuffer={this.props.sample.sample.buffer} onSeek={(pos) => this.onSeek(pos)} height={this.props.sample.height-30} zoom={100 * this.props.sample.zoom}></WaveformEditorView>
+             <Resizer vertical={true} resize={(w, h) => this.resize(w, h)} finished={() => this.resizeFinished()}></Resizer>
+        </div>
+    }
 
-            <Resizer vertical={true} resize={(w, h) => this.resize(w, h)} finished={() => this.resizeFinished()}></Resizer>
+    renderClipSettings() {
+        return <div style="width: 200px; display: flex; flex-direction: column; background-color: gray;">
+            <div style="display: flex; flex-direction: row; align-items: first baseline;">
+                <button style="font-weight: bolder; margin: 2px; padding: 2px;" onClick={() => this.toggleSampleEnabled()}>{this.props.sample.clipSettings.clipEnabled ? "◼︎" : "◻︎"}</button>
+                <span style="flex: 1;">{this.props.sample.name}</span>
+                <button style="font-weight: bolder; margin: 2px; padding: 2px;" onClick={() => this.deleteSample()}>Ⅹ</button>
+            </div>
+            <button onClick={() => this.saveSample()}>Save</button>
         </div>
     }
 }

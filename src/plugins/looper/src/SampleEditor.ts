@@ -1,8 +1,15 @@
-import { Token } from "monaco-editor"
 import { Sample } from "./Sample"
 
 export type SampleEditorState = {
     samples: SampleState[]
+}
+
+export type ClipSettings = {
+    clipEnabled: boolean
+    loopEnabled: boolean
+    startingOffset: number // in samples
+    loopStartBar: number // in bars
+    loopLengthBars: number // in bars
 }
 
 export type SampleState = {
@@ -16,6 +23,7 @@ export type SampleState = {
     name: string
     seekPos?: number
     zoom: number
+    clipSettings: ClipSettings
 }
 
 export class SampleEditor {
@@ -74,17 +82,12 @@ export class SampleEditor {
             channelData.push(sample.sample.buffer.getChannelData(i))
         }
 
-        console.log("Channel lengths are ", JSON.stringify(channelData.map(c => c.length)))
+        let message = {source:"ar", action:"load", token: sample.token, clipId: sample.clipId, buffer: channelData, settings: sample.clipSettings}
 
-        let message = {source:"ar", action:"load", token: sample.token, clipId: sample.clipId, buffer: channelData}
-
-        console.log("Attempting to transfer ", message)
         this.port.postMessage(message)
     }
 
     setState(state: SampleEditorState) {
-        console.log("called SampleEditor.setState")
-
         this.samples = [...state.samples]
         for (let sample of this.samples) {
             if (sample.state == "INIT") {
@@ -92,9 +95,29 @@ export class SampleEditor {
             }
         }
         if (this.callback) {
-            console.log("Calling callback")
             this.callback()
         }
+    }
+
+    setClipSettings(token: string, settings: ClipSettings) {
+        let existing = this.samples.find(s => s.token == token)
+        if (!existing) {
+            console.error("Setting clip settings for missing sample: token ", token)
+            return
+        }
+        existing.clipSettings = settings
+
+        this.sendClipSettingsToProcessor(existing)
+
+        if (this.callback) {
+            this.callback()
+        }
+    }
+
+    sendClipSettingsToProcessor(sample: SampleState) {
+        let message = {source:"ar", action:"clipSettings", token: sample.token, clipId: sample.clipId, clipSettings: sample.clipSettings}
+
+        this.port.postMessage(message)
     }
 
     defaultSampleState(sample: Sample, name: string, clipId: string): SampleState {
@@ -106,7 +129,14 @@ export class SampleEditor {
             height: 30 + (100 * sample.buffer.numberOfChannels),
             name: name,
             seekPos: undefined,
-            zoom: 1
+            zoom: 1,
+            clipSettings: {
+                clipEnabled: true,
+                loopEnabled: false,
+                startingOffset: 0,
+                loopLengthBars: 1,
+                loopStartBar: 0,
+            }
         }
     }
 }

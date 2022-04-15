@@ -9,11 +9,9 @@ export default class AudioInputNode extends CompositeAudioNode {
     stream!: MediaStream
     streamNode!: MediaStreamAudioSourceNode
     channelCounter!: ChannelCounter
-    muteControl: GainNode;
 
     callback?: () => void
 
-    muted: boolean
     channelMapOptions: number[][]
     channelMapIndex: number
 
@@ -36,11 +34,13 @@ export default class AudioInputNode extends CompositeAudioNode {
         }
 
         let stream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
+            audio: {
+                latency: {ideal: 0.003},
+            },
             video: false,
         })
         this.stream = stream
-
+        
         console.log("stream is ", stream)
         console.log("tracks are ", stream.getAudioTracks())
         for (let t of stream.getAudioTracks()) {
@@ -57,6 +57,11 @@ export default class AudioInputNode extends CompositeAudioNode {
         // Feed the HTMLMediaElement into it
         this.streamNode = ctx.createMediaStreamSource(stream);
 
+        console.log("AudioContext base latency is: ", ctx.baseLatency)
+        // @ts-ignore
+        console.log("AudioContext output latency is: ", ctx.outputLatency)
+
+
         console.log("streamNode has ", this.streamNode.numberOfInputs, " inputs and ", this.streamNode.numberOfOutputs, " outputs")
 
         let channelCounter = new ChannelCounter(ctx)
@@ -65,10 +70,7 @@ export default class AudioInputNode extends CompositeAudioNode {
         await channelCounter.register()
 
         this._input = this.context.createGain()
-        this.muteControl = this.context.createGain()
-        this._output = this.muteControl
-
-        this.setMute(true)
+        this._output = this.context.createGain()
 
         this.channelCounter.callback = () => {
             this.updateFromState()
@@ -139,11 +141,6 @@ export default class AudioInputNode extends CompositeAudioNode {
         if (this.callback) {
             this.callback()
         }
-    }
-
-    setMute(mute: boolean) {
-        this.muted = mute
-        this.muteControl.gain.value = (mute ? 0 : 1.0)
     }
 
     get paramMgr(): ParamMgrNode {

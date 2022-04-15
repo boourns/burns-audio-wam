@@ -2,7 +2,7 @@
 
 function addAudioWorklet(context: BaseAudioContext, proc: any){
     var f=`data:text/javascript,${encodeURI(proc.toString())};
-            registerProcessor("${proc.name}",${proc.name})`;
+            try {registerProcessor("${proc.name}",${proc.name}) } catch (e) { }`;
     return context.audioWorklet.addModule(f);
 }
 
