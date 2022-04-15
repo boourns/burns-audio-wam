@@ -449,9 +449,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"audio_recorder@workspace:.":
+"audio_track@workspace:.":
   version: 0.0.0-use.local
-  resolution: "audio_recorder@workspace:."
+  resolution: "audio_track@workspace:."
   dependencies:
     "@types/debug": ^4.1.6
     "@types/wavesurfer.js": ^6.0.1
