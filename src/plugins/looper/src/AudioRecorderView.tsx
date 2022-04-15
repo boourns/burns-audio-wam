@@ -3,7 +3,6 @@ import AudioRecorderModule from '.';
 import { SampleView } from './SampleView';
 import { WamAsset } from 'wam-extensions';
 import { Sample } from './Sample';
-import { json } from 'lib0';
 
 export interface AudioRecorderViewProps {
   plugin: AudioRecorderModule

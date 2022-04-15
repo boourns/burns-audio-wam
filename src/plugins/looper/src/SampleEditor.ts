@@ -58,7 +58,6 @@ export class SampleEditor {
     
             this.context.decodeAudioData(buffer, (buffer: AudioBuffer) => {
                 let sampleData = new Sample(this.context, buffer)
-                console.log("sample decoded! clipSettings is", sample.clipSettings)
                 
                 sample.sample = sampleData
                 sample.height = 30 + (100 * sampleData.buffer.numberOfChannels)
