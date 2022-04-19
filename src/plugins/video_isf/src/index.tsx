@@ -78,17 +78,18 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 
 		if (window.WAMExtensions && window.WAMExtensions.video) {
 			window.WAMExtensions.video.setDelegate(this.instanceId, {
+				getVideoConfig: () => {
+					return {
+						numberOfInputs: 1,
+						numberOfOutputs: 1,
+					}
+				},
 				connectVideo: (options: VideoExtensionOptions) => {
 					console.log("connectVideo!")
 
 					this.options = options
 
-					this.upload()
-
-					return {
-						numberOfInputs: 1,
-						numberOfOutputs: 1
-					}
+					this.upload()					
 				},
 				render: (inputs: WebGLTexture[], currentTime: number) => {
 					if (this.shader) {

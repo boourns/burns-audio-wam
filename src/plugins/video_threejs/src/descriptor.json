@@ -7,5 +7,6 @@
     "thumbnail": "",
     "keywords": ["video", "generator"],
     "isInstrument": false,
-    "website": ""
+    "website": "",
+    "hasVideoOutput": true
 }

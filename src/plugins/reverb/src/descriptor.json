@@ -7,5 +7,7 @@
     "thumbnail": "",
     "keywords": ["effect", "reverb"],
     "isInstrument": false,
-    "website": ""
+    "website": "",
+    "hasAudioInput": true,
+    "hasAudioOutput": true
 }
