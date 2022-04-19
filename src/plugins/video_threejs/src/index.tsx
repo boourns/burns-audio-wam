@@ -15,7 +15,7 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import { DynamicParameterNode, DynamicParamGroup } from "../../shared/DynamicParameterNode";
 import { ThreeJSGenerator, ThreeJSRunner } from './ThreeJSRunner';
 
-import { VideoExtensionOptions } from 'wam-extensions';
+import { VideoExtensionOptions, VideoModuleConfig } from 'wam-extensions';
 import { LiveCoderNode, LiveCoderView } from '../../shared/LiveCoderView';
 
 import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
@@ -78,6 +78,12 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 
 		if (window.WAMExtensions && window.WAMExtensions.video) {
 			window.WAMExtensions.video.setDelegate(this.instanceId, {
+				getVideoConfig: () => {
+					return {
+						numberOfInputs: 0,
+						numberOfOutputs: 1,
+					}
+				},
 				connectVideo: (options: VideoExtensionOptions) => {
 					console.log("connectVideo!")
 
@@ -86,11 +92,6 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 
 					if (this.generator) {
 						this.generator.initialize(THREE, options)
-					}
-
-					return {
-						numberOfInputs: 1,
-						numberOfOutputs: 1,
 					}
 				},
 				render: (inputs: WebGLTexture[], currentTime: number): WebGLTexture[] => {

@@ -7,5 +7,7 @@
     "thumbnail": "",
     "keywords": ["synthesizer", "modal", "instrument"],
     "isInstrument": true,
-    "website": ""
+    "website": "",
+    "hasMidiInput": true,
+    "hasAudioOutput": true
 }

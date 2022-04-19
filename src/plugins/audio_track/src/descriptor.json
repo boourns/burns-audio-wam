@@ -7,5 +7,7 @@
     "thumbnail": "",
     "keywords": ["audio", "utility", "editor", "looper"],
     "isInstrument": false,
-    "website": ""
+    "website": "",
+    "hasAudioInput": true,
+    "hasAudioOutput": true
 }
