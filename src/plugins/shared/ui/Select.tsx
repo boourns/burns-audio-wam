@@ -116,7 +116,6 @@ export class Select<T> extends Component<SelectProps, any> {
             let option = document.createElement("option");
             option.text = name
             option.value = (this.props.values) ? this.props.values[index].toString() : index.toString()
-            console.log("Adding option ", option.text, "value ", option.value)
             this.select.appendChild(option)
         })
 
