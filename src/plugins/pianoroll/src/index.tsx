@@ -112,7 +112,7 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 		
 		shadow.appendChild(container)
 		if (!clipId) {
-			clipId = this.sequencer.pianoRoll.clip().state.id
+			clipId = "default"
 		} else {
 			this.sequencer.pianoRoll.addClip(clipId)
 		}
@@ -121,9 +121,9 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 		return div;
 	}
 
-	clip(): Clip {
-		return this.sequencer.pianoRoll.clip()
-	}
+	// clip(): Clip {
+	// 	return this.sequencer.pianoRoll.clip()
+	// }
 
 	destroyGui(el: Element) {
 		render(null, el)
@@ -136,8 +136,8 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 
 		let patternDelegate: PatternDelegate = {
 			getPatternList: () => {
-				return this.sequencer.pianoRoll.clips.map(c => {
-					return {id: c.state.id, name: "pattern"}
+				return Object.keys(this.sequencer.pianoRoll.clips).map(id => {
+					return {id: id, name: "pattern"}
 				})
 			},
 			createPattern: (id: string) => {
@@ -146,13 +146,14 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 			},
 			deletePattern: (id: string) => {
 				logger("deletePattern(%s)", id)
-				this.sequencer.pianoRoll.clips = this.sequencer.pianoRoll.clips.filter(c => c.state.id != id)
+				delete this.sequencer.pianoRoll.clips[id]
 			},
 			playPattern: (id: string | undefined) => {
 				logger("playPattern(%s)", id)
 
 				let clip = this.sequencer.pianoRoll.getClip(id)
 				if (!clip && id != undefined) {
+					console.log("PianoRoll index: adding clip ", id)
 					this.sequencer.pianoRoll.addClip(id)
 				}
 				this.sequencer.pianoRoll.playingClip = id
@@ -176,7 +177,7 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 					clip.setState(state, id)
 				} else {
 					let clip = new Clip(id, state)
-					this.sequencer.pianoRoll.clips.push(clip)
+					this.sequencer.pianoRoll.clips[id] = clip
 				}
 				if (this.sequencer.pianoRoll.renderCallback) {
 					this.sequencer.pianoRoll.renderCallback()
