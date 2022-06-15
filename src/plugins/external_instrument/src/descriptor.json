@@ -1,0 +1,13 @@
+{
+    "name": "External Instrument",
+    "vendor": "SequencerParty",
+    "description": "External MIDI Instrument Controller",
+    "version": "1.0.0",
+    "sdkVersion": "1.0.0",
+    "thumbnail": "",
+    "keywords": ["midi", "external instrument"],
+    "isInstrument": false,
+    "website": "",
+    "hasMidiInput": true,
+    "hasMidiOutput": true
+}
