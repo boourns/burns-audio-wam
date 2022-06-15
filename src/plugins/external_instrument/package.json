@@ -1,5 +1,5 @@
 {
-  "name": "functionseq",
+  "name": "external-instrument",
   "version": "0.0.0",
   "description": "> TODO: description",
   "author": "Tom Burns <tom@burns.ca>",
@@ -9,7 +9,8 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "del dist",
-    "build": "./node_modules/.bin/webpack"
+    "build": "./node_modules/.bin/webpack",
+    "test": "./node_modules/.bin/mocha"
   },
   "dependencies": {
     "@types/debug": "^4.1.6",
@@ -17,6 +18,9 @@
     "preact": "^10.5.5"
   },
   "devDependencies": {
+    "@types/assert": "^1.5.6",
+    "@types/mocha": "^9.1.1",
+    "assert": "^2.0.0",
     "copy-webpack-plugin": "^9.0.0",
     "css-loader": "^6.2.0",
     "css-modules-typescript-loader": "^4.0.1",

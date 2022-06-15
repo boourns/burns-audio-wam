@@ -1,5 +1,6 @@
 import { WamParameterConfiguration } from "@webaudiomodules/api"
 import { string } from "lib0"
+import { group } from "lib0/logging"
 import {NoteDefinition} from "wam-extensions"
 import { DynamicParamGroup } from "../../shared/DynamicParameterNode"
 
@@ -47,7 +48,7 @@ export class InstrumentKernel {
         this.definition = definition
     }
 
-    toWAM() {
+    toWAM(): DynamicParamGroup[] {
         let groups: DynamicParamGroup[] = []
 
         for (let defGroup of this.definition.controlGroups) {
@@ -78,5 +79,6 @@ export class InstrumentKernel {
 
 			groups.push(group)
 		}
+        return groups
     }
 }
