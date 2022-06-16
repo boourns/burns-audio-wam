@@ -1,14 +1,13 @@
-import { WamTransportData } from "@webaudiomodules/api";
+import { WamEvent, WamMidiData, WamTransportData } from "@webaudiomodules/api";
 import { AudioWorkletGlobalScope, WamParameterConfiguration } from "@webaudiomodules/api";
-import { InstrumentDefinition, MIDIControl } from "./InstrumentDefinition";
+import { InstrumentDefinition, InstrumentKernelType, MIDIControl } from "./InstrumentDefinition";
+
+export type ExternalInstrumentConfig = {
+    midiPassThrough: "off" | "notes" | "all"
+
+}
 
 const getExternalInstrumentProcessor = (moduleId: string) => {
-    class MIDI {
-        static NOTE_ON = 0x90;
-        static NOTE_OFF = 0x80;
-        static CC = 0xB0;
-    }
-    
     // @ts-ignore
 
     const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
@@ -21,10 +20,13 @@ const getExternalInstrumentProcessor = (moduleId: string) => {
  	} = ModuleScope;
 
     const DynamicParameterProcessor = ModuleScope.DynamicParameterProcessor
+    const InstrumentKernel = ModuleScope.InstrumentKernel
 
     class ExternalInstrumentProcessor extends DynamicParameterProcessor {
         instrumentDefinition: InstrumentDefinition
-        controlList: MIDIControl[]
+        kernel: InstrumentKernelType
+        midiChannel: number
+        count = 0
 
         constructor(options: any) {
             super(options)
@@ -32,6 +34,13 @@ const getExternalInstrumentProcessor = (moduleId: string) => {
             this.instrumentDefinition = {
                 controlGroups: []
             }
+            this.midiChannel = 0
+
+            this.loadKernel()
+        }
+
+        loadKernel() {
+            this.kernel = new InstrumentKernel(this.instrumentDefinition, this.midiChannel, this.kernel)
         }
         
         /**
@@ -44,10 +53,25 @@ const getExternalInstrumentProcessor = (moduleId: string) => {
         _process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
             const { currentTime } = audioWorkletGlobalScope;
 
-            for (let control of this.controlList) {
-                
-            }
+            if (this.kernel) {
+                let params: Record<string, number> = {}
 
+                for (let control of this.kernel.controls) {
+                    const p = this._parameterInterpolators[control.id]
+                    if (p) {
+                        params[control.id] = Math.round(p.values[startSample])
+                    }
+                }
+
+                const messages = this.kernel.emitEvents(params) as WamEvent[]
+                if (messages.length > 0) {
+                    console.log("messages: ", JSON.stringify(messages))
+                }
+
+                this.emitEvents(...messages)
+            } else {
+                console.log("no kernel")
+            }
 
             return;
         }
@@ -58,24 +82,29 @@ const getExternalInstrumentProcessor = (moduleId: string) => {
          */
         async _onMessage(message: any): Promise<void> {
             if (message.data && message.data.source == "def") {
+                console.log("Received instrument definition! ", JSON.stringify(message.data.def))
+
                 this.instrumentDefinition = message.data.def
-                this.controlList = []
-                for (let group of this.instrumentDefinition.controlGroups) {
-                    for (let control of group.controls) {
-                        this.controlList.push(control)
-                    }
-                }
+
+                this.loadKernel()
+            } else if (message.data && message.data.source == "config") {
+                this.config = message.data.config
             } else {
                 super._onMessage(message)
             }
         }
 
-        generateMidiFor(control: MIDIControl) {
+        _onMidi(midiData: WamMidiData) {
+            const result = this.kernel.ingestMidi(midiData)
+            if (result) {
+                if (result[0] == "wam") {
+                    this.emitEvents(result[1])
+                } else if (result[0] == "port") {
+                    this.port.postMessage(result[1])
+                }
+            }
 
-        }
-
-        _onMidi() {
-
+            this.emitEvents({type:"wam-midi", data: midiData})
         }
 
         _onTransport(transportData: WamTransportData) {

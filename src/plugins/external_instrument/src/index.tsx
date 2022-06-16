@@ -7,13 +7,15 @@
 import { h, render } from 'preact';
 
 import { WebAudioModule, addFunctionModule } from '@webaudiomodules/sdk';
-import {WamParameterConfiguration, WamParameterDataMap} from '@webaudiomodules/api';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 import { DynamicParameterNode, DynamicParamGroup } from '../../shared/DynamicParameterNode';
 
 import getExternalInstrumentProcessor from './ExternalInstrumentProcessor';
 import { ExternalInstrumentView } from './ExternalInstrumentView';
-import { InstrumentDefinition, MIDIControlData } from './InstrumentDefinition';
+import { InstrumentDefinition } from './InstrumentDefinition';
+import getInstrumentKernel from './InstrumentDefinition';
+
+const InstrumentKernel = getInstrumentKernel("test")
 
 export class ExternalInstrumentNode extends DynamicParameterNode {
 	destroyed = false;
@@ -27,6 +29,7 @@ export class ExternalInstrumentNode extends DynamicParameterNode {
 
 		await super.addModules(audioContext, moduleId);
 
+		await addFunctionModule(audioWorklet, getInstrumentKernel, moduleId);
 		await addFunctionModule(audioWorklet, getExternalInstrumentProcessor, moduleId);
 	}
 
@@ -66,8 +69,6 @@ export class ExternalInstrumentNode extends DynamicParameterNode {
 				}
 			]
 		}
-
-		this.updateProcessorFromDefinition()
 	}
 
 	registerExtensions() {
@@ -75,11 +76,19 @@ export class ExternalInstrumentNode extends DynamicParameterNode {
 	}
 
 	updateProcessorFromDefinition() {
-		let groups: DynamicParamGroup[] = []		
-
         super.port.postMessage({source:"def", def: this.instrumentDefinition})
 
-		this.updateProcessor(groups)
+		let kernel = new InstrumentKernel(this.instrumentDefinition, 0)
+
+		this.updateProcessor(kernel.toWAM())
+	}
+
+	_onMessage(message: MessageEvent) {
+		if (message.data && message.data.source == "kernel") {
+			console.log("Received kernel message: ", JSON.stringify(message))
+		} else {
+			super._onMessage(message)
+		}
 	}
 }
 
@@ -89,7 +98,7 @@ export default class ExternalInstrumentModule extends WebAudioModule<ExternalIns
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 
-	get instanceId() { return "TomBurnsFunctionSequencer" + this._timestamp; }
+	get instanceId() { return "TomBurnsExternalInstrument" + this._timestamp; }
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -102,17 +111,25 @@ export default class ExternalInstrumentModule extends WebAudioModule<ExternalIns
 	}
 
 	async initialize(state: any) {
+		console.log("WAM::initialize")
+
 		await this._loadDescriptor();
 
 		return super.initialize(state);
 	}
 
 	async createAudioNode(initialState: any) {
+		console.log("WAM::createAudioNode")
+
 		await ExternalInstrumentNode.addModules(this.audioContext, this.moduleId)
 		const node: ExternalInstrumentNode = new ExternalInstrumentNode(this, {});
+
 		await node._initialize();
 
+		if (initialState) await node.setState(initialState);
+
 		node.registerExtensions()
+		node.updateProcessorFromDefinition()
 
 		return node
     }

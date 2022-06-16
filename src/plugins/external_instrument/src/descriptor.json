@@ -6,7 +6,7 @@
     "sdkVersion": "1.0.0",
     "thumbnail": "",
     "keywords": ["midi", "external instrument"],
-    "isInstrument": false,
+    "isInstrument": true,
     "website": "",
     "hasMidiInput": true,
     "hasMidiOutput": true
