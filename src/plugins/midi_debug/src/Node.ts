@@ -1,14 +1,10 @@
 /* eslint-disable no-underscore-dangle */
 import { WamEventMap, WamMidiData, WebAudioModule } from '@webaudiomodules/api';
 import { addFunctionModule, WamNode } from '@webaudiomodules/sdk';
-import getMIDIInputProcessor from './MIDIInputProcessor';
+import getMIDIDebugProcessor from './MIDIDebugProcessor';
 
-export class MIDIInputNode extends WamNode {
+export class MIDIDebugNode extends WamNode {
 	destroyed = false;
-
-	midiIn: WebMidi.MIDIInput[]
-	midiOut: WebMidi.MIDIOutput[]
-	selectedDevice: number = -1
 
 	_supportedEventTypes: Set<keyof WamEventMap>
 
@@ -17,7 +13,7 @@ export class MIDIInputNode extends WamNode {
 
 		await super.addModules(audioContext, moduleId);
 
-		await addFunctionModule(audioWorklet, getMIDIInputProcessor, moduleId);
+		await addFunctionModule(audioWorklet, getMIDIDebugProcessor, moduleId);
 	}
 
 	/**
@@ -36,16 +32,6 @@ export class MIDIInputNode extends WamNode {
 
 		this.midiMessageReceived = this.midiMessageReceived.bind(this)
 	}	
-
-	selectMIDIInput(index: number) {
-		if (this.selectedDevice >= 0) {
-			this.midiIn[this.selectedDevice].removeEventListener('midimessage', this.midiMessageReceived)
-		}
-		this.selectedDevice = index
-		if (index >= 0) {
-			this.midiIn[index].addEventListener('midimessage', this.midiMessageReceived)
-		}
-	}
 
 	midiMessageReceived(event: any) {
 		const bytes: [number, number, number] = [event.data[0], event.data[1], event.data[2]]

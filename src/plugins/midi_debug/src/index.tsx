@@ -7,10 +7,10 @@
 import { WebAudioModule } from '@webaudiomodules/sdk';
 import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
-import { MIDIInputView } from './MIDIInputView';
-import { MIDIInputNode } from './Node';
+import { MIDIDebugView } from './MIDIDebugView';
+import { MIDIDebugNode as MIDIDebugNode } from './Node';
 
-export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
+export default class MIDIDebugModule extends WebAudioModule<MIDIDebugNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
@@ -36,52 +36,18 @@ export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 	}
 
 	async createAudioNode(initialState: any) {
-		await MIDIInputNode.addModules(this.audioContext, this.moduleId)
+		await MIDIDebugNode.addModules(this.audioContext, this.moduleId)
 		await this.audioContext.audioWorklet.addModule(this._processorUrl)
 
-		const node: MIDIInputNode = new MIDIInputNode(this, {})
+		const node: MIDIDebugNode = new MIDIDebugNode(this, {})
 
 		await node._initialize()
 
 		this.audioNode = node
-
-		try {
-			let midi = await navigator.requestMIDIAccess()
-			midi.addEventListener('statechange', (event: WebMidi.MIDIConnectionEvent) => this.midiReady(event.target as WebMidi.MIDIAccess));
-
-			this.midiReady(midi)
-		} catch (err) {
-			console.log('Error accessing MIDI devices: ', err);
-		}	  
 	  
 		if (initialState) node.setState(initialState);
 		return node;
     }
-
-	midiReady(midi: WebMidi.MIDIAccess) {
-		// Reset.
-		this.audioNode.midiIn = [];
-		this.audioNode.midiOut = [];
-		this.audioNode.selectedDevice = -1;
-		
-		// MIDI devices that send you data.
-		const inputs = midi.inputs.values();
-		for (let input = inputs.next(); input && !input.done; input = inputs.next()) {
-			this.audioNode.midiIn.push(input.value);
-		}
-		
-		// MIDI devices that you send data to.
-		const outputs = midi.outputs.values();
-		for (let output = outputs.next(); output && !output.done; output = outputs.next()) {
-			this.audioNode.midiOut.push(output.value);
-		}
-
-		this.midiInitialized = true
-
-		if (this.callback) {
-			this.callback()
-		}
-	}
 
 	async createGui() {
 		const div = document.createElement('div');
@@ -92,7 +58,7 @@ export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 
 		var shadow = div.attachShadow({mode: 'open'});
 		let initialState = await this.audioNode.getParameterValues()
-		render(<MIDIInputView plugin={this}></MIDIInputView>, shadow);
+		render(<MIDIDebugView plugin={this}></MIDIDebugView>, shadow);
 
 		return div;
 	}

@@ -55,12 +55,23 @@ export class ExternalInstrumentNode extends DynamicParameterNode {
 					label: "Controls",
 					controls: [
 						{
-							label: "Pan",
-							id: "pan",
+							label: "Cutoff",
+							id: "cutoff",
 							data: {
 								dataType: "CC",
-								ccNumber: 7,
+								ccNumber: 102,
 								defaultValue: 64,
+								minValue: 0,
+								maxValue: 127
+							}
+						},
+						{
+							label: "Res",
+							id: "res",
+							data: {
+								dataType: "CC",
+								ccNumber: 103,
+								defaultValue: 0,
 								minValue: 0,
 								maxValue: 127
 							}

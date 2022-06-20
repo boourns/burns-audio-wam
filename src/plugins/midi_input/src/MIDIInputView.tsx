@@ -36,7 +36,7 @@ export interface MIDIInputProps {
 
       return <div>
         <div style="display: flex; flex-direction: row; padding: 8px;">
-          <Select label="MIDI Input:" value={() => 1+this.props.plugin.audioNode.selectedMIDIInput} options={options} onChange={(i) => this.selectMIDIOutput(i)}></Select>
+          <Select label="MIDI Input:" value={() => 1+this.props.plugin.audioNode.selectedDevice} options={options} onChange={(i) => this.selectMIDIOutput(i)}></Select>
         </div>
       </div>
     }

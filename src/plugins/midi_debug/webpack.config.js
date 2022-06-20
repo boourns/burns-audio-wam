@@ -69,8 +69,8 @@ const wamNode = {
 const processor = {
   entry: {
     processor: {
-      import: './src/MIDIInputProcessor.ts',
-      filename: 'MIDIInputProcessor.js'
+      import: './src/MIDIDebugProcessor.ts',
+      filename: 'MIDIDebugProcessor.js'
     }
   },
   module: {
