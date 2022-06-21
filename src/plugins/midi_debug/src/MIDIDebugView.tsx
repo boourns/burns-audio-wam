@@ -1,6 +1,6 @@
-import { h, Component, render } from 'preact';
+import { h, Component, Fragment } from 'preact';
 import MIDIDebugModule from '.';
-import { Select } from '../../shared/ui/Select'
+import { MIDIMessageAnalyzer } from './MIDIMessageAnalyzer';
 
 export interface MIDIDebugProps {
     plugin: MIDIDebugModule
@@ -22,8 +22,16 @@ export interface MIDIDebugProps {
     }
 
     renderMIDIMessage(msg: number[]) {
-      
-      return <div></div>
+      let a = new MIDIMessageAnalyzer(msg)
+      return <>
+      <tr>
+        <td colSpan={2}>{msg.join(" ")}</td>
+      </tr>
+      <tr>
+        <td>{a.description().join(" ")}</td>
+        <td><button>Replay</button></td>
+      </tr>
+      </>
     }
   
     render() {
@@ -42,11 +50,16 @@ export interface MIDIDebugProps {
         [0xcc, 0xf0, 0],
       ]
 
-      let content = messages.map(m => <div>{m}</div>)
+      let content = messages.map(m => this.renderMIDIMessage(m))
 
-      return <div>
-        <div style="display: flex; flex-direction: row; padding: 8px; font-family: 'Courier New', monospace;">
-          {content}
+      return <div style="width: 100%;">
+        <div style="display: flex; flex-direction: row;">
+          <button>Clear</button>
+        </div>
+        <div style="display: flex; flex-direction: column; background-color: white; color: black; padding: 8px; font-family: 'Courier New', monospace;">
+          <table>
+            {content}
+          </table>
         </div>
       </div>
     }
