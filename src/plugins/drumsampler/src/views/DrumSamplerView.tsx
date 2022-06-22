@@ -9,7 +9,6 @@ import { DrumSamplerVoiceState } from '../Voice';
 import {WaveformView} from "./WaveformView"
 import { WamAsset } from 'wam-extensions';
 
-// @ts-ignore
 let styles = styleRoot.locals as typeof styleRoot
 
 const c = (a: string[]) => a.filter(el => !!el).join(" ")

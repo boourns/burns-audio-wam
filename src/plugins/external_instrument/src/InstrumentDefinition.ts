@@ -47,7 +47,8 @@ export type InstrumentKernelType = {
     toWAM(): DynamicParamGroup[]
     generateMidiEvent(control: MIDIControl, value: number): WamEvent[]
     emitEvents(parameters: Record<string, number>): WamEvent[]
-    ingestMidi(event: WamMidiData): ["wam" | "port", Record<string, any>] | undefined
+    ingestMidi(event: WamMidiData): ["wam" | "port", Record<string, any>] | undefined;
+    existingControlForCC(num: number): MIDIControl | undefined
 }
 
 const getInstrumentKernel = (moduleId: string) => {
@@ -146,16 +147,20 @@ const getInstrumentKernel = (moduleId: string) => {
             return output
         }
 
+        existingControlForCC(num: number): MIDIControl | undefined {
+            return this.controls.find(c => c.data.dataType == "CC" && c.data.ccNumber == num)
+        }
+
         ingestMidi(event: WamMidiData): ["wam" | "port", Record<string, any>] | undefined {
             if (event.bytes[0] == 0xB0 + this.channel) {
-                let existing = this.controls.find(c => c.data.dataType == "CC" && c.data.ccNumber == event.bytes[1])
+                let existing = this.existingControlForCC(event.bytes[1])
                 if (existing) {
                     let automation: WamAutomationEvent = {
                         type: "wam-automation",
                         data: {
                             id: existing.id,
                             value: event.bytes[2],
-                            normalized: false
+                            normalized: false,
                         }
                     }
                     return ["wam", automation]
@@ -184,7 +189,6 @@ const getInstrumentKernel = (moduleId: string) => {
     if (audioWorkletGlobalScope.webAudioModules) {
         const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
 
-        console.log("WOOF Setting InstrumentKernel!")
         ModuleScope.InstrumentKernel = InstrumentKernel
     }
 

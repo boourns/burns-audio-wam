@@ -51,6 +51,7 @@ export default class MIDIOutputNode extends CompositeAudioNode {
 		midiEvents.forEach (message => {
 			let timeDelta = message.time - this.context.currentTime
 			if (timeDelta <= 0) {
+				console.log("Sending to output: ", message.event)
 				output.send(message.event)
 			} else {
 				output.send(message.event, Date.now() + timeDelta)

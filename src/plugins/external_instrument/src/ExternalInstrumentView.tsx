@@ -1,13 +1,20 @@
 import { Component, h } from 'preact';
 import { ExternalInstrumentNode } from '.';
 import { DynamicParameterView } from "../../shared/DynamicParameterView"
+import {EditInstrumentDefinitionView} from "./EditInstrumentDefinitionView"
+import { InstrumentDefinition } from './InstrumentDefinition';
+
+import styleRoot from "./ExternalInstrument.scss"
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
 
 export interface ExternalInstrumentProps {
   plugin: ExternalInstrumentNode
 }
 
 type ExternalInstrumentState = {
-  panel: "GUI" | "CODE"
+  panel: "GUI" | "EDIT"
   runCount: number
 }
 
@@ -38,13 +45,13 @@ export class ExternalInstrumentView extends Component<ExternalInstrumentProps, E
   }
 
   panelPressed() {
-    let newPanel: "CODE" | "GUI"
+    let newPanel: "EDIT" | "GUI"
 
     switch(this.state.panel) {
       case "GUI":
-        newPanel = "CODE"
+        newPanel = "EDIT"
         break
-      case "CODE":
+      case "EDIT":
         newPanel = "GUI"
         break
     }
@@ -66,9 +73,14 @@ export class ExternalInstrumentView extends Component<ExternalInstrumentProps, E
     this.ref = ref
   }
 
+  definitionUpdated(def: InstrumentDefinition) {
+    this.props.plugin.instrumentDefinition = def
+    this.props.plugin.updateProcessorFromDefinition()
+  }
+
   renderEditor() {
     return <div style="width: 100%; height: 100%; flex: 1;">
-      <div style="width: 100%; height: 100%; flex: 1;" ref={(ref) => this.setupEditor(ref)}></div>
+      <EditInstrumentDefinitionView definition={this.props.plugin.instrumentDefinition} onUpdate={(def: InstrumentDefinition) => this.definitionUpdated(def)}></EditInstrumentDefinitionView>
     </div>
   }
 
@@ -88,7 +100,7 @@ export class ExternalInstrumentView extends Component<ExternalInstrumentProps, E
     let panelLabel
     let panel
     switch(this.state.panel) {
-      case "CODE":
+      case "EDIT":
         panelLabel = "GUI"
         panel = this.renderEditor()
         break
@@ -99,7 +111,7 @@ export class ExternalInstrumentView extends Component<ExternalInstrumentProps, E
     }
 
     let result = (
-    <div class="function-sequencer-module">
+    <div class={styles.module}>
       <div style="display: flex; flex-direction: column">
         <div style="display: flex; justify-content: space-between; width: 100%">
           <div>
@@ -112,51 +124,8 @@ export class ExternalInstrumentView extends Component<ExternalInstrumentProps, E
         </div>
       </div>
       {panel}
-      <style>
-        {this.css()}
-      </style>
     </div>)
 
     return result
-  }
-
-  css(): string {
-    return `
-      .function-sequencer-module {
-          flex: 1;
-          background-color: #lightblue;
-          display: flex;
-          flex-direction:column;
-          justify-content:space-between;
-          width: 100%;
-          height: 100%;
-      }
-      
-      .distortion-module .component-wrapper {
-          padding: 5px;
-      }
-
-        /* UI elements */
-    
-      .component-wrapper {
-        display: flex;
-        flex-direction: column; 
-        align-content: center; 
-        text-align: center;
-        flex: 1;
-      }
-      
-      .component-knob, .component-fader {
-          margin-top: auto;
-      }
-      
-      .component-select {
-          margin-top: auto;
-          margin-bottom: 3px;
-      }
-      `
-  }
-
-  
-  
+  }  
 }

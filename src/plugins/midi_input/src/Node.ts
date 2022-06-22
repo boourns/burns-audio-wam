@@ -48,9 +48,10 @@ export class MIDIInputNode extends WamNode {
 	}
 
 	midiMessageReceived(event: any) {
-		const bytes: [number, number, number] = [event.data[0], event.data[1], event.data[2]]
-
-		console.log("Emitting midi: ", bytes)
+		const bytes: number[] = []
+		for (let b of event.data) {
+			bytes.push(b)
+		}
 
 		if (event.data.length <= 3) {
 			this.port.postMessage({

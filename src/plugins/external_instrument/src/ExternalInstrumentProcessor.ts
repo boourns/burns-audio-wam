@@ -3,8 +3,9 @@ import { AudioWorkletGlobalScope, WamParameterConfiguration } from "@webaudiomod
 import { InstrumentDefinition, InstrumentKernelType, MIDIControl } from "./InstrumentDefinition";
 
 export type ExternalInstrumentConfig = {
-    midiPassThrough: "off" | "notes" | "all"
-
+    channel: number,
+    midiPassThrough: "off" | "notes" | "all",
+    learn: boolean,
 }
 
 const getExternalInstrumentProcessor = (moduleId: string) => {
@@ -25,8 +26,8 @@ const getExternalInstrumentProcessor = (moduleId: string) => {
     class ExternalInstrumentProcessor extends DynamicParameterProcessor {
         instrumentDefinition: InstrumentDefinition
         kernel: InstrumentKernelType
-        midiChannel: number
         count = 0
+        config: ExternalInstrumentConfig
 
         constructor(options: any) {
             super(options)
@@ -34,13 +35,19 @@ const getExternalInstrumentProcessor = (moduleId: string) => {
             this.instrumentDefinition = {
                 controlGroups: []
             }
+
             this.midiChannel = 0
+            this.config = {
+                channel: 0,
+                midiPassThrough: "all",
+                learn: true,
+            }
 
             this.loadKernel()
         }
 
         loadKernel() {
-            this.kernel = new InstrumentKernel(this.instrumentDefinition, this.midiChannel, this.kernel)
+            this.kernel = new InstrumentKernel(this.instrumentDefinition, this.config.channel, this.kernel)
         }
         
         /**
@@ -64,9 +71,6 @@ const getExternalInstrumentProcessor = (moduleId: string) => {
                 }
 
                 const messages = this.kernel.emitEvents(params) as WamEvent[]
-                if (messages.length > 0) {
-                    console.log("messages: ", JSON.stringify(messages))
-                }
 
                 this.emitEvents(...messages)
             } else {
@@ -95,10 +99,13 @@ const getExternalInstrumentProcessor = (moduleId: string) => {
         }
 
         _onMidi(midiData: WamMidiData) {
+            const { currentTime } = audioWorkletGlobalScope;
+
             const result = this.kernel.ingestMidi(midiData)
             if (result) {
                 if (result[0] == "wam") {
-                    this.emitEvents(result[1])
+                    console.log("emitting ", result[1])
+                    this.scheduleEvents({...result[1], time: currentTime})
                 } else if (result[0] == "port") {
                     this.port.postMessage(result[1])
                 }

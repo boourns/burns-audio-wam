@@ -10,10 +10,12 @@ import { WebAudioModule, addFunctionModule } from '@webaudiomodules/sdk';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 import { DynamicParameterNode, DynamicParamGroup } from '../../shared/DynamicParameterNode';
 
-import getExternalInstrumentProcessor from './ExternalInstrumentProcessor';
+import getExternalInstrumentProcessor, { ExternalInstrumentConfig } from './ExternalInstrumentProcessor';
 import { ExternalInstrumentView } from './ExternalInstrumentView';
-import { InstrumentDefinition } from './InstrumentDefinition';
+import { InstrumentDefinition, InstrumentKernelType } from './InstrumentDefinition';
 import getInstrumentKernel from './InstrumentDefinition';
+
+import styles from './ExternalInstrument.scss'
 
 const InstrumentKernel = getInstrumentKernel("test")
 
@@ -23,6 +25,8 @@ export class ExternalInstrumentNode extends DynamicParameterNode {
 	error?: any;
 
 	instrumentDefinition: InstrumentDefinition
+	config: ExternalInstrumentConfig
+	kernel: InstrumentKernelType
 
 	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
 		const { audioWorklet } = audioContext;
@@ -45,6 +49,12 @@ export class ExternalInstrumentNode extends DynamicParameterNode {
 				outputChannelCount: [2],
 			}}, 
 		[]);
+
+		this.config = {
+			channel: 0,
+			midiPassThrough: "all",
+			learn: true,
+		}
 
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
@@ -82,6 +92,23 @@ export class ExternalInstrumentNode extends DynamicParameterNode {
 		}
 	}
 
+	async getState(): Promise<any> {
+		return {
+			params: await super.getState(),
+			definition: this.instrumentDefinition,
+		}
+	}
+
+	async setState(state: any): Promise<void> {
+		if (state.params) {
+			await super.setState(state.params)
+		}
+		if (state.definition) {
+			this.instrumentDefinition = state.definition
+			this.updateProcessorFromDefinition()
+		}
+	}
+
 	registerExtensions() {
 		
 	}
@@ -89,14 +116,39 @@ export class ExternalInstrumentNode extends DynamicParameterNode {
 	updateProcessorFromDefinition() {
         super.port.postMessage({source:"def", def: this.instrumentDefinition})
 
-		let kernel = new InstrumentKernel(this.instrumentDefinition, 0)
+		this.kernel = new InstrumentKernel(this.instrumentDefinition, 0)
 
-		this.updateProcessor(kernel.toWAM())
+		this.updateProcessor(this.kernel.toWAM())
+
+		if (this.renderCallback) {
+			this.renderCallback()
+		}
 	}
 
 	_onMessage(message: MessageEvent) {
 		if (message.data && message.data.source == "kernel") {
 			console.log("Received kernel message: ", JSON.stringify(message))
+			if (message.data.type == "learn") {
+				// data: {
+				// 	cc: event.bytes[1],
+				// 	value: event.bytes[2]
+				// }
+				if (!this.kernel.existingControlForCC(message.data.data.cc) && this.config.learn) {
+					this.instrumentDefinition.controlGroups[this.instrumentDefinition.controlGroups.length-1].controls.push({
+						id: `cc${message.data.data.cc}`,
+						label: `CC${message.data.data.cc}`,
+						data: {
+							dataType: 'CC',
+							ccNumber: message.data.data.cc,
+							defaultValue: message.data.data.value,
+							minValue: 0,
+							maxValue: 127,
+						}
+					})
+
+					this.updateProcessorFromDefinition()
+				}
+			}
 		} else {
 			super._onMessage(message)
 		}
@@ -149,15 +201,24 @@ export default class ExternalInstrumentModule extends WebAudioModule<ExternalIns
 		const div = document.createElement('div');
 		// hack because h() is getting stripped for non-use despite it being what the JSX compiles to
 		h("div", {})
-		div.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
 
-		render(<ExternalInstrumentView plugin={this.audioNode}></ExternalInstrumentView>, div);
+		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
+
+		var shadow = div.attachShadow({mode: 'open'});
+
+		// @ts-ignore
+    	styles.use({ target: shadow });
+
+		render(<ExternalInstrumentView plugin={this.audioNode}></ExternalInstrumentView>, shadow);
 
 		return div;
 	}
 
 	destroyGui(el: Element) {
-		render(null, el)
+		// @ts-ignore
+		styles.unuse()
+
+		render(null, el.shadowRoot)
 	}
 	
 }
