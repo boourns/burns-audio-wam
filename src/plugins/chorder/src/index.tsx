@@ -64,7 +64,7 @@ export default class ChorderModule extends WebAudioModule<WamNode> {
 		const node: ChorderNode = new ChorderNode(this, {});
 		await node._initialize()
 
-		if (initialState) node.setState(initialState);
+		if (initialState) await node.setState(initialState);
 
 		return node
     }

@@ -1,0 +1,12 @@
+{
+    "name": "MIDIDebug",
+    "vendor": "SequencerParty",
+    "description": "WAM2 MIDI Debug tool",
+    "version": "1.0.0",
+    "sdkVersion": "1.0.0",
+    "thumbnail": "",
+    "keywords": ["utility", "midi"],
+    "isInstrument": false,
+    "website": "",
+    "hasMidiInput": true
+}

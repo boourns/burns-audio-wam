@@ -1,7 +1,6 @@
 import { Component, h } from 'preact';
 import { Clip } from './Clip';
 
-import { Modal } from '../../shared/ui/Modal'
 import { Select } from '../../shared/ui/Select'
 import { TextInput } from '../../shared/ui/TextInput'
 
@@ -72,7 +71,7 @@ export class ClipSettingsView extends Component<ClipSettingsProps, any> {
         ]
 
         return (
-        <Modal title="Clip Settings" actions={actions}>
+        <div>
             <div class="flex my-1">
                 <label>Quantize</label>
                 <Select style="flex-direction: row-reverse;" options={quantizeOptions} values={quantizeValues} value={() => this.props.clip.quantize} onChange={(e) => this.quantizeChanged(e)} />
@@ -81,7 +80,8 @@ export class ClipSettingsView extends Component<ClipSettingsProps, any> {
                 <label>Clip Length (bars)</label>
                 <TextInput className="w-20" value={bars} onChange={(e) => this.lengthChanged(e)} />
             </div>
-        </Modal>
+            {actions}
+        </div>
         )
     }
 }

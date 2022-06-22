@@ -1,0 +1,12 @@
+{
+    "name": "MIDIIn",
+    "vendor": "SequencerParty",
+    "description": "WAM2 WebMIDI Input",
+    "version": "1.0.0",
+    "sdkVersion": "1.0.0",
+    "thumbnail": "",
+    "keywords": ["utility", "midi"],
+    "isInstrument": false,
+    "website": "",
+    "hasMidiInput": true
+}

@@ -1,5 +1,6 @@
 import { Clip, ClipState } from './Clip'
 import { NoteDefinition } from 'wam-extensions'
+import { string } from 'lib0'
 
 export type MIDIEvent = Uint8Array
  export type ScheduledMIDIEvent = {
@@ -8,7 +9,7 @@ export type MIDIEvent = Uint8Array
  }
 
 export type PianoRollState = {
-	clips: (ClipState | undefined)[]
+	clips: Record<string, ClipState>
 }
 
 export class PianoRoll {
@@ -16,8 +17,7 @@ export class PianoRoll {
 	futureEvents: ScheduledMIDIEvent[];
 	dirty: boolean;
 
-	selectedClip: number
-	clips: (Clip | undefined)[]
+	clips: Record<string, Clip>
 
 	playingClip: string | undefined
 
@@ -30,17 +30,16 @@ export class PianoRoll {
 		this.instanceId = instanceId
 		this.futureEvents = []
 		this.dirty = false
-		this.clips = [new Clip()]
-		this.selectedClip = 0
+		this.clips = {"default": new Clip()}
 
 		this.registerNoteListHandler()
-		this.clips.forEach(c => c.updateProcessor = (c) => {
+		Object.keys(this.clips).forEach(id => this.clips[id].updateProcessor = (c) => {
 			if (this.updateProcessor) this.updateProcessor(c)
 		})
 	}
 
 	getClip(id: string) {
-		return this.clips.find(c => c.state.id == id)
+		return this.clips[id]
 	}
 
 	addClip(id: string) {
@@ -50,7 +49,7 @@ export class PianoRoll {
 			clip.updateProcessor = (c) => {
 				if (this.updateProcessor) this.updateProcessor(c)
 			}
-			this.clips.push(clip)
+			this.clips[id] = clip
 		}
 	}
 
@@ -73,7 +72,11 @@ export class PianoRoll {
 
 	getState(): PianoRollState {
 		var state: PianoRollState = {
-			clips: this.clips.map(v => (!!v) ? v.getState() : undefined)
+			clips: {}
+		}
+
+		for (let id of Object.keys(this.clips)) {
+			state.clips[id] = this.clips[id].getState()
 		}
 
 		return state
@@ -84,17 +87,21 @@ export class PianoRoll {
 			return
 		}
 		
-		// TODO this is very shitty performance
-		// and prolly some bugs lol
-		this.clips = state.clips.map(c => new Clip(c.id, c))
+		this.clips = {}
 
-		this.clips.forEach(c => {
-			c.updateProcessor = (c) => {
+		for (let id of Object.keys(state.clips)) {
+			this.clips[id] = new Clip(id, state.clips[id])
+		}
+
+		console.log("PianoRoll setState: loading clips ", state.clips)
+
+		for (let id of Object.keys(this.clips)) {
+			this.clips[id].updateProcessor = (c) => {
 				if (this.updateProcessor) this.updateProcessor(c)
 			}
 
-			if (this.updateProcessor) this.updateProcessor(c)
-		})
+			if (this.updateProcessor) this.updateProcessor(this.clips[id])
+		}
 
 		this.dirty = true
 		if (this.renderCallback != undefined) {
@@ -102,12 +109,12 @@ export class PianoRoll {
 		}
 	}
 
-	clip(): Clip | undefined {
-		if (this.selectedClip > this.clips.length || this.selectedClip < 0) {
-			return this.clips[0]
-		}
-		return this.clips[this.selectedClip]
-	}
+	// clip(): Clip | undefined {
+	// 	if (this.selectedClip > this.clips.length || this.selectedClip < 0) {
+	// 		return this.clips[0]
+	// 	}
+	// 	return this.clips[this.selectedClip]
+	// }
 
 	clearRenderFlag() {
 		this.dirty = false;

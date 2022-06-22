@@ -1,0 +1,36 @@
+{
+  "name": "midi debug",
+  "version": "0.0.0",
+  "description": "> TODO: description",
+  "author": "Tom Burns <tom@burns.ca>",
+  "homepage": "https://github.com/53js/webaudiomodule#readme",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "clean": "del dist",
+    "build": "./node_modules/.bin/webpack",
+    "test": "./node_modules/.bin/mocha"
+  },
+  "dependencies": {
+    "@types/debug": "^4.1.6",
+    "debug": "^4.3.1",
+    "preact": "^10.5.5"
+  },
+  "devDependencies": {
+    "@types/mocha": "^9.1.1",
+    "@types/webmidi": "^2.0.6",
+    "copy-webpack-plugin": "^9.0.0",
+    "css-loader": "^6.2.0",
+    "css-modules-typescript-loader": "^4.0.1",
+    "mocha": "^10.0.0",
+    "sass": "^1.39.2",
+    "sass-loader": "^12.1.0",
+    "style-loader": "^3.2.1",
+    "ts-loader": "^8.0.12",
+    "ts-node": "^10.8.1",
+    "typescript": "^4.0.2",
+    "webpack": "^5.11.1",
+    "webpack-cli": "^4.3.0"
+  }
+}
