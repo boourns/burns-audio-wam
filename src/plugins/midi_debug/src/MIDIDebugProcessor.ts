@@ -1,5 +1,4 @@
-import { WamEvent, WamMidiData, WamTransportData } from "@webaudiomodules/api";
-import { AudioWorkletGlobalScope } from "@webaudiomodules/api";
+import { AudioWorkletGlobalScope, WamTransportData } from "@webaudiomodules/api";
 
 export type ExternalInstrumentConfig = {
     midiPassThrough: "off" | "notes" | "all"
@@ -51,6 +50,18 @@ const getMIDIDebugProcessor = (moduleId: string) => {
             } else {
                 super._onMessage(message)
             }
+        }
+
+        _onMidi(midiData: any) {        
+            const { currentTime } = audioWorkletGlobalScope;
+
+            const bytes = midiData.bytes;
+
+            this.port.postMessage({source: "midi", timestamp: currentTime, bytes})
+            
+            this.emitEvents(
+                {type:"wam-midi", time: currentTime, data: midiData}
+            )
         }
 
         _onTransport(transportData: WamTransportData) {

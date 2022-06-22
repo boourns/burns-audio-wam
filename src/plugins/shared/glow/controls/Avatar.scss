@@ -1,0 +1,29 @@
+@mixin avatar-common {
+    border-radius: 50%;
+    color: #ffffff;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+}
+
+.default {
+    @include avatar-common();
+    width: 21px;
+    height: 21px;
+}
+
+.big {
+    @include avatar-common();
+
+    width: 40px;
+    height: 40px;
+}
+
+.huge {
+    @include avatar-common();
+
+    width: 120px;
+    height: 120px;
+}

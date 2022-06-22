@@ -1,0 +1,22 @@
+@import '../common.scss';
+
+@mixin common {
+    font-size: 12px;
+    
+    padding: 2px 4px;    
+
+    border: 1px solid;
+    box-sizing: border-box;
+}
+
+.Accent {
+    @include common();
+    background-color: $accent-primary;
+    border-color: $accent-secondary;
+}
+
+.Red {
+    @include common();
+    background-color: $red-primary;
+    border-color: $red-secondary;
+}

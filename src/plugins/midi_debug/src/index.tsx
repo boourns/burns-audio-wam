@@ -9,6 +9,8 @@ import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 import { MIDIDebugView } from './MIDIDebugView';
 import { MIDIDebugNode as MIDIDebugNode } from './Node';
+import styles from "./MIDIDebugView.scss"
+
 
 export default class MIDIDebugModule extends WebAudioModule<MIDIDebugNode> {
 	//@ts-ignore
@@ -57,13 +59,19 @@ export default class MIDIDebugModule extends WebAudioModule<MIDIDebugNode> {
 		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
-		let initialState = await this.audioNode.getParameterValues()
-		render(<MIDIDebugView plugin={this}></MIDIDebugView>, shadow);
+
+		// @ts-ignore
+    	styles.use({ target: shadow });
+
+		render(<MIDIDebugView plugin={this.audioNode}></MIDIDebugView>, shadow);
 
 		return div;
 	}
 
 	destroyGui(el: Element) {
+		// @ts-ignore
+		styles.unuse()
+
 		render(null, el.shadowRoot)
 	}
 }

@@ -1,67 +1,80 @@
 import { h, Component, Fragment } from 'preact';
-import MIDIDebugModule from '.';
+import { GenerateMIDIMessageView } from './GenerateMIDIMessageView';
 import { MIDIMessageAnalyzer } from './MIDIMessageAnalyzer';
+import { RecordedMIDIMessage } from './MIDIRecording';
+import { MIDIDebugNode } from './Node';
 
 export interface MIDIDebugProps {
-    plugin: MIDIDebugModule
+  plugin: MIDIDebugNode
+}
+
+type MIDIDebugState = {
+  modal: 'generate' | undefined
+}
+
+export class MIDIDebugView extends Component<MIDIDebugProps, MIDIDebugState> {
+  constructor() {
+    super();
   }
-  
-  export class MIDIDebugView extends Component<MIDIDebugProps, any> {
-    constructor() {
-      super();
-    }
 
-    componentDidMount(): void {
-      this.props.plugin.callback = () => {
-        this.forceUpdate()
-      }
+  componentDidMount(): void {
+    this.props.plugin.callback = () => {
+      this.forceUpdate()
     }
+  }
 
-    componentWillUnmount(): void {
-      this.props.plugin.callback = undefined
-    }
+  componentWillUnmount(): void {
+    this.props.plugin.callback = undefined
+  }
 
-    renderMIDIMessage(msg: number[]) {
-      let a = new MIDIMessageAnalyzer(msg)
-      return <>
+  renderMIDIMessage(msg: RecordedMIDIMessage) {
+    let a = new MIDIMessageAnalyzer(msg.bytes)
+    const dir = msg.incoming ? "<- " : "-> "
+    return <>
       <tr>
-        <td colSpan={2}>{msg.join(" ")}</td>
+        <td colSpan={2}><b>{dir}{msg.bytes.join(" ")}</b></td>
       </tr>
       <tr>
         <td>{a.description().join(" ")}</td>
-        <td><button>Replay</button></td>
+        <td><button onClick={() => this.replayMessage(msg.bytes)}>Replay</button></td>
       </tr>
-      </>
-    }
-  
-    render() {
-      h("div", {})
-
-      let messages: number[][] = [
-        [0xb0, 44, 0],
-        [0xcc, 0xf0, 0],
-        [0xb0, 44, 0],
-        [0xcc, 0xf0, 0],
-        [0xb0, 44, 0],
-        [0xcc, 0xf0, 0],        
-        [0xb0, 44, 0],
-        [0xcc, 0xf0, 0],
-        [0xb0, 44, 0],
-        [0xcc, 0xf0, 0],
-      ]
-
-      let content = messages.map(m => this.renderMIDIMessage(m))
-
-      return <div style="width: 100%;">
-        <div style="display: flex; flex-direction: row;">
-          <button>Clear</button>
-        </div>
-        <div style="display: flex; flex-direction: column; background-color: white; color: black; padding: 8px; font-family: 'Courier New', monospace;">
-          <table>
-            {content}
-          </table>
-        </div>
-      </div>
-    }
-
+    </>
   }
+
+  replayMessage(bytes: number[]) {
+    this.props.plugin.emitMIDI(bytes)
+  }
+
+  clearPressed() {
+    this.props.plugin.recording.clear()
+  }
+
+  showModal(modal: 'generate' | undefined) {
+    this.setState({modal})
+  }
+
+  render() {
+    h("div", {})
+
+    let content = this.props.plugin.recording.messages.map(m => this.renderMIDIMessage(m))
+
+    var modal
+    if (this.state.modal == 'generate') {
+      modal = <GenerateMIDIMessageView plugin={this.props.plugin} onClose={() => this.showModal(undefined)}></GenerateMIDIMessageView>
+    }
+
+    return <div style="width: 100%; display: flex; flex-direction: column;">
+      {modal}
+      <div style="display: flex; flex-direction: row; height: 30px;">
+        <button onClick={() => this.clearPressed()}>Clear</button>
+      </div>
+      <div style="display: flex; height: 100%; overflow: scroll; flex-direction: column; background-color: white; color: black; padding: 8px; font-family: 'Courier New', monospace;">
+        <table cellPadding={0} cellSpacing={0}>
+          {content}
+        </table>
+        <button onClick={() => this.showModal('generate')}>+ Generate message</button>
+      </div>
+    </div>
+  }
+
+}

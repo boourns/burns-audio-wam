@@ -1,0 +1,27 @@
+@import "../common.scss";
+
+.Default {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 4px;
+    width: 100%;
+    min-width: 100%;
+
+    background: #ffffff;
+    border-radius: $radius-small;
+
+    /* Inside Auto Layout */
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+
+    font-style: normal;
+    font-weight: normal;
+    font-size: $font-size-regular;
+    line-height: 14px;
+
+    /* identical to box height */
+
+    color: #000000;
+}

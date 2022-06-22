@@ -1,0 +1,12 @@
+@use 'sass:color';
+
+$font-size-regular: 14px;
+$radius-small: 2px;
+
+$accent-primary: #4779F9;
+$accent-secondary: color.scale($accent-primary, $lightness: -20%);
+
+$red-primary: rgba(249, 71, 71, 0.6);
+$red-secondary: color.scale($red-primary, $lightness: -20%);
+
+$card-max-width: 500px;

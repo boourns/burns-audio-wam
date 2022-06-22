@@ -1,0 +1,44 @@
+.boxContainer {
+    background-color: rgba(229, 231, 235, 1);
+    border-radius: 4px;
+    border: 1px solid rgba(0,0,0,0.3);
+
+    max-width: 800px;
+    min-width: 400px;
+
+    display: flex;
+    flex-direction: column;   
+    padding-bottom: 4px;
+    color: #000000;
+}
+
+.boxHeader {
+    text-align: center;
+    background-color: rgba(209, 213, 219, 1);
+    color: #000000;
+}
+
+.boxContent {
+    padding: 6px;
+}
+
+.boxFooter {
+    color: #000000;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 8px;
+    bottom: 6px;
+
+    /* Auto Layout */
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    /* Inside Auto Layout */
+    flex: none;
+    order: 2;
+    align-self: stretch;
+    flex-grow: 0;
+    margin: 0px 0px 0px 4px;
+}

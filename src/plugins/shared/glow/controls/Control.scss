@@ -1,0 +1,22 @@
+.default {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 0px;
+
+    flex: none;
+    order: 1;
+    align-self: stretch;
+    flex-grow: 0;
+    margin: 6px 0px;
+}
+
+.ControlContainer {
+    flex-basis: 60%;
+    margin: 0px 10px 0px 10px;
+}
+
+.LabelContainer {
+    flex-basis: 35%;
+    text-align: right;
+}
