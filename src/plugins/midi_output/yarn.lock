@@ -3658,6 +3658,34 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
+"midi-output-wam@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "midi-output-wam@workspace:."
+  dependencies:
+    "@babel/core": ^7.12.16
+    "@babel/plugin-proposal-class-properties": ^7.13.0
+    "@babel/plugin-syntax-import-meta": ^7.10.4
+    "@babel/preset-env": ^7.13.10
+    "@babel/preset-react": ^7.12.13
+    "@babel/preset-typescript": ^7.13.0
+    "@rollup/plugin-babel": ^5.3.0
+    "@rollup/plugin-commonjs": ^17.1.0
+    "@rollup/plugin-node-resolve": ^11.2.0
+    "@rollup/plugin-replace": ^2.4.1
+    "@surma/rollup-plugin-off-main-thread": ^2.1.0
+    "@types/webmidi": ^2.0.6
+    debug: ^4.3.1
+    preact: ^10.5.5
+    rollup: ^2.42.1
+    rollup-plugin-copy: ^3.4.0
+    rollup-plugin-node-builtins: ^2.1.2
+    ts-loader: ^8.0.12
+    typescript: ^4.0.2
+    webpack: ^5.11.1
+    webpack-cli: ^4.3.0
+  languageName: unknown
+  linkType: soft
+
 "miller-rabin@npm:^4.0.0":
   version: 4.0.1
   resolution: "miller-rabin@npm:4.0.1"
@@ -4742,34 +4770,6 @@ fsevents@~2.3.2:
   checksum: c052193a7e43c6cdc741eb7f378df605636e01ad434badf7324f17fb60c69a880d8d8fcdcb562cf94c2350e57b937d7425ab5b8326c67c2adc48f7c87c1db406
   languageName: node
   linkType: hard
-
-"synth101@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "synth101@workspace:."
-  dependencies:
-    "@babel/core": ^7.12.16
-    "@babel/plugin-proposal-class-properties": ^7.13.0
-    "@babel/plugin-syntax-import-meta": ^7.10.4
-    "@babel/preset-env": ^7.13.10
-    "@babel/preset-react": ^7.12.13
-    "@babel/preset-typescript": ^7.13.0
-    "@rollup/plugin-babel": ^5.3.0
-    "@rollup/plugin-commonjs": ^17.1.0
-    "@rollup/plugin-node-resolve": ^11.2.0
-    "@rollup/plugin-replace": ^2.4.1
-    "@surma/rollup-plugin-off-main-thread": ^2.1.0
-    "@types/webmidi": ^2.0.6
-    debug: ^4.3.1
-    preact: ^10.5.5
-    rollup: ^2.42.1
-    rollup-plugin-copy: ^3.4.0
-    rollup-plugin-node-builtins: ^2.1.2
-    ts-loader: ^8.0.12
-    typescript: ^4.0.2
-    webpack: ^5.11.1
-    webpack-cli: ^4.3.0
-  languageName: unknown
-  linkType: soft
 
 "tapable@npm:^1.0.0":
   version: 1.1.3

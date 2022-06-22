@@ -1,9 +1,5 @@
-import { string } from 'lib0';
 import { Component, h } from 'preact';
-
-import { Box } from '../../shared/glow/layout/Box'
 import { channelMessages } from './MIDIMessageAnalyzer';
-
 import { MIDIDebugNode } from './Node';
 
 export type HTMLInputEvent = Event & {target: HTMLInputElement }
@@ -67,30 +63,29 @@ export class GenerateMIDIMessageView extends Component<GenerateMIDIMessageProps,
 
         return (
         <div>
-            <Box title="Generate MIDI Message" actions={actions}>
-                <div>
-                    <label>Message Type:
-                        <select onChange={(e) => this.typeChanged(e)}>
-                            {options}
-                        </select>
-                    </label>
-                </div>
-                <div>
-                    <label>Channel:
-                        <input placeholder="0-15" value={this.state.channel} onChange={(e) => this.valueChanged('channel', e)}></input>
-                    </label>
-                </div>
-                <div>
-                    <label>Byte 1:
-                        <input value={this.state.byte1} onChange={(e) => this.valueChanged('byte1', e)}></input>
-                    </label>
-                </div>
-                <div>
-                    <label>Byte 2:
-                        <input value={this.state.byte2} onChange={(e) => this.valueChanged('byte2', e)}></input>
-                    </label>
-                </div>
-            </Box>
+            <div>
+                <label>Message Type:
+                    <select onChange={(e) => this.typeChanged(e)}>
+                        {options}
+                    </select>
+                </label>
+            </div>
+            <div>
+                <label>Channel:
+                    <input placeholder="0-15" value={this.state.channel} onChange={(e) => this.valueChanged('channel', e)}></input>
+                </label>
+            </div>
+            <div>
+                <label>Byte 1:
+                    <input value={this.state.byte1} onChange={(e) => this.valueChanged('byte1', e)}></input>
+                </label>
+            </div>
+            <div>
+                <label>Byte 2:
+                    <input value={this.state.byte2} onChange={(e) => this.valueChanged('byte2', e)}></input>
+                </label>
+            </div>
+            {actions}
         </div>
         )
     }
