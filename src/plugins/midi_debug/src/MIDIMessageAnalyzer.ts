@@ -13,7 +13,7 @@ type MIDIMessageDescription = {
     byte_names: string[]
 }
 
-let channelMessages: Record<number, MIDIMessageDescription> = {
+export let channelMessages: Record<number, MIDIMessageDescription> = {
     0x90: {
         name: "note_on",
         byte_names: ["note", "velocity"],

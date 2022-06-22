@@ -56,25 +56,23 @@ export class MIDIDebugView extends Component<MIDIDebugProps, MIDIDebugState> {
   render() {
     h("div", {})
 
-    let content = this.props.plugin.recording.messages.map(m => this.renderMIDIMessage(m))
-
-    var modal
     if (this.state.modal == 'generate') {
-      modal = <GenerateMIDIMessageView plugin={this.props.plugin} onClose={() => this.showModal(undefined)}></GenerateMIDIMessageView>
-    }
+      return <GenerateMIDIMessageView plugin={this.props.plugin} onClose={() => this.showModal(undefined)}></GenerateMIDIMessageView>
+    } else {
+      let content = this.props.plugin.recording.messages.map(m => this.renderMIDIMessage(m))
 
-    return <div style="width: 100%; display: flex; flex-direction: column;">
-      {modal}
-      <div style="display: flex; flex-direction: row; height: 30px;">
-        <button onClick={() => this.clearPressed()}>Clear</button>
+      return <div style="width: 100%; display: flex; flex-direction: column;">
+        <div style="display: flex; flex-direction: row; height: 30px;">
+          <button onClick={() => this.clearPressed()}>Clear</button>
+        </div>
+        <div style="display: flex; height: 100%; overflow: scroll; flex-direction: column; background-color: white; color: black; padding: 8px; font-family: 'Courier New', monospace;">
+          <table cellPadding={0} cellSpacing={0}>
+            {content}
+          </table>
+          <button onClick={() => this.showModal('generate')}>+ Generate message</button>
+        </div>
       </div>
-      <div style="display: flex; height: 100%; overflow: scroll; flex-direction: column; background-color: white; color: black; padding: 8px; font-family: 'Courier New', monospace;">
-        <table cellPadding={0} cellSpacing={0}>
-          {content}
-        </table>
-        <button onClick={() => this.showModal('generate')}>+ Generate message</button>
-      </div>
-    </div>
+    }    
   }
 
 }
