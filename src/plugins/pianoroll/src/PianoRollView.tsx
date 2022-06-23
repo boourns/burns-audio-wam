@@ -8,7 +8,7 @@ import { PianoRoll } from './PianoRoll';
 import { ClipSettingsView } from './ClipSettingsView';
 import { Note, PPQN } from './Clip';
 import { Design, NoteCanvasRenderer, NoteCanvasRenderState } from './NoteCanvasRenderer';
-var logger = (...any: any) => {}
+const logger = (...any: any) => {}
 //const logger = console.log
 
 type PositionEvent = MouseEvent & { layerX: number, layerY: number}
@@ -452,8 +452,8 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 .pianoroll-body {
     flex-shrink: 1;
     overflow: scroll;
+    overflow-x: hidden;
     position: relative;
-    scrollbar-width: none; /* fixes endless resize bug on old FF, but probably needs to be replaced to a fixed width */
 }
 
 .pianoroll {
