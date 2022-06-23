@@ -61,7 +61,7 @@ return new RandomNoteSequencer()
 
 export function editorDefinition(): string {
     return `
-export type MIDINote = {
+declare type MIDINote = {
     /** MIDI Note number, 0-127 */
     note: number
     /** Note velocity, 0: off, 1-127: note on strength */
@@ -70,7 +70,7 @@ export type MIDINote = {
     duration: number
 }
 
-export type WAMParameterDefinition = {
+declare type WAMParameterDefinition = {
     /** An identifier for the parameter, unique to this plugin instance */
     id: string
     /** The parameter's human-readable name. */
@@ -85,12 +85,12 @@ export type WAMParameterDefinition = {
     maxValue?: number
 }
 
-export type ParameterDefinition = {
+declare type ParameterDefinition = {
     id: string
     config: WAMParameterDefinition
 }
 
-export interface FunctionSequencer {
+declare interface FunctionSequencer {
     parameter(): ParameterDefinition[]
     onTick(tick: number, params: Record<string, any>): MIDINote[]
 }
