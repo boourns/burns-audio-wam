@@ -17,7 +17,6 @@ export default class MIDIDebugModule extends WebAudioModule<MIDIDebugNode> {
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
-	_processorUrl = `${this._baseURL}/MIDIInputProcessor.js`;
 
 	callback?: () => void
 	midiInitialized: boolean = false
@@ -39,7 +38,6 @@ export default class MIDIDebugModule extends WebAudioModule<MIDIDebugNode> {
 
 	async createAudioNode(initialState: any) {
 		await MIDIDebugNode.addModules(this.audioContext, this.moduleId)
-		await this.audioContext.audioWorklet.addModule(this._processorUrl)
 
 		const node: MIDIDebugNode = new MIDIDebugNode(this, {})
 
