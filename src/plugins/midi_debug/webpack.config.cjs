@@ -66,31 +66,4 @@ const wamNode = {
   ]
 };
 
-const processor = {
-  entry: {
-    processor: {
-      import: './src/MIDIDebugProcessor.ts',
-      filename: 'MIDIDebugProcessor.js'
-    }
-  },
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
-      },
-    ],
-  },
-  mode: "development",
-  devtool: false,
-  resolve: {
-    extensions: [ '.tsx', '.ts', '.js' ],
-  },
-  output: {
-    path: path.resolve(__dirname, './dist'),
-    publicPath: 'auto',
-  }
-};
-
-module.exports = [wamNode, processor]
+module.exports = [wamNode]
