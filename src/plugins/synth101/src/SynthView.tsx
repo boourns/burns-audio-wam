@@ -49,7 +49,7 @@ export interface SynthViewProps {
     }
 
     async pollAutomationState() {
-      this.wamState = await this.props.plugin.audioNode.paramMgr.getParamsValues()
+      this.wamState = this.props.plugin.audioNode.paramMgr.getParamsValues()
       this.automationStatePoller = window.requestAnimationFrame(this.pollAutomationState)
     }
 

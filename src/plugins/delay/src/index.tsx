@@ -14,7 +14,7 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 
 export default class Delay extends WebAudioModule<DelayPluginNode> {
 	//@ts-ignore
-	_baseURL = getBaseUrl(new URL('.', import.meta.url));
+	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 
@@ -26,6 +26,8 @@ export default class Delay extends WebAudioModule<DelayPluginNode> {
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this._descriptor, descriptor);
+
+		return descriptor
 	}
 
 	async initialize(state: any) {

@@ -16,6 +16,7 @@
     "preact": "^10.5.5"
   },
   "devDependencies": {
+    "@types/webmidi": "^2.0.6",
     "copy-webpack-plugin": "^9.0.0",
     "css-loader": "^6.2.0",
     "css-modules-typescript-loader": "^4.0.1",

@@ -36,6 +36,7 @@ export default class Synth101 extends WebAudioModule<Synth101Node> {
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this._descriptor, descriptor);
+		return descriptor
 	}
 
 	async initialize(state: any) {
@@ -291,7 +292,8 @@ export default class Synth101 extends WebAudioModule<Synth101Node> {
 		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
-		let initialState = await this.audioNode.getParameterValues()
+		let initialState = this.audioNode.paramMgr.getParamsValues()
+
 		render(<SynthView initialState={initialState} plugin={this}></SynthView>, shadow);
 
 		return div;
