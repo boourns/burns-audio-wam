@@ -16,6 +16,7 @@ import { InstrumentDefinition, InstrumentKernelType } from './InstrumentDefiniti
 import getInstrumentKernel from './InstrumentDefinition';
 
 import styles from './ExternalInstrument.scss'
+import diff from "microdiff"
 
 const InstrumentKernel = getInstrumentKernel("test")
 
@@ -104,8 +105,11 @@ export class ExternalInstrumentNode extends DynamicParameterNode {
 			await super.setState(state.params)
 		}
 		if (state.definition) {
-			this.instrumentDefinition = state.definition
-			this.updateProcessorFromDefinition()
+			const changes = diff(this.instrumentDefinition, state.definition)
+			if (changes.length > 0) {
+				this.instrumentDefinition = state.definition
+				this.updateProcessorFromDefinition()
+			}
 		}
 	}
 
