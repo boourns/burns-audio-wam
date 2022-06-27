@@ -24,7 +24,7 @@ let cssLoaders = [
   // NOTE: The first build after adding/removing/renaming CSS classes fails, since the newly generated .d.ts typescript module is picked up only later
 ] 
 
-module.exports = {
+const plugin = {
   entry: {
     app: {
       import: './src/index.tsx',
@@ -75,3 +75,60 @@ module.exports = {
     }),
   ]
 };
+
+
+const processor1 = {
+  entry: {
+    processor: {
+      import: '../shared/EnvelopeGeneratorProcessor.ts',
+      filename: 'EnvelopeGeneratorProcessor.js'
+    }
+  },
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
+    ],
+  },
+  mode: "development",
+  devtool: false,
+  resolve: {
+    extensions: [ '.tsx', '.ts', '.js' ],
+  },
+  output: {
+    path: path.resolve(__dirname, './dist'),
+    publicPath: 'auto',
+  }
+};
+
+const processor2 = {
+  entry: {
+    processor: {
+      import: '../shared/SlewProcessor.ts',
+      filename: 'SlewProcessor.js'
+    }
+  },
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
+    ],
+  },
+  mode: "development",
+  devtool: false,
+  resolve: {
+    extensions: [ '.tsx', '.ts', '.js' ],
+  },
+  output: {
+    path: path.resolve(__dirname, './dist'),
+    publicPath: 'auto',
+  }
+};
+
+module.exports = [plugin, processor1, processor2]

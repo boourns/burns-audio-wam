@@ -13,7 +13,7 @@ import VideoInputNode from './Node';
 
 export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
 	//@ts-ignore
-	_baseURL = getBaseUrl(new URL('.', import.meta.url));
+	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 
@@ -28,11 +28,15 @@ export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
 	}
 
 	async initialize(state: any) {
+		console.log("video input: initialize")
+
 		await this._loadDescriptor();
 		return super.initialize(state);
 	}
 
 	async createAudioNode(initialState: any) {
+		console.log("video input: createAudioNode")
+
 		const synthNode = new VideoInputNode(this.audioContext as AudioContext, this._baseURL);
 
 		// @ts-ignore
@@ -47,6 +51,7 @@ export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
     }
 
 	async createGui() {
+		
 		const div = document.createElement('div');
 		// hack because h() is getting stripped for non-use despite it being what the JSX compiles to
 		h("div", {})

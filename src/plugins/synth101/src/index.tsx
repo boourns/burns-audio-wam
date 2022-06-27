@@ -24,7 +24,7 @@ function normalize(v: number, min: number, max: number, int: boolean = false) {
 
 export default class Synth101 extends WebAudioModule<Synth101Node> {
 	//@ts-ignore
-	_baseURL = getBaseUrl(new URL('.', import.meta.url));
+	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_envelopeGeneratorUrl = `${this._baseURL}/EnvelopeGeneratorProcessor.js`;

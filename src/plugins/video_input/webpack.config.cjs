@@ -71,7 +71,6 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         { from: `./src/descriptor.json`, to: './' },
-        { from: "./assets/*", to: "./"}
       ]
     }),
   ]
