@@ -1,9 +1,14 @@
 import { h, Component, render } from 'preact';
-import { Select } from '../../shared/ui/Select'
+import { Select } from '../../../shared/ui/Select'
 
-import AudioInputModule from '.';
-import { StereoVUMeter } from './StereoVUMeter';
-import { VUMeter } from './VUMeter';
+import AudioInputModule from '..';
+import { StereoVUMeter } from '../StereoVUMeter';
+import { VUMeter } from '../VUMeter';
+
+import styleRoot from "./AudioInputView.scss"
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
 
 export interface AudioInputViewProps {
   plugin: AudioInputModule
@@ -54,7 +59,7 @@ export class AudioInputView extends Component<AudioInputViewProps, any> {
     let channelSelectOptions = audioNode.channelMapOptions.map(c => c.map(i=>i+1).join(" / "))
 
     return <div>
-      <div style="display: flex; flex-direction: row; padding: 8px;">
+      <div class={styles.AudioInputMain}>
         <div>
           {meter}
         </div>

@@ -1,8 +1,14 @@
 import { h, Component, render } from 'preact';
-import { Knob } from '../../shared/ui/Knob'
-import { Select } from '../../shared/ui/Select'
+import { Knob } from '../../../shared/ui/Knob'
+import { Select } from '../../../shared/ui/Select'
 
-import Delay from '.'
+import Delay from '..'
+
+import styleRoot from "./DelayView.scss"
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
+
 
 export interface DelayViewProps {
   plugin: Delay
@@ -31,7 +37,7 @@ export class DelayView extends Component<DelayViewProps, any> {
     let params = this.props.plugin.audioNode.paramMgr
 
     return (
-    <div class="delay-module">
+    <div class={styles.delayModule}>
     <div style="display: flex">
         <Knob label="Time" size={40} value={() => params.getParamValue("time")} minimumValue={0.001} maximumValue={5} onChange={(v) => this.paramChanged("time", v)}/>
         <Knob label="Fdbk" size={40} value={() => params.getParamValue("feedback")} minimumValue={0} maximumValue={1.2} onChange={(v) => this.paramChanged("feedback", v)}/>
@@ -45,47 +51,7 @@ export class DelayView extends Component<DelayViewProps, any> {
     <div style="flex: 1">
         <Select label="Ping/Pong" options={["off", "on"]} values={[0, 1]} value={() => params.getParamValue("pingpong")} onChange={(v) => this.paramChanged("pingpong", v)}/>
     </div>
-    <style>
-      {this.css()}
-    </style>
+
 </div>)
-  }
-
-  css(): string {
-    return `
-    .delay-module {
-      flex: 1;
-      background-color: darkslateblue;
-      display: flex;
-      flex-direction:column;
-      justify-content:space-between;
-      color: white;
-      padding: 10px;
-  }
-  
-  .delay-module .component-wrapper {
-      padding: 5px;
-  }
-
-        /* UI elements */
-    
-      .component-wrapper {
-        display: flex;
-        flex-direction: column; 
-        align-content: center; 
-        text-align: center;
-        flex: 1;
-      }
-      
-      .component-knob, .component-fader {
-          margin-top: auto;
-      }
-      
-      .component-select {
-          margin-top: auto;
-          margin-bottom: 3px;
-      }
-      `
-  }
-  
+  }  
 }

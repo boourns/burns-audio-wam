@@ -9,8 +9,10 @@ import { ParamMgrFactory, CompositeAudioNode } from '@webaudiomodules/sdk-paramm
 
 import DelayPluginNode from './Node';
 import { h, render } from 'preact';
-import { DelayView } from './DelayView';
+import { DelayView } from './views/DelayView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
+
+import styleRoot from "./views/DelayView.scss"
 
 export default class Delay extends WebAudioModule<DelayPluginNode> {
 	//@ts-ignore
@@ -146,15 +148,22 @@ export default class Delay extends WebAudioModule<DelayPluginNode> {
 		const div = document.createElement('div');
 		// hack because h() is getting stripped for non-use despite it being what the JSX compiles to
 		h("div", {})
+
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
+		// @ts-ignore
+		styleRoot.use({ target: shadow });
+		
 		render(<DelayView plugin={this}></DelayView>, shadow);
 
 		return div;
 	}
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styleRoot.unuse()
+
 		render(null, el.shadowRoot)
 	}
 }

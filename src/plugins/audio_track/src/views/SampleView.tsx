@@ -1,8 +1,8 @@
 import { Component, h } from "preact";
 import { WaveformEditorView, WaveformViewTransportControls } from "./WaveformEditorView";
-import { SampleEditor, SampleState } from "./SampleEditor";
-import { Sample } from "./Sample";
-import { Resizer } from "./Resizer";
+import { SampleEditor, SampleState } from "../SampleEditor";
+import { Sample } from "../Sample";
+import { Resizer } from "../Resizer";
 
 export interface SampleViewProps {
     index: number

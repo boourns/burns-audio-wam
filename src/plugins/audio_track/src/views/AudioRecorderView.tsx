@@ -1,8 +1,14 @@
 import { Component, h } from 'preact';
-import AudioRecorderModule from '.';
+import AudioRecorderModule from '..';
 import { SampleView } from './SampleView';
 import { WamAsset } from 'wam-extensions';
-import { Sample } from './Sample';
+import { Sample } from '../Sample';
+
+import styleRoot from "./AudioRecorderView.scss";
+import { style } from 'wavesurfer.js/src/util';
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
 
 export interface AudioRecorderViewProps {
   plugin: AudioRecorderModule
@@ -108,19 +114,13 @@ export class AudioRecorderView extends Component<AudioRecorderViewProps, AudioRe
     }
 
     let result = (
-    <div style="overflow-y: scroll; height: 100%; background-color: #190933; ">
-        <button style="padding: 5px; border: 1px solid; border-radius: 5%; margin: 5px; font-weight: bold;" onClick={(e) => this.loadAssets()}>Load Track</button>
-        <button style="padding: 5px; border: 1px solid; border-radius: 5%; margin: 5px; font-weight: bold;" onClick={(e) => this.toggleMonitor()}>Monitor: <b>{this.props.plugin.audioNode.monitor ? "On" : "Off"}</b></button>
+    <div class={styles.Wrapper}>
+        <button class={styles.Button} onClick={(e) => this.loadAssets()}>Load Track</button>
+        <button class={styles.Button} onClick={(e) => this.toggleMonitor()}>Monitor: <b>{this.props.plugin.audioNode.monitor ? "On" : "Off"}</b></button>
 
         {content}
     </div>)
 
     return result
-  }
-
-  css(): string {
-    return `
-      `
-  }
-  
+  }  
 }

@@ -5,8 +5,12 @@ import { PatternDelegate } from 'wam-extensions';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 import { AudioRecorderNode } from './AudioRecorderNode';
 
-import { AudioRecorderView } from './AudioRecorderView';
+import { AudioRecorderView } from './views/AudioRecorderView';
 
+import styleRoot from "./views/AudioRecorderView.scss"
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
 
 export default class AudioRecorderModule extends WebAudioModule<AudioRecorderNode> {
 	//@ts-ignore
@@ -47,20 +51,23 @@ export default class AudioRecorderModule extends WebAudioModule<AudioRecorderNod
 		const div = document.createElement('div');
 		// hack because h() is getting stripped for non-use despite it being what the JSX compiles to
 		h("div", {})
-		div.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
 
-		//var shadow = div.attachShadow({mode: 'open'});
-		//const container = document.createElement('div');
-		//container.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
+		var shadow = div.attachShadow({mode: 'open'});
 		
-		//shadow.appendChild(container)
+		// @ts-ignore
+    	styleRoot.use({ target: shadow });
 
-		//render(<ChorderView plugin={this}></ChorderView>, div);
-		render(<AudioRecorderView plugin={this} clipId={clipId}></AudioRecorderView>, div)
+		div.setAttribute("style", "display: flex; flex-direction: column: width: 100%; height: 100%")
+
+		render(<AudioRecorderView plugin={this} clipId={clipId}></AudioRecorderView>, shadow)
+
 		return div;
 	}
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styleRoot.unuse()
+
 		render(null, el)
 	}
 
