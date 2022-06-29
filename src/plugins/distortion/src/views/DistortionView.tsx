@@ -1,8 +1,14 @@
 import { h, Component, render } from 'preact';
-import { Knob } from '../../shared/ui/Knob'
-import { Select } from '../../shared/ui/Select'
+import { Knob } from '../../../shared/ui/Knob'
+import { Select } from '../../../shared/ui/Select'
 
-import Distortion from '.'
+import Distortion from '..'
+
+import styleRoot from "./DistortionView.scss"
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
+
 
 export interface DistortionViewProps {
   plugin: Distortion
@@ -31,7 +37,7 @@ export class DistortionView extends Component<DistortionViewProps, any> {
     let params = this.props.plugin.audioNode.paramMgr
 
     return (
-    <div class="distortion-module">
+    <div class={styles.distortionModule}>
         <div style="display: flex; margin: auto">
             <Knob label="Drive" size={40} value={() => params.getParamValue("overdrive")} minimumValue={1} maximumValue={10} onChange={(v) => this.paramChanged("overdrive", v)}/>
             <Knob label="Level" size={40} value={() => params.getParamValue("level")} minimumValue={0} maximumValue={4} onChange={(v) => this.paramChanged("level", v)}/>
@@ -42,45 +48,7 @@ export class DistortionView extends Component<DistortionViewProps, any> {
         </div>
         <div style="flex: 1">
         </div>
-        <style>
-          {this.css()}
-        </style>
     </div>)
-  }
-
-  css(): string {
-    return `
-      .distortion-module {
-          flex: 1;
-          background-color: #fe8e22;
-          display: flex;
-          flex-direction:column;
-          justify-content:space-between;
-          padding: 10px;
-      }
-      
-      .distortion-module .component-wrapper {
-          padding: 5px;
-      }
-
-        /* UI elements */
-    
-      .component-wrapper {
-        display: flex;
-        flex-direction: column; 
-        align-content: center; 
-        text-align: center;
-      }
-      
-      .component-knob, .component-fader {
-          margin-top: auto;
-      }
-      
-      .component-select {
-          margin-top: auto;
-          margin-bottom: 3px;
-      }
-      `
   }
   
 }
