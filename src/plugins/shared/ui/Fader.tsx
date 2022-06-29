@@ -1,6 +1,11 @@
 import { Component, h } from 'preact';
 import { svg_create, svg_line, svg_rectangle, svg_update_line, svg_update_rectangle } from './svg'
 
+import styleRoot from "./Fader.scss"
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
+
 export interface FaderProps {
     value: () => number
     automationValue?: () => number
@@ -204,11 +209,10 @@ export class Fader extends Component<FaderProps, FaderState> {
     render() {
         h("div", {})
 
-        return <div class="component-wrapper">
+        return <div class="ComponentWrapper">
             <label>{this.props.label ? this.props.label : ""}</label>
-            <div ref={(ref) => this.setup(ref)} class="component-fader flex flex-col items-center"
+            <div ref={(ref) => this.setup(ref)} class="Fader"
                 onMouseDown={(e) => this.onMousedown(e)}>
-
             </div>
             <small><label ref={ref => { this.valueLabel = ref; this.lastValue = undefined} }></label></small>
         </div>

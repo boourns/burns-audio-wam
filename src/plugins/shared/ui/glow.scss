@@ -1,0 +1,12 @@
+:global(.ComponentWrapper) {
+    display: flex;
+    flex-direction: column; 
+    align-items: center; 
+    text-align: center;
+    flex: 1;
+    padding: 4px;
+}
+
+@import "./Fader.scss";
+@import "./Knob.scss";
+@import "./Select.scss";

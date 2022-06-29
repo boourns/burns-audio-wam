@@ -8,20 +8,4 @@
     padding: 10px;
 }
 
-/* UI elements */
-.component-wrapper {
-    display: flex;
-    flex-direction: column; 
-    align-content: center; 
-    text-align: center;
-    flex: 1;
-}
-
-.component-knob, .component-fader {
-    margin-top: auto;
-}
-
-.component-select {
-    margin-top: auto;
-    margin-bottom: 3px;
-}
+@import "../../../shared/ui/glow.scss";

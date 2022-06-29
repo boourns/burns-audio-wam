@@ -1,6 +1,12 @@
 import { Component, h } from 'preact';
 import { svg_arc, svg_create, svg_update_arc } from './svg'
 
+import styleRoot from "./Knob.scss"
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
+
+
 export type KnobProps = {
     value: () => number
 
@@ -208,9 +214,9 @@ export class Knob extends Component<KnobProps, KnobState> {
         h("div", {})
 
         return (
-        <div class="component-wrapper">
+        <div class="ComponentWrapper">
             <label>{this.props.label}</label>
-            <div ref={(ref) => this.setup(ref)} class="component-knob flex flex-col items-center"
+            <div ref={(ref) => this.setup(ref)} class="Knob"
                 onMouseDown={(e) => this.onMousedown(e)}
                 onDblClick={(e) => this.onDoubleClick(e)}
                 >
