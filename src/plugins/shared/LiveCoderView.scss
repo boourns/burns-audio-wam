@@ -1,9 +1,7 @@
-@import "../../shared/ui/glow.scss";
-@import "./EditInstrumentDefinitionView.scss";
+@import "./ui/glow.scss";
 
-.module {
+:global(.LiveCoderModule) {
     flex: 1;
-    background-color: lightblue;
     display: flex;
     flex-direction:column;
     justify-content:space-between;

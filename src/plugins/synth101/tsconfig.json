@@ -25,7 +25,8 @@
       "downlevelIteration": true
     },
     "include": [
-      "./src/*"    ],
+      "./src/*"    
+    ],
     "exclude": [
       "dist",
       "node_modules",

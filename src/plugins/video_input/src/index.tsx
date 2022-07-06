@@ -11,6 +11,8 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import { VideoInputView } from './VideoInputView';
 import VideoInputNode from './Node';
 
+import styleRoot from "./VideoInput.scss"
+
 export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
@@ -51,7 +53,6 @@ export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
     }
 
 	async createGui() {
-		
 		const div = document.createElement('div');
 		// hack because h() is getting stripped for non-use despite it being what the JSX compiles to
 		h("div", {})
@@ -59,12 +60,18 @@ export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
+		// @ts-ignore
+		styleRoot.use({ target: shadow });
+
 		render(<VideoInputView plugin={this}></VideoInputView>, shadow);
 
 		return div;
 	}
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styleRoot.unuse()
+		
 		render(null, el.shadowRoot)
 	}
 }

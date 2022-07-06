@@ -1,12 +1,11 @@
 @import "../../shared/ui/glow.scss";
-@import "./EditInstrumentDefinitionView.scss";
 
-.module {
+.reverbModule {
     flex: 1;
-    background-color: lightblue;
+    background-color: #631F87;
     display: flex;
     flex-direction:column;
     justify-content:space-between;
-    width: 100%;
-    height: 100%;
+    padding: 10px;
+    color: white;
 }

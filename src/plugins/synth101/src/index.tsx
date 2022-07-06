@@ -11,6 +11,8 @@ import { h, render } from 'preact';
 import { SynthView } from './SynthView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
+import styleRoot from "./Synth101.scss"
+
 let lfoWaves: OscillatorType[] = ["triangle", "square"]
 let ranges = ["32'", "16'", "8'", "4'"]
 let pwms = ["LFO", "Manual", "Env"]
@@ -292,6 +294,9 @@ export default class Synth101 extends WebAudioModule<Synth101Node> {
 		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
+		// @ts-ignore
+		styleRoot.use({ target: shadow });
+
 		let initialState = this.audioNode.paramMgr.getParamsValues()
 
 		render(<SynthView initialState={initialState} plugin={this}></SynthView>, shadow);
@@ -300,6 +305,9 @@ export default class Synth101 extends WebAudioModule<Synth101Node> {
 	}
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styleRoot.unuse()
+
 		render(null, el.shadowRoot)
 	}
 }

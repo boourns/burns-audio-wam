@@ -8,8 +8,14 @@ import { PianoRoll } from './PianoRoll';
 import { ClipSettingsView } from './ClipSettingsView';
 import { Note, PPQN } from './Clip';
 import { Design, NoteCanvasRenderer, NoteCanvasRenderState } from './NoteCanvasRenderer';
+
 const logger = (...any: any) => {}
 //const logger = console.log
+
+import styleRoot from "./PianoRollView.scss"
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
 
 type PositionEvent = MouseEvent & { layerX: number, layerY: number}
 
@@ -268,12 +274,12 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
             ref.innerHTML = ""
 
             let body = document.createElement("div");
-            body.setAttribute("class", "pianoroll-body");
+            body.setAttribute("class", styles.pianorollBody);
             this.body = body;
 
             body.appendChild(canvas)
             body.appendChild(this.canvasRenderer.playhead)
-            this.canvasRenderer.playhead.setAttribute("class", "playhead")
+            this.canvasRenderer.playhead.setAttribute("class", styles.playhead)
 
             ref.appendChild(header)
             ref.appendChild(body)
@@ -330,11 +336,8 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         }
 
         return (
-            <div ref={(ref) => this.setup(ref)} class="pianoroll-container">
+            <div ref={(ref) => this.setup(ref)} class={styles.pianorollContainer}>
                 {settingsModal}
-                <style>
-                    {this.css()}
-                </style>
             </div>
         )
     }
@@ -362,6 +365,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         
         let settingsButton = document.createElement("button")
         settingsButton.textContent = "Settings"
+        // TODO this CSS doesn't exist in this project
         settingsButton.setAttribute("class", "border m-1 px-2 py-1 border-gray-700 bg-gray-300 text-xs shadow-md")
         settingsButton.addEventListener("click", this.settingsButtonPressed.bind(this))
         span.appendChild(settingsButton)
@@ -437,37 +441,6 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         this.setState({
             showSettingsModal: false
         })
-    }
-
-    css(): string {
-        return `
-        
-.pianoroll-container {
-    flex: 1;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-.pianoroll-body {
-    flex-shrink: 1;
-    overflow: scroll;
-    overflow-x: hidden;
-    position: relative;
-}
-
-.pianoroll {
-    stroke:grey; 
-    fill:none; 
-    stroke-width:1
-}
-
-.playhead {
-    position: absolute; 
-    top: 0; 
-    left: 0;
-}
-        `
     }
 }
 

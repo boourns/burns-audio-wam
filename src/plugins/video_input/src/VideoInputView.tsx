@@ -1,6 +1,10 @@
 import { h, Component, render } from 'preact';
-import { Knob } from '../../shared/ui/Knob'
-import { Select } from '../../shared/ui/Select'
+
+import styleRoot from "./VideoInput.scss"
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
+
 
 import AudioInputModule from '.';
 
@@ -29,9 +33,4 @@ export class VideoInputView extends Component<VideoInputViewProps, any> {
     </div>
 
   }
-
-  css(): string {
-    return ``
-  }
-  
 }
