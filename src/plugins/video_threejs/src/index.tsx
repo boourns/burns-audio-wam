@@ -78,13 +78,7 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 
 		if (window.WAMExtensions && window.WAMExtensions.video) {
 			window.WAMExtensions.video.setDelegate(this.instanceId, {
-				getVideoConfig: () => {
-					return {
-						numberOfInputs: 0,
-						numberOfOutputs: 1,
-					}
-				},
-				connectVideo: (options: VideoExtensionOptions) => {
+				connectVideo: (options: VideoExtensionOptions): VideoModuleConfig => {
 					console.log("connectVideo!")
 
 					this.options = options
@@ -92,6 +86,10 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 
 					if (this.generator) {
 						this.generator.initialize(THREE, options)
+					}
+					return {
+						numberOfInputs: 0,
+						numberOfOutputs: 1,
 					}
 				},
 				render: (inputs: WebGLTexture[], currentTime: number): WebGLTexture[] => {

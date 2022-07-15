@@ -1,0 +1,25 @@
+.pianorollContainer {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.pianorollBody {
+    flex-shrink: 1;
+    overflow: scroll;
+    overflow-x: hidden;
+    position: relative;
+}
+
+.pianoroll {
+    stroke:grey; 
+    fill:none; 
+    stroke-width:1
+}
+
+.playhead {
+    position: absolute; 
+    top: 0; 
+    left: 0;
+}

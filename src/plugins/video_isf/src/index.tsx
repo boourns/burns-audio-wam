@@ -12,7 +12,7 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 
 import { DynamicParameterNode } from "../../shared/DynamicParameterNode";
 
-import { VideoExtensionOptions } from 'wam-extensions';
+import { VideoExtensionOptions, VideoModuleConfig } from 'wam-extensions';
 import { LiveCoderNode, LiveCoderView } from '../../shared/LiveCoderView';
 
 import { ISFShader } from './ISFShader';
@@ -78,18 +78,17 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 
 		if (window.WAMExtensions && window.WAMExtensions.video) {
 			window.WAMExtensions.video.setDelegate(this.instanceId, {
-				getVideoConfig: () => {
-					return {
-						numberOfInputs: 1,
-						numberOfOutputs: 1,
-					}
-				},
-				connectVideo: (options: VideoExtensionOptions) => {
+				connectVideo: (options: VideoExtensionOptions): VideoModuleConfig => {
 					console.log("connectVideo!")
 
 					this.options = options
 
-					this.upload()					
+					this.upload()
+					
+					return {
+						numberOfInputs: 1,
+						numberOfOutputs: 1,
+					}
 				},
 				render: (inputs: WebGLTexture[], currentTime: number) => {
 					if (this.shader) {

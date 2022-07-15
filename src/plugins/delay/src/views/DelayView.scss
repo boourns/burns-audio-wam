@@ -1,0 +1,11 @@
+.delayModule {
+    flex: 1;
+    background-color: darkslateblue;
+    display: flex;
+    flex-direction:column;
+    justify-content:space-between;
+    color: white;
+    padding: 10px;
+}
+
+@import "../../../shared/ui/glow.scss";

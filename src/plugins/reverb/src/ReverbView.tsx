@@ -5,6 +5,11 @@ import { Select } from '../../shared/ui/Select'
 import ConvolutionReverb from '.'
 import { IRListEntry } from './Node';
 
+import styleRoot from "./ReverbView.scss"
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
+
 export interface ConvolutionReverbViewProps {
   plugin: ConvolutionReverb
 }
@@ -49,7 +54,7 @@ export class ConvolutionReverbView extends Component<ConvolutionReverbViewProps,
     let irValues = this.state.IRList.map(e => e.id)
 
     return (
-    <div class="reverb-module">
+    <div class={styles.reverbModule}>
         <div style="display: flex">
             <Select options={irOptions} values={irValues} value={() => this.props.plugin.audioNode.state.ir} label="Model" onChange={(v) => this.updateIR(v)} />
             <Knob label="Mix" size={40} value={() => params.getParamValue("wet")} minimumValue={0.0} maximumValue={1} onChange={(v) => this.paramChanged("wet", v)}/>
@@ -57,47 +62,6 @@ export class ConvolutionReverbView extends Component<ConvolutionReverbViewProps,
 
         <div style="flex: 1">
         </div>
-        <style>
-          {this.css()}
-        </style>
     </div>)
-  }
-
-  css(): string {
-    return `
-      .reverb-module {
-          flex: 1;
-          background-color: #631F87;
-          display: flex;
-          flex-direction:column;
-          justify-content:space-between;
-          padding: 10px;
-          color: white;
-      }
-      
-      .distortion-module .component-wrapper {
-          padding: 5px;
-      }
-
-        /* UI elements */
-    
-      .component-wrapper {
-        display: flex;
-        flex-direction: column; 
-        align-content: center; 
-        text-align: center;
-        flex: 1;
-      }
-      
-      .component-knob, .component-fader {
-          margin-top: auto;
-      }
-      
-      .component-select {
-          margin-top: auto;
-          margin-bottom: 3px;
-      }
-      `
-  }
-  
+  }  
 }

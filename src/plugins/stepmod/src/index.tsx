@@ -12,6 +12,9 @@ import { Clip } from './Clip';
 
 import {PatternDelegate} from 'wam-extensions';
 
+import styleRoot from "./StepModulatorView.scss"
+
+
 var logger = console.log
 
 class StepModulatorNode extends WamNode {
@@ -118,13 +121,12 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 		const div = document.createElement('div');
 		// hack because h() is getting stripped for non-use despite it being what the JSX compiles to
 		h("div", {})
-		div.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
 
-		//var shadow = div.attachShadow({mode: 'open'});
-		//const container = document.createElement('div');
-		//container.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
-		
-		//shadow.appendChild(container)
+		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
+
+		var shadow = div.attachShadow({mode: 'open'});
+		// @ts-ignore
+		styleRoot.use({ target: shadow });
 
 		if (!clipId) {
 			clipId = this.sequencer.clip().state.id
@@ -132,7 +134,7 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 			this.sequencer.addClip(clipId)
 		}
 
-		render(<StepModulatorView plugin={this} sequencer={this.sequencer} clipId={clipId}></StepModulatorView>, div);
+		render(<StepModulatorView plugin={this} sequencer={this.sequencer} clipId={clipId}></StepModulatorView>, shadow);
 
 		return div;
 	}
@@ -142,6 +144,9 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 	}
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styleRoot.unuse()
+
 		render(null, el)
 	}
 

@@ -1,4 +1,3 @@
-import { realpathSync } from 'fs';
 import { Component, h } from 'preact';
 
 export type HTMLInputEvent = Event & {target: HTMLInputElement }
@@ -132,9 +131,9 @@ export class Select<T> extends Component<SelectProps, any> {
 
         let style = this.props.style ? this.props.style : ""
 
-        return <div class="component-wrapper" style={style}>
+        return <div class="ComponentWrapper" style={style}>
             {this.props.label && <label>{this.props.label}</label>}
-            <div ref={(e) => this.setup(e)} style="color: black;" class="component-select">
+            <div ref={(e) => this.setup(e)} style="color: black;" class="ComponentSelect">
             </div>
         </div>
     }

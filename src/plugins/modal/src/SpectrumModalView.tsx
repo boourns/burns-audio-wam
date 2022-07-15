@@ -3,6 +3,8 @@ import { Knob } from '../../shared/ui/Knob'
 import SpectrumModalModule from '.';
 import { Select } from '../../shared/ui/Select'
 
+import "./SpectrumModalView.scss";
+
 export interface SpectrumModalViewProps {
   plugin: SpectrumModalModule
 }
@@ -95,36 +97,6 @@ export class SpectrumModalView extends Component<SpectrumModalViewProps, any> {
 
   css(): string {
     return `
-
-        /* UI elements */
-      .modal-module {
-          flex: 1;
-          background-color: #476C9B;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          padding: 10px;
-          color: white;
-      }
-
-      .component-wrapper {
-        display: flex;
-        flex-direction: column; 
-        align-content: center; 
-        text-align: center;
-        flex: 1;
-        padding-left: 3px;
-        padding-right: 3px;
-      }
-      
-      .component-knob, .component-fader {
-          margin-top: auto;
-      }
-      
-      .component-select {
-          margin-top: auto;
-          margin-bottom: 3px;
-      }
       `
   }
   

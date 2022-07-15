@@ -12,6 +12,7 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import getSpectrumModalProcessor from "./SpectrumModalProcessor"
 
 import { SpectrumModalView } from './SpectrumModalView';
+import styleRoot from "./SpectrumModalView.scss";
 	
 class SpectrumModalNode extends WamNode {
 	destroyed = false;
@@ -77,19 +78,22 @@ export default class SpectrumModalModule extends WebAudioModule<WamNode> {
 		const div = document.createElement('div');
 		// hack because h() is getting stripped for non-use despite it being what the JSX compiles to
 		h("div", {})
-		div.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
 
-		//var shadow = div.attachShadow({mode: 'open'});
-		//const container = document.createElement('div');
-		//container.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
-		
-		//shadow.appendChild(container)
+		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
+
+		var shadow = div.attachShadow({mode: 'open'});
+		// @ts-ignore
+		styleRoot.use({ target: shadow });
 
 		render(<SpectrumModalView plugin={this}></SpectrumModalView>, div);
+
 		return div;
 	}
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styleRoot.unuse()
+
 		render(null, el)
 	}
 }

@@ -8,8 +8,9 @@ import { WebAudioModule } from '@webaudiomodules/sdk';
 import {ParamMgrFactory } from '@webaudiomodules/sdk-parammgr'
 import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
-import { AudioInputView } from './AudioInputView';
+import { AudioInputView } from './views/AudioInputView';
 import AudioInputNode from './Node';
+import styles from "./views/AudioInputView.scss"
 
 export default class AudioInputModule extends WebAudioModule<AudioInputNode> {
 	//@ts-ignore
@@ -51,12 +52,18 @@ export default class AudioInputModule extends WebAudioModule<AudioInputNode> {
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
+		// @ts-ignore
+		styles.use({ target: shadow });
+		
 		render(<AudioInputView plugin={this}></AudioInputView>, shadow);
 
 		return div;
 	}
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styles.unuse()
+
 		render(null, el.shadowRoot)
 	}
 }

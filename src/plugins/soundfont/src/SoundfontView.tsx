@@ -1,9 +1,13 @@
 import { h, Component, render } from 'preact';
-import { Knob } from '../../shared/ui/Knob'
 import { Select } from '../../shared/ui/Select'
 
 import SoundfontModule from '.';
 import { InstrumentName } from 'soundfont-player'
+
+import styleRoot from "./SoundfontView.scss"
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
 
 export interface SoundfontViewProps {
   plugin: SoundfontModule
@@ -167,63 +171,12 @@ export class SoundfontView extends Component<SoundfontViewProps, any> {
     let params = this.props.plugin.audioNode.paramMgr
 
     return (
-    <div class="soundfont-module">
-        <div style="soundfont-section">
+    <div class={styles.module}>
+        <div style={styles.section}>
             <Select label={"Instrument"} options={availableInstruments} values={availableInstruments} value={() => this.props.plugin.synth.instrument} onChange={(v) => this.instrumentChanged(v)}></Select>
             <div style="flex: 1">
             </div>
         </div>
-        <style>
-          {this.css()}
-        </style>
     </div>)
-  }
-
-  css(): string {
-    return `
-      .soundfont-module {
-          flex: 1;
-          background-color: #292a30;
-          display: flex;
-          flex-direction:column;
-          justify-content:space-between;
-          padding: 10px;
-          color: white;
-      }
-      
-      .soundfont-module .component-wrapper {
-          padding: 5px;
-      }
-
-      .soundfont-101-section {
-        /* border: 1px solid white; */
-        border: 1px solid rgba(0,0,0,0.3);
-    
-        border-radius: 2px;
-        margin: 5px;
-        display: flex;
-        flex-direction: column;
-    }
-
-        /* UI elements */
-    
-      .component-wrapper {
-        display: flex;
-        flex-direction: column; 
-        align-content: center; 
-        text-align: center;
-        flex: 1;
-      }
-      
-      .component-knob, .component-fader {
-          margin-top: auto;
-      }
-      
-      .component-select {
-          margin-top: auto;
-          margin-bottom: 3px;
-      }
-      `
-  }
-  
+  }  
 }

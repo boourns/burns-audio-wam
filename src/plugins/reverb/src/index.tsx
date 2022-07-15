@@ -11,9 +11,11 @@ import { h, render } from 'preact';
 import { ConvolutionReverbView } from './ReverbView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
+import styleRoot from "./ReverbView.scss"
+
 export default class ConvolutionReverb extends WebAudioModule<ConvolutionReverbNode> {
 	//@ts-ignore
-	_baseURL = getBaseUrl(new URL('.', import.meta.url));
+	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 
@@ -23,6 +25,7 @@ export default class ConvolutionReverb extends WebAudioModule<ConvolutionReverbN
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this._descriptor, descriptor);
+		return descriptor
 	}
 
 	async initialize(state: any) {
@@ -77,12 +80,18 @@ export default class ConvolutionReverb extends WebAudioModule<ConvolutionReverbN
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
+		// @ts-ignore
+		styleRoot.use({ target: shadow });
+
 		render(<ConvolutionReverbView plugin={this}></ConvolutionReverbView>, shadow);
 
 		return div;
 	}
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styleRoot.unuse()
+		
 		render(null, el.shadowRoot)
 	}
 }

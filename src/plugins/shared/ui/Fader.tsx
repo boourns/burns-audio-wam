@@ -204,11 +204,10 @@ export class Fader extends Component<FaderProps, FaderState> {
     render() {
         h("div", {})
 
-        return <div class="component-wrapper">
+        return <div class="ComponentWrapper">
             <label>{this.props.label ? this.props.label : ""}</label>
-            <div ref={(ref) => this.setup(ref)} class="component-fader flex flex-col items-center"
+            <div ref={(ref) => this.setup(ref)} class="Fader"
                 onMouseDown={(e) => this.onMousedown(e)}>
-
             </div>
             <small><label ref={ref => { this.valueLabel = ref; this.lastValue = undefined} }></label></small>
         </div>

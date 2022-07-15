@@ -15,6 +15,11 @@ let vcaSources = ["Env", "Gate"]
 let envTriggers = ["Gate", "Trig", "Both"]
 let portamentoModes = ["Off", "Auto", "On"]
 
+import styleRoot from "./Synth101.scss"
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
+
 export interface SynthViewProps {
     plugin: Synth101
     initialState: Record<string, number>
@@ -49,7 +54,7 @@ export interface SynthViewProps {
     }
 
     async pollAutomationState() {
-      this.wamState = await this.props.plugin.audioNode.paramMgr.getParamsValues()
+      this.wamState = this.props.plugin.audioNode.paramMgr.getParamsValues()
       this.automationStatePoller = window.requestAnimationFrame(this.pollAutomationState)
     }
 
@@ -64,25 +69,25 @@ export interface SynthViewProps {
     render() {
       h("div", {})
 
-      return <div class="root">
-          <div class="synth-101">
-            <div class="synth-101-section">
-            <div class="synth-101-header">Portamento</div>
-            <div class="synth-101-section-content" style="flex-direction: column">
+      return <div class={styles.root}>
+          <div class={styles.synth101}>
+            <div class={styles.section}>
+            <div class={styles.header}>Portamento</div>
+            <div class={styles.content} style="flex-direction: column">
               <Knob label="Time" value={() => this.value("portamentoTime") } onChange={(e) => this.parameterChanged("portamentoTime", e)}/>
               <Select label="Mode" options={portamentoModes} value={() => this.value("portamentoMode")} onChange={(e) => this.parameterChanged("portamentoMode", parseInt(e))} />
             </div>
           </div>
-          <div class="synth-101-section">
-            <div class="synth-101-header">LFO</div>
-            <div class="synth-101-section-content" style="flex-direction: column">
+          <div class={styles.section}>
+            <div class={styles.header}>LFO</div>
+            <div class={styles.content} style="flex-direction: column">
               <Knob label="Rate" value={() => this.value("lfoRate")} onChange={(e) => this.parameterChanged("lfoRate", e)}/>
               <Select label="Waveform" options={lfoWaves} value={() => this.value("lfoWaveform")} onChange={(e) => this.parameterChanged("lfoWaveform", parseInt(e))} />
             </div>
           </div>
-          <div class="synth-101-section">
-            <div class="synth-101-header">Oscillator</div>
-            <div class="synth-101-section-content">
+          <div class={styles.section}>
+            <div class={styles.header}>Oscillator</div>
+            <div class={styles.content}>
               <div style="display: flex; flex-direction: column">
                 <Knob label="Tune" value={() => this.value("detune")} minimumValue={-0.5} maximumValue={0.5} bipolar={true} onChange={(e) => this.parameterChanged("detune", e)}/>
                 <Select label="Range" options={ranges} value={() => this.value("oscRange")} onChange={(e) => this.parameterChanged("oscRange", parseInt(e))} />
@@ -95,18 +100,18 @@ export interface SynthViewProps {
                 </div>        
             </div>
           </div>
-          <div class="synth-101-section">
-            <div class="synth-101-header">Mixer</div>
-            <div class="synth-101-section-content">
+          <div class={styles.section}>
+            <div class={styles.header}>Mixer</div>
+            <div class={styles.content}>
               {this.fader("Pulse", "mixerPulse")}
               {this.fader("Saw", "mixerSaw")}
               {this.fader("Sub", "mixerSub")}
               {this.fader("Noise", "mixerNoise")}
             </div>
           </div>
-          <div class="synth-101-section">
-            <div class="synth-101-header">Filter</div>
-            <div class="synth-101-section-content">
+          <div class={styles.section}>
+            <div class={styles.header}>Filter</div>
+            <div class={styles.content}>
               {this.fader("Freq", "filterFreq")}
               {this.fader("Res", "filterRes")}
               <div style="width: 10px;"> </div>
@@ -115,9 +120,9 @@ export interface SynthViewProps {
               {this.fader("Kybd", "filterKeyboard")}
             </div>
           </div>
-          <div class="synth-101-section">
-          <div class="synth-101-header">VCA / Env</div>
-          <div class="synth-101-section-content">
+          <div class={styles.section}>
+          <div class={styles.header}>VCA / Env</div>
+          <div class={styles.content}>
             <div style="display: flex; flex-direction: column">
               <Select label="VCA" options={vcaSources} value={() => this.value("vcaSource")} onChange={(e) => this.parameterChanged("vcaSource", parseInt(e))} />
             </div>
@@ -127,78 +132,11 @@ export interface SynthViewProps {
             {this.fader("R", "envRelease")}
             </div>
         </div>
-        <style>
-          {this.css()}
-        </style>
         </div>
       </div>
     }
 
     fader(label: string, param: string) {
       return <Fader label={label} value={() => this.value(param)} onChange={(e) => this.parameterChanged(param,e)}/>
-    }
-
-    css() {
-      return `
-      .root {
-        background-color: #4773cc;
-        display: flex;
-        flex: 1;
-        height: 100%;
-        width: 100%;
-      }
-
-      .synth-101 {
-        color: white;
-        display: flex;
-        justify-content: center;
-        margin: auto;
-    }
-    
-    .synth-101 .component-wrapper {
-        padding: 5px;
-    }
-    
-    .synth-101-section {
-        /* border: 1px solid white; */
-        border: 1px solid rgba(0,0,0,0.3);
-    
-        border-radius: 2px;
-        margin: 5px;
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .synth-101-header {
-        background-color: rgba(0,0,0,0.2);
-        padding: 2px;
-    }
-    
-    .synth-101-section-content {
-        display: flex;
-        justify-content: stretch;
-        flex: 1;
-        padding: 10px;
-    }
-    
-    /* UI elements */
-    
-    .component-wrapper {
-        display: flex;
-        flex-direction: column; 
-        align-content: center; 
-        text-align: center;
-        flex: 1;
-    }
-    
-    .component-knob, .component-fader {
-        margin-top: auto;
-    }
-    
-    .component-select {
-        margin-top: auto;
-        margin-bottom: 3px;
-    }
-    `
     }
   }

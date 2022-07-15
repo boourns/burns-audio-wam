@@ -1,0 +1,11 @@
+@import "../../shared/ui/glow.scss";
+
+.reverbModule {
+    flex: 1;
+    background-color: #631F87;
+    display: flex;
+    flex-direction:column;
+    justify-content:space-between;
+    padding: 10px;
+    color: white;
+}

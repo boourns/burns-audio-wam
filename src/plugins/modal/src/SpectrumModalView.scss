@@ -1,0 +1,12 @@
+@import "../../shared/ui/glow.scss";
+
+/* UI elements */
+.modalModule {
+    flex: 1;
+    background-color: #476C9B;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px;
+    color: white;
+}

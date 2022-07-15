@@ -12,13 +12,13 @@ import { h, render } from 'preact';
 import { SoundfontView } from './SoundfontView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
+import styleRoot from "./SoundfontView.scss"
+
 export default class SoundfontModule extends WebAudioModule<SoundfontPlayerNode> {
 	//@ts-ignore
-	_baseURL = getBaseUrl(new URL('.', import.meta.url));
+	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
-	_envelopeGeneratorUrl = `${this._baseURL}/EnvelopeGeneratorProcessor.js`;
-	_slewUrl = `${this._baseURL}/SlewProcessor.js`;
 
 	synth: SoundfontPlayerNode
 
@@ -28,6 +28,7 @@ export default class SoundfontModule extends WebAudioModule<SoundfontPlayerNode>
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this._descriptor, descriptor);
+		return descriptor
 	}
 
 	async initialize(state: any) {
@@ -65,12 +66,18 @@ export default class SoundfontModule extends WebAudioModule<SoundfontPlayerNode>
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
+		// @ts-ignore
+		styleRoot.use({ target: shadow });
+
 		render(<SoundfontView plugin={this}></SoundfontView>, shadow);
 
 		return div;
 	}
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styleRoot.unuse()
+
 		render(null, el.shadowRoot)
 	}
 }

@@ -2,10 +2,6 @@
 // Please do not change this file!
 interface CssExports {
   'blah': string;
-  'component-fader': string;
-  'component-knob': string;
-  'component-select': string;
-  'component-wrapper': string;
   'module': string;
 }
 export const cssExports: CssExports;

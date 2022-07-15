@@ -1,0 +1,10 @@
+.distortionModule {
+    flex: 1;
+    background-color: #fe8e22;
+    display: flex;
+    flex-direction:column;
+    justify-content:space-between;
+    padding: 10px;
+}
+
+@import "../../../shared/ui/glow.scss";

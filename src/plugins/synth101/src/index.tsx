@@ -11,6 +11,8 @@ import { h, render } from 'preact';
 import { SynthView } from './SynthView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
+import styleRoot from "./Synth101.scss"
+
 let lfoWaves: OscillatorType[] = ["triangle", "square"]
 let ranges = ["32'", "16'", "8'", "4'"]
 let pwms = ["LFO", "Manual", "Env"]
@@ -24,7 +26,7 @@ function normalize(v: number, min: number, max: number, int: boolean = false) {
 
 export default class Synth101 extends WebAudioModule<Synth101Node> {
 	//@ts-ignore
-	_baseURL = getBaseUrl(new URL('.', import.meta.url));
+	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_envelopeGeneratorUrl = `${this._baseURL}/EnvelopeGeneratorProcessor.js`;
@@ -36,6 +38,7 @@ export default class Synth101 extends WebAudioModule<Synth101Node> {
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this._descriptor, descriptor);
+		return descriptor
 	}
 
 	async initialize(state: any) {
@@ -291,13 +294,20 @@ export default class Synth101 extends WebAudioModule<Synth101Node> {
 		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
-		let initialState = await this.audioNode.getParameterValues()
+		// @ts-ignore
+		styleRoot.use({ target: shadow });
+
+		let initialState = this.audioNode.paramMgr.getParamsValues()
+
 		render(<SynthView initialState={initialState} plugin={this}></SynthView>, shadow);
 
 		return div;
 	}
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styleRoot.unuse()
+
 		render(null, el.shadowRoot)
 	}
 }

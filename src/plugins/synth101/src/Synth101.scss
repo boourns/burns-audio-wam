@@ -1,0 +1,36 @@
+.root {
+    background-color: #4773cc;
+    display: flex;
+    flex: 1;
+    height: 100%;
+    width: 100%;
+}
+
+.synth101 {
+    color: white;
+    display: flex;
+    justify-content: center;
+    margin: auto;
+}
+
+.section {
+    /* border: 1px solid white; */
+    border: 1px solid rgba(0,0,0,0.3);
+
+    border-radius: 2px;
+    margin: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    background-color: rgba(0,0,0,0.2);
+    padding: 2px;
+}
+
+.content {
+    display: flex;
+    justify-content: stretch;
+    flex: 1;
+    padding: 10px;
+}

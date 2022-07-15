@@ -10,6 +10,8 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import { MIDIInputView } from './MIDIInputView';
 import { MIDIInputNode } from './Node';
 
+import styleRoot from "./MIDIInputView.scss";
+
 export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
@@ -91,13 +93,18 @@ export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
-		let initialState = await this.audioNode.getParameterValues()
+		// @ts-ignore
+		styleRoot.use({ target: shadow });
+
 		render(<MIDIInputView plugin={this}></MIDIInputView>, shadow);
 
 		return div;
 	}
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styleRoot.unuse()
+
 		render(null, el.shadowRoot)
 	}
 }

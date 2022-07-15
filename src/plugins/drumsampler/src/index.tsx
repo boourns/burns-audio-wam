@@ -164,6 +164,7 @@ export default class DrumSampler extends WebAudioModule<DrumSamplerNode> {
 	destroyGui(el: Element) {
 		//@ts-ignore
 		styles.unuse()
+		
 		render(null, el.shadowRoot)
 	}
 }

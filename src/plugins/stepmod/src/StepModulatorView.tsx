@@ -6,6 +6,11 @@ import { Knob } from '../../shared/ui/Knob'
 import StepModulatorModule from '.';
 import { StepModulator } from './StepModulator';
 
+import styleRoot from "./StepModulatorView.scss"
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
+
 let quantizeOptions = [
     "1/32",
     "1/16",
@@ -107,7 +112,7 @@ export class StepModulatorView extends Component<StepModulatorViewProps, any> {
         })
 
         return (
-        <div class="step-modulator-module">
+        <div class={styles.Module}>
             <div style="display: flex">
                 {steps}
             </div>
@@ -119,47 +124,6 @@ export class StepModulatorView extends Component<StepModulatorViewProps, any> {
             </div>
 
             <div style="flex: 1"></div>
-            <style>
-            {this.css()}
-            </style>
         </div>)
-    }
-
-  css(): string {
-    return `
-      .step-modulator-module {
-          flex: 1;
-          background-color: #56585b;
-          display: flex;
-          flex-direction:column;
-          justify-content:space-between;
-          padding: 10px;
-          color: white;
-      }
-      
-      .step-modulator-module .component-wrapper {
-          padding: 5px;
-      }
-
-        /* UI elements */
-    
-      .component-wrapper {
-        display: flex;
-        flex-direction: column; 
-        align-content: center; 
-        text-align: center;
-        flex: 1;
-      }
-      
-      .component-knob, .component-fader {
-          margin-top: auto;
-      }
-      
-      .component-select {
-          margin-top: auto;
-          margin-bottom: 3px;
-      }
-      `
-  }
-  
+    }  
 }
