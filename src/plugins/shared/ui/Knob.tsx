@@ -1,12 +1,6 @@
 import { Component, h } from 'preact';
 import { svg_arc, svg_create, svg_update_arc } from './svg'
 
-import styleRoot from "./Knob.scss"
-
-// @ts-ignore
-let styles = styleRoot.locals as typeof styleRoot
-
-
 export type KnobProps = {
     value: () => number
 

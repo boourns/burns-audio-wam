@@ -1,11 +1,6 @@
 import { Component, h } from 'preact';
 import { svg_create, svg_line, svg_rectangle, svg_update_line, svg_update_rectangle } from './svg'
 
-import styleRoot from "./Fader.scss"
-
-// @ts-ignore
-let styles = styleRoot.locals as typeof styleRoot
-
 export interface FaderProps {
     value: () => number
     automationValue?: () => number

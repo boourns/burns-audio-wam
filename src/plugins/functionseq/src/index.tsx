@@ -16,6 +16,8 @@ import { LiveCoderNode, LiveCoderView } from "../../shared/LiveCoderView"
 
 import getFunctionSequencerProcessor from './FunctionSeqProcessor';
 import { defaultScript, editorDefinition } from './editor';
+
+import styleRoot from "./FunctionSequencer.scss"
 	
 type FunctionSeqState = {
 	runCount: number
@@ -235,9 +237,15 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 		const div = document.createElement('div');
 		// hack because h() is getting stripped for non-use despite it being what the JSX compiles to
 		h("div", {})
-		div.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
+		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
-		render(<LiveCoderView plugin={this.audioNode}></LiveCoderView>, div);
+		var shadow = div.attachShadow({mode: 'open'});
+		// @ts-ignore
+		styleRoot.use({ target: shadow });
+
+		console.log("Styleroot is ", styleRoot)
+
+		render(<LiveCoderView plugin={this.audioNode}></LiveCoderView>, shadow);
 
 		return div;
 	}
