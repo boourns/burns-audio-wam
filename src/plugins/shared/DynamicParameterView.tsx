@@ -4,7 +4,6 @@ import { Knob } from "../shared/ui/Knob"
 import { Select } from "../shared/ui/Select"
 import { WamParameterData, WamParameterDataMap } from "@webaudiomodules/api";
 
-
 export interface DPProps {
     plugin: DynamicParameterNode
 }

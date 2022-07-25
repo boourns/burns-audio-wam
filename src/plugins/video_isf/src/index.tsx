@@ -12,13 +12,15 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 
 import { DynamicParameterNode } from "../../shared/DynamicParameterNode";
 
-import { VideoExtensionOptions } from 'wam-extensions';
+import { VideoExtensionOptions, VideoModuleConfig } from 'wam-extensions';
 import { LiveCoderNode, LiveCoderView } from '../../shared/LiveCoderView';
 
 import { ISFShader } from './ISFShader';
 import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
 import { defaultFragmentShader, defaultVertexShader } from './defaultShaders';
-	
+
+import styleRoot from "./ISFVideo.scss"
+
 type ISFVideoState = {
 	runCount: number
 	params: any
@@ -78,18 +80,17 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 
 		if (window.WAMExtensions && window.WAMExtensions.video) {
 			window.WAMExtensions.video.setDelegate(this.instanceId, {
-				getVideoConfig: () => {
-					return {
-						numberOfInputs: 1,
-						numberOfOutputs: 1,
-					}
-				},
-				connectVideo: (options: VideoExtensionOptions) => {
+				connectVideo: (options: VideoExtensionOptions): VideoModuleConfig => {
 					console.log("connectVideo!")
 
 					this.options = options
 
-					this.upload()					
+					this.upload()
+					
+					return {
+						numberOfInputs: 1,
+						numberOfOutputs: 1,
+					}
 				},
 				render: (inputs: WebGLTexture[], currentTime: number) => {
 					if (this.shader) {
@@ -234,13 +235,22 @@ export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
 		const div = document.createElement('div');
 		// hack because h() is getting stripped for non-use despite it being what the JSX compiles to
 		h("div", {})
-		div.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
 
-		render(<LiveCoderView plugin={this._audioNode}></LiveCoderView>, div);
+		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
+
+		var shadow = div.attachShadow({mode: 'open'});
+		// @ts-ignore
+		styleRoot.use({ target: shadow });
+
+		render(<LiveCoderView plugin={this._audioNode}></LiveCoderView>, shadow);
+
 		return div;
 	}
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styleRoot.unuse()
+
 		render(null, el)
 	}
 }

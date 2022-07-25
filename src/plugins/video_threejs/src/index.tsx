@@ -22,6 +22,8 @@ import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandle
 import getThreeJSProcessor from './ThreeJSProcessor';
 import { defaultScript } from './editorDefaults';
 
+import styleRoot from "./VideoThreeJS.scss"
+
 type ThreeJSState = {
 	runCount: number
 	params: any
@@ -78,13 +80,7 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 
 		if (window.WAMExtensions && window.WAMExtensions.video) {
 			window.WAMExtensions.video.setDelegate(this.instanceId, {
-				getVideoConfig: () => {
-					return {
-						numberOfInputs: 0,
-						numberOfOutputs: 1,
-					}
-				},
-				connectVideo: (options: VideoExtensionOptions) => {
+				connectVideo: (options: VideoExtensionOptions): VideoModuleConfig => {
 					console.log("connectVideo!")
 
 					this.options = options
@@ -92,6 +88,10 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 
 					if (this.generator) {
 						this.generator.initialize(THREE, options)
+					}
+					return {
+						numberOfInputs: 0,
+						numberOfOutputs: 1,
 					}
 				},
 				render: (inputs: WebGLTexture[], currentTime: number): WebGLTexture[] => {
@@ -305,13 +305,22 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 		const div = document.createElement('div');
 		// hack because h() is getting stripped for non-use despite it being what the JSX compiles to
 		h("div", {})
-		div.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
 
-		render(<LiveCoderView plugin={this.audioNode}></LiveCoderView>, div);
+		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
+
+		var shadow = div.attachShadow({mode: 'open'});
+		// @ts-ignore
+		styleRoot.use({ target: shadow });
+
+		render(<LiveCoderView plugin={this.audioNode}></LiveCoderView>, shadow);
+
 		return div;
 	}
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styleRoot.unuse()
+
 		render(null, el)
 	}	
 }

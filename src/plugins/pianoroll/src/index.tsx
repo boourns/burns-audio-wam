@@ -15,6 +15,8 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import { Clip } from './Clip';
 import { PianoRoll } from './PianoRoll';
 
+import styleRoot from "./PianoRollView.scss";
+
 const logger = console.log
 
 class PianoRollNode extends WamNode {
@@ -111,6 +113,10 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 		container.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
 		
 		shadow.appendChild(container)
+
+		// @ts-ignore
+		styleRoot.use({ target: shadow });
+
 		if (!clipId) {
 			clipId = "default"
 		} else {
@@ -126,6 +132,9 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 	// }
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styleRoot.unuse()
+
 		render(null, el)
 	}
 

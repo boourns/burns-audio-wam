@@ -5,6 +5,8 @@ import * as monaco from 'monaco-editor';
 import { MultiplayerHandler } from './collaboration/MultiplayerHandler';
 import { DynamicParameterNode } from './DynamicParameterNode';
 
+import styleRoot from "./LiveCoderView.scss"
+
 export interface LiveCoderNode extends DynamicParameterNode {
   error?: any
   renderCallback?: () => void
@@ -129,7 +131,7 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
     }
 
     let result = (
-    <div class="function-sequencer-module">
+    <div class="LiveCoderModule">
       <div style="display: flex; flex-direction: column">
         <div style="display: flex; justify-content: space-between; width: 100%">
           <div>
@@ -143,51 +145,9 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
         </div>
       </div>
       {panel}
-      <style>
-        {this.css()}
-      </style>
     </div>)
 
     return result
   }
 
-  css(): string {
-    return `
-      .function-sequencer-module {
-          flex: 1;
-          background-color: #lightblue;
-          display: flex;
-          flex-direction:column;
-          justify-content:space-between;
-          width: 100%;
-          height: 100%;
-      }
-      
-      .distortion-module .component-wrapper {
-          padding: 5px;
-      }
-
-        /* UI elements */
-    
-      .component-wrapper {
-        display: flex;
-        flex-direction: column; 
-        align-content: center; 
-        text-align: center;
-        flex: 1;
-      }
-      
-      .component-knob, .component-fader {
-          margin-top: auto;
-      }
-      
-      .component-select {
-          margin-top: auto;
-          margin-bottom: 3px;
-      }
-      `
-  }
-
-  
-  
 }

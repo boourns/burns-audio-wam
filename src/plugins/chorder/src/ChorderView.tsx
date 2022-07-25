@@ -69,47 +69,6 @@ export class ChorderView extends Component<ChorderViewProps, any> {
 
         <div style="flex: 1">
         </div>
-        <style>
-          {this.css()}
-        </style>
     </div>)
-  }
-
-  css(): string {
-    return `
-      .lfo-module {
-          flex: 1;
-          background-color: #lightblue;
-          display: flex;
-          flex-direction:column;
-          justify-content:space-between;
-          padding: 10px;
-          color: white;
-      }
-      
-      .distortion-module .component-wrapper {
-          padding: 5px;
-      }
-
-        /* UI elements */
-    
-      .component-wrapper {
-        display: flex;
-        flex-direction: column; 
-        align-content: center; 
-        text-align: center;
-        flex: 1;
-      }
-      
-      .component-knob, .component-fader {
-          margin-top: auto;
-      }
-      
-      .component-select {
-          margin-top: auto;
-          margin-bottom: 3px;
-      }
-      `
-  }
-  
+  }  
 }

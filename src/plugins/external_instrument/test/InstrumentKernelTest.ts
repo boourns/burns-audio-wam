@@ -1,7 +1,7 @@
 import getInstrumentKernel, {InstrumentDefinition} from "../src/InstrumentDefinition.js"
 
 import { describe, it } from "mocha"
-import { deepStrictEqual, strictEqual } from "assert"
+import assert, { deepStrictEqual, strictEqual } from "assert"
 
 const InstrumentKernel = getInstrumentKernel("test")
 
@@ -130,6 +130,4 @@ describe("InstrumentKernel", () => {
             }
         ])
     })
-
-
 })

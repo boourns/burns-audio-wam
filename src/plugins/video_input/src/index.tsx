@@ -11,9 +11,11 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import { VideoInputView } from './VideoInputView';
 import VideoInputNode from './Node';
 
+import styleRoot from "./VideoInput.scss"
+
 export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
 	//@ts-ignore
-	_baseURL = getBaseUrl(new URL('.', import.meta.url));
+	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 
@@ -28,11 +30,15 @@ export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
 	}
 
 	async initialize(state: any) {
+		console.log("video input: initialize")
+
 		await this._loadDescriptor();
 		return super.initialize(state);
 	}
 
 	async createAudioNode(initialState: any) {
+		console.log("video input: createAudioNode")
+
 		const synthNode = new VideoInputNode(this.audioContext as AudioContext, this._baseURL);
 
 		// @ts-ignore
@@ -54,12 +60,18 @@ export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
+		// @ts-ignore
+		styleRoot.use({ target: shadow });
+
 		render(<VideoInputView plugin={this}></VideoInputView>, shadow);
 
 		return div;
 	}
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styleRoot.unuse()
+		
 		render(null, el.shadowRoot)
 	}
 }

@@ -1,0 +1,32 @@
+.wrapper {
+    display: flex;
+    background-color: #2b3595;
+}
+
+.simpleeqModule {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    color: white;
+    margin-bottom: auto;
+}
+
+.group {
+    border: 1px solid rgba(255,255,255,0.2);
+    margin: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.groupHeader {
+    background-color: rgba(255,255,255,0.2);
+    padding: 2px;
+}
+
+.groupContent {
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+    flex: 1;
+    padding: 10px 5px 10px 5px;
+}

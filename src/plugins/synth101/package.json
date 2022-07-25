@@ -1,5 +1,5 @@
 {
-  "name": "synth101",
+  "name": "synth101-wam",
   "version": "0.0.0",
   "description": "> TODO: description",
   "author": "Tom Burns <tom@burns.ca>",
@@ -8,27 +8,21 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "del dist",
-    "build": "./node_modules/.bin/rollup -c"
+    "build": "./node_modules/.bin/webpack",
+    "test": "echo 'no tests'"
   },
   "dependencies": {
-    "@babel/core": "^7.12.16",
-    "@babel/plugin-proposal-class-properties": "^7.13.0",
-    "@babel/plugin-syntax-import-meta": "^7.10.4",
-    "@babel/preset-env": "^7.13.10",
-    "@babel/preset-typescript": "^7.13.0",
-    "@rollup/plugin-babel": "^5.3.0",
-    "@rollup/plugin-commonjs": "^17.1.0",
-    "@rollup/plugin-node-resolve": "^11.2.0",
-    "@rollup/plugin-replace": "^2.4.1",
-    "@surma/rollup-plugin-off-main-thread": "^2.1.0",
+    "@types/debug": "^4.1.6",
     "debug": "^4.3.1",
-    "preact": "^10.5.5",
-    "rollup": "^2.42.1",
-    "rollup-plugin-copy": "^3.4.0",
-    "rollup-plugin-node-builtins": "^2.1.2"
+    "preact": "^10.5.5"
   },
   "devDependencies": {
-    "@babel/preset-react": "^7.12.13",
+    "copy-webpack-plugin": "^9.0.0",
+    "css-loader": "^6.2.0",
+    "css-modules-typescript-loader": "^4.0.1",
+    "sass": "^1.39.2",
+    "sass-loader": "^12.1.0",
+    "style-loader": "^3.2.1",
     "ts-loader": "^8.0.12",
     "typescript": "^4.0.2",
     "webpack": "^5.11.1",

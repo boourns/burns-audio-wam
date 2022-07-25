@@ -10,7 +10,8 @@
   "scripts": {
     "clean": "del dist",
     "build": "./node_modules/.bin/webpack",
-    "watch": "./node_modules/.bin/webpack -w"
+    "watch": "./node_modules/.bin/webpack -w",
+    "test": "echo 'no tests'"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^9.0.0",

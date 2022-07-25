@@ -13,9 +13,7 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 
 export default class LFO extends WebAudioModule<LFONode> {
 	//@ts-ignore
-	_baseURL = getBaseUrl(new URL('.', import.meta.url));
-
-	_descriptorUrl = `${this._baseURL}/descriptor.json`;
+	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;

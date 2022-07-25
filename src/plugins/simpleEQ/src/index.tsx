@@ -11,9 +11,11 @@ import { h, render } from 'preact';
 import { SimpleEQView } from './SimpleEQView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
+import styleRoot from "./SimpleEQView.scss"
+
 export default class SimpleEQ extends WebAudioModule<SimpleEQNode> {
 	//@ts-ignore
-	_baseURL = getBaseUrl(new URL('.', import.meta.url));
+	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 
@@ -23,6 +25,7 @@ export default class SimpleEQ extends WebAudioModule<SimpleEQNode> {
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this._descriptor, descriptor);
+		return descriptor
 	}
 
 	async initialize(state: any) {
@@ -97,12 +100,18 @@ export default class SimpleEQ extends WebAudioModule<SimpleEQNode> {
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
+		// @ts-ignore
+		styleRoot.use({ target: shadow });
+
 		render(<SimpleEQView plugin={this}></SimpleEQView>, shadow);
 
 		return div;
 	}
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styleRoot.unuse()
+
 		render(null, el.shadowRoot)
 	}
 }
