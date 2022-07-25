@@ -1,6 +1,6 @@
 {
   "name": "burns-audio-wam",
-  "version": "0.2.16",
+  "version": "0.2.17",
   "description": "Collection of Web Audio Modules (WAMs) by Burns Audio",
   "main": "index.js",
   "scripts": {
