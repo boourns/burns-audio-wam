@@ -20,12 +20,9 @@ jobs:
         uses: mymindstorm/setup-emsdk@v9
         with:
           version: 2.0.16
-     
-      - name: What directory am i in
-        run: pwd
-
-      - name: what is here
-        run: ls -al
 
       - name: Build Plugins
         run: ./tools/build.sh    
+
+      - name: Test Plugins
+        run: ./tools/test.sh
