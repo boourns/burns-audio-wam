@@ -129,9 +129,5 @@ describe("InstrumentKernel", () => {
                 }
             }
         ])
-
-        assert(false)
     })
-
-
 })
