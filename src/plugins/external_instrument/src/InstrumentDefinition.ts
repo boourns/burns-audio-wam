@@ -1,8 +1,6 @@
 import { AudioWorkletGlobalScope, WamAutomationEvent, WamEvent, WamMidiData, WamParameterConfiguration } from "@webaudiomodules/api"
-import { number } from "lib0"
 import {NoteDefinition} from "wam-extensions"
 import { DynamicParamGroup } from "../../shared/DynamicParameterNode"
-
 
 export type CCParamData = {
     dataType: "CC"
@@ -20,7 +18,25 @@ export type SysexParamData = {
     maxValue: number
 }
 
-export type MIDIControlType = "CC" | "SYSEX" // | "NRPN"
+export type NRPNParamData = {
+    dataType: "NRPN"
+    lsb: number
+    msb: number
+    defaultValue: number
+    minValue: number
+    maxValue: number
+}
+
+export type RPNParamData = {
+    dataType: "RPN"
+    lsb: number
+    msb: number
+    defaultValue: number
+    minValue: number
+    maxValue: number
+}
+
+export type MIDIControlType = "CC" | "SYSEX" | "NRPN" | "RPN"
 export type MIDIControlData = CCParamData | SysexParamData
 
 export type MIDIControl = {
@@ -51,8 +67,24 @@ export type InstrumentKernelType = {
     existingControlForCC(num: number): MIDIControl | undefined
 }
 
-const getInstrumentKernel = (moduleId: string) => {
+export type RPNState = {
+    lsb?: number
+    msb?: number
+    value?: number
+}
 
+const RPNCCs = [
+    6, /* set value (msb) */
+    38, /* set value (lsb) */
+    96, /* increment */
+    97, /* decrement */
+    98, /* NRPN (lsb) */
+    99, /* NRPN (msb) */
+    100, /* RPN (lsb) */
+    101 /* RPN (msb) */
+]
+
+const getInstrumentKernel = (moduleId: string) => {
     const MIDI_CC = 0xB0
     
     class InstrumentKernel implements InstrumentKernelType {
@@ -60,6 +92,9 @@ const getInstrumentKernel = (moduleId: string) => {
         values: Record<string, number>
         controls: MIDIControl[]
         channel: number
+        nrpn: RPNState
+        rpn: RPNState
+        lastRPN: undefined | "RPN" | "NRPN"
 
         constructor(definition: InstrumentDefinition, channel: number, previous?: InstrumentKernel) {
             if (channel > 15 || channel < 0) {
@@ -70,6 +105,8 @@ const getInstrumentKernel = (moduleId: string) => {
             this.controls = []
             this.channel = channel
             this.values = {}
+            this.rpn = {}
+            this.nrpn = {}
 
             for (let group of definition.controlGroups) {
                 for (let control of group.controls) {
@@ -147,36 +184,47 @@ const getInstrumentKernel = (moduleId: string) => {
             return output
         }
 
-        existingControlForCC(num: number): MIDIControl | undefined {
+        existingControl(type:"CC" | "SYSEX" | "RPN" | "NRPN", num: number): MIDIControl | undefined {
             return this.controls.find(c => c.data.dataType == "CC" && c.data.ccNumber == num)
         }
 
         ingestMidi(event: WamMidiData): ["wam" | "port", Record<string, any>] | undefined {
             if (event.bytes[0] == 0xB0 + this.channel) {
-                let existing = this.existingControlForCC(event.bytes[1])
-                if (existing) {
-                    let automation: WamAutomationEvent = {
-                        type: "wam-automation",
-                        data: {
-                            id: existing.id,
-                            value: event.bytes[2],
-                            normalized: false,
+                const cc = event.bytes[1]
+                if (RPNCCs.includes(cc)) {
+                    if (!!this.lastRPN && [6, 38, 96, 97].includes(cc)) {
+                        if (this.lastRPN == "NRPN" && this.nrpn.lsb && this.nrpn.msb) {
+                            let existing = this.existingControl("nrpn", this.nrpn)
+                            if (existing) {
+
+                            } else {
+
+                            }
                         }
                     }
-                    return ["wam", automation]
-
                 } else {
-                    let learnEvent = {
-                        source: "kernel",
-                        type: "learn",
-                        data: {
-                            cc: event.bytes[1],
-                            value: event.bytes[2]
+                    let existing = this.existingControl("cc", cc)
+                    if (existing) {
+                        let automation: WamAutomationEvent = {
+                            type: "wam-automation",
+                            data: {
+                                id: existing.id,
+                                value: event.bytes[2],
+                                normalized: false,
+                            }
                         }
+                        return ["wam", automation]
+                    } else {
+                        let learnEvent = {
+                            source: "kernel",
+                            type: "learn",
+                            data: {
+                                cc,
+                                value: event.bytes[2]
+                            }
+                        }
+                        return ["port", learnEvent]
                     }
-                    return ["port", learnEvent]
-
-
                 }
             } else {
                 return undefined
