@@ -18,7 +18,9 @@ import { LiveCoderNode, LiveCoderView } from '../../shared/LiveCoderView';
 import { ISFShader } from './ISFShader';
 import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
 import { defaultFragmentShader, defaultVertexShader } from './defaultShaders';
-	
+
+import styleRoot from "./ISFVideo.scss"
+
 type ISFVideoState = {
 	runCount: number
 	params: any
@@ -233,13 +235,22 @@ export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
 		const div = document.createElement('div');
 		// hack because h() is getting stripped for non-use despite it being what the JSX compiles to
 		h("div", {})
-		div.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
 
-		render(<LiveCoderView plugin={this._audioNode}></LiveCoderView>, div);
+		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
+
+		var shadow = div.attachShadow({mode: 'open'});
+		// @ts-ignore
+		styleRoot.use({ target: shadow });
+
+		render(<LiveCoderView plugin={this._audioNode}></LiveCoderView>, shadow);
+
 		return div;
 	}
 
 	destroyGui(el: Element) {
+		//@ts-ignore
+		styleRoot.unuse()
+
 		render(null, el)
 	}
 }
