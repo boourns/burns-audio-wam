@@ -106,8 +106,37 @@ describe("InstrumentKernel", () => {
                 source: "kernel",
                 type: "learn",
                 data: {
-                    cc: 8,
-                    value: 55
+                    dataType: "CC",
+                    ccNumber: 8,
+                    defaultValue: 55,
+                    minValue: 0,
+                    maxValue: 127
+                }
+            }
+        ])
+    })
+
+    it("ingests MIDI NRPN messages in learn mode", async () => {
+        const kernel = new InstrumentKernel(definition, 0)
+
+        let result = kernel.ingestMidi({bytes: [0xB0, 99, 0]})
+        deepStrictEqual(result, undefined)
+
+        result = kernel.ingestMidi({bytes: [0xB0, 98, 1]})
+        deepStrictEqual(result, undefined)
+
+        result = kernel.ingestMidi({bytes: [0xB0, 6, 55]})
+
+        deepStrictEqual(result, [
+            "port",
+            {
+                source: "kernel",
+                type: "learn",
+                data: {
+                    dataType: "NRPN",
+                    lsb: 1,
+                    msb: 0,
+                    defaultValue: 55
                 }
             }
         ])

@@ -5,39 +5,39 @@ import { DynamicParamGroup } from "../../shared/DynamicParameterNode"
 export type CCParamData = {
     dataType: "CC"
     ccNumber: number
-    defaultValue: number
-    minValue: number
-    maxValue: number
+    defaultValue?: number
+    minValue?: number
+    maxValue?: number
 }
 
 export type SysexParamData = {
     dataType: "SYSEX"
     prefix: number[]
-    defaultValue: number
-    minValue: number
-    maxValue: number
+    defaultValue?: number
+    minValue?: number
+    maxValue?: number
 }
 
 export type NRPNParamData = {
     dataType: "NRPN"
     lsb: number
     msb: number
-    defaultValue: number
-    minValue: number
-    maxValue: number
+    defaultValue?: number
+    minValue?: number
+    maxValue?: number
 }
 
 export type RPNParamData = {
     dataType: "RPN"
     lsb: number
     msb: number
-    defaultValue: number
-    minValue: number
-    maxValue: number
+    defaultValue?: number
+    minValue?: number
+    maxValue?: number
 }
 
 export type MIDIControlType = "CC" | "SYSEX" | "NRPN" | "RPN"
-export type MIDIControlData = CCParamData | SysexParamData
+export type MIDIControlData = CCParamData | SysexParamData | NRPNParamData | RPNParamData
 
 export type MIDIControl = {
     label: string
@@ -64,7 +64,8 @@ export type InstrumentKernelType = {
     generateMidiEvent(control: MIDIControl, value: number): WamEvent[]
     emitEvents(parameters: Record<string, number>): WamEvent[]
     ingestMidi(event: WamMidiData): ["wam" | "port", Record<string, any>] | undefined;
-    existingControlForCC(num: number): MIDIControl | undefined
+    existingControl(compare: MIDIControlData): MIDIControl | undefined
+    defaultIdForControl(control: MIDIControlData): string
 }
 
 export type RPNState = {
@@ -184,26 +185,34 @@ const getInstrumentKernel = (moduleId: string) => {
             return output
         }
 
-        existingControl(type:"CC" | "SYSEX" | "RPN" | "NRPN", num: number): MIDIControl | undefined {
-            return this.controls.find(c => c.data.dataType == "CC" && c.data.ccNumber == num)
+        existingControl(compare: MIDIControlData): MIDIControl | undefined {
+            return this.controls.find(c => this.sameControl(compare, c.data))
+        }
+
+        sameControl(lhs: MIDIControlData, rhs: MIDIControlData): boolean {
+            if (lhs.dataType != rhs.dataType) {
+                return false
+            }
+
+            switch (lhs.dataType) {
+                case "CC":
+                    return lhs.ccNumber == (rhs as CCParamData).ccNumber
+                case "NRPN":
+                case "RPN":
+                    let r = rhs as RPNParamData
+                    return lhs.lsb == r.lsb && lhs.msb == r.msb
+                case "SYSEX":
+                    return lhs.prefix == (rhs as SysexParamData).prefix
+            }
         }
 
         ingestMidi(event: WamMidiData): ["wam" | "port", Record<string, any>] | undefined {
             if (event.bytes[0] == 0xB0 + this.channel) {
                 const cc = event.bytes[1]
                 if (RPNCCs.includes(cc)) {
-                    if (!!this.lastRPN && [6, 38, 96, 97].includes(cc)) {
-                        if (this.lastRPN == "NRPN" && this.nrpn.lsb && this.nrpn.msb) {
-                            let existing = this.existingControl("nrpn", this.nrpn)
-                            if (existing) {
-
-                            } else {
-
-                            }
-                        }
-                    }
+                    return this.ingestRPN(event)
                 } else {
-                    let existing = this.existingControl("cc", cc)
+                    let existing = this.existingControl({dataType:"CC", ccNumber: cc})
                     if (existing) {
                         let automation: WamAutomationEvent = {
                             type: "wam-automation",
@@ -215,19 +224,102 @@ const getInstrumentKernel = (moduleId: string) => {
                         }
                         return ["wam", automation]
                     } else {
+                        let data: CCParamData = {
+                            dataType: "CC",
+                            ccNumber: cc,
+                            defaultValue: event.bytes[2],
+                            minValue: 0,
+                            maxValue: 127
+                        }
+
                         let learnEvent = {
                             source: "kernel",
                             type: "learn",
-                            data: {
-                                cc,
-                                value: event.bytes[2]
-                            }
+                            data: data
                         }
                         return ["port", learnEvent]
                     }
                 }
             } else {
                 return undefined
+            }
+        }
+
+        ingestRPN(event: WamMidiData): ["wam" | "port", Record<string, any>] | undefined {
+            const cc = event.bytes[1]
+
+            if (!!this.lastRPN && [6, 38, 96, 97].includes(cc)) {
+                let existing: MIDIControl | undefined
+                let incoming: MIDIControlData
+
+                console.log("HERE")
+                if (this.lastRPN == "NRPN" && this.nrpn.lsb !== undefined && this.nrpn.msb !== undefined) {
+                    incoming = {dataType: "NRPN", lsb: this.nrpn.lsb, msb: this.nrpn.msb}
+                    existing = this.existingControl(incoming)
+                } else if (this.lastRPN == "RPN" && this.rpn.lsb !== undefined && this.rpn.msb !== undefined) {
+                    incoming = {dataType: "RPN", lsb: this.nrpn.lsb, msb: this.nrpn.msb}
+                    existing = this.existingControl(incoming)
+                }
+
+                if (existing) {
+                    if (cc == 6) {
+                        let automation: WamAutomationEvent = {
+                            type: "wam-automation",
+                            data: {
+                                id: existing.id,
+                                value: event.bytes[2],
+                                normalized: false,
+                            }
+                        }
+
+                        return ["wam", automation]
+                    } else {
+                        console.warn("Received CC for NRPN LSB, not implemented yet")
+                    }
+                } else {
+                    if (cc == 6) {
+                        incoming.defaultValue = event.bytes[2]
+
+                        let learnEvent = {
+                            source: "kernel",
+                            type: "learn",
+                            data: incoming
+                        }
+                        return ["port", learnEvent]
+                    } else {
+                        console.warn("Received NRPN LSB set, not implemented yet")
+                    }
+                }
+            } else if ([98, 99].includes(cc)) {
+                // NRPN address
+                this.lastRPN = "NRPN"
+                if (cc == 98) {
+                    this.nrpn.lsb = event.bytes[2]
+                } else {
+                    this.nrpn.msb = event.bytes[2]
+                }
+            } else if ([100, 101].includes(cc)) {
+                // RPN address
+                this.lastRPN = "RPN"
+                if (cc == 100) {
+                    this.nrpn.lsb = event.bytes[2]
+                } else {
+                    this.nrpn.msb = event.bytes[2]
+                }
+            }
+            return undefined
+        }
+
+        defaultIdForControl(control: MIDIControlData): string {
+            switch(control.dataType) {
+                case "CC":
+                    return `CC${control.ccNumber}`
+                case "NRPN":
+                    return `NRPN${control.msb}:${control.lsb}`
+                case "RPN":
+                    return `RPN${control.msb}:${control.lsb}`
+                case "SYSEX":
+                    return `SYS${control.prefix}`
             }
         }
     }

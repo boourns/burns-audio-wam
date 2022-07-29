@@ -12,7 +12,7 @@ import { DynamicParameterNode, DynamicParamGroup } from '../../shared/DynamicPar
 
 import getExternalInstrumentProcessor, { ExternalInstrumentConfig } from './ExternalInstrumentProcessor';
 import { ExternalInstrumentView } from './ExternalInstrumentView';
-import { InstrumentDefinition, InstrumentKernelType } from './InstrumentDefinition';
+import { InstrumentDefinition, InstrumentKernelType, MIDIControl, MIDIControlData } from './InstrumentDefinition';
 import getInstrumentKernel from './InstrumentDefinition';
 
 import styles from './ExternalInstrument.scss'
@@ -133,21 +133,18 @@ export class ExternalInstrumentNode extends DynamicParameterNode {
 		if (message.data && message.data.source == "kernel") {
 			console.log("Received kernel message: ", JSON.stringify(message))
 			if (message.data.type == "learn") {
+				let control = message.data.data as MIDIControlData
 				// data: {
 				// 	cc: event.bytes[1],
 				// 	value: event.bytes[2]
 				// }
-				if (!this.kernel.existingControlForCC(message.data.data.cc) && this.config.learn) {
+				if (!this.kernel.existingControl(control) && this.config.learn) {
+					const name = this.kernel.defaultIdForControl(control)
+
 					this.instrumentDefinition.controlGroups[this.instrumentDefinition.controlGroups.length-1].controls.push({
-						id: `cc${message.data.data.cc}`,
-						label: `CC${message.data.data.cc}`,
-						data: {
-							dataType: 'CC',
-							ccNumber: message.data.data.cc,
-							defaultValue: message.data.data.value,
-							minValue: 0,
-							maxValue: 127,
-						}
+						id: name,
+						label: name,
+						data: control
 					})
 
 					this.updateProcessorFromDefinition()
