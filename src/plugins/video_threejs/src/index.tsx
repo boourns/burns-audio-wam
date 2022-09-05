@@ -308,11 +308,11 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 
 		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
 
-		var shadow = div.attachShadow({mode: 'open'});
+		//var shadow = div.attachShadow({mode: 'open'});
 		// @ts-ignore
-		styleRoot.use({ target: shadow });
+		styleRoot.use({ target: div });
 
-		render(<LiveCoderView plugin={this.audioNode}></LiveCoderView>, shadow);
+		render(<LiveCoderView plugin={this.audioNode}></LiveCoderView>, div);
 
 		return div;
 	}

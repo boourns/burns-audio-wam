@@ -5,8 +5,6 @@ import * as monaco from 'monaco-editor';
 import { MultiplayerHandler } from './collaboration/MultiplayerHandler';
 import { DynamicParameterNode } from './DynamicParameterNode';
 
-import styleRoot from "./LiveCoderView.scss"
-
 export interface LiveCoderNode extends DynamicParameterNode {
   error?: any
   renderCallback?: () => void
