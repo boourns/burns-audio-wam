@@ -41,6 +41,12 @@ const wamNode = {
       {
         test: /\.(sa|sc|c)ss$/,
         use: cssLoaders,
+        exclude: /node_modules/,
+      },
+      { // for monaco (with /node_modules/)
+        test: /\.(sa|sc|c)ss$/,
+        use: ['style-loader', 'css-loader'],
+        exclude: /src\/plugins\//
       },
     ],
   },
