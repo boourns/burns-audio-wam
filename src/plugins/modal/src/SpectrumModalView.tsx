@@ -5,6 +5,11 @@ import { Select } from '../../shared/ui/Select'
 
 import "./SpectrumModalView.scss";
 
+import styleRoot from "./SpectrumModalView.scss";
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
+
 export interface SpectrumModalViewProps {
   plugin: SpectrumModalModule
 }
@@ -46,7 +51,7 @@ export class SpectrumModalView extends Component<SpectrumModalViewProps, any> {
     h("div", {})
 
     return (
-    <div class="modal-module">
+    <div class={styles.modalModule}>
       <div style="display: flex; flex-direction: row; justify-content: stretch">
         <div style="display: flex; flex-direction: column; justify-content: space-between; flex: 1">
           <div style="display: flex">
