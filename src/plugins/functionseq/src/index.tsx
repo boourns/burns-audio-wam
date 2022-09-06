@@ -239,13 +239,13 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 		h("div", {})
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
-		var shadow = div.attachShadow({mode: 'open'});
+		//var shadow = div.attachShadow({mode: 'open'});
 		// @ts-ignore
-		styleRoot.use({ target: shadow });
+		styleRoot.use({ target: div });
 
 		console.log("Styleroot is ", styleRoot)
 
-		render(<LiveCoderView plugin={this.audioNode}></LiveCoderView>, shadow);
+		render(<LiveCoderView plugin={this.audioNode}></LiveCoderView>, div);
 
 		return div;
 	}

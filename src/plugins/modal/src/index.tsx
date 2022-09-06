@@ -12,6 +12,7 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import getSpectrumModalProcessor from "./SpectrumModalProcessor"
 
 import { SpectrumModalView } from './SpectrumModalView';
+
 import styleRoot from "./SpectrumModalView.scss";
 	
 class SpectrumModalNode extends WamNode {
@@ -85,7 +86,7 @@ export default class SpectrumModalModule extends WebAudioModule<WamNode> {
 		// @ts-ignore
 		styleRoot.use({ target: shadow });
 
-		render(<SpectrumModalView plugin={this}></SpectrumModalView>, div);
+		render(<SpectrumModalView plugin={this}></SpectrumModalView>, shadow);
 
 		return div;
 	}
