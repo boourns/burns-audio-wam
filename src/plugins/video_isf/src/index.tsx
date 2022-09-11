@@ -80,13 +80,14 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 
 		if (window.WAMExtensions && window.WAMExtensions.video) {
 			window.WAMExtensions.video.setDelegate(this.instanceId, {
-				connectVideo: (options: VideoExtensionOptions): VideoModuleConfig => {
+				connectVideo: (options: VideoExtensionOptions) => {
 					console.log("connectVideo!")
 
 					this.options = options
 
 					this.upload()
-					
+				},
+				config: () => {
 					return {
 						numberOfInputs: 1,
 						numberOfOutputs: 1,
