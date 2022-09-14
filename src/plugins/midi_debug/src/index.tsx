@@ -55,6 +55,8 @@ export default class MIDIDebugModule extends WebAudioModule<MIDIDebugNode> {
 		h("div", {})
 
 		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
+		div.setAttribute("width", "800")
+		div.setAttribute("height", "600")
 
 		var shadow = div.attachShadow({mode: 'open'});
 

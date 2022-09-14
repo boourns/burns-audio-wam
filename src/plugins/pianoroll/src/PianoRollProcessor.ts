@@ -63,8 +63,9 @@ class PianoRollProcessor extends WamProcessor {
         }
 
         let clip = this.clips.get(this.currentClipId)
-        if (!clip) return
-
+        if (!clip) {
+            return
+        }
         if (!this.transportData) {
             return
         }
@@ -78,6 +79,7 @@ class PianoRollProcessor extends WamProcessor {
             var tickPosition = Math.floor(beatPosition * PPQN)
 
             let clipPosition = tickPosition % clip.state.length;
+
 
             if (this.ticks != clipPosition) {
                 let secondsPerTick = 1.0 / ((this.transportData!.tempo / 60.0) * PPQN);

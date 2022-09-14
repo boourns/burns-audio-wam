@@ -8,5 +8,9 @@
     "keywords": ["video", "utility", "input"],
     "isInstrument": false,
     "website": "",
-    "hasVideoOuput": true
+    "hasVideoOuput": true,
+    "hasMidiInput": false,
+    "hasMidiOutput": false,
+    "hasAudioInput": false,
+    "hasAudioOutput": false
 }

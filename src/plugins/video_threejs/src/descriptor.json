@@ -8,5 +8,7 @@
     "keywords": ["video", "generator"],
     "isInstrument": false,
     "website": "",
-    "hasVideoOutput": true
+    "hasVideoOutput": true,
+    "hasMidiInput": true,
+    "hasAudioInput": true
 }

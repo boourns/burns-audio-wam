@@ -8,5 +8,8 @@
     "keywords": ["utility", "midi"],
     "isInstrument": false,
     "website": "",
-    "hasMidiInput": true
+    "hasMidiInput": false,
+    "hasMidiOutput": true,
+    "hasAudioInput": false,
+    "hasAudioOutput": false
 }

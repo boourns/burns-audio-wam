@@ -9,5 +9,6 @@
     "isInstrument": true,
     "website": "",
     "hasMidiInput": true,
+    "hasMidiOutput": false,
     "hasAudioOutput": true
 }

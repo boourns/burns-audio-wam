@@ -9,5 +9,7 @@
     "isInstrument": true,
     "website": "https://github.com/boourns/burns-audio-wam",
     "hasMidiInput": true,
-    "hasAudioOutput": true
+    "hasMidiOutput": false,
+    "hasAudioOutput": true,
+    "hasAudioInput": false
 }
