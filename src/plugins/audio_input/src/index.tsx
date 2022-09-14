@@ -50,6 +50,8 @@ export default class AudioInputModule extends WebAudioModule<AudioInputNode> {
 		h("div", {})
 
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
+		div.setAttribute("width", "320")
+		div.setAttribute("height", "240")
 
 		var shadow = div.attachShadow({mode: 'open'});
 		// @ts-ignore

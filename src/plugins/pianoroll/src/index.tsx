@@ -109,7 +109,7 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 		div.setAttribute("style", "display: flex; flex-direction: column; height: 100%; width: 100%; max-height: 100%; max-width: 100%;")
 
 		div.setAttribute("width", "1024")
-		div.setAttribute("height", "800")
+		div.setAttribute("height", "680")
 		
 		var shadow = div.attachShadow({mode: 'open'});
 		const container = document.createElement('div');

@@ -92,7 +92,9 @@ export default class MIDIOutputModule extends WebAudioModule<MIDIOutputNode> {
 		h("div", {})
 
 		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
-
+		div.setAttribute("width", "320")
+		div.setAttribute("height", "240")
+		
 		var shadow = div.attachShadow({mode: 'open'});
 		// @ts-ignore
 		styleRoot.use({ target: shadow });

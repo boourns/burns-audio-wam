@@ -58,6 +58,8 @@ export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
 		h("div", {})
 
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
+		div.setAttribute("width", "400")
+		div.setAttribute("height", "300")
 
 		var shadow = div.attachShadow({mode: 'open'});
 		// @ts-ignore
