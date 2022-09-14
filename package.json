@@ -1,6 +1,6 @@
 {
   "name": "burns-audio-wam",
-  "version": "0.2.19",
+  "version": "0.2.20",
   "description": "Collection of Web Audio Modules (WAMs) by Burns Audio",
   "main": "index.js",
   "scripts": {
@@ -35,6 +35,6 @@
     "@webaudiomodules/sdk": "webaudiomodules/sdk#commit=810ba256f58385c0d50c16e36c82c7818bd01ead",
     "@webaudiomodules/sdk-parammgr": "webaudiomodules/sdk-parammgr#commit=6eb3bc85fc30144502043f456f47268a62d3db5a",
     "copy-webpack-plugin": "^11.0.0",
-    "wam-extensions": "boourns/wam-extensions#commit=4b1d672e85c64cd009b6bce8ef65609ea20ddd80"
+    "wam-extensions": "boourns/wam-extensions#commit=a8326a810982d01e6f545bf2bfd01c8f7d59fb7c"
   }
 }

@@ -18,6 +18,7 @@ export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
+	nonce: string | undefined;
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -62,6 +63,18 @@ export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
 		div.setAttribute("height", "300")
 
 		var shadow = div.attachShadow({mode: 'open'});
+
+		if (this.nonce) {
+			// we've already rendered before, unuse the styles before using them again
+			this.nonce = undefined
+
+			//@ts-ignore
+			styleRoot.unuse()
+		}
+
+		this.nonce = Math.random().toString(16).substr(2, 8);
+		div.setAttribute("data-nonce", this.nonce)
+
 		// @ts-ignore
 		styleRoot.use({ target: shadow });
 
@@ -71,8 +84,12 @@ export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
 	}
 
 	destroyGui(el: Element) {
-		//@ts-ignore
-		styleRoot.unuse()
+		if (el.getAttribute("data-nonce") == this.nonce) {
+			// this was the last time we rendered the GUI so clear the style
+			
+			//@ts-ignore
+			styleRoot.unuse()
+		}
 		
 		render(null, el.shadowRoot)
 	}

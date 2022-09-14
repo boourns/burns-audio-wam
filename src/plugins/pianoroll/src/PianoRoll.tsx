@@ -56,11 +56,13 @@ export class PianoRoll {
 	registerNoteListHandler() {
 		if (window.WAMExtensions && window.WAMExtensions.notes) {
 			window.WAMExtensions.notes.addListener(this.instanceId, (notes) => {
+				console.log("Notelist handler called! ", notes)
 				this.noteList = notes
 				if (this.renderCallback) {
 					this.renderCallback()
 				}
 			})
+			console.log("Registered note extension for id ", this.instanceId)
 		}
 	}
 

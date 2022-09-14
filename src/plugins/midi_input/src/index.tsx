@@ -18,6 +18,7 @@ export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_processorUrl = `${this._baseURL}/MIDIInputProcessor.js`;
+	nonce: string | undefined;
 
 	callback?: () => void
 	midiInitialized: boolean = false
@@ -95,6 +96,18 @@ export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 		div.setAttribute("height", "240")
 		
 		var shadow = div.attachShadow({mode: 'open'});
+
+		if (this.nonce) {
+			// we've already rendered before, unuse the styles before using them again
+			this.nonce = undefined
+
+			//@ts-ignore
+			styleRoot.unuse()
+		}
+
+		this.nonce = Math.random().toString(16).substr(2, 8);
+		div.setAttribute("data-nonce", this.nonce)
+
 		// @ts-ignore
 		styleRoot.use({ target: shadow });
 
@@ -104,9 +117,13 @@ export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 	}
 
 	destroyGui(el: Element) {
-		//@ts-ignore
-		styleRoot.unuse()
-
+		if (el.getAttribute("data-nonce") == this.nonce) {
+			// this was the last time we rendered the GUI so clear the style
+			
+			//@ts-ignore
+			styleRoot.unuse()
+		}
+		
 		render(null, el.shadowRoot)
 	}
 }
