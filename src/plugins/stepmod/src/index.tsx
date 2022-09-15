@@ -55,6 +55,13 @@ class StepModulatorNode extends WamNode {
 			this.sequencer.setState(state.sequencer ? state.sequencer : {})
 		}
 	}
+
+	setTargetParameter(id: string) {
+		const param = this.paramList ? this.paramList[id] : undefined
+		this.port.postMessage({action: "target", param})
+
+		window.WAMExtensions.modulationTarget.lockParametersForAutomation(this.instanceId, [id])
+	}
 }
 
 export default class StepModulatorModule extends WebAudioModule<StepModulatorNode> {

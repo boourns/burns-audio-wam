@@ -35,6 +35,6 @@
     "@webaudiomodules/sdk": "webaudiomodules/sdk#commit=810ba256f58385c0d50c16e36c82c7818bd01ead",
     "@webaudiomodules/sdk-parammgr": "webaudiomodules/sdk-parammgr#commit=6eb3bc85fc30144502043f456f47268a62d3db5a",
     "copy-webpack-plugin": "^11.0.0",
-    "wam-extensions": "boourns/wam-extensions#commit=789994b4c4859a17ac3851da0a7db8d9f9325d0a"
+    "wam-extensions": "boourns/wam-extensions#commit=166ca1fe126e3768fce2cebca33d9ad4f10cd8e3"
   }
 }
