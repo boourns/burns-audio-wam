@@ -82,6 +82,10 @@ export class StepModulatorView extends Component<StepModulatorViewProps, any> {
         this.props.plugin.audioNode.setParameterValues(this.state) 
     }
 
+    targetChanged(v: string) {
+        this.props.plugin.audioNode.setTargetParameter(v)
+    }
+
     targetValueString(v: number): string {
         
         let param = this.props.plugin.targetParam
@@ -111,6 +115,11 @@ export class StepModulatorView extends Component<StepModulatorViewProps, any> {
             return <Fader value={() => clip.state.steps[index]} valueString={v => this.targetValueString(v)} onChange={(e) => {clip.state.steps[index] = e; clip.updateProcessor(clip)}}/>
         })
 
+        let paramIds: string[] = []
+        if (this.props.plugin.audioNode.paramList) {
+            paramIds = Object.keys(this.props.plugin.audioNode.paramList)
+        }
+
         return (
         <div class={styles.Module}>
             <div style="display: flex">
@@ -121,6 +130,7 @@ export class StepModulatorView extends Component<StepModulatorViewProps, any> {
                 <Knob label="Gain" size={40} value={() => this.state['gain'].value} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("gain", v)}/>
                 <Knob label="Slew" size={40} value={() => this.state['slew'].value} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("slew", v)}/>
                 <Select label="Speed" options={quantizeOptions} values={quantizeValues} value={() => clip.state.speed} onChange={(e) => { clip.state.speed = parseInt(e); clip.updateProcessor(clip)}} />
+                <Select label="Param" options={paramIds} values={paramIds} value={() => undefined} onChange={(v) => this.targetChanged(v)}/>
             </div>
 
             <div style="flex: 1"></div>

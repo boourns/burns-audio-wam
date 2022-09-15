@@ -1,4 +1,4 @@
-import { WamEventMap, WamParameterInfo, WamTransportData } from '@webaudiomodules/api';
+import { WamEventMap, WamParameterInfo, WamParameterInfoMap, WamTransportData } from '@webaudiomodules/api';
 
 import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
 
@@ -20,6 +20,9 @@ var logger = console.log
 class StepModulatorNode extends WamNode {
 	destroyed = false;
 	_supportedEventTypes: Set<keyof WamEventMap>
+
+	paramList?: WamParameterInfoMap
+	targetParam?: string
 
 	sequencer: StepModulator
 
@@ -104,9 +107,13 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 
 		if (window.WAMExtensions && window.WAMExtensions.modulationTarget) {
 			window.WAMExtensions.modulationTarget.setModulationTargetDelegate(this.instanceId, {
-				setModulationTarget: (param: WamParameterInfo) => {
-					this.targetParam = param
-					this.sequencerNode.port.postMessage({action: "target", param})
+				// @ts-ignore
+				connectModulation: (params: WamParameterInfoMap) => {
+					console.log("Plugin received param list: ", params)
+					node.paramList = params
+
+					//this.targetParam = param
+					//this.sequencerNode.port.postMessage({action: "target", param})
 					if (this.sequencer.renderCallback) {
 						this.sequencer.renderCallback()
 					}

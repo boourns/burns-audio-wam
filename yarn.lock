@@ -125,7 +125,7 @@ __metadata:
     lib0: ^0.2.47
     monaco-editor: ^0.25.2
     preact: ^10.5.5
-    wam-extensions: "boourns/wam-extensions#commit=a8326a810982d01e6f545bf2bfd01c8f7d59fb7c"
+    wam-extensions: "boourns/wam-extensions#commit=789994b4c4859a17ac3851da0a7db8d9f9325d0a"
   languageName: unknown
   linkType: soft
 
@@ -427,11 +427,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wam-extensions@boourns/wam-extensions#commit=a8326a810982d01e6f545bf2bfd01c8f7d59fb7c":
+"wam-extensions@boourns/wam-extensions#commit=789994b4c4859a17ac3851da0a7db8d9f9325d0a":
   version: 0.2.4
-  resolution: "wam-extensions@https://github.com/boourns/wam-extensions.git#commit=a8326a810982d01e6f545bf2bfd01c8f7d59fb7c"
+  resolution: "wam-extensions@https://github.com/boourns/wam-extensions.git#commit=789994b4c4859a17ac3851da0a7db8d9f9325d0a"
   peerDependencies:
     "@webaudiomodules/api": "*"
-  checksum: 0c38e791247012a4e6053311008704b7fa382630492d44362768252170888d2818ca1f5cadf60ac7bb9b52f912ab4b6e5192e22389ef216171954d030a7e96d5
+  checksum: f23e830416cf03fec95db6ee324f29caa1a3f5f0c6b89f639e25867a3b8a6128f292aa7adb26faa2670061a7677aecb05495d7e665f488be259b36a6a0975618
   languageName: node
   linkType: hard

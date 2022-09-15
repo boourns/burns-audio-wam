@@ -7,5 +7,10 @@
     "thumbnail": "",
     "keywords": ["sequencer", "modulator"],
     "isInstrument": false,
-    "website": ""
+    "website": "",
+    "hasMidiInput": false,
+    "hasMidiOutput": false,
+    "hasAudioInput": false,
+    "hasAudioOutput": false
 }
+
