@@ -25,6 +25,7 @@ class StepModulatorNode extends WamNode {
 	targetParam?: string
 
 	sequencer: StepModulator
+	connected: boolean
 
 	/**
 	 * @param {WebAudioModule} module
@@ -43,7 +44,11 @@ class StepModulatorNode extends WamNode {
 
 	async getState(): Promise<any> {
 		var params = await super.getState()
-		return {params, sequencer: this.sequencer.getState()}
+		return {
+			params, 
+			sequencer: this.sequencer.getState(),
+			targetParam: this.targetParam
+		}
 	}
 
 	async setState(state: any) {
@@ -54,13 +59,27 @@ class StepModulatorNode extends WamNode {
 		if (state.sequencer) {
 			this.sequencer.setState(state.sequencer ? state.sequencer : {})
 		}
+
+		if (state.targetParam != this.targetParam) {
+			this.setTargetParameter(state.targetParam)
+		}
 	}
 
-	setTargetParameter(id: string) {
-		const param = this.paramList ? this.paramList[id] : undefined
+	async setTargetParameter(id: string | undefined) {
+		this.targetParam = id
+
+		if (!this.paramList) {
+			console.log("param list not yet set")
+			return
+		}
+
+		// paramList is set 
+		const param = id ? this.paramList[id] : undefined
 		this.port.postMessage({action: "target", param})
 
-		window.WAMExtensions.modulationTarget.lockParametersForAutomation(this.instanceId, [id])
+		let ids = id ? [id] : []
+
+		await window.WAMExtensions.modulationTarget.lockParametersForAutomation(this.instanceId, ids)
 	}
 }
 
@@ -114,13 +133,13 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 
 		if (window.WAMExtensions && window.WAMExtensions.modulationTarget) {
 			window.WAMExtensions.modulationTarget.setModulationTargetDelegate(this.instanceId, {
-				// @ts-ignore
-				connectModulation: (params: WamParameterInfoMap) => {
+				connectModulation: async (params: WamParameterInfoMap) => {
 					console.log("Plugin received param list: ", params)
 					node.paramList = params
+					if (node.targetParam) {
+						await node.setTargetParameter(node.targetParam)
+					}
 
-					//this.targetParam = param
-					//this.sequencerNode.port.postMessage({action: "target", param})
 					if (this.sequencer.renderCallback) {
 						this.sequencer.renderCallback()
 					}
