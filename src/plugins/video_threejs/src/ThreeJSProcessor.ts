@@ -11,6 +11,27 @@ const getThreeJSProcessor = (moduleId: string) => {
 
 	class ThreeJSExampleProcessor extends DynamicParameterProcessor {
 
+		/**
+         * Implement custom DSP here.
+         * @param {number} startSample beginning of processing slice
+         * @param {number} endSample end of processing slice
+         * @param {Float32Array[][]} inputs
+         * @param {Float32Array[][]} outputs
+         */
+		_process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
+			if (inputs.length != outputs.length) {
+				return
+			}
+
+			for (let i = 0; i < inputs.length; i++) {
+				for (let j = 0; j < inputs[i].length; j++) {
+					for (let k = 0; k < inputs[i][j].length; k++) {
+						outputs[i][j][k] = inputs[i][j][k]
+					}
+				}
+			}
+			return;
+		}
 	}
 
 	try {

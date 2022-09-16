@@ -36,6 +36,8 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 	runCount: number
 	error?: any
 
+	analyser: AnalyserNode
+	fftArray: Float32Array
 	gl: WebGLRenderingContext
 
 	runner: ThreeJSRunner
@@ -105,7 +107,12 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 						}
 					}
 
-					return this.runner.render(inputs, this.generator, currentTime, params)
+					if (!this.fftArray) {
+						this.fftArray = new Float32Array(this.analyser.frequencyBinCount);
+					}
+					this.analyser.getFloatFrequencyData(this.fftArray)
+					
+					return this.runner.render(inputs, this.generator, currentTime, params, this.fftArray)
 				},
 				disconnectVideo: () => {
 					console.log("disconnectVideo")
@@ -296,6 +303,11 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 
 		const node: ThreeJSNode = new ThreeJSNode(this, {});
 		await node._initialize();
+
+		let analyser = this.audioContext.createAnalyser()
+		node.analyser = analyser
+		analyser.smoothingTimeConstant = 0.3
+		node.connect(analyser)
 
 		if (initialState) node.setState(initialState);
 
