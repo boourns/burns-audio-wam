@@ -134,7 +134,6 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 		if (window.WAMExtensions && window.WAMExtensions.modulationTarget) {
 			window.WAMExtensions.modulationTarget.setModulationTargetDelegate(this.instanceId, {
 				connectModulation: async (params: WamParameterInfoMap) => {
-					console.log("Plugin received param list: ", params)
 					node.paramList = params
 					if (node.targetParam) {
 						await node.setTargetParameter(node.targetParam)
