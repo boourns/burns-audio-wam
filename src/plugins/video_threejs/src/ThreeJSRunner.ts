@@ -60,12 +60,13 @@ export class ThreeJSRunner {
         this.texture = texture
     }
 
-    render(inputs: WebGLTexture[], generator: ThreeJSGenerator | undefined, time: number, params: Record<string, any>): WebGLTexture[] {
+    render(inputs: WebGLTexture[], generator: ThreeJSGenerator | undefined, time: number, params: Record<string, any>, fft: any): WebGLTexture[] {
         this.renderer.resetState()
         this.renderer.setRenderTarget(this.texture)
 
         if (generator) {
-            generator.render(this.renderer, time, params)
+            // @ts-ignore
+            generator.render(this.renderer, time, params, fft)
         }
 
         this.output = this.renderer.properties.get(this.texture.texture).__webglTexture

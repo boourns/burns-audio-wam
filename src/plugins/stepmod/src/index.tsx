@@ -1,4 +1,4 @@
-import { WamEventMap, WamParameterInfo, WamTransportData } from '@webaudiomodules/api';
+import { WamEventMap, WamParameterInfo, WamParameterInfoMap, WamTransportData } from '@webaudiomodules/api';
 
 import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
 
@@ -21,7 +21,11 @@ class StepModulatorNode extends WamNode {
 	destroyed = false;
 	_supportedEventTypes: Set<keyof WamEventMap>
 
+	paramList?: WamParameterInfoMap
+	targetParam?: string
+
 	sequencer: StepModulator
+	connected: boolean
 
 	/**
 	 * @param {WebAudioModule} module
@@ -40,7 +44,11 @@ class StepModulatorNode extends WamNode {
 
 	async getState(): Promise<any> {
 		var params = await super.getState()
-		return {params, sequencer: this.sequencer.getState()}
+		return {
+			params, 
+			sequencer: this.sequencer.getState(),
+			targetParam: this.targetParam
+		}
 	}
 
 	async setState(state: any) {
@@ -51,6 +59,27 @@ class StepModulatorNode extends WamNode {
 		if (state.sequencer) {
 			this.sequencer.setState(state.sequencer ? state.sequencer : {})
 		}
+
+		if (state.targetParam != this.targetParam) {
+			this.setTargetParameter(state.targetParam)
+		}
+	}
+
+	async setTargetParameter(id: string | undefined) {
+		this.targetParam = id
+
+		if (!this.paramList) {
+			console.log("param list not yet set")
+			return
+		}
+
+		// paramList is set 
+		const param = id ? this.paramList[id] : undefined
+		this.port.postMessage({action: "target", param})
+
+		let ids = id ? [id] : []
+
+		await window.WAMExtensions.modulationTarget.lockParametersForAutomation(this.instanceId, ids)
 	}
 }
 
@@ -60,6 +89,8 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_processorUrl = `${this._baseURL}/StepModulatorProcessor.js`;
+
+	nonce: string | undefined;
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -102,9 +133,12 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 
 		if (window.WAMExtensions && window.WAMExtensions.modulationTarget) {
 			window.WAMExtensions.modulationTarget.setModulationTargetDelegate(this.instanceId, {
-				setModulationTarget: (param: WamParameterInfo) => {
-					this.targetParam = param
-					this.sequencerNode.port.postMessage({action: "target", param})
+				connectModulation: async (params: WamParameterInfoMap) => {
+					node.paramList = params
+					if (node.targetParam) {
+						await node.setTargetParameter(node.targetParam)
+					}
+
 					if (this.sequencer.renderCallback) {
 						this.sequencer.renderCallback()
 					}
@@ -125,6 +159,18 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
+
+		if (this.nonce) {
+			// we've already rendered before, unuse the styles before using them again
+			this.nonce = undefined
+
+			//@ts-ignore
+			styleRoot.unuse()
+		}
+
+		this.nonce = Math.random().toString(16).substr(2, 8);
+		div.setAttribute("data-nonce", this.nonce)
+
 		// @ts-ignore
 		styleRoot.use({ target: shadow });
 
@@ -144,9 +190,13 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 	}
 
 	destroyGui(el: Element) {
-		//@ts-ignore
-		styleRoot.unuse()
-
+		if (el.getAttribute("data-nonce") == this.nonce) {
+			// this was the last time we rendered the GUI so clear the style
+			
+			//@ts-ignore
+			styleRoot.unuse()
+		}
+		
 		render(null, el)
 	}
 

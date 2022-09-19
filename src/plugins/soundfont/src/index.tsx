@@ -19,6 +19,7 @@ export default class SoundfontModule extends WebAudioModule<SoundfontPlayerNode>
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
+	nonce: string | undefined;
 
 	synth: SoundfontPlayerNode
 
@@ -66,6 +67,18 @@ export default class SoundfontModule extends WebAudioModule<SoundfontPlayerNode>
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
+
+		if (this.nonce) {
+			// we've already rendered before, unuse the styles before using them again
+			this.nonce = undefined
+
+			//@ts-ignore
+			styleRoot.unuse()
+		}
+
+		this.nonce = Math.random().toString(16).substr(2, 8);
+		div.setAttribute("data-nonce", this.nonce)
+
 		// @ts-ignore
 		styleRoot.use({ target: shadow });
 
@@ -75,9 +88,13 @@ export default class SoundfontModule extends WebAudioModule<SoundfontPlayerNode>
 	}
 
 	destroyGui(el: Element) {
-		//@ts-ignore
-		styleRoot.unuse()
-
+		if (el.getAttribute("data-nonce") == this.nonce) {
+			// this was the last time we rendered the GUI so clear the style
+			
+			//@ts-ignore
+			styleRoot.unuse()
+		}
+		
 		render(null, el.shadowRoot)
 	}
 }

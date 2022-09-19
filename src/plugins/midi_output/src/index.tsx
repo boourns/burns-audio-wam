@@ -21,6 +21,7 @@ export default class MIDIOutputModule extends WebAudioModule<MIDIOutputNode> {
 
 	callback?: () => void
 	midiInitialized: boolean = false
+	nonce: string | undefined;
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;

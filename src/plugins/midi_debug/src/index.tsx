@@ -9,7 +9,7 @@ import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 import { MIDIDebugView } from './MIDIDebugView';
 import { MIDIDebugNode as MIDIDebugNode } from './Node';
-import styles from "./MIDIDebugView.scss"
+import styleRoot from "./MIDIDebugView.scss"
 
 
 export default class MIDIDebugModule extends WebAudioModule<MIDIDebugNode> {
@@ -20,6 +20,7 @@ export default class MIDIDebugModule extends WebAudioModule<MIDIDebugNode> {
 
 	callback?: () => void
 	midiInitialized: boolean = false
+	nonce: string | undefined;
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -60,8 +61,19 @@ export default class MIDIDebugModule extends WebAudioModule<MIDIDebugNode> {
 
 		var shadow = div.attachShadow({mode: 'open'});
 
+		if (this.nonce) {
+			// we've already rendered before, unuse the styles before using them again
+			this.nonce = undefined
+
+			//@ts-ignore
+			styleRoot.unuse()
+		}
+
+		this.nonce = Math.random().toString(16).substr(2, 8);
+		div.setAttribute("data-nonce", this.nonce)
+
 		// @ts-ignore
-    	styles.use({ target: shadow });
+    	styleRoot.use({ target: shadow });
 
 		render(<MIDIDebugView plugin={this.audioNode}></MIDIDebugView>, shadow);
 
@@ -69,8 +81,12 @@ export default class MIDIDebugModule extends WebAudioModule<MIDIDebugNode> {
 	}
 
 	destroyGui(el: Element) {
-		// @ts-ignore
-		styles.unuse()
+		if (el.getAttribute("data-nonce") == this.nonce) {
+			// this was the last time we rendered the GUI so clear the style
+			
+			//@ts-ignore
+			styleRoot.unuse()
+		}
 
 		render(null, el.shadowRoot)
 	}

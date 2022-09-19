@@ -15,7 +15,7 @@ import { ExternalInstrumentView } from './ExternalInstrumentView';
 import { InstrumentDefinition, InstrumentKernelType } from './InstrumentDefinition';
 import getInstrumentKernel from './InstrumentDefinition';
 
-import styles from './ExternalInstrument.scss'
+import styleRoot from './ExternalInstrument.scss'
 import diff from "microdiff"
 
 const InstrumentKernel = getInstrumentKernel("test")
@@ -164,6 +164,7 @@ export default class ExternalInstrumentModule extends WebAudioModule<ExternalIns
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
+	nonce: string | undefined;
 
 	get instanceId() { return "TomBurnsExternalInstrument" + this._timestamp; }
 
@@ -210,8 +211,19 @@ export default class ExternalInstrumentModule extends WebAudioModule<ExternalIns
 
 		var shadow = div.attachShadow({mode: 'open'});
 
+		if (this.nonce) {
+			// we've already rendered before, unuse the styles before using them again
+			this.nonce = undefined
+
+			//@ts-ignore
+			styleRoot.unuse()
+		}
+
+		this.nonce = Math.random().toString(16).substr(2, 8);
+		div.setAttribute("data-nonce", this.nonce)
+
 		// @ts-ignore
-    	styles.use({ target: shadow });
+    	styleRoot.use({ target: shadow });
 
 		render(<ExternalInstrumentView plugin={this.audioNode}></ExternalInstrumentView>, shadow);
 
@@ -219,8 +231,12 @@ export default class ExternalInstrumentModule extends WebAudioModule<ExternalIns
 	}
 
 	destroyGui(el: Element) {
-		// @ts-ignore
-		styles.unuse()
+		if (el.getAttribute("data-nonce") == this.nonce) {
+			// this was the last time we rendered the GUI so clear the style
+			
+			//@ts-ignore
+			styleRoot.unuse()
+		}
 
 		render(null, el.shadowRoot)
 	}

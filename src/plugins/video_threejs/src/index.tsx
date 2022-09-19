@@ -36,6 +36,8 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 	runCount: number
 	error?: any
 
+	analyser: AnalyserNode
+	fftArray: Float32Array
 	gl: WebGLRenderingContext
 
 	runner: ThreeJSRunner
@@ -105,7 +107,12 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 						}
 					}
 
-					return this.runner.render(inputs, this.generator, currentTime, params)
+					if (!this.fftArray) {
+						this.fftArray = new Float32Array(this.analyser.frequencyBinCount);
+					}
+					this.analyser.getFloatFrequencyData(this.fftArray)
+					
+					return this.runner.render(inputs, this.generator, currentTime, params, this.fftArray)
 				},
 				disconnectVideo: () => {
 					console.log("disconnectVideo")
@@ -246,6 +253,7 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_processorUrl = `${this._baseURL}/ThreeJSProcessor.js`;
+	nonce: string | undefined;
 
 	multiplayer?: MultiplayerHandler;
 
@@ -296,6 +304,11 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 		const node: ThreeJSNode = new ThreeJSNode(this, {});
 		await node._initialize();
 
+		let analyser = this.audioContext.createAnalyser()
+		node.analyser = analyser
+		analyser.smoothingTimeConstant = 0.3
+		node.connect(analyser)
+
 		if (initialState) node.setState(initialState);
 
 		node.registerExtensions()
@@ -311,7 +324,17 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 
 		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
 
-		//var shadow = div.attachShadow({mode: 'open'});
+		if (this.nonce) {
+			// we've already rendered before, unuse the styles before using them again
+			this.nonce = undefined
+
+			//@ts-ignore
+			styleRoot.unuse()
+		}
+
+		this.nonce = Math.random().toString(16).substr(2, 8);
+		div.setAttribute("data-nonce", this.nonce)
+
 		// @ts-ignore
 		styleRoot.use({ target: div });
 
@@ -321,9 +344,13 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 	}
 
 	destroyGui(el: Element) {
-		//@ts-ignore
-		styleRoot.unuse()
-
+		if (el.getAttribute("data-nonce") == this.nonce) {
+			// this was the last time we rendered the GUI so clear the style
+			
+			//@ts-ignore
+			styleRoot.unuse()
+		}
+		
 		render(null, el)
 	}	
 }
