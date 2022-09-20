@@ -1,0 +1,11 @@
+@import "../../shared/ui/glow.scss";
+
+.module {
+    flex: 1;
+    background-color: lightblue;
+    display: flex;
+    flex-direction:column;
+    justify-content:space-between;
+    width: 100%;
+    height: 100%;
+}

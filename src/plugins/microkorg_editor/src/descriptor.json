@@ -1,0 +1,15 @@
+{
+    "name": "Microkorg Editor",
+    "vendor": "SequencerParty",
+    "description": "Korg Microkorg patch editor and controller",
+    "version": "1.0.0",
+    "sdkVersion": "1.0.0",
+    "thumbnail": "",
+    "keywords": ["midi", "external instrument", "korg", "microkorg"],
+    "isInstrument": true,
+    "website": "",
+    "hasMidiInput": true,
+    "hasMidiOutput": true,
+    "hasAudioInput": false,
+    "hasAudioOutput": false
+}
