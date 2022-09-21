@@ -31,6 +31,7 @@ export class SelectParameter implements SynthParameter {
 
     toWAM(): WamParameterConfiguration {
         return {
+            label: this.label,
             type: "choice",
             defaultValue: this.defaultValue,
             choices: this.options.map(o => o.label)

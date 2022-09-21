@@ -10,7 +10,6 @@ const MIDIControllerProcessor = scope.MIDIControllerProcessor
 class MicrokorgProcessor extends MIDIControllerProcessor {
     loadKernel() {
         this.kernel = new MicrokorgKernel()
-        
     }
 }
 

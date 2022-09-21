@@ -4,6 +4,8 @@ import { MIDIMessager } from "./ControlChangeMessager"
 const MIDI_CC = 0xB0
 
 export interface SynthParameter {
+    id: string
+    label: string
     toWAM(): WamParameterConfiguration
     ingestMIDI(currentChannel: number, event: WamMidiData): boolean
     updateFromSysex(value: number): void
@@ -37,6 +39,7 @@ export class IntParameter implements SynthParameter {
     toWAM(): WamParameterConfiguration {
         return {
             type: "int",
+            label: this.label,
             defaultValue: this.defaultValue,
             minValue: this.minValue,
             maxValue: this.maxValue,

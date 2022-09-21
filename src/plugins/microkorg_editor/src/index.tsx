@@ -6,45 +6,13 @@
 
 import { h, render } from 'preact';
 
-import { WebAudioModule, addFunctionModule } from '@webaudiomodules/sdk';
+import { WebAudioModule } from '@webaudiomodules/sdk';
 import { getBaseUrl } from '../../shared/getBaseUrl';
-import { DynamicParameterNode } from '../../shared/DynamicParameterNode';
-import loadMIDIControllerProcessor from './MIDIControllerProcessor';
+import styleRoot from "./MicrokorgEditorView.scss"
+import { MicrokorgEditorView } from './MicrokorgEditorView';
+import { MIDIControllerNode } from './MIDIControllerNode';
 
-export class MicrokorgControllerNode extends DynamicParameterNode {
-	destroyed = false;
-	renderCallback?: () => void
-	error?: any;
-
-
-	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
-		const { audioWorklet } = audioContext;
-
-		await super.addModules(audioContext, moduleId);
-
-        await addFunctionModule(audioWorklet, loadMIDIControllerProcessor, moduleId);
-
-	}
-
-	/**
-	 * @param {WebAudioModule} module
-	 * @param {AudioWorkletNodeOptions} options
-	 */
-	 constructor(module: WebAudioModule, options: AudioWorkletNodeOptions) {
-		super(module, 
-			{...options, processorOptions: {
-				numberOfInputs: 1,
-				numberOfOutputs: 1,
-				outputChannelCount: [2],
-			}}, 
-		[]);
-
-		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
-		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
-	}
-}
-
-export default class MicrokorgControllerModule extends WebAudioModule<MicrokorgControllerNode> {
+export default class MicrokorgControllerModule extends WebAudioModule<MIDIControllerNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
@@ -76,10 +44,10 @@ export default class MicrokorgControllerModule extends WebAudioModule<MicrokorgC
 	async createAudioNode(initialState: any) {
 		console.log("WAM::createAudioNode")
 
-		await MicrokorgControllerNode.addModules(this.audioContext, this.moduleId)
+		await MIDIControllerNode.addModules(this.audioContext, this.moduleId)
 		await this.audioContext.audioWorklet.addModule(this._processorUrl)
 
-		const node: MicrokorgControllerNode = new MicrokorgControllerNode(this, {});
+		const node: MIDIControllerNode = new MIDIControllerNode(this, {});
 
 		await node._initialize();
 
@@ -102,16 +70,16 @@ export default class MicrokorgControllerModule extends WebAudioModule<MicrokorgC
 			this.nonce = undefined
 
 			//@ts-ignore
-			//styleRoot.unuse()
+			styleRoot.unuse()
 		}
 
 		this.nonce = Math.random().toString(16).substr(2, 8);
 		div.setAttribute("data-nonce", this.nonce)
 
 		// @ts-ignore
-    	//styleRoot.use({ target: shadow });
+    	styleRoot.use({ target: shadow });
 
-		render(<div>yo</div>, shadow)
+		render(<MicrokorgEditorView plugin={this.audioNode}></MicrokorgEditorView>, shadow)
 
 		return div;
 	}
@@ -121,7 +89,7 @@ export default class MicrokorgControllerModule extends WebAudioModule<MicrokorgC
 			// this was the last time we rendered the GUI so clear the style
 			
 			//@ts-ignore
-			//styleRoot.unuse()
+			styleRoot.unuse()
 		}
 
 		render(null, el.shadowRoot)
