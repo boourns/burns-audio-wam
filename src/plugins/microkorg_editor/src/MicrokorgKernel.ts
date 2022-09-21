@@ -5,9 +5,9 @@ import { SelectOption, SelectParameter } from "./SelectParameter";
 import { IntParameter, SynthParameter } from "./IntParameter";
 import { ControlChangeMessager } from "./ControlChangeMessager";
 import {NRPNMSBMessager} from "./NRPNMSBMessager"
-import { MIDIControllerKernelType } from "./MIDIControllerKernel";
+import { MIDIControllerKernel } from "./MIDIControllerKernel";
 
-export class MicrokorgKernel implements MIDIControllerKernelType {
+export class MicrokorgKernel implements MIDIControllerKernel {
     channel: number
     parameters: Record<string, SynthParameter>
     vocoderParameters: Record<string, SynthParameter>

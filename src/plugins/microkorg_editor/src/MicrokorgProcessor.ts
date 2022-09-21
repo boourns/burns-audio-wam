@@ -4,17 +4,18 @@ import { MicrokorgKernel } from "./MicrokorgKernel";
 const moduleId = "SequencerPartyMicrokorg Editor"
 const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
 
-let scope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
+const scope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
+const MIDIControllerProcessor = scope.MIDIControllerProcessor
 
-scope.MIDIControllerKernel = MicrokorgKernel
-
-const DynamicParameterProcessor = scope.DynamicParameterProcessor
-
-class MicrokorgProcessor extends DynamicParameterProcessor {
-
+class MicrokorgProcessor extends MIDIControllerProcessor {
+    loadKernel() {
+        this.kernel = new MicrokorgKernel()
+        
+    }
 }
 
 try {
+    // @ts-ignore
     audioWorkletGlobalScope.registerProcessor(moduleId, MicrokorgProcessor);
 } catch (error) {
     // eslint-disable-next-line no-console

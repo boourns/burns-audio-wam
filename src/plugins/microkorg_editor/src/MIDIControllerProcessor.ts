@@ -1,13 +1,13 @@
-import { WamEvent, WamMidiData, WamTransportData } from "@webaudiomodules/api";
+import { WamEvent, WamMidiData, WamParameterInfoMap, WamTransportData } from "@webaudiomodules/api";
 import { AudioWorkletGlobalScope, WamParameterConfiguration } from "@webaudiomodules/api";
-import { MIDIControllerKernelClass, MIDIControllerKernelType } from "./MIDIControllerKernel"
+import type { MIDIControllerKernel } from "./MIDIControllerKernel"
 
 export type MIDIControllerConfig = {
     channel: number,
     midiPassThrough: "off" | "notes" | "all",
 }
 
-const getMIDIControllerProcessor = (moduleId: string) => {
+const loadMIDIControllerProcessor = (moduleId: string) => {
     // @ts-ignore
 
     const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
@@ -19,11 +19,19 @@ const getMIDIControllerProcessor = (moduleId: string) => {
  		WamParameterInfo,
  	} = ModuleScope;
 
-    const DynamicParameterProcessor = ModuleScope.DynamicParameterProcessor
-    const MIDIControllerKernel: MIDIControllerKernelClass = ModuleScope.MIDIControllerKernel
+    class MIDIControllerProcessor extends WamProcessor {
+        kernel: MIDIControllerKernel
 
-    class MIDIControllerProcessor extends DynamicParameterProcessor {
-        kernel: MIDIControllerKernelType
+        _generateWamParameterInfo(): WamParameterInfoMap {
+            const kernelParam = this.kernel.wamParameters()
+
+            let params: WamParameterInfoMap = {}
+            for (let id of Object.keys(kernelParam)) {
+                params[id] = new WamParameterInfo(id, kernelParam[id])
+            }
+
+            return params
+        }
 
         constructor(options: any) {
             super(options)
@@ -34,8 +42,10 @@ const getMIDIControllerProcessor = (moduleId: string) => {
             }
 
             this.loadKernel()
+        }
 
-            this.kernel = new MIDIControllerKernel()
+        loadKernel(): MIDIControllerKernel {
+            throw new Error("loadKernel() not implemented!")
         }
         
         /**
@@ -115,4 +125,4 @@ const getMIDIControllerProcessor = (moduleId: string) => {
     return MIDIControllerProcessor
 }
 
-export default getMIDIControllerProcessor
+export default loadMIDIControllerProcessor

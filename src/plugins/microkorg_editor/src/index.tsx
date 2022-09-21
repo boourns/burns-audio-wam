@@ -9,16 +9,21 @@ import { h, render } from 'preact';
 import { WebAudioModule, addFunctionModule } from '@webaudiomodules/sdk';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 import { DynamicParameterNode } from '../../shared/DynamicParameterNode';
+import loadMIDIControllerProcessor from './MIDIControllerProcessor';
 
 export class MicrokorgControllerNode extends DynamicParameterNode {
 	destroyed = false;
 	renderCallback?: () => void
 	error?: any;
 
+
 	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
 		const { audioWorklet } = audioContext;
 
 		await super.addModules(audioContext, moduleId);
+
+        await addFunctionModule(audioWorklet, loadMIDIControllerProcessor, moduleId);
+
 	}
 
 	/**
@@ -44,6 +49,8 @@ export default class MicrokorgControllerModule extends WebAudioModule<MicrokorgC
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
+	_processorUrl = `${this._baseURL}/MicrokorgProcessor.js`;
+
 	nonce: string | undefined;
 
 	//get instanceId() { return "TomBurnsExternalInstrument" + this._timestamp; }
@@ -70,6 +77,8 @@ export default class MicrokorgControllerModule extends WebAudioModule<MicrokorgC
 		console.log("WAM::createAudioNode")
 
 		await MicrokorgControllerNode.addModules(this.audioContext, this.moduleId)
+		await this.audioContext.audioWorklet.addModule(this._processorUrl)
+
 		const node: MicrokorgControllerNode = new MicrokorgControllerNode(this, {});
 
 		await node._initialize();
@@ -93,14 +102,14 @@ export default class MicrokorgControllerModule extends WebAudioModule<MicrokorgC
 			this.nonce = undefined
 
 			//@ts-ignore
-			styleRoot.unuse()
+			//styleRoot.unuse()
 		}
 
 		this.nonce = Math.random().toString(16).substr(2, 8);
 		div.setAttribute("data-nonce", this.nonce)
 
 		// @ts-ignore
-    	styleRoot.use({ target: shadow });
+    	//styleRoot.use({ target: shadow });
 
 		render(<div>yo</div>, shadow)
 
@@ -112,7 +121,7 @@ export default class MicrokorgControllerModule extends WebAudioModule<MicrokorgC
 			// this was the last time we rendered the GUI so clear the style
 			
 			//@ts-ignore
-			styleRoot.unuse()
+			//styleRoot.unuse()
 		}
 
 		render(null, el.shadowRoot)
