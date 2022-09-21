@@ -1,13 +1,14 @@
 import { describe, it } from "mocha"
 import assert, { deepStrictEqual, strictEqual } from "assert"
-import {SimpleCCParameter} from "../src/SimpleCCParameter.js"
+import {IntParameter} from "../src/IntParameter.js"
+import { ControlChangeMessager } from "../src/ControlChangeMessager.js"
 
 const MIDI_CC = 0xB0
 const MIDI_NOTE = 0x90
 
 describe("SimpleCCParameter", () => {
     it("toWAM generates DynamicParameter config", async () => {
-        const param = new SimpleCCParameter("cutoff", "Filter Cutoff", 15, 60, 0, 127)
+        const param = new IntParameter("cutoff", "Filter Cutoff", new ControlChangeMessager(15), 60, 0, 127)
 
         const wam = param.toWAM()
         
@@ -21,7 +22,7 @@ describe("SimpleCCParameter", () => {
     })
 
     it("ingestMIDI ignores other MIDI messages", async () => {
-        const param = new SimpleCCParameter("cutoff", "Filter Cutoff", 15, 60, 0, 127)
+        const param = new IntParameter("cutoff", "Filter Cutoff", new ControlChangeMessager(15), 60, 0, 127)
 
         // wrong channel
         param.ingestMIDI(0, {bytes:[MIDI_CC + 4, 15, 0]})
@@ -38,7 +39,7 @@ describe("SimpleCCParameter", () => {
     })
 
     it("ingestMIDI ingests MIDI messages", async () => {
-        const param = new SimpleCCParameter("cutoff", "Filter Cutoff", 15, 60, 0, 127)
+        const param = new IntParameter("cutoff", "Filter Cutoff", new ControlChangeMessager(15), 60, 0, 127)
 
         // correct, exact channel
         param.ingestMIDI(4, {bytes:[MIDI_CC + 4, 15, 40]})

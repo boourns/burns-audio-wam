@@ -8,34 +8,17 @@ import { h, render } from 'preact';
 
 import { WebAudioModule, addFunctionModule } from '@webaudiomodules/sdk';
 import { getBaseUrl } from '../../shared/getBaseUrl';
-import { DynamicParameterNode, DynamicParamGroup } from '../../shared/DynamicParameterNode';
+import { DynamicParameterNode } from '../../shared/DynamicParameterNode';
 
-import getExternalInstrumentProcessor, { ExternalInstrumentConfig } from './ExternalInstrumentProcessor';
-import { ExternalInstrumentView } from './ExternalInstrumentView';
-import { InstrumentDefinition, InstrumentKernelType } from './InstrumentDefinition';
-import getInstrumentKernel from './InstrumentDefinition';
-
-import styleRoot from './ExternalInstrument.scss'
-import diff from "microdiff"
-
-const InstrumentKernel = getInstrumentKernel("test")
-
-export class ExternalInstrumentNode extends DynamicParameterNode {
+export class MicrokorgControllerNode extends DynamicParameterNode {
 	destroyed = false;
 	renderCallback?: () => void
 	error?: any;
-
-	instrumentDefinition: InstrumentDefinition
-	config: ExternalInstrumentConfig
-	kernel: InstrumentKernelType
 
 	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
 		const { audioWorklet } = audioContext;
 
 		await super.addModules(audioContext, moduleId);
-
-		await addFunctionModule(audioWorklet, getInstrumentKernel, moduleId);
-		await addFunctionModule(audioWorklet, getExternalInstrumentProcessor, moduleId);
 	}
 
 	/**
@@ -51,122 +34,19 @@ export class ExternalInstrumentNode extends DynamicParameterNode {
 			}}, 
 		[]);
 
-		this.config = {
-			channel: 0,
-			midiPassThrough: "all",
-			learn: true,
-		}
-
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
-
-		this.instrumentDefinition = {
-			controlGroups: [
-				{
-					label: "Controls",
-					controls: [
-						{
-							label: "Cutoff",
-							id: "cutoff",
-							data: {
-								dataType: "CC",
-								ccNumber: 102,
-								defaultValue: 64,
-								minValue: 0,
-								maxValue: 127
-							}
-						},
-						{
-							label: "Res",
-							id: "res",
-							data: {
-								dataType: "CC",
-								ccNumber: 103,
-								defaultValue: 0,
-								minValue: 0,
-								maxValue: 127
-							}
-						}
-					]
-				}
-			]
-		}
-	}
-
-	async getState(): Promise<any> {
-		return {
-			params: await super.getState(),
-			definition: this.instrumentDefinition,
-		}
-	}
-
-	async setState(state: any): Promise<void> {
-		if (state.params) {
-			await super.setState(state.params)
-		}
-		if (state.definition) {
-			const changes = diff(this.instrumentDefinition, state.definition)
-			if (changes.length > 0) {
-				this.instrumentDefinition = state.definition
-				this.updateProcessorFromDefinition()
-			}
-		}
-	}
-
-	registerExtensions() {
-		
-	}
-
-	updateProcessorFromDefinition() {
-        super.port.postMessage({source:"def", def: this.instrumentDefinition})
-
-		this.kernel = new InstrumentKernel(this.instrumentDefinition, 0)
-
-		this.updateProcessor(this.kernel.toWAM())
-
-		if (this.renderCallback) {
-			this.renderCallback()
-		}
-	}
-
-	_onMessage(message: MessageEvent) {
-		if (message.data && message.data.source == "kernel") {
-			console.log("Received kernel message: ", JSON.stringify(message))
-			if (message.data.type == "learn") {
-				// data: {
-				// 	cc: event.bytes[1],
-				// 	value: event.bytes[2]
-				// }
-				if (!this.kernel.existingControlForCC(message.data.data.cc) && this.config.learn) {
-					this.instrumentDefinition.controlGroups[this.instrumentDefinition.controlGroups.length-1].controls.push({
-						id: `cc${message.data.data.cc}`,
-						label: `CC${message.data.data.cc}`,
-						data: {
-							dataType: 'CC',
-							ccNumber: message.data.data.cc,
-							defaultValue: message.data.data.value,
-							minValue: 0,
-							maxValue: 127,
-						}
-					})
-
-					this.updateProcessorFromDefinition()
-				}
-			}
-		} else {
-			super._onMessage(message)
-		}
 	}
 }
 
-export default class ExternalInstrumentModule extends WebAudioModule<ExternalInstrumentNode> {
+export default class MicrokorgControllerModule extends WebAudioModule<MicrokorgControllerNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	nonce: string | undefined;
 
-	get instanceId() { return "TomBurnsExternalInstrument" + this._timestamp; }
+	//get instanceId() { return "TomBurnsExternalInstrument" + this._timestamp; }
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -189,15 +69,12 @@ export default class ExternalInstrumentModule extends WebAudioModule<ExternalIns
 	async createAudioNode(initialState: any) {
 		console.log("WAM::createAudioNode")
 
-		await ExternalInstrumentNode.addModules(this.audioContext, this.moduleId)
-		const node: ExternalInstrumentNode = new ExternalInstrumentNode(this, {});
+		await MicrokorgControllerNode.addModules(this.audioContext, this.moduleId)
+		const node: MicrokorgControllerNode = new MicrokorgControllerNode(this, {});
 
 		await node._initialize();
 
 		if (initialState) await node.setState(initialState);
-
-		node.registerExtensions()
-		node.updateProcessorFromDefinition()
 
 		return node
     }
@@ -225,7 +102,7 @@ export default class ExternalInstrumentModule extends WebAudioModule<ExternalIns
 		// @ts-ignore
     	styleRoot.use({ target: shadow });
 
-		render(<ExternalInstrumentView plugin={this.audioNode}></ExternalInstrumentView>, shadow);
+		render(<div>yo</div>, shadow)
 
 		return div;
 	}

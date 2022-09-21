@@ -1,52 +1,61 @@
 import { WamAutomationEvent, WamMidiData, WamMidiEvent, WamParameterConfiguration } from "@webaudiomodules/api"
+import { MIDIMessager } from "./ControlChangeMessager"
+import { SynthParameter } from "./IntParameter"
 
-const MIDI_CC = 0xB0
-
-export class SimpleCCParameter {
-    id: string
+export type SelectOption = {
+    value: number
     label: string
-    ccNumber: number
+}
+
+export class SelectParameter implements SynthParameter {
+    id: string
+    messager: MIDIMessager
+    label: string
     defaultValue: number
-    minValue: number
-    maxValue: number
+
+    options: SelectOption[]
     value: number
 
     midiDirty: boolean
     automationDirty: boolean
 
-    constructor(id: string, label: string, ccNumber: number, defaultValue: number, minValue: number = 0, maxValue: number = 127) {
+    constructor(id: string, label: string, messager: MIDIMessager, defaultValue: number, options: SelectOption[]) {
         this.id = id
         this.label = label
-        this.ccNumber = ccNumber
+        this.messager = messager
         this.defaultValue = defaultValue
-        this.minValue = minValue
-        this.maxValue = maxValue
+        this.options = options
+
         this.value = this.defaultValue
     }
 
     toWAM(): WamParameterConfiguration {
         return {
-            type: "int",
+            type: "choice",
             defaultValue: this.defaultValue,
-            minValue: this.minValue,
-            maxValue: this.maxValue,
+            choices: this.options.map(o => o.label)
         }
     }
 
     ingestMIDI(currentChannel: number, event: WamMidiData): boolean {
-        if (
-            (currentChannel < 0 && (event.bytes[0] & 0xf0) == MIDI_CC) ||
-            ((event.bytes[0] == MIDI_CC + currentChannel))) {
-                if (event.bytes[1] == this.ccNumber) {
-                    if (this.value != event.bytes[2]) {
-                        this.value = event.bytes[2]
-                        this.automationDirty = true
-                        return true
-                    }
-                }
+        let value = this.messager.ingestMIDI(currentChannel, this.value, event)
+
+        if (value === undefined) {
+            return false
+        }
+        if (value === this.value) {
+            return false
         }
 
-        return false
+        const option = this.options.find(o => o.value == value)
+        if (option === undefined) {
+            return false
+        }
+
+        this.value = value
+        this.automationDirty = true
+
+        return true
     }
 
     updateFromSysex(value: number) {
@@ -55,6 +64,11 @@ export class SimpleCCParameter {
     }
 
     parameterUpdate(newValue: number): boolean {
+        const option = this.options.find(o => o.value == newValue)
+        if (option === undefined) {
+            return false
+        }
+
         const dirty = this.value != newValue
 
         if (dirty) {
@@ -66,18 +80,13 @@ export class SimpleCCParameter {
         return dirty
     }
 
-    midiMessage(channel: number, force: boolean = false): WamMidiEvent | undefined {
+    midiMessage(channel: number, force: boolean = false): WamMidiEvent[] | undefined {
         if (!this.midiDirty && !force) {
             return undefined
         }
 
         this.midiDirty = false
-        return {
-            type: "wam-midi", 
-            data: {
-                bytes: [MIDI_CC + channel, this.ccNumber, this.value]
-            }
-        }
+        return this.messager.toMIDI(channel, this.value)
     }
 
     automationMessage(force: boolean = false): WamAutomationEvent | undefined {

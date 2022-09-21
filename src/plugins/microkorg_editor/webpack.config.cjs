@@ -66,4 +66,31 @@ const WAMPlugin = {
   ]
 };
 
-module.exports = [WAMPlugin];
+const processor = {
+  entry: {
+    processor: {
+      import: './src/MicrokorgProcessor.ts',
+      filename: 'MicrokorgProcessor.js'
+    }
+  },
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
+    ],
+  },
+  mode: "development",
+  devtool: false,
+  resolve: {
+    extensions: [ '.tsx', '.ts', '.js' ],
+  },
+  output: {
+    path: path.resolve(__dirname, './dist'),
+    publicPath: 'auto',
+  }
+};
+
+module.exports = [WAMPlugin, processor];

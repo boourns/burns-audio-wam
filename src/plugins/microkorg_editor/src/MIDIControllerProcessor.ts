@@ -1,13 +1,13 @@
 import { WamEvent, WamMidiData, WamTransportData } from "@webaudiomodules/api";
 import { AudioWorkletGlobalScope, WamParameterConfiguration } from "@webaudiomodules/api";
-import { InstrumentDefinition, InstrumentKernelType, MIDIControl } from "./InstrumentDefinition";
+import { MIDIControllerKernelClass, MIDIControllerKernelType } from "./MIDIControllerKernel"
 
-export type ExternalInstrumentConfig = {
+export type MIDIControllerConfig = {
     channel: number,
     midiPassThrough: "off" | "notes" | "all",
 }
 
-const getExternalInstrumentProcessor = (moduleId: string) => {
+const getMIDIControllerProcessor = (moduleId: string) => {
     // @ts-ignore
 
     const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
@@ -20,12 +20,10 @@ const getExternalInstrumentProcessor = (moduleId: string) => {
  	} = ModuleScope;
 
     const DynamicParameterProcessor = ModuleScope.DynamicParameterProcessor
-    const InstrumentKernel = ModuleScope.InstrumentKernel
+    const MIDIControllerKernel: MIDIControllerKernelClass = ModuleScope.MIDIControllerKernel
 
-    class ExternalInstrumentProcessor extends DynamicParameterProcessor {
-        instrumentDefinition: InstrumentDefinition
-        kernel: InstrumentKernelType
-        count = 0
+    class MIDIControllerProcessor extends DynamicParameterProcessor {
+        kernel: MIDIControllerKernelType
 
         constructor(options: any) {
             super(options)
@@ -36,10 +34,8 @@ const getExternalInstrumentProcessor = (moduleId: string) => {
             }
 
             this.loadKernel()
-        }
 
-        loadKernel() {
-            this.kernel = new InstrumentKernel(this.config)
+            this.kernel = new MIDIControllerKernel()
         }
         
         /**
@@ -55,18 +51,18 @@ const getExternalInstrumentProcessor = (moduleId: string) => {
             if (this.kernel) {
                 let params: Record<string, number> = {}
 
-                for (let control of this.kernel.controls) {
-                    const p = this._parameterInterpolators[control.id]
-                    if (p) {
-                        params[control.id] = Math.round(p.values[startSample])
-                    }
-                }
+                // for (let control of this.kernel.controls) {
+                //     const p = this._parameterInterpolators[control.id]
+                //     if (p) {
+                //         params[control.id] = Math.round(p.values[startSample])
+                //     }
+                // }
 
-                this.kernel.updateParameters(params)
+                // this.kernel.updateParameters(params)
 
-                const messages = this.kernel.emitEvents() as WamEvent[]
+                // const messages = this.kernel.emitEvents() as WamEvent[]
 
-                this.emitEvents(...messages)
+                // this.emitEvents(...messages)
             } else {
                 console.log("no kernel")
             }
@@ -95,15 +91,16 @@ const getExternalInstrumentProcessor = (moduleId: string) => {
         _onMidi(midiData: WamMidiData) {
             const { currentTime } = audioWorkletGlobalScope;
 
-            const result = this.kernel.ingestMidi(midiData)
-            if (result) {
-                if (result[0] == "wam") {
-                    console.log("emitting ", result[1])
-                    this.scheduleEvents({...result[1], time: currentTime})
-                } else if (result[0] == "port") {
-                    this.port.postMessage(result[1])
-                }
-            }
+            // const result = this.kernel.ingestMidi(midiData)
+            
+            // if (result) {
+            //     if (result[0] == "wam") {
+            //         console.log("emitting ", result[1])
+            //         this.scheduleEvents({...result[1], time: currentTime})
+            //     } else if (result[0] == "port") {
+            //         this.port.postMessage(result[1])
+            //     }
+            // }
 
             this.emitEvents({type:"wam-midi", data: midiData})
         }
@@ -113,12 +110,9 @@ const getExternalInstrumentProcessor = (moduleId: string) => {
         }
     }
 
-    try {
-        registerProcessor('SequencerPartyExternal Instrument', ExternalInstrumentProcessor as typeof WamProcessor);
-    } catch (error) {
-        // eslint-disable-next-line no-console
-        console.warn(error);
-    }
+    ModuleScope.MIDIControllerProcessor = MIDIControllerProcessor
+
+    return MIDIControllerProcessor
 }
 
-export default getExternalInstrumentProcessor
+export default getMIDIControllerProcessor
