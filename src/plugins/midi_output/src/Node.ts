@@ -22,6 +22,7 @@ export default class MIDIOutputNode extends CompositeAudioNode {
 	setup(paramMgr: ParamMgrNode) {
         // @ts-ignore
         paramMgr.addEventListener('wam-midi', (e) => this.processMIDIEvents([{event: e.detail.data.bytes, time: 0}]));
+        paramMgr.addEventListener('wam-sysex', (e) => this.processMIDIEvents([{event: e.detail.data.bytes, time: 0}]));
 
         this._wamNode = paramMgr
 	}
@@ -39,6 +40,7 @@ export default class MIDIOutputNode extends CompositeAudioNode {
     // MIDI note handling
 
     processMIDIEvents(midiEvents: ScheduledMIDIEvent[]) {
+		
 		if (this.selectedMIDIOutput < 0) {
 			return
 		}

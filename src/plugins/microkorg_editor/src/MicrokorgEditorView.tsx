@@ -188,7 +188,30 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, any
     }
 
     requestSysex() {
-        // TODO
+        const message = [
+            0xF0,
+            0x7E,
+            0x7F,
+            0x06,
+            0x01,
+            0xF7
+        ]
+
+        this.props.plugin.sendEventToProcessor({
+            type: "wam-sysex",
+            data: {
+                bytes: new Uint8Array(message)
+            }
+        })    
+    }
+    
+    allNotesOff() {
+        this.props.plugin.sendEventToProcessor({
+            type: "wam-midi",
+            data: {
+                bytes: [0xb0, 0x78, 0]
+            }
+        })
     }
 
     renderHeader() {
@@ -196,6 +219,7 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, any
             <button onClick={() => this.initPressed()}>Init Patch</button>
             <button onClick={() => this.requestSysex()}>Request Sysex</button>
             <button onClick={() => this.requestSysex()}>Send Patch</button>
+            <button onClick={() => this.allNotesOff()}>All Notes Off</button>
         </div>
     }
 

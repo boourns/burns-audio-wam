@@ -1,4 +1,4 @@
-import { WamParameterDataMap } from '@webaudiomodules/api';
+import { WamEvent, WamParameterDataMap } from '@webaudiomodules/api';
 import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk';
 import loadMIDIControllerProcessor from './MIDIControllerProcessor';
 
@@ -64,6 +64,10 @@ export class MIDIControllerNode extends WamNode {
         await this.setParameterValues(update)
 
         this.pause = false
+    }
+
+    async sendEventToProcessor(event: WamEvent) {
+        super.port.postMessage({action:"emit", event})
     }
 
     async updateState() {

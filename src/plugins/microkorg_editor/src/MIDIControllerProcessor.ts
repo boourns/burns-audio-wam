@@ -125,8 +125,8 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
                     this.rxCounts = message.data.count
                 }
             } else if (message.data && message.data.action == "emit") {
-                if (message.data.message) {
-                    this.emitEvents(message.data.message)
+                if (message.data.event) {
+                    this.emitEvents(message.data.event)
                 }
             } else {
                 // @ts-ignore

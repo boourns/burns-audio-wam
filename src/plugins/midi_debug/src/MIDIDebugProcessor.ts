@@ -1,4 +1,4 @@
-import { AudioWorkletGlobalScope, WamTransportData } from "@webaudiomodules/api";
+import { AudioWorkletGlobalScope, WamBinaryData, WamTransportData } from "@webaudiomodules/api";
 
 export type ExternalInstrumentConfig = {
     midiPassThrough: "off" | "notes" | "all"
@@ -41,12 +41,21 @@ const getMIDIDebugProcessor = (moduleId: string) => {
             if (message.data && message.data.source == "midi") {
                 const { currentTime } = audioWorkletGlobalScope;
 
-                console.log("processor emitting midi: ", message.data)
-
-                this.emitEvents(
-                    { type: 'wam-midi', time: currentTime, data: { bytes: message.data.bytes } }
-                )
-
+                if (message.data.bytes[0] == 0xf0) {
+                    this.emitEvents(
+                        {
+                            type: 'wam-sysex',
+                            time: currentTime,
+                            data: {
+                                bytes: new Uint8Array(message.data.bytes)
+                            }
+                        }
+                    )
+                } else {
+                    this.emitEvents(
+                        { type: 'wam-midi', time: currentTime, data: { bytes: message.data.bytes } }
+                    )
+                }
             } else {
                 super._onMessage(message)
             }
@@ -61,6 +70,18 @@ const getMIDIDebugProcessor = (moduleId: string) => {
             
             this.emitEvents(
                 {type:"wam-midi", time: currentTime, data: midiData}
+            )
+        }
+
+        _onSysex(sysexData: WamBinaryData) {
+            const { currentTime } = audioWorkletGlobalScope;
+
+            const bytes = sysexData.bytes;
+
+            this.port.postMessage({source: "sysex", timestamp: currentTime, bytes})
+            
+            this.emitEvents(
+                {type:"wam-sysex", time: currentTime, data: sysexData}
             )
         }
 

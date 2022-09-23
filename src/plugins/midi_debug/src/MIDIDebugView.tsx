@@ -4,6 +4,10 @@ import { MIDIMessageAnalyzer } from './MIDIMessageAnalyzer';
 import { RecordedMIDIMessage } from './MIDIRecording';
 import { MIDIDebugNode } from './Node';
 
+import styleRoot from "./MIDIDebugView.scss"
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
+
 export interface MIDIDebugProps {
   plugin: MIDIDebugNode
 }
@@ -32,7 +36,7 @@ export class MIDIDebugView extends Component<MIDIDebugProps, MIDIDebugState> {
     const dir = msg.incoming ? "<- " : "-> "
     return <>
       <tr>
-        <td colSpan={2}><b>{dir}{msg.bytes.join(" ")}</b></td>
+        <td colSpan={2}><b>{dir} [{msg.bytes.join(", ")}]</b></td>
       </tr>
       <tr>
         <td>{a.description().join(" ")}</td>
@@ -61,7 +65,7 @@ export class MIDIDebugView extends Component<MIDIDebugProps, MIDIDebugState> {
     } else {
       let content = this.props.plugin.recording.messages.map(m => this.renderMIDIMessage(m))
 
-      return <div style="width: 100%; display: flex; flex-direction: column;">
+      return <div class={styles.allowSelect} style="width: 100%; display: flex; flex-direction: column; ">
         <div style="display: flex; flex-direction: row; height: 30px;">
           <button onClick={() => this.clearPressed()}>Clear</button>
         </div>

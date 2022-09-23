@@ -49,7 +49,7 @@ export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 		this.audioNode = node
 
 		try {
-			let midi = await navigator.requestMIDIAccess()
+			let midi = await navigator.requestMIDIAccess({sysex: true});
 			midi.addEventListener('statechange', (event: WebMidi.MIDIConnectionEvent) => this.midiReady(event.target as WebMidi.MIDIAccess));
 
 			this.midiReady(midi)
