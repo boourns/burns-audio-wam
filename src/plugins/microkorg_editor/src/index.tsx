@@ -45,7 +45,9 @@ export default class MicrokorgControllerModule extends WebAudioModule<MIDIContro
 		console.log("WAM::createAudioNode")
 
 		await MIDIControllerNode.addModules(this.audioContext, this.moduleId)
-		await this.audioContext.audioWorklet.addModule(this._processorUrl)
+
+		let url = `${this._processorUrl}?v=${Math.random()}`
+		await this.audioContext.audioWorklet.addModule(url)
 
 		const node: MIDIControllerNode = new MIDIControllerNode(this, {});
 

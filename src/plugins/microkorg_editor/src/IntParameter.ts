@@ -10,7 +10,7 @@ export interface SynthParameter {
     ingestMIDI(currentChannel: number, event: WamMidiData): boolean
     updateFromSysex(value: number): void
     parameterUpdate(newValue: number): boolean
-    midiMessage(channel: number, force?: boolean): WamMidiEvent[] | undefined
+    midiMessage(channel: number, force?: boolean): WamMidiEvent[]
     automationMessage(force?: boolean): WamAutomationEvent | undefined
 }
 
@@ -95,9 +95,9 @@ export class IntParameter implements SynthParameter {
         return dirty
     }
 
-    midiMessage(channel: number, force: boolean = false): WamMidiEvent[] | undefined {
+    midiMessage(channel: number, force: boolean = false): WamMidiEvent[] {
         if (!this.midiDirty && !force) {
-            return undefined
+            return []
         }
 
         this.midiDirty = false

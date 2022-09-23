@@ -7,6 +7,10 @@ export type MIDIControllerConfig = {
     midiPassThrough: "off" | "notes" | "all",
 }
 
+export type MIDIControllerCounts = {
+    sendMidi: number
+}
+
 const loadMIDIControllerProcessor = (moduleId: string) => {
     // @ts-ignore
 
@@ -21,13 +25,23 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
 
     class MIDIControllerProcessor extends WamProcessor {
         kernel: MIDIControllerKernel
+        kernelParam: Record<string, WamParameterConfiguration>
+        config: MIDIControllerConfig
+        counts: MIDIControllerCounts
+        rxCounts: MIDIControllerCounts
 
         _generateWamParameterInfo(): WamParameterInfoMap {
-            const kernelParam = this.kernel.wamParameters()
+            this.kernelParam = this.kernel.wamParameters()
+            this.counts = {
+                sendMidi: 0
+            }
+            this.rxCounts = {
+                sendMidi: 0
+            }
 
             let params: WamParameterInfoMap = {}
-            for (let id of Object.keys(kernelParam)) {
-                params[id] = new WamParameterInfo(id, kernelParam[id])
+            for (let id of Object.keys(this.kernelParam)) {
+                params[id] = new WamParameterInfo(id, this.kernelParam[id])
             }
 
             return params
@@ -61,18 +75,23 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
             if (this.kernel) {
                 let params: Record<string, number> = {}
 
-                // for (let control of this.kernel.controls) {
-                //     const p = this._parameterInterpolators[control.id]
-                //     if (p) {
-                //         params[control.id] = Math.round(p.values[startSample])
-                //     }
-                // }
+                for (let id of Object.keys(this.kernelParam)) {
+                    const p = this._parameterInterpolators[id]
+                    if (p) {
+                        params[id] = Math.round(p.values[startSample])
+                    }
+                }
 
-                // this.kernel.updateParameters(params)
+                if (this.kernel.parameterUpdate(params)) {
+                    // some parameters updated, send the MIDI events
+                    this.emitEvents(...this.kernel.midiMessages(this.config.channel, false))
+                }
 
-                // const messages = this.kernel.emitEvents() as WamEvent[]
-
-                // this.emitEvents(...messages)
+                if (this.counts.sendMidi != this.rxCounts.sendMidi) {
+                    // somebody (possibly remote) pressed sendMidi
+                    this.emitEvents(...this.kernel.midiMessages(this.config.channel, true))
+                    this.counts.sendMidi = this.rxCounts.sendMidi
+                }
             } else {
                 console.log("no kernel")
             }
@@ -80,39 +99,39 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
             return;
         }
 
-        /**
-         * Messages from main thread appear here.
-         * @param {MessageEvent} message
-         */
-        async _onMessage(message: any): Promise<void> {
-            if (message.data && message.data.source == "def") {
-                console.log("Received instrument definition! ", JSON.stringify(message.data.def))
-
-                this.instrumentDefinition = message.data.def
-
-                this.loadKernel()
-            } else if (message.data && message.data.source == "config") {
-                this.config = message.data.config
-            } else {
-                super._onMessage(message)
-            }
-        }
-
         _onMidi(midiData: WamMidiData) {
             const { currentTime } = audioWorkletGlobalScope;
 
-            // const result = this.kernel.ingestMidi(midiData)
+            const result = this.kernel.ingestMIDI(midiData)
             
-            // if (result) {
-            //     if (result[0] == "wam") {
-            //         console.log("emitting ", result[1])
-            //         this.scheduleEvents({...result[1], time: currentTime})
-            //     } else if (result[0] == "port") {
-            //         this.port.postMessage(result[1])
-            //     }
-            // }
+            if (result) {
+                const messages = this.kernel.automationMessages(false)
+                for (let message of messages) {                    
+                    this.scheduleEvents({...message, time: currentTime})
+                }
+            } else {
+                // only forward MIDI events we don't ingest
+                this.emitEvents({type:"wam-midi", data: midiData})
+            }
+        }
 
-            this.emitEvents({type:"wam-midi", data: midiData})
+        /**
+         * Messages from main thread appear here.
+        //  * @param {MessageEvent} message
+        //  */
+        async _onMessage(message: any): Promise<void> {
+            if (message.data && message.data.action == "count") {
+                if (message.data.count) {
+                    this.rxCounts = message.data.count
+                }
+            } else if (message.data && message.data.action == "emit") {
+                if (message.data.message) {
+                    this.emitEvents(message.data.message)
+                }
+            } else {
+                // @ts-ignore
+                super._onMessage(message)
+            }
         }
 
         _onTransport(transportData: WamTransportData) {

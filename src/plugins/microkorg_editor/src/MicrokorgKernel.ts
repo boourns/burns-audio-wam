@@ -55,7 +55,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         this.parameters["osc2_tune"] = new IntParameter("osc2_tune", "OSC2 Tune", new ControlChangeMessager(18), 0, -64, 63)
         this.parameters["osc2_finetune"] = new IntParameter("osc2_finetune", "OSC2 Finetune", new ControlChangeMessager(19), 0, -64, 63)
 
-        this.parameters["mixer_osc1"] = new IntParameter("mixer_osc1", "OSC1 Level", new ControlChangeMessager(20), 0, 0, 127)
+        this.parameters["mixer_osc1"] = new IntParameter("mixer_osc1", "OSC1 Level", new ControlChangeMessager(20), 100, 0, 127)
         this.parameters["mixer_osc2"] = new IntParameter("mixer_osc2", "OSC2 Level", new ControlChangeMessager(21), 0, 0, 127)
         this.parameters["mixer_noise"] = new IntParameter("mixer_noise", "Noise Level", new ControlChangeMessager(22), 0, 0, 127)
 
@@ -67,7 +67,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         ]
         this.parameters["filter_type"] = new SelectParameter("filter_type", "Filter Type", new ControlChangeMessager(83), 0, filterTypes)
         this.parameters["filter_cutoff"] = new IntParameter("filter_freq", "Filter Frequency", new ControlChangeMessager(74), 100, 0, 127)
-        this.parameters["filter_res"] = new IntParameter("filter_res", "Filter Resonance", new ControlChangeMessager(71), 100, 0, 127)
+        this.parameters["filter_res"] = new IntParameter("filter_res", "Filter Resonance", new ControlChangeMessager(71), 0, 0, 127)
         this.parameters["filter_env"] = new IntParameter("filter_env", "Filter Env Depth", new ControlChangeMessager(79), 0, -64, 63)
         this.parameters["filter_keyboard"] = new IntParameter("filter_keyboard", "Filter Keyboard Track", new ControlChangeMessager(85), 0, -64, 63)
 
@@ -76,7 +76,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         this.parameters["f_eg_sustain"] = new IntParameter("f_eg_sustain", "Filter EG Sustain", new ControlChangeMessager(25), 0, 0, 127)
         this.parameters["f_eg_release"] = new IntParameter("f_eg_release", "Filter EG Release", new ControlChangeMessager(26), 0, 0, 127)
 
-        this.parameters["amp_level"] = new IntParameter("amp_level", "Amp Level", new ControlChangeMessager(7), 0, 0, 127)
+        this.parameters["amp_level"] = new IntParameter("amp_level", "Amp Level", new ControlChangeMessager(7), 100, 0, 127)
         this.parameters["amp_pan"] = new IntParameter("amp_pan", "Amp Pan", new ControlChangeMessager(10), 0, -64, 63)
 
         const off_on: SelectOption[] = [
@@ -86,9 +86,9 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         this.parameters["amp_distortion"] = new SelectParameter("amp_distortion", "Distortion", new ControlChangeMessager(92), 0, off_on)
 
         this.parameters["amp_eg_attack"] = new IntParameter("amp_eg_attack", "Amp EG Attack", new ControlChangeMessager(73), 0, 0, 127)
-        this.parameters["amp_eg_decay"] = new IntParameter("amp_eg_decay", "Amp EG Decay", new ControlChangeMessager(75), 0, 0, 127)
-        this.parameters["amp_eg_sustain"] = new IntParameter("amp_eg_sustain", "Amp EG Sustain", new ControlChangeMessager(70), 0, 0, 127)
-        this.parameters["amp_eg_release"] = new IntParameter("amp_eg_release", "Amp EG Release", new ControlChangeMessager(72), 0, 0, 127)
+        this.parameters["amp_eg_decay"] = new IntParameter("amp_eg_decay", "Amp EG Decay", new ControlChangeMessager(75), 50, 0, 127)
+        this.parameters["amp_eg_sustain"] = new IntParameter("amp_eg_sustain", "Amp EG Sustain", new ControlChangeMessager(70), 50, 0, 127)
+        this.parameters["amp_eg_release"] = new IntParameter("amp_eg_release", "Amp EG Release", new ControlChangeMessager(72), 15, 0, 127)
 
         const lfo1Waves: SelectOption[] = [
             {value: 0, label:"Saw"}, 
@@ -108,11 +108,6 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         this.parameters["lfo1_freq"] = new IntParameter("lfo1_freq", "LFO1 Freq", new ControlChangeMessager(27), 0, 0, 127)
         this.parameters["lfo2_wave"] = new SelectParameter("lfo2_wave", "LFO2 Wave", new ControlChangeMessager(88), 0, lfo2Waves)
         this.parameters["lfo2_freq"] = new IntParameter("lfo2_freq", "LFO2 Freq", new ControlChangeMessager(76), 0, 0, 127)
-
-        this.parameters["patch1_level"] = new IntParameter("patch1_lebel", "Patch1 Level", new ControlChangeMessager(28), 0, -64, 63)
-        this.parameters["patch2_level"] = new IntParameter("patch2_lebel", "Patch2 Level", new ControlChangeMessager(29), 0, -64, 63)
-        this.parameters["patch3_level"] = new IntParameter("patch3_lebel", "Patch3 Level", new ControlChangeMessager(30), 0, -64, 63)
-        this.parameters["patch4_level"] = new IntParameter("patch4_lebel", "Patch4 Level", new ControlChangeMessager(31), 0, -64, 63)
 
         this.parameters["modfx_speed"] = new IntParameter("modfx_speed", "ModFX LFO Speed", new ControlChangeMessager(12), 0, 0, 127)
         this.parameters["modfx_depth"] = new IntParameter("modfx_depth", "ModFX Depth", new ControlChangeMessager(93), 0, 0, 127)
@@ -170,6 +165,11 @@ export class MicrokorgKernel implements MIDIControllerKernel {
             {value: 126, label: "LFO2 Freq"}
         ]
 
+        this.parameters["patch1_level"] = new IntParameter("patch1_lebel", "Patch1 Level", new ControlChangeMessager(28), 0, -64, 63)
+        this.parameters["patch2_level"] = new IntParameter("patch2_lebel", "Patch2 Level", new ControlChangeMessager(29), 0, -64, 63)
+        this.parameters["patch3_level"] = new IntParameter("patch3_lebel", "Patch3 Level", new ControlChangeMessager(30), 0, -64, 63)
+        this.parameters["patch4_level"] = new IntParameter("patch4_lebel", "Patch4 Level", new ControlChangeMessager(31), 0, -64, 63)
+
         this.parameters["patch1_src"] = new SelectParameter("patch1_src", "Patch1 Src", new NRPNMSBMessager(false, 4, 0), 0, patchSources)
         this.parameters["patch2_src"] = new SelectParameter("patch2_src", "Patch2 Src", new NRPNMSBMessager(false, 4, 1), 0, patchSources)
         this.parameters["patch3_src"] = new SelectParameter("patch3_src", "Patch3 Src", new NRPNMSBMessager(false, 4, 2), 0, patchSources)
@@ -215,24 +215,41 @@ export class MicrokorgKernel implements MIDIControllerKernel {
 
         for (let id of Object.keys(this.parameters)) {
             if (this.parameters[id].ingestMIDI(this.channel, event)) {
-                result ||= true
+                result = true
             }
         }
-        return false
+        return result
     }
 
     ingestSysex(event: WamSysexEvent): boolean {
         // TODO custom sysex interpretation for Microkorg
+        
         return false
     }
 
-    parameterUpdate(params: WamParameterDataMap) {
-        for (let id of Object.keys(params)) {
-            this.parameters[id].parameterUpdate(params[id].value)
-        } 
+    parameterUpdate(values: Record<string, number>): boolean {
+        let result: boolean = false
+
+        for (let id of Object.keys(values)) {
+            if (this.parameters[id].parameterUpdate(values[id])) {
+                result = true
+            }
+        }
+
+        return result
     }
 
     automationMessages(force: boolean): WamAutomationEvent[] {
         return Object.keys(this.parameters).map(id => this.parameters[id].automationMessage(force)).filter(ev => ev !== undefined)
+    }
+
+    midiMessages(channel: number, force: boolean = false): WamMidiEvent[] {
+        let results: WamMidiEvent[] = []
+
+        for (let id of Object.keys(this.parameters)) {
+            results.push(...this.parameters[id].midiMessage(channel, force))
+        }
+
+        return results
     }
 }

@@ -1,0 +1,1410 @@
+	   micro KORG MIDI Implementation          Revision 1.4 (2002.06.27)
+
+1.TRANSMITTED DATA
+
+1-1 CHANNEL MESSAGES            [H]:Hex,  [D]:Decimal
++--------+---------+-------------+-------------------------------------------+---+
+| Status | Second  |   Third     |      Description        (Transmitted by ) |ENA|
+|  [Hex] | [H] [D] |  [H]   [D]  |                                           |   |
++--------+---------+-------------+-------------------------------------------+---+
+|   8n   | kk (kk) | 40    (64)  | Note Off                                *1| A |
+|   9n   | kk (kk) | vv    (vv)  | Note On  vv=1~127                       *1| A |
+|   Bn   | 01 (01) | vv    (vv)  | Modulation1             (Mod Wheel)       | C |
+|   Bn   | 06 (06) | vv    (vv)  | Data Entry (MSB)        (Panel Control) *2| C |
+|   Bn   | 62 (98) | vv    (vv)  | NRPN (LSB)              (P.C)           *2| C |
+|   Bn   | 63 (99) | vv    (vv)  | NRPN (MSB)              (P.C)           *2| C |
+|   Bn   | cc (cc) | vv    (vv)  | Control Change cc=00~95 (P.C, S.C)      *3| C |
+|   Cn   | pp (pp) | --     --   | Program Change          (Prog Change)     | P |
+|   En   | bb (bb) | bb    (bb)  | Pitch Bender Change     (Bend Wheel)      | B |
++--------+---------+-------------+-------------------------------------------+---+
+
+ n  : MIDI Channel = 0 ~ F
+ vv : Value
+
+ P.C: Panel Control
+ S.C: Sync Control
+
+ ENA = A : Always Enable
+       C : Enabled when Global CtrlChg is enabled.
+       P : Enabled when Global ProgChg is enabled.
+       B : Enabled when Global P.Bend is enabled.
+
+
+ *1 : kk =  0 ~ 127    (37Keys + OCT + Transpose)
+
+
+ *2 : Non Registered Parameter Number (NRPN)
++---------+-----------------------------+------------------------+
+| MSB LSB |       Parameter             | Data Entry(MSB) Value  |
+| [H] [H] |                             |                        |
++---------+-----------------------------+------------------------+
+| 00  02  | Arpeggio On/Off             | 00~3F/40~7F:OFF/ON     |
+| 00  03  | Arpeggio Octaves            | 00~03      :1~4 Oct.   |
+| 00  04  | Arpeggio Latch On/Off       | 00~3F/40~7F:OFF/ON     |
+| 00  07  | Arpeggio Type               | *2-1                   |
+| 00  0A  | Arpeggio Gate               | *2-2                   |
+|         |(Synth Mode   /Vocoder Mode )|                        |
+| 04  00  | Patch1 Source/Fc Mod Source | *2-3 / *2-3            |
+| 04  01  | Patch2 Source               | *2-3                   |
+| 04  02  | Patch3 Source               | *2-3                   |
+| 04  03  | Patch4 Source               | *2-3                   |
+| 04  08  | Patch1 Destination          | *2-4                   |
+| 04  09  | Patch2 Destination          | *2-4                   |
+| 04  0A  | Patch3 Destination          | *2-4                   |
+| 04  0B  | Patch4 Destination          | *2-4                   |
+|         |(Synth Mode   /Vocoder Mode )|                        |
+| 04  10  |              /BAND[1] LEVEL |      / 00~7F:0~127     |
+| 04  12  |              /BAND[2] LEVEL |      / 00~7F:0~127     |
+| 04  14  |              /BAND[3] LEVEL |      / 00~7F:0~127     |
+| 04  16  |              /BAND[4] LEVEL |      / 00~7F:0~127     |
+| 04  18  |              /BAND[5] LEVEL |      / 00~7F:0~127     |
+| 04  1A  |              /BAND[6] LEVEL |      / 00~7F:0~127     |
+| 04  1C  |              /BAND[7] LEVEL |      / 00~7F:0~127     |
+| 04  1E  |              /BAND[8] LEVEL |      / 00~7F:0~127     |
+|         |                             |                        |
+| 04  20  |              /BAND[1] PAN   |      / *2-7            |
+| 04  22  |              /BAND[2] PAN   |      / *2-7            |
+| 04  24  |              /BAND[3] PAN   |      / *2-7            |
+| 04  26  |              /BAND[4] PAN   |      / *2-7            |
+| 04  28  |              /BAND[5] PAN   |      / *2-7            |
+| 04  2A  |              /BAND[6] PAN   |      / *2-7            |
+| 04  2C  |              /BAND[7] PAN   |      / *2-7            |
+| 04  2E  |              /BAND[8] PAN   |      / *2-7            |
++---------+-----------------------------+------------------------+
+
+ *2-1 : 00~15 : Up
+        16~2A : Down
+        2B~3F : Alt1
+        40~55 : Alt2
+        56~6A : Random
+        6B~7F : Trigger
+
+ *2-2 : 00~07 :  0,  0,  1,  2,  3,  3,  4,  5
+        08~0F :  6,  7,  7,  8,  9, 10, 11, 11
+        10~17 : 12, 13, 14, 14, 15, 16, 17, 18
+        18~1F : 18, 19, 20, 21, 22, 22, 23, 24
+        20~27 : 25, 26, 26, 27, 28, 29, 29, 30
+        28~2F : 31, 32, 33, 33, 34, 35, 36, 37
+        30~37 : 37, 38, 39, 40, 41, 41, 42, 43
+        38~3F : 44, 44, 45, 46, 47, 48, 48, 49
+        40~47 : 50, 51, 52, 52, 53, 54, 55, 56
+        48~4F : 56, 57, 58, 59, 59, 60, 61, 62
+        50~57 : 63, 63, 64, 65, 66, 67, 67, 68
+        58~5F : 69, 70, 71, 71, 72, 73, 74, 74
+        60~67 : 75, 76, 77, 78, 78, 79, 80, 81
+        68~6F : 82, 82, 83, 84, 85, 86, 86, 87
+        70~77 : 88, 89, 89, 90, 91, 92, 93, 93
+        78~7F : 94, 95, 96, 97, 97, 98, 99,100
+
+ *2-3 : 00~0F : EG1           *2-4 : 00~0F : PITCH
+        10~1F : EG2                  10~1F : OSC2PITCH
+	20~2F : LFO1                 20~2F : OSC1CTRL1
+        30~3F : LFO2                 30~3F : NOISE LEVEL
+        40~4F : VELOCITY             40~4F : CUTOFF
+        50~5F : KBD TRACK            50~5F : AMP
+        60~6F : P.Bend(MIDI1)        60~6F : PAN
+        70~7F : Mod(MIDI2)           70~7F : LFO2FREQ
+
+ *2-5 : 00~07 : -24,-24,-24,-23,-23,-23,-22,-22
+		08~0F : -21,-21,-21,-20,-20,-20,-19,-19
+		10~17 : -18,-18,-18,-17,-17,-16,-16,-16
+		18~1F : -15,-15,-15,-14,-14,-13,-13,-13
+		20~27 : -12,-12,-11,-11,-11,-10,-10,-10
+		28~2F : - 9,- 9,- 8,- 8,- 8,- 7,- 7,- 7
+		30~37 : - 6,- 6,- 5,- 5,- 5,- 4,- 4,- 3
+		38~3F : - 3,- 3,- 2,- 2,- 2,- 1,- 1,  0
+		40~47 :   0,  0,+ 1,+ 1,+ 2,+ 2,+ 2,+ 3
+		48~4F : + 3,+ 3,+ 4,+ 4,+ 5,+ 5,+ 5,+ 6
+		50~57 : + 6,+ 7,+ 7,+ 7,+ 8,+ 8,+ 8,+ 9
+		58~5F : + 9,+10,+10,+10,+11,+11,+11,+12
+		60~67 : +12,+13,+13,+13,+14,+14,+15,+15
+		68~6F : +15,+16,+16,+16,+17,+17,+18,+18
+        70~77 : +18,+19,+19,+20,+20,+20,+21,+21
+        78~7F : +21,+22,+22,+23,+23,+23,+24,+24
+
+ *2-6 : 00,01~7F = -63,-63~+63
+        00~07 : -63,-63,-62,-61,-60,-59,-58,-57
+        08~0F : -56,-55,-54,-53,-52,-51,-50,-49
+        10~17 : -48,-47,-46,-45,-44,-43,-42,-41
+        18~1F : -40,-39,-38,-37,-36,-35,-34,-33
+        20~27 : -32,-31,-30,-29,-28,-27,-26,-25
+        28~2F : -24,-23,-22,-21,-20,-19,-18,-17
+        30~37 : -16,-15,-14,-13,-12,-11,-10,- 9
+        38~3F : - 8,- 7,- 6,- 5,- 4,- 3,- 2,- 1
+        40~47 :   0,+ 1,+ 2,+ 3,+ 4,+ 5,+ 6,+ 7
+        48~4F : + 8,+ 9,+10,+11,+12,+13,+14,+15
+        50~57 : +16,+17,+18,+19,+20,+21,+22,+23
+        58~5F : +24,+25,+26,+27,+28,+29,+30,+31
+        60~67 : +32,+33,+34,+35,+36,+37,+38,+39
+        68~6F : +40,+41,+42,+43,+44,+45,+46,+47
+        70~77 : +48,+49,+50,+51,+52,+53,+54,+55
+	78~7F : +56,+57,+58,+59,+60,+61,+62,+63
+
+ *2-7 : 00,01~40~7F = L63,L63~CNT~R63
+        00~07 : L63,L63,L62,L61,L60,L59,L58,L57
+        08~0F : L56,L55,L54,L53,L52,L51,L50,L49
+        10~17 : L48,L47,L46,L45,L44,L43,L42,L41
+        18~1F : L40,L39,L38,L37,L36,L35,L34,L33
+        20~27 : L32,L31,L30,L29,L28,L27,L26,L25
+        28~2F : L24,L23,L22,L21,L20,L19,L18,L17
+        30~37 : L16,L15,L14,L13,L12,L11,L10,L09
+        38~3F : L08,L07,L06,L05,L04,L03,L02,L01
+        40~47 : CNT,R01,R02,R03,R04,R05,R06,R07
+        48~4F : R08,R09,R10,R11,R12,R13,R14,R15
+        50~57 : R16,R17,R18,R19,R20,R21,R22,R23
+        58~5F : R24,R25,R26,R27,R28,R29,R30,R31
+        60~67 : R32,R33,R34,R35,R36,R37,R38,R39
+        68~6F : R40,R41,R42,R43,R44,R45,R46,R47
+        70~77 : R48,R49,R50,R51,R52,R53,R54,R55
+        78~7F : R56,R57,R58,R59,R60,R61,R62,R63
+
+
+ *3 :Panel Knob & Switch Control (assignable)
++----------+--------------------+--------------------+----------------------+
+|          |    Synth Mode      |    Vocoder Mode    |                      |
++----------+--------------------+--------------------+----------------------+
+| PITCH    | Portamento         | Portamento         | 00~7F:0~127          |
+| OSC1     | Wave               | Wave               | *3-1                 |
+|          | Control1           | Control1           | 00~7F:0~127          |
+|          | Control2           | Control2           | *3-2                 |
+| OSC2     | Wave               |                    | *3-3                 |
+|(AudioIn1)| OSC Mod            |                    | *3-4                 |
+|          | Semitone           | HPF Level          | *2-5/00~7F:0~127     |
+|          | Tune               | Threshold          | *2-6/00~7F:0~127     |
+| MIXER    | OSC1 Level         | OSC1 Level         | 00~7F:0~127          |
+|          | OSC2 Level         | Inst Level         | 00~7F:0~127          |
+|          | Noise Level        | Noise Level        | 00~7F:0~127          |
+| FILTER   | Type               | Formant Shift      | *3-5/*3-6            |
+|          | Cutoff             | Cutoff             | 00~7F:0~127/*2-6     |
+|          | Resonance          | Resonance          | 00~7F:0~127          |
+|          | EG1 Int            | Mod Int            | *2-6                 |
+|          | KBD Track          | E.F.Sense          | *2-6/00~7F:0~127     |
+| AMP      | Level              | Level              | 00~7F:0~127          |
+|          | Panpot             | Direct Level       | *2-7/00~7F:0~127     |
+|          | Distortion         | Distortion         | 00~3F/40~7F:OFF/ON   |
+| EG1      | Attack             |                    | 00~7F:0~127          |
+|          | Decay              |                    | 00~7F:0~127          |
+|          | Sustain            |                    | 00~7F:0~127          |
+|          | Release            |                    | 00~7F:0~127          |
+| EG2      | Attack             | Attack             | 00~7F:0~127          |
+|          | Decay              | Decay              | 00~7F:0~127          |
+|          | Sustain            | Sustain            | 00~7F:0~127          |
+|          | Release            | Release            | 00~7F:0~127          |
+| LFO1     | Wave               | Wave               | *3-7                 |
+|          | Frequency          | Frequency          | *3-9                 |
+| LFO2     | Wave               | Wave               | *3-8                 |
+|          | Frequency          | Frequency          | *3-9                 |
+| PATCH1   | Intensity          |                    | *2-6                 |
+| PATCH2   | Intensity          |                    | *2-6                 |
+| PATCH3   | Intensity          |                    | *2-6                 |
+| PATCH4   | Intensity          |                    | *2-6                 |
+| MOD FX   | LFO Speed          | LFO Speed          | 00~7F:0~127          |
+|          | Depth              | Depth              | 00~7F:0~127          |
+| DELAY FX | Delay Time         | Delay Time         | *3-10                |
+|          | Depth              | Depth              | 00~7F:0~127          |
++----------+--------------------+--------------------+----------------------+
+| Sync Control                                       | 00~3F/40~7F:No/Sync  |
++----------+--------------------+--------------------+----------------------+
+| Timbre Select                                      | *3-11                |
++----------+--------------------+--------------------+----------------------+
+
+ *3-1 : 00~0F : Saw        *3-3 : 00~2A : Saw    *3-4 : 00~1F : OFF
+        10~1F : Pulse             2B~55 : Squ           20~3F : Ring
+        20~2F : Tri               56~7F : Tri           40~5F : Sync
+        30~3F : Sin                                     60~7F : RingSync
+        40~4F : Vox Wave
+        50~5F : DWGS
+        60~6F : Noise
+        70~7F : Audio In
+
+
+ *3-2 : When OSC1Wave isn't "DWGS"   00~7F : 0~127
+
+        When OSC1Wave is "DWGS"      00,01 : DWGS Wave No. 1
+                                     02,03 :               2
+                                        ''           ''
+                                     7C,7D : DWGS Wave No.63
+                                     7E,7F :              64
+
+ *3-5 : 00~1F : 24LPF      *3-6 : 00~19 :  0
+        20~3F : 12LPF             1A~33 : +1
+        40~5F : 12BPF             34~4C : +2
+        60~7F : 12HPF             4D~66 : -1
+                                  67~7F : -2
+
+ *3-7 : 00~1F : Saw        *3-8 : 00~1F : Saw
+        20~3F : Squ               20~3F : Squ(+)
+        40~5F : Tri               40~5F : Sin
+        60~7F : S/H               60~7F : S/H
+
+ *3-9 : When Tempo Sync is "OFF".   00~7F : 0~127
+
+        When Tempo Sync is "ON".
+         00~08 : 1/1     2B~33 : 1/3     56~5D : 3/32
+         09~11 : 3/4     34~3B : 1/4     5E~66 : 1/12
+         12~19 : 2/3     3C~44 : 3/16    67~6E : 1/16
+         1A~22 : 1/2     45~4C : 1/6     6F~77 : 1/24
+         23~2A : 3/8     4D~55 : 1/8     78~7F : 1/32
+
+ *3-10: When Tempo Sync is "OFF".   00~7F : 0~127
+
+        When Tempo Sync is "ON".
+         00~08 : 1/32    2B~33 : 1/8     56~5D : 3/8
+         09~11 : 1/24    34~3B : 1/6     5E~66 : 1/2
+         12~19 : 1/16    3C~44 : 3/16    67~6E : 2/3
+         1A~22 : 1/12    45~4C : 1/4     6F~77 : 3/4
+         23~2A : 3/32    4D~55 : 1/3     78~7F : 1/1
+
+ *3-11
+         00    :Timbre1
+         01    :Timbre1 & 2
+	 02~7F :Timbre2
+
+
+1-2 SYSTEM REALTIME MESSAGES
++-----------+---------------------------------------------+
+| Status[H] | Description                                 |
++-----------+---------------------------------------------+
+|    F8     | Timing Clock                             *4 |
+|    FE     | Active Sensing                              |
++-----------+---------------------------------------------+
+
+ *4 :This message is transmitted when the "Clock" is set to "Internal".
+
+
+1-3 UNIVERSAL SYSTEM EXCLUSIVE MESSAGES
+
+ DEVICE INQUIRY REPLY
++---------+------------------------------------------------+
+| Byte[H] |                Description                     |
++---------+------------------------------------------------+
+|   F0    | Exclusive Status                               |
+|   7E    | Non Realtime Message                           |
+|   0g    | MIDI Global Channel  ( Device ID )             |
+|   06    | General Information                            |
+|   02    | Identity Reply                                 |
+|   42    | KORG ID              ( Manufacturers ID )      |
+|   58    | MS2000 Series ID     ( Family ID   (LSB))      |
+|   00    |                      ( Family ID   (MSB))      |
+|   mm    |                      ( Member ID   (LSB))      |
+|   00    |                      ( Member ID   (MSB))      |
+|   xx    |                      ( Minor Ver.  (LSB))      |
+|   xx    |                      ( Minor Ver.  (MSB))      |
+|   xx    |                      ( Major Ver.  (LSB))      |
+|   xx    |                      ( Major Ver.  (MSB))      |
+|   F7    | END OF EXCLUSIVE                               |
++---------+------------------------------------------------+
+
+ mm = 11 : micro KORG
+
+  This message is transmitted whenever a INQUIRY MESSAGE REQUEST is received.
+
+
+1-4 SYSTEM EXCLUSIVE MESSAGES
++-------------+-----------------------------------+--------+
+| Function ID |    Description/Function           |        |
+|    [Hex]    |                                   |  *5    |
++-------------+-----------------------------------+--------+
+|     40      | CURRENT PROGRAM DATA DUMP         | R,D    |
+|     4C      | PROGRAM DATA DUMP                 | R,D    |
+|     51      | GLOBAL DATA DUMP                  | R,D    |
+|     50      | ALL DATA(PROGRAM,GLOBAL) DUMP     | R,D    |
+|     26      | DATA FORMAT ERROR                 | E      |
+|     23      | DATA LOAD COMPLETED               | E      |
+|     24      | DATA LOAD ERROR                   | E      |
+|     21      | WRITE COMPLETED                   | E      |
+|     22      | WRITE ERROR                       | E      |
++-------------+-----------------------------------+--------+
+
+ *5 : Transmitted when
+      R  : Request message is received.
+      D  : Data dump from MIDI dump page.
+          (Doesn't respond to MIDI FILTER "SystemEx" parameter.)
+      E  : Exclusive message is received.
+
+
+2.RECOGNIZED RECEIVE DATA
+
+2-1 CHANNEL MESSAGES
++--------+---------+-------------+--------------------------------------+
+| Status | Second  |   Third     |           Description                |
+| [Hex]  | [H] [D] | [H]   [D]   |                                      |
++--------+---------+-------------+--------------------------------------+
+|   8n   | kk (kk) | vv    (vv)  | Note Off    vv=0~127                 |
+|   9n   | kk (kk) | 00    (00)  | Note Off                             |
+|   9n   | kk (kk) | vv    (vv)  | Note On     vv=1~127                 |
+|   Bn   | 01 (01) | vv    (vv)  | Pitch Modulation Depth               |
+|   Bn   | 06 (06) | vv    (vv)  | Data Entry(MSB)                   *6 |
+|   Bn   | 62 (98) | nl    (nl)  | NRPN LSB                          *6 |
+|   Bn   | 63 (99) | nm    (nm)  | NRPN MSB                          *6 |
+|   Bn   | 78(120) | 00    (0)   | All Sound Off                        |
+|   Bn   | 79(121) | 00    (0)   | Reset All Controllers                |
+|   Bn   | 7B(123) | 00    (0)   | All Note Off                         |
+|   Bn   | 7C(124) | 00    (0)   | Omni Mode Off (All Note OFF)         |
+|   Bn   | 7D(125) | 00    (0)   | Omni Mode On  (All Note OFF)         |
+|   Bn   | 7E(126) | mm    (mm)  | Mono Mode On  (All Note OFF)         |
+|   Bn   | 7F(127) | 00    (0)   | Poly Mode On  (All Note OFF)         |
+|   Bn   | cc (cc) | vv    (vv)  | Control Data  cc=00~95               |
+|   Cn   | pp (pp) | --     --   | Program Change                       |
+|   En   | bb (bb) | bb    (bb)  | Pitch Bender Change                  |
++--------+---------+-------------+--------------------------------------+
+
+ n  : MIDI Channel = 0 ~ F
+ vv : Value
+
+ *6 : Non Registered Parameter Number (NRPN)
++---------+-----------------------------+------------------------+
+| MSB LSB |       Parameter             | Data Entry(MSB) Value  |
+| [H] [H] |                             |                        |
++---------+-----------------------------+------------------------+
+| 00  02  | Arpeggio On/Off             | 00~3F/40~7F:OFF/ON     |
+| 00  03  | Arpeggio Octaves            | 00~03      :1~4 Oct.   |
+| 00  04  | Arpeggio Latch On/Off       | 00~3F/40~7F:OFF/ON     |
+| 00  07  | Arpeggio Type               | *2-1                   |
+| 00  0A  | Arpeggio Gate               | *2-2                   |
+|         |(Synth Mode   /Vocoder Mode )|                        |
+| 04  00  | Patch1 Source/Fc Mod Source | *2-3 / *2-3            |
+| 04  01  | Patch2 Source               | *2-3                   |
+| 04  02  | Patch3 Source               | *2-3                   |
+| 04  03  | Patch4 Source               | *2-3                   |
+| 04  08  | Patch1 Destination          | *2-4                   |
+| 04  09  | Patch2 Destination          | *2-4                   |
+| 04  0A  | Patch3 Destination          | *2-4                   |
+| 04  0B  | Patch4 Destination          | *2-4                   |
+|         |(Synth Mode   /Vocoder Mode )|                        |
+| 04  10  |              /BAND[1] LEVEL |      / 00~7F:0~127     |
+| 04  12  |              /BAND[2] LEVEL |      / 00~7F:0~127     |
+| 04  14  |              /BAND[3] LEVEL |      / 00~7F:0~127     |
+| 04  16  |              /BAND[4] LEVEL |      / 00~7F:0~127     |
+| 04  18  |              /BAND[5] LEVEL |      / 00~7F:0~127     |
+| 04  1A  |              /BAND[6] LEVEL |      / 00~7F:0~127     |
+| 04  1C  |              /BAND[7] LEVEL |      / 00~7F:0~127     |
+| 04  1E  |              /BAND[8] LEVEL |      / 00~7F:0~127     |
+|         |(Synth Mode   /Vocoder Mode )|                        |
+| 04  20  |              /BAND[1] PAN   |      / *2-7            |
+| 04  22  |              /BAND[2] PAN   |      / *2-7            |
+| 04  24  |              /BAND[3] PAN   |      / *2-7            |
+| 04  26  |              /BAND[4] PAN   |      / *2-7            |
+| 04  28  |              /BAND[5] PAN   |      / *2-7            |
+| 04  2A  |              /BAND[6] PAN   |      / *2-7            |
+| 04  2C  |              /BAND[7] PAN   |      / *2-7            |
+| 04  2E  |              /BAND[8] PAN   |      / *2-7            |
++---------+-----------------------------+------------------------+
+
+  All these parameters can be changed by "Data Entry(MSB)".
+
+
+2-2 SYSTEM REALTIME MESSAGES
++-----------+----------------------------------------------+
+| Status[H] | Description                                  |
++-----------+----------------------------------------------+
+|    F8     | Timing Clock                              *7 |
+|    FA     | Start                                     *7 |
+|    FC     | Stop       (Arpeggiator stop)             *7 |
+|    FE     | Active Sensing                               |
++-----------+----------------------------------------------+
+
+ *7 :This message is recognized when the "Clock" is set to "External" or "Auto".
+
+
+2-3 UNIVERSAL SYSTEM EXCLUSIVE MESSAGE ( NON REALTIME )
+
+ DEVICE INQUIRY MESSAGE REQUEST
++---------+------------------------------------------------+
+| Byte[H] |    Description                                 |
++---------+------------------------------------------------+
+|   F0    | Exclusive Status                               |
+|   7E    | Non Realtime Message                           |
+|   nn    | MIDI Channel (Device ID)                       |
+|   06    | General Information                            |
+|   01    | Identity Request                               |
+|   F7    | END OF EXCLUSIVE                               |
++---------+------------------------------------------------+
+
+ nn : MIDI Channel = 0 ~ F :Global Channel
+                   = 7F    :Any Channel
+
+
+2-4 UNIVERSAL SYSTEM EXCLUSIVE MESSAGE ( REALTIME )
+
+ (1) MASTER VOLUME
++---------+------------------------------------------------+
+| Byte[H] |    Description                                 |
++---------+------------------------------------------------+
+|   F0    | Exclusive Status                               |
+|   7F    | Realtime Message                               |
+|   nn    | MIDI Channel (Device ID)                       |
+|   04    | Device Control                                 |
+|   01    | Master Volume                                  |
+|   vv    | Value (LSB)                                    |
+|   mm    | Value (MSB)                                    |
+|   F7    | END OF EXCLUSIVE                               |
++---------+------------------------------------------------+
+
+ nn : MIDI Channel = 0 ~ F :Global Channel
+                   = 7F    :Any Channel
+ mm,vv : 00,00 ~ 7F,7F     :Min ~ Max
+
+
+ (2) MASTER FINE TUNE
++---------+------------------------------------------------+
+| Byte[H] |    Description                                 |
++---------+------------------------------------------------+
+|   F0    | Exclusive Status                               |
+|   7F    | Realtime Message                               |
+|   nn    | MIDI Channel (Device ID)                       |
+|   04    | Device Control                                 |
+|   03    | Master Fine Tune                               |
+|   vv    | Value (LSB)                                    |
+|   mm    | Value (MSB)                                    |
+|   F7    | END OF EXCLUSIVE                               |
++---------+------------------------------------------------+
+
+ nn : MIDI Channel = 0 ~ F : Global Channel
+                   = 7F    : Any Channel
+ mm,vv : 00,00~40,00~7F,7F : -100 ~ 0 ~ <+100
+
+
+2-5 SYSTEM EXCLUSIVE MESSAGE
++-------------+--------------------------------------------+
+| Function ID |               Function                     |
+|    [Hex]    |                                            |
++-------------+--------------------------------------------+
+|     10      | CURRENT PROGRAM DATA DUMP REQUEST          |
+|     1C      | PROGRAM DATA DUMP REQUEST                  |
+|     0E      | GLOBAL DATA DUMP REQUEST                   |
+|     0F      | ALL DATA(PROGRAM,GLOBAL) DUMP REQUEST      |
+|     40      | CURRENT PROGRAM DATA DUMP                  |
+|     4C      | PROGRAM DATA DUMP                          |
+|     51      | GLOBAL DATA DUMP                           |
+|     50      | ALL DATA(PROGRAM,GLOBAL) DUMP              |
+|     11      | PROGRAM WRITE REQUEST                      |
++-------------+--------------------------------------------+
+
+ When the "SystemEx" parameter is set to "ENA", these messages are recognized.
+
+
+MIDI EXCLUSIVE FORMAT   (R:Receive, T:Transmit)
+
+(1) CURRENT PROGRAM DATA DUMP REQUEST                              R
++----------------+--------------------------------------------------+
+|     Byte       |             Description                          |
++----------------+--------------------------------------------------+
+| F0,42,3g,58    | EXCLUSIVE HEADER                                 |
+| 0001 0000 (10) | CURRENT PROGRAM DATA DUMP REQUEST      10H       |
+| 1111 0111 (F7) | EOX                                              |
++----------------+--------------------------------------------------+
+
+ Receive this message, and transmits Func=40 or Func=24 message.
+
+
+(2) PROGRAM DATA DUMP REQUEST                                      R
++----------------+--------------------------------------------------+
+|     Byte       |             Description                          |
++----------------+--------------------------------------------------+
+| F0,42,3g,58    | EXCLUSIVE HEADER                                 |
+| 0001 1100 (1C) | PROGRAM DATA DUMP REQUEST              1CH       |
+| 1111 0111 (F7) | EOX                                              |
++----------------+--------------------------------------------------+
+
+ Receive this message, and transmits Func=4C or Func=24 message.
+
+
+(3) GLOBAL DATA DUMP REQUEST                                       R
++----------------+--------------------------------------------------+
+|     Byte       |             Description                          |
++----------------+--------------------------------------------------+
+| F0,42,3g,58    | EXCLUSIVE HEADER                                 |
+| 0000 1110 (0E) | GLOBAL DATA DUMP REQUEST               0EH       |
+| 1111 0111 (F7) | EOX                                              |
++----------------+--------------------------------------------------+
+
+ Receive this message, and transmits Func=51 or Func=24 message.
+
+
+(4) ALL DATA DUMP REQUEST                                          R
++----------------+--------------------------------------------------+
+|     Byte       |             Description                          |
++----------------+--------------------------------------------------+
+| F0,42,3g,58    | EXCLUSIVE HEADER                                 |
+| 0000 1111 (0F) | ALL DATA DUMP REQUEST                  0FH       |
+| 1111 0111 (F7) | EOX                                              |
++----------------+--------------------------------------------------+
+
+ Receive this message, and transmits Func=50 or Func=24 message.
+
+
+(5) PROGRAM WRITE REQUEST                                          R
++----------------+--------------------------------------------------+
+|     Byte       |            Description                           |
++----------------+--------------------------------------------------+
+| F0,42,3g,58    | EXCLUSIVE HEADER                                 |
+| 0001 0001 (11) | PROGRAM WRITE REQUEST                  11H       |
+| 0000 0000 (00) |                                                  |
+| 0ppp pppp (pp) | Destination Program No.(0~127)                   |
+| 1111 0111 (F7) | EOX                                              |
++----------------+--------------------------------------------------+
+
+ Receive this message, and transmits Func=21 or Func=22 message.
+
+
+(6) CURRENT PROGRAM DATA DUMP                                    R/T
++----------------+--------------------------------------------------+
+|     Byte       |             Description                          |
++----------------+--------------------------------------------------+
+| F0,42,3g,58    | EXCLUSIVE HEADER                                 |
+| 0100 0000 (40) | CURRENT PROGRAM DATA DUMP              40H       |
+| 0ddd dddd (dd) | Data                                  (NOTE 1,5) |
+|     :          |  :                                               |
+| 1111 0111 (F7) | EOX                                              |
++----------------+--------------------------------------------------+
+
+ Receive this message & data, save them to Edit Buffer and transmits Func=23 or Func=24 message.
+ Receive Func=10 message, and transmits this message & data from Edit Buffer.
+
+
+(7) PROGRAM DATA DUMP                                            R/T
++----------------+--------------------------------------------------+
+|     Byte       |             Description                          |
++----------------+--------------------------------------------------+
+| F0,42,3g,58    | EXCLUSIVE HEADER                                 |
+| 0100 1100 (4C) | PROGRAM DATA DUMP                      4CH       |
+| 0ddd dddd (dd) | Data                                  (NOTE 2,5) |
+|     :          |  :                                               |
+| 1111 0111 (F7) | EOX                                              |
++----------------+--------------------------------------------------+
+
+ Receive this message & data, save them to Internal Memory and transmits Func=23 or Func=24 message.
+ Receive Func=1C message, and transmits this message & data from Internal Memory.
+When DATA DUMP is executed, transmit this message & data from Internal Memory.
+
+
+(8) GLOBAL DATA DUMP                                             R/T
++----------------+--------------------------------------------------+
+|     Byte       |             Description                          |
++----------------+--------------------------------------------------+
+| F0,42,3g,58    | EXCLUSIVE HEADER                                 |
+| 0101 0001 (51) | GLOBAL DATA DUMP                       51H       |
+| 0ddd dddd (dd) | Data                                  (NOTE 3,5) |
+|     :          |  :                                               |
+| 1111 0111 (F7) | EOX                                              |
++----------------+--------------------------------------------------+
+
+ Receive this message & data, save them to Internal Memory and transmits Func=23 or Func=24 message.
+ Receive Func=0E message, and transmits this message & data from Edit Buffer.
+When DATA DUMP is executed, transmit this message & data from Edit Buffer.
+
+
+(9) ALL DATA DUMP                                                R/T
++----------------+--------------------------------------------------+
+|     Byte       |             Description                          |
++----------------+--------------------------------------------------+
+| F0,42,3g,58    | EXCLUSIVE HEADER                                 |
+| 0101 0000 (50) | ALL DATA DUMP                          50H       |
+| 0ddd dddd (dd) | Data                                  (NOTE 4,5) |
+|     :          |  :                                               |
+| 1111 0111 (F7) | EOX                                              |
++----------------+--------------------------------------------------+
+
+ Receive this message & data, save them to Internal Memory and transmits Func=23 or Func=24 message.
+ Receive Func=0F message, and transmits this message & data from Internal Memory or Edit Buffer(GLOBAL).
+When DATA DUMP is executed, transmit this message & data from Internal Memory or Edit Buffer(GLOBAL).
+
+
+(10) RECEIVE DATA FORMAT ERROR                                     T
++----------------+--------------------------------------------------+
+|     Byte       |             Description                          |
++----------------+--------------------------------------------------+
+| F0,42,3g,58    | EXCLUSIVE HEADER                                 |
+| 0010 0110 (26) | DATA FORMAT ERROR                      26H       |
+| 1111 0111 (F7) | EOX                                              |
++----------------+--------------------------------------------------+
+
+ When found an error in the received message (ex.data length), transmits this message.
+
+
+(11) DATA LOAD COMPLETED (ACK)                                     T
++----------------+--------------------------------------------------+
+|     Byte       |             Description                          |
++----------------+--------------------------------------------------+
+| F0,42,3g,58    | EXCLUSIVE HEADER                                 |
+| 0010 0011 (23) | DATA LOAD COMPLETED                    23H       |
+| 1111 0111 (F7) | EOX                                              |
++----------------+--------------------------------------------------+
+
+ When DATA LOAD,PROCESSING have been completed, transmits this message.
+
+
+(12) DATA LOAD ERROR (NAK)                                         T
++----------------+--------------------------------------------------+
+|     Byte       |             Description                          |
++----------------+--------------------------------------------------+
+| F0,42,3g,58    | EXCLUSIVE HEADER                                 |
+| 0010 0100 (24) | DATA LOAD ERROR                        24H       |
+| 1111 0111 (F7) | EOX                                              |
++----------------+--------------------------------------------------+
+
+ When DATA LOAD,PROCESSING have not been completed (ex.protect), transmits this message.
+
+
+(13) WRITE COMPLETED                                               T
++----------------+--------------------------------------------------+
+|     Byte       |             Description                          |
++----------------+--------------------------------------------------+
+| F0,42,3g,58    | EXCLUSIVE HEADER                                 |
+| 0010 0001 (21) | WRITE COMPLETED                        21H       |
+| 1111 0111 (F7) | EOX                                              |
++----------------+--------------------------------------------------+
+
+ When DATA WRITE MIDI has been completed, transmits this message.
+
+
+(14) WRITE ERROR                                                   T
++----------------+--------------------------------------------------+
+|     Byte       |             Description                          |
++----------------+--------------------------------------------------+
+| F0,42,3g,58    | EXCLUSIVE HEADER                                 |
+| 0010 0010 (22) | WRITE ERROR                            22H       |
+| 1111 0111 (F7) | EOX                                              |
++----------------+--------------------------------------------------+
+
+ When DATA WRITE MIDI has not been completed, transmits this message.
+
+
+ NOTE 1: CURRENT PROGRAM DATA (IN CURRENT BUFFER) DUMP FORMAT
+         254Bytes       = 7*36+2    -> 8*36+(1+2)   => 291Bytes
+         (TABLE 1)
+
+ NOTE 2: PROGRAM DATA (IN INTERNAL MEMORY) DUMP FORMAT
+         [Prog A01(254Bytes)],....,[Prog H16(254Bytes)]
+         254*128Bytes    = 7*4644+4  -> 8*4644+(1+4) => 37157Bytes
+         (TABLE 5)
+
+ NOTE 3: GLOBAL DATA (IN INTERNAL MEMORY) DUMP FORMAT
+         200Bytes        = 7*28+4    -> 8*28+(1+4)   => 229Bytes
+         (TABLE 6)
+
+ NOTE 4: ALL DATA (IN INTERNAL MEMORY) DUMP FORMAT
+         [Prog A01(254Bytes)],....,[Prog H16(254Bytes)],[Global Data].
+         254*128+200Bytes= 7*4673+1  -> 8*4673+(1+1) => 37386Bytes
+         (TABLE 7)
+
+ NOTE 5: The dump data conversion
+
+   DATA ( 1set = 8bit x 7Byte )
+   b7     ~      b0   b7     ~      b0   b7   ~~    b0   b7     ~      b0
+   +-+-+-+-+-+-+-+-+  +-+-+-+-+-+-+-+-+  +-+-+-~~-+-+-+  +-+-+-+-+-+-+-+-+
+   | | | | | | | | |  | | | | | | | | |  | | |    | | |  | | | | | | | | |
+   +-+-+-+-+-+-+-+-+  +-+-+-+-+-+-+-+-+  +-+-+-~~-+-+-+  +-+-+-+-+-+-+-+-+
+         7n+0               7n+1          7n+2 ~~ 7n+5         7n+6
+
+    MIDI DATA ( 1set = 7bit x 8Byte )
+      b7b7b7b7b7b7b7     b6    ~     b0     b6 ~~    b0     b6    ~     b0
+   +-+-+-+-+-+-+-+-+  +-+-+-+-+-+-+-+-+  +-+-+-~~-+-+-+  +-+-+-+-+-+-+-+-+
+   |0| | | | | | | |  |0| | | | | | | |  |0| |    | | |  |0| | | | | | | |
+   +-+-+-+-+-+-+-+-+  +-+-+-+-+-+-+-+-+  +-+-+-~~-+-+-+  +-+-+-+-+-+-+-+-+
+   7n+6,5,4,3,2,1,0         7n+0          7n+1 ~~ 7n+5         7n+6
+
+
+ TABLE 1 : PROGRAM PARAMETER ( 1 PROGRAM, CURRENT PROGRAM )
++-----------+-------------------+-----------------------------------+
+| 0~11      | program name      | ASCII code [0]~[15]=1st~12th      |
++-----------+-------------------+-----------------------------------+
+| 12,13     | (dummy bytes)                                         |
++-----------+-------------------+-----------------------------------+
+|  ARPEGGIO (Trigger controll)                                      |
++-----------+-------------------+-----------------------------------+
+| 14  B3~7  | not use           | (0,0,0,0,0)                       |
+|    -------+-------------------+-----------------------------------+
+|     B0~2  | Trigger Length    | 0~7=1(1 step)~8(all step)         |
++-----------+-------------------+-----------------------------------+
+| 15  B0~7  | Trigger Pattern   | "0"/"1":On/Off,B0~7:1st~8th       |
++-----------+-------------------+-----------------------------------+
+|                                                                   |
++-----------+-------------------+-----------------------------------+
+| 16  B6,7  | not use           | (*,*)                             |
+|    -------+-------------------+-----------------------------------+
+|     B4,5  | Voice Mode        | 0,2,3=Single,Layer,Vocoder        |
+|    -------+-------------------+-----------------------------------+
+|     B0~3  | not use           | (0,0,0,0)                         |
++-----------+-------------------+-----------------------------------+
+| 17  B4~7  | Scale Key         | 0=C                               |
+|    -------+-------------------+-----------------------------------+
+|     B0~3  | Scale Type        | 0=Equal Temp                      |
++-----------+-------------------+-----------------------------------+
+| 18        | (dummy byte)                                          |
++-----------+-------------------+-----------------------------------+
+|  DELAY FX                                                         |
++-----------+-------------------+-----------------------------------+
+| 19  B7    | Sync              | 0,1=Off,On                        |
+|    -------+-------------------+-----------------------------------+
+|     B4~6  | not use           | (0,0,0)                           |
+|    -------+-------------------+-----------------------------------+
+|     B0~3  | Time Base         | 0~14=1/32~1/1                *T-1 |
++-----------+-------------------+-----------------------------------+
+| 20        | Delay Time        | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| 21        | Depth             | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| 22        | Type              | 0~2=StereoDelay,CrossDelay,       |
+|           |                   |     L/R Delay                     |
++-----------+-------------------+-----------------------------------+
+|  MOD FX                                                           |
++-----------+-------------------+-----------------------------------+
+| 23        | LFO Speed         | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| 24        | Depth             | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| 25        | Type              | 0~2=Cho/Flg,Ensemble,Phaser       |
++-----------+-------------------+-----------------------------------+
+|  EQ                                                               |
++-----------+-------------------+-----------------------------------+
+| 26        | Hi Freq           | 0~29=1.00~18.0 [KHz]        *T-10 |
++-----------+-------------------+-----------------------------------+
+| 27        | Hi Gain           | 64+/-12=0+/-12                    |
++-----------+-------------------+-----------------------------------+
+| 28        | Low Freq          | 0~29=40~1000 [Hz]           *T-11 |
++-----------+-------------------+-----------------------------------+
+| 29        | Low Gain          | 64+/-12=0+/-12                    |
++-----------+-------------------+-----------------------------------+
+|  ARPEGGIO                                                         |
++-----------+-------------------+-----------------------------------+
+| 30        | tempo (MSB)       | 20~300                            |
+| 31        |       (LSB)       | (SEQ tempo)                       |
++-----------+-------------------+-----------------------------------+
+| 32   B7   | Arpeggio On/Off   | 0,1=Off,On                        |
+|    -------+-------------------+-----------------------------------+
+|      B6   | Latch             | 0,1=Off,On                        |
+|    -------+-------------------+-----------------------------------+
+|      B4,5 | Target            | 0~2=Both,Timb1,Timb2              |
+|    -------+-------------------+-----------------------------------+
+|      B1   | not use           | (0)                               |
+|    -------+-------------------+-----------------------------------+
+|      B0   | Key Sync          | 0,1=Off,On                        |
++-----------+-------------------+-----------------------------------+
+| 33   B0~3 | Type              | 0~5=Up~Trigger              *T-12 |
+|    -------+-------------------+-----------------------------------+
+|      B4~7 | Range             | 0~3=1~4 Octave                    |
++-----------+-------------------+-----------------------------------+
+| 34        | gate time         | 0~100=0~100[%]                    |
++-----------+-------------------+-----------------------------------+
+| 35        | Resolution        | 0~5=1/24,1/16,1/12,1/8,1/6,1/4    |
++-----------+-------------------+-----------------------------------+
+| 36        | Swing             | 0+/-100=0+/-100[%]                |
++-----------+-------------------+-----------------------------------+
+|  KBD Octave                                                       |
++-----------+-------------------+-----------------------------------+
+| 37        | KBD Octave        | -3~0~+3=3OctDown~normal~3OctUp    |
++-----------+-------------------+-----------------------------------+
+  Synth parameter (Mode = Single,Layer)
++-----------+-------------------+-----------------------------------+
+| 38~145    | TIMBRE1 DATA      | Timbre parameter        (TABLE 2) |
++-----------+-------------------+-----------------------------------+
+  Synth parameter (Mode = Layer)
++-----------+-------------------+-----------------------------------+
+| 146~253   | TIMBRE2 DATA      | Timbre parameter        (TABLE 2) |
++-----------+-------------------+-----------------------------------+
+  Vocoder parameter (Mode = Vocoder)
++-----------+-------------------+-----------------------------------+
+| 38~141    | VOCODER DATA      | Vocoder parameter       (TABLE 3) |
++-----------+-------------------+-----------------------------------+
+| 142~253   | (dummy bytes)                                         |
++-----------+-------------------+-----------------------------------+
+
+ TABLE 2 : SYNTH PARAMETER ( 1 TIMBRE )
++-----------+-------------------+-----------------------------------+
+| +0        | MIDI ch.          | -1=GLB                            |
++-----------+-------------------+-----------------------------------+
+| +1   B6,7 | Assign Mode       | 0,1,2=Mono,Poly,Unison            |
+|    -------+-------------------+-----------------------------------+
+|      B5   | EG2 reset         | 0,1=Off,On                        |
+|    -------+-------------------+-----------------------------------+
+|      B4   | EG1 reset         | 0,1=Off,On                        |
+|    -------+-------------------+-----------------------------------+
+|      B3   | Trigger Mode      | 0,1=Single,Multi                  |
+|           |                   |            (use Mono/Unison Mode) |
+|    -------+-------------------+-----------------------------------+
+|      B0~1 | Key Priority      | 0=Last                            |
++-----------+-------------------+-----------------------------------+
+| +2        | Unison Detune     | 0~99=0~99[cent] (use Unison Mode) |
++-----------+-------------------+-----------------------------------+
+|  PITCH                                                            |
++-----------+-------------------+-----------------------------------+
+| +3        | Tune              | 64+/-50=0+/-50[cent]              |
++-----------+-------------------+-----------------------------------+
+| +4        | Bend Range        | 64+/-12=0+/-12[note]              |
++-----------+-------------------+-----------------------------------+
+| +5        | Transpose         | 64+/-24=0+/-24[note]              |
++-----------+-------------------+-----------------------------------+
+| +6        | Vibrato Int       | 64+/-63=0+/-63                    |
++-----------+-------------------+-----------------------------------+
+|  OSC1                                                             |
++-----------+-------------------+-----------------------------------+
+| +7        | Wave              | 0~7=Saw~Audio In             *T-2 |
++-----------+-------------------+-----------------------------------+
+| +8        | Waveform CTRL1    | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +9        | Waveform CTRL2    | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +10       | DWGS Wave         | 0~63=DWGS No. 1~64                |
+|           |                   |        (when OSC1 Wave is "DWGS") |
++-----------+-------------------+-----------------------------------+
+| +11       | (dummy byte)                                          |
++-----------+-------------------+-----------------------------------+
+|  OSC2                                                             |
++-----------+-------------------+-----------------------------------+
+| +12  B6,7 | not use           | (0,0)                             |
+|    -------+-------------------+-----------------------------------+
+|      B4,5 | Mod Select        | 0~3=Off,Ring,Sync,RingSync        |
+|    -------+-------------------+-----------------------------------+
+|      B2,3 | not use           | (0,0)                             |
+|    -------+-------------------+-----------------------------------+
+|      B0,1 | Wave              | 0~2=Saw,Squ,Tri                   |
++-----------+-------------------+-----------------------------------+
+| +13       | Semitone          | 64+/-24=0+/-24[note]              |
++-----------+-------------------+-----------------------------------+
+| +14       | Tune              | 64+/-63=0+/-63                    |
++-----------+-------------------+-----------------------------------+
+|  PITCH (2)                                                        |
++-----------+-------------------+-----------------------------------+
+| +15  B7   | not use           | (0)                               |
+|    -------+-------------------+-----------------------------------+
+|      B0~6 | Portamento Time   | 0~127                             |
++-----------+-------------------+-----------------------------------+
+|  MIXER                                                            |
++-----------+-------------------+-----------------------------------+
+| +16       | OSC1 Level        | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +17       | OSC2 Level        | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +18       | Noise             | 0~127                             |
++-----------+-------------------+-----------------------------------+
+|  FILTER                                                           |
++-----------+-------------------+-----------------------------------+
+| +19       | Type              | 0~3=24LPF,12LPF,12BPF,12HPF       |
++-----------+-------------------+-----------------------------------+
+| +20       | Cutoff            | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +21       | Resonance         | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +22       | EG1 Intensity     | 64+/-63=0+/-63                    |
++-----------+-------------------+-----------------------------------+
+| +23       | Velocity Sense    | 64=0                              |
++-----------+-------------------+-----------------------------------+
+| +24       | Keyboard Track    | 64+/-63=0+/-63                    |
++-----------+-------------------+-----------------------------------+
+|  AMP                                                              |
++-----------+-------------------+-----------------------------------+
+| +25       | Level             | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +26       | Panpot            | 0~64~127=L64~CNT~R63              |
++-----------+-------------------+-----------------------------------+
+| +27  B7   | not use           | (0)                               |
+|    -------+-------------------+-----------------------------------+
+|      B6   | Amp SW            | 0=EG2                             |
+|    -------+-------------------+-----------------------------------+
+|      B1~5 | not use           | (0,0,0,0,0)                       |
+|    -------+-------------------+-----------------------------------+
+|      B0   | Distortion        | 0,1=Off,On                        |
++-----------+-------------------+-----------------------------------+
+| +28       | Velocity Sense    | 64=0                              |
++-----------+-------------------+-----------------------------------+
+| +29       | Keyboard Track    | 64+/-63=0+/-63                    |
++-----------+-------------------+-----------------------------------+
+|  EG1                                                              |
++-----------+-------------------+-----------------------------------+
+| +30       | Attck             | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +31       | Decay             | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +32       | Sustain           | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +33       | Release           | 0~127                             |
++-----------+-------------------+-----------------------------------+
+|  EG2                                                              |
++-----------+-------------------+-----------------------------------+
+| +34       | Attack            | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +35       | Decay             | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +36       | Sustain           | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +37       | Release           | 0~127                             |
++-----------+-------------------+-----------------------------------+
+|  LFO1                                                             |
++-----------+-------------------+-----------------------------------+
+| +38  B6,7 | not use           | (0,0)                             |
+|    -------+-------------------+-----------------------------------+
+|      B4,5 | Key Sync          | 0~2=OFF,Timbre,Voice              |
+|    -------+-------------------+-----------------------------------+
+|      B2,3 | not use           | (0,0)                             |
+|    -------+-------------------+-----------------------------------+
+|      B0,1 | Wave              | 0~3=Saw,Squ,Tri,S/H               |
++-----------+-------------------+-----------------------------------+
+| +39       | Frequency         | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +40  B7   | Tempo Sync        | 0,1=Off,On                        |
+|    -------+-------------------+-----------------------------------+
+|      B5,6 | not use           | (0,0)                             |
+|    -------+-------------------+-----------------------------------+
+|      B0~4 | Sync Note         | 0~14=1/1~1/32                *T-5 |
++-----------+-------------------+-----------------------------------+
+|  LFO2                                                             |
++-----------+-------------------+-----------------------------------+
+| +41  B6,7 | not use           | (0,0)                             |
+|    -------+-------------------+-----------------------------------+
+|      B4,5 | Key Sync          | 0~2=OFF,Timbre,Voice              |
+|    -------+-------------------+-----------------------------------+
+|      B2,3 | not use           | (0,0)                             |
+|    -------+-------------------+-----------------------------------+
+|      B0,1 | Wave              | 0~3=Saw,Squ(+),Sin,S/H            |
++-----------+-------------------+-----------------------------------+
+| +42       | Frequency         | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +43  B7   | Tempo Sync        | 0,1=Off,On                        |
+|    -------+-------------------+-----------------------------------+
+|      B5,6 | not use           | (0,0)                             |
+|    -------+-------------------+-----------------------------------+
+|      B0~4 | Sync Note         | 0~14=1/1~1/32                *T-5 |
++-----------+-------------------+-----------------------------------+
+|  PATCH                                                            |
++-----------+-------------------+-----------------------------------+
+| +44  B4~7 | Patch1 Destination| 0~7=PITCH~LFO2FREQ           *T-4 |
+|    -------+-------------------+-----------------------------------+
+|      B0~3 | Patch1 Source     | 0~7=EG1~Mod(MIDI2)           *T-3 |
++-----------+-------------------+-----------------------------------+
+| +45       | Patch1 Intensity  | 64+/-63=0+/-63                    |
++-----------+-------------------+-----------------------------------+
+| +46  B4~7 | Patch2 Destination| 0~7=PITCH~LFO2FREQ           *T-4 |
+|    -------+-------------------+-----------------------------------+
+|      B0~3 | Patch2 Source     | 0~7=EG1~Mod(MIDI2)           *T-3 |
++-----------+-------------------+-----------------------------------+
+| +47       | Patch2 Intensity  | 64+/-63=0+/-63                    |
++-----------+-------------------+-----------------------------------+
+| +48  B4~7 | Patch3 Destination| 0~7=PITCH~LFO2FREQ           *T-4 |
+|    -------+-------------------+-----------------------------------+
+|      B0~3 | Patch3 Source     | 0~7=EG1~Mod(MIDI2)           *T-3 |
++-----------+-------------------+-----------------------------------+
+| +49       | Patch3 Intensity  | 64+/-63=0+/-63                    |
++-----------+-------------------+-----------------------------------+
+| +50  B4~7 | Patch4 Destination| 0~7=PITCH~LFO2FREQ           *T-4 |
+|    -------+-------------------+-----------------------------------+
+|      B0~3 | Patch4 Source     | 0~7=EG1~Mod(MIDI2)           *T-3 |
++-----------+-------------------+-----------------------------------+
+| +51       | Patch4 Intensity  | 64+/-63=0+/-63                    |
++-----------+-------------------+-----------------------------------+
+|                                                                   |
++-----------+-------------------+-----------------------------------+
+| +52~107   | (dummy bytes)                                         |
++-----------+-------------------+-----------------------------------+
+
+ TABLE 3 : VOCODER PARAMETER
++-----------+-------------------+-----------------------------------+
+| +0        | MIDI ch.          | -1=GLB                            |
++-----------+-------------------+-----------------------------------+
+| +1   B6,7 | Assign Mode       | 0,1,2=Mono,Poly,Unison            |
+|    -------+-------------------+-----------------------------------+
+|      B5   | EG2 reset         | 0,1=Off,On                        |
+|    -------+-------------------+-----------------------------------+
+|      B4   | EG1 reset         | 0=Off                             |
+|    -------+-------------------+-----------------------------------+
+|      B3   | Trigger Mode      | 0,1=Single,Multi                  |
+|           |                   |            (use Mono/Unison Mode) |
+|    -------+-------------------+-----------------------------------+
+|      B0~1 | Key Priority      | 0=Last                            |
++-----------+-------------------+-----------------------------------+
+| +2        | Unison Detune     | 0~99=0~99[cent] (use Unison Mode) |
++-----------+-------------------+-----------------------------------+
+|  PITCH                                                            |
++-----------+-------------------+-----------------------------------+
+| +3        | Tune              | 64+/-50=0+/-50[cent]              |
++-----------+-------------------+-----------------------------------+
+| +4        | Bend Range        | 64+/-12=0+/-12[note]              |
++-----------+-------------------+-----------------------------------+
+| +5        | Transpose         | 64+/-24=0+/-24[note]              |
++-----------+-------------------+-----------------------------------+
+| +6        | Vibrato Int       | 64+/-63=0+/-63                    |
++-----------+-------------------+-----------------------------------+
+|  OSC                                                              |
++-----------+-------------------+-----------------------------------+
+| +7        | Wave              | 0~7=Saw~Audio In             *T-2 |
++-----------+-------------------+-----------------------------------+
+| +8        | Waveform CTRL1    | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +9        | Waveform CTRL2    | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +10       | DWGS Wave         | 0~63=DWGS No. 1~64                |
+|           |                   |         (when OSC Wave is "DWGS") |
++-----------+-------------------+-----------------------------------+
+| +11       | (dummy byte)                                          |
++-----------+-------------------+-----------------------------------+
+|  AUDIO IN1                                                        |
++-----------+-------------------+-----------------------------------+
+| +12  B1~7 | not use           | (0,0,0,0,0,0,0)                   |
+|    -------+-------------------+-----------------------------------+
+|      B0   | HPF Gate          | 0,1=Dis,Ena                       |
++-----------+-------------------+-----------------------------------+
+| +13       | (dummy byte)                                          |
++-----------+-------------------+-----------------------------------+
+|  PITCH (2)                                                        |
++-----------+-------------------+-----------------------------------+
+| +14  B7   | not use           | (0)                               |
+|    -------+-------------------+-----------------------------------+
+|      B0~6 | Portamento Time   | 0~127                             |
++-----------+-------------------+-----------------------------------+
+|  MIXER                                                            |
++-----------+-------------------+-----------------------------------+
+| +15       | OSC1 Level        | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +16       | Ext1 Level        | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +17       | Noise Level       | 0~127                             |
++-----------+-------------------+-----------------------------------+
+|  AUDIO IN1 (2)                                                    |
++-----------+-------------------+-----------------------------------+
+| +18       | HPF Level         | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +19       | Gate Sense        | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +20       | Threshold         | 0~127                             |
++-----------+-------------------+-----------------------------------+
+|  FILTER                                                           |
++-----------+-------------------+-----------------------------------+
+| +21       | Shift             | 0~4=0,+1,+2,-1,-2                 |
++-----------+-------------------+-----------------------------------+
+| +22       | Cutoff            | 64+/-63=0+/-63                    |
++-----------+-------------------+-----------------------------------+
+| +23       | Resonance         | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +24       | Mod Source        | 1~7=AEG~Mod(MIDI2)          *T-13 |
++-----------+-------------------+-----------------------------------+
+| +25       | Intensity         | 64+/-63=0+/-63                    |
++-----------+-------------------+-----------------------------------+
+| +26       | E.F.Sense         | 0~126,127=0~126,Hold              |
++-----------+-------------------+-----------------------------------+
+|  AMP                                                              |
++-----------+-------------------+-----------------------------------+
+| +27       | Level             | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +28       | Direct Level      | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +29  B1~7 | not use           | (0,0,0,0,0,0,0)                   |
+|    -------+-------------------+-----------------------------------+
+|      B0   | Distortion On/Off | 0,1=Off,On                        |
++-----------+-------------------+-----------------------------------+
+| +30       | Vel.Sense         | 64=0                              |
++-----------+-------------------+-----------------------------------+
+| +31       | KeyTrack          | 64+/-63=0+/-63                    |
++-----------+-------------------+-----------------------------------+
+|  EG1                                                              |
++-----------+-------------------+-----------------------------------+
+| +32       | Attack            | 0                                 |
++-----------+-------------------+-----------------------------------+
+| +33       | Decay             | 0                                 |
++-----------+-------------------+-----------------------------------+
+| +34       | Sustain           | 127                               |
++-----------+-------------------+-----------------------------------+
+| +35       | Release           | 0                                 |
++-----------+-------------------+-----------------------------------+
+|  EG2                                                              |
++-----------+-------------------+-----------------------------------+
+| +36       | Attack            | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +37       | Decay             | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +38       | Sustain           | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +39       | Release           | 0~127                             |
++-----------+-------------------+-----------------------------------+
+|  LFO1                                                             |
++-----------+-------------------+-----------------------------------+
+| +40  B6,7 | not use           | (0,0)                             |
+|    -------+-------------------+-----------------------------------+
+|      B4,5 | Key Sync          | 0~2=OFF,Timbre,Voice              |
+|    -------+-------------------+-----------------------------------+
+|      B2,3 | not use           | (0,0)                             |
+|    -------+-------------------+-----------------------------------+
+|      B0,1 | Wave              | 0~3=Saw,Squ,Tri,S/H               |
++-----------+-------------------+-----------------------------------+
+| +41       | Frequency         | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +42  B7   | Tempo Sync        | 0,1=Off,On                        |
+|    -------+-------------------+-----------------------------------+
+|      B5,6 | not use           | (0,0)                             |
+|    -------+-------------------+-----------------------------------+
+|      B0~4 | Sync Note         | 0~14=1/1~1/32                *T-5 |
++-----------+-------------------+-----------------------------------+
+|  LFO2                                                             |
++-----------+-------------------+-----------------------------------+
+| +43  B6,7 | not use           | (0,0)                             |
+|    -------+-------------------+-----------------------------------+
+|      B4,5 | Key Sync          | 0~2=OFF,Timbre,Voice              |
+|    -------+-------------------+-----------------------------------+
+|      B2,3 | not use           | (0,0)                             |
+|    -------+-------------------+-----------------------------------+
+|      B0,1 | Wave              | 0~3=Saw,Squ(+),Sin,S/H            |
++-----------+-------------------+-----------------------------------+
+| +44       | Frequency         | 0~127                             |
++-----------+-------------------+-----------------------------------+
+| +45  B7   | Tempo Sync        | 0,1=Off,On                        |
+|    -------+-------------------+-----------------------------------+
+|      B5,6 | not use           | (0,0)                             |
+|    -------+-------------------+-----------------------------------+
+|      B0~4 | Sync Note         | 0~14=1/1~1/32                *T-5 |
++-----------+-------------------+-----------------------------------+
+|  CH LEVEL [0] = [1] = BAND[1] LEVEL                               |
+|  CH LEVEL [2] = [3] = BAND[2] LEVEL                               |
+|  CH LEVEL [4] = [5] = BAND[3] LEVEL                               |
+|  CH LEVEL [6] = [7] = BAND[4] LEVEL                               |
+|  CH LEVEL [8] = [9] = BAND[5] LEVEL                               |
+|  CH LEVEL [10]=[11] = BAND[6] LEVEL                               |
+|  CH LEVEL [12]=[13] = BAND[7] LEVEL                               |
+|  CH LEVEL [14]=[15] = BAND[8] LEVEL                               |
++-----------+-------------------+-----------------------------------+
+| +46~61    | Level [0~15]      | 0~127                             |
++-----------+-------------------+-----------------------------------+
+|  CH PAN   [0] = [1] = BAND[1] PAN                                 |
+|  CH PAN   [2] = [3] = BAND[2] PAN                                 |
+|  CH PAN   [4] = [5] = BAND[3] PAN                                 |
+|  CH PAN   [6] = [7] = BAND[4] PAN                                 |
+|  CH PAN   [8] = [9] = BAND[5] PAN                                 |
+|  CH PAN   [10]=[11] = BAND[6] PAN                                 |
+|  CH PAN   [12]=[13] = BAND[7] PAN                                 |
+|  CH PAN   [14]=[15] = BAND[8] PAN                                 |
++-----------+-------------------+-----------------------------------+
+| +62~77    | Pan   [0~15]      | 1~64~127=L63~CNT~R63              |
++-----------+-------------------+-----------------------------------+
+|  E.F Hold Level [0]~[15]=CH[1]~[16]                               |
+|                                   (use when E.F Sense is "Hold")  |
++-----------+-------------------+-----------------------------------+
+| +78~141   | [0]~[15]          | 0~7FFFFF00h             (TABLE 4) |
++-----------+-------------------+-----------------------------------+
+
+ TABLE 4 : E.F Hold Level
++-----------+-------------------+-----------------------------------+
+| +0        | HIGH              |                                   |
+| +1        | MID HIGH          |                                   |
+| +2        | MID LOW           |                                   |
+| +3        | LOW               | (00h)                             |
++-----------+-------------------+-----------------------------------+
+
+ TABLE 5 : ALL PROGRAM PARAMETER
++-----------+-------------------+-----------------------------------+
+|  000~ 253 | Prog A01          |                         (TABLE 1) |
++-----------+-------------------+-----------------------------------+
+|  254~ 507 | Prog A02          |                         (TABLE 1) |
++-----------+-------------------+-----------------------------------+
+|  508~ 761 | Prog A03          |                         (TABLE 1) |
+
+|           |                   |                                   |
++-----------+-------------------+-----------------------------------+
+|32004~32257| Prog H15          |                         (TABLE 1) |
++-----------+-------------------+-----------------------------------+
+|32258~32511| Prog H16          |                         (TABLE 1) |
++-----------+-------------------+-----------------------------------+
+
+
+ TABLE 6 : GLOBAL PARAMETER
++-----------+-------------------+-----------------------------------+
+| 0         | Master Tune       | 0+/-100=430~440~450               |
++-----------+-------------------+-----------------------------------+
+| 1         | Transpose         | 0+/-12                            |
++-----------+-------------------+-----------------------------------+
+| 2    B1~7 | not use           | (0,0,0,0,0,0,0)                   |
+|    -------+-------------------+-----------------------------------+
+|      B0   | Position          | 0,1=PostKBD,PreTG                 |
++-----------+-------------------+-----------------------------------+
+| 3         | Vel.Value         | 1~127=1~127                  *T-7 |
++-----------+-------------------+-----------------------------------+
+| 4         | Vel.Curve         | 0~7,8=1~8,Const              *T-7 |
++-----------+-------------------+-----------------------------------+
+| 5    B3~7 | not use           | (0,0,0,0,0)                       |
+|    -------+-------------------+-----------------------------------+
+|      B2   | Local Ctrl        | 0,1=Off,On                        |
+|    -------+-------------------+-----------------------------------+
+|      B1   | not use           | (0)                               |
+|    -------+-------------------+-----------------------------------+
+|      B0   | Memory Protect    | 0,1=Off,On                        |
++-----------+-------------------+-----------------------------------+
+| 6,7       | (dummy bytes)                                         |
++-----------+-------------------+-----------------------------------+
+| 8    B2~7 | not use           | (0,0,0,0,0,0)                     |
+|    -------+-------------------+-----------------------------------+
+|      B0,1 | Clock             | 0~2=Internal,External,Auto        |
++-----------+-------------------+-----------------------------------+
+| 9    B4~7 | not use           | (0,0,0,0)                         |
+|    -------+-------------------+-----------------------------------+
+|      B0~3 | MIDI Ch.          | 0~15=1~16                         |
++-----------+-------------------+-----------------------------------+
+| 10        | Sync Ctrl No.     | -1,0~95=OFF,CC#00~95              |
++-----------+-------------------+-----------------------------------+
+| 11        | TimbSel Ctrl No.  | -1,0~95=OFF,CC#00~95              |
++-----------+-------------------+-----------------------------------+
+| 12,13     | (dummy bytes)                                         |
++-----------+-------------------+-----------------------------------+
+| 14        | MIDI1 Ctrl No.    | 0=P.Bend                          |
++-----------+-------------------+-----------------------------------+
+| 15        | MIDI2 Ctrl No.    | 3=CC#01                           |
++-----------+-------------------+-----------------------------------+
+| 16   B7   | SystemEx Filter   | 0,1=Dis,Ena                       |
+|    -------+-------------------+-----------------------------------+
+|      B2~6 | not use           | (0,0,0,0,0)                       |
+|    -------+-------------------+-----------------------------------+
+|      B0,1 | Note Receive      | 0=All                             |
++-----------+-------------------+-----------------------------------+
+| 17   B7   | not use           | (0)                               |
+|    -------+-------------------+-----------------------------------+
+|      B6   | P.Bend Filter     | 0,1=Dis,Ena                       |
+|    -------+-------------------+-----------------------------------+
+|      B3~5 | not use           | (0,0,0)                           |
+|    -------+-------------------+-----------------------------------+
+|      B2   | CtrlChg Filter    | 0,1=Dis,Ena                       |
+|    -------+-------------------+-----------------------------------+
+|      B1   | not use           | (0)                               |
+|    -------+-------------------+-----------------------------------+
+|      B0   | ProgChg Filter    | 0,1=Dis,Ena                       |
++-----------+-------------------+-----------------------------------+
+|  Knob & Switch Ctrl Change No. Map                                |
++-----------+-------------------+-----------------------------------+
+| 18~59     | [0]~[41]          |                              *T-9 |
+|           | Ctrl Change No.   | -1,0~95=OFF,CC#00~95              |
++-----------+-------------------+-----------------------------------+
+|  User Scale Parameter (not use)                                   |
++-----------+-------------------+-----------------------------------+
+| 60~71     | User Scale[C]~[B] | 0+/-100=+/-100cent                |
++-----------+-------------------+-----------------------------------+
+|  MIDI In Program Change Map                                       |
++-----------+-------------------+-----------------------------------+
+| 72~199    | P.Chg[000]~[127]  | [000]=00(A11)~[127]=7F(b88)       |
+|           | Internal Prog No. |                              *T-8 |
++-----------+-------------------+-----------------------------------+
+
+
+ TABLE 7 : ALL PARAMETER
++-----------+-------------------+-----------------------------------+
+|  000~32511| ALL PROGRAM DATA  | Prog A01~H16            (TABLE 5) |
++-----------+-------------------+-----------------------------------+
+|32512~32711| GLOBAL DATA       |                         (TABLE 6) |
++-----------+-------------------+-----------------------------------+
+
+
+
+ *T-1 :
+       0: 1/32       5: 1/8       10: 3/8
+       1: 1/24       6: 1/6       11: 1/2
+       2: 1/16       7: 3/16      12: 2/3
+       3: 1/12       8: 1/4       13: 3/4
+       4: 3/32       9: 1/3       14: 1/1
+
+ *T-2 :
+       0: Saw        4: Vox Wave
+       1: Pulse      5: DWGS
+       2: Tri        6: Noise
+       3: Sin(Cross) 7: Audio In
+
+ *T-3 :
+       0: EG1        4: VELOCITY
+       1: EG2        5: KBD TRACK
+       2: LFO1       6: P.Bend(MIDI1)
+       3: LFO2       7: Mod(MIDI2)
+
+ *T-4 :
+       0: PITCH         4: CUTOFF
+       1: OSC2 PITCH    5: AMP
+       2: OSC1 CNTL1    6: PAN
+       3: NOISE LEVEL   7: LFO2 FREQ
+
+ *T-5 :
+       0: 1/1        5: 1/3       10: 3/32
+       1: 3/4        6: 1/4       11: 1/12
+       2: 2/3        7: 3/16      12: 1/16
+       3: 1/2        8: 1/6       13: 1/24
+       4: 3/8        9: 1/8       14: 1/32
+
+ *T-6 :
+       0: 1/48       5: 3/32      10: 1/3      15: 1/1
+       1: 1/32       6: 1/8       11: 3/8
+       2: 1/24       7: 1/6       12: 1/2
+       3: 1/16       8: 3/16      13: 2/3
+       4: 1/12       9: 1/4       14: 3/4
+
+ *T-7 :
+       display       Vel.Value    Vel.Curve
+       Crv           ***          2
+         1             1          8
+         2             2          8
+        ''            ''          ''
+       127           127          8
+
+ *T-8 :
+       P.Chg[000]    00          (A11)
+       P.Chg[001]    01          (A12)
+       P.Chg[002]    02          (A13)
+       P.Chg[003]    03          (A14)
+       P.Chg[004]    04          (A15)
+           ''        ''           ''
+       P.Chg[124]    7C          (b85)
+       P.Chg[125]    7D          (b86)
+       P.Chg[126]    7E          (b87)
+       P.Chg[127]    7F          (b88)
+
+ *T-9 :
+    [+00]: Portamento       [+20]: EG1 Attack       [+40]: Delay Feedback
+    [+01]: OSC1 Wave Sw     [+21]: EG1 Decay        [+41]: (dummy byte)
+    [+02]: OSC1 Ctrl1       [+22]: EG1 Sustain
+    [+03]; OSC1 Ctrl2       [+23]: EG1 Release
+    [+04]: OSC2 Wave Sw     [+24]: EG2 Attack
+    [+05]: OSC2 Mod Sw      [+25]: EG2 Decay
+    [+06]: OSC2 Semitone    [+26]: EG2 Sustain
+    [+07]: OSC2 Tune        [+27]: EG2 Release
+    [+08]: OSC1 Level       [+28]: LFO1 Wave
+    [+09]: OSC2 Level       [+29]: LFO1 Freq
+    [+10]: Noise Level      [+30]: LFO2 Wave
+    [+11]: Filter Type Sw   [+31]: LFO2 Freq
+    [+12]: Cutoff           [+32]: PATCH1 Int
+    [+13]: Resonance        [+33]: PATCH2 Int
+    [+14]: EG1 Int          [+34]: PATCH3 Int
+    [+15]: FLT KbdTrack     [+35]: PATCH4 Int
+    [+16]: AMP Level        [+36]: SEQ Off/On Sw
+    [+17]: Panpot           [+37]: Mod Speed
+    [+18]: EG2/Gate Sw      [+38]: Mod Depth
+    [+19]: Distortion       [+39]: Delay Time
+
+ *T-10 :
+        0: 1.00        10: 3.50        20: 6.00
+        1: 1.25        11: 3.75        21: 7.00
+        2: 1.50        12: 4.00        22: 8.00
+        3: 1.75        13: 4.25        23: 9.00
+        4: 2.00        14: 4.50        24: 10.0
+        5: 2.25        15: 4.75        25: 11.0
+        6: 2.50        16: 5.00        26: 12.0
+        7: 2.75        17: 5.25        27: 14.0
+        8: 3.00        18: 5.50        28: 16.0
+        9: 3.25        19: 5.75        29: 18.0
+
+ *T-11 :
+        0: 40          10: 220         20: 420
+        1: 50          11: 240         21: 440
+        2: 60          12: 260         22: 460
+        3: 80          13: 280         23: 480
+        4: 100         14: 300         24: 500
+        5: 120         15: 320         25: 600
+        6: 140         16: 340         26: 700
+        7: 160         17: 360         27: 800
+        8: 180         18: 380         28: 900
+        9: 200         19: 400         29: 1000
+
+ *T-12 :
+        0: Up
+        1: Down
+        2: Alt1
+        3: Alt2
+        4: Random
+        5: Trigger
+
+ *T-13 :
+       0: ---        4: VELOCITY
+       1: AEG        5: KBD TRACK
+       2: LFO1       6: P.Bend(MIDI1)
+       3: LFO2       7: Mod(MIDI2)
+

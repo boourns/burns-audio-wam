@@ -1,0 +1,19 @@
+@import "../../shared/ui/glow.scss";
+
+.container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+}
+
+.group {
+    border: 1px solid black;
+    display: flex;
+    flex-direction: row;
+}
+

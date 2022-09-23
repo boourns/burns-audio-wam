@@ -39,21 +39,24 @@ export class SelectParameter implements SynthParameter {
     }
 
     ingestMIDI(currentChannel: number, event: WamMidiData): boolean {
-        let value = this.messager.ingestMIDI(currentChannel, this.value, event)
+        let currentMidiValue = this.options[this.value].value
+        let newMidiValue = this.messager.ingestMIDI(currentChannel, currentMidiValue, event)
 
-        if (value === undefined) {
-            return false
-        }
-        if (value === this.value) {
-            return false
-        }
-
-        const option = this.options.find(o => o.value == value)
-        if (option === undefined) {
+        if (newMidiValue === undefined) {
             return false
         }
 
-        this.value = value
+        if (newMidiValue === currentMidiValue) {
+            return false
+        }
+
+        const index = this.options.findIndex(o => o.value == newMidiValue)
+
+        if (index < 0) {
+            return false
+        }
+
+        this.value = index
         this.automationDirty = true
 
         return true
@@ -65,8 +68,10 @@ export class SelectParameter implements SynthParameter {
     }
 
     parameterUpdate(newValue: number): boolean {
-        const option = this.options.find(o => o.value == newValue)
+        const option = this.options[newValue]
+
         if (option === undefined) {
+            console.log("Could not find option for newvalue ", newValue, this.id, this.options)
             return false
         }
 
@@ -81,13 +86,20 @@ export class SelectParameter implements SynthParameter {
         return dirty
     }
 
-    midiMessage(channel: number, force: boolean = false): WamMidiEvent[] | undefined {
+    midiMessage(channel: number, force: boolean = false): WamMidiEvent[] {
         if (!this.midiDirty && !force) {
-            return undefined
+            return []
+        }
+        
+        this.midiDirty = false
+
+        const option = this.options[this.value]
+        if (!option) {
+            console.error(`select ${this.id}: value ${this.value} should reference a select option index ${this.options}`)
+            return []
         }
 
-        this.midiDirty = false
-        return this.messager.toMIDI(channel, this.value)
+        return this.messager.toMIDI(channel, option.value)
     }
 
     automationMessage(force: boolean = false): WamAutomationEvent | undefined {
