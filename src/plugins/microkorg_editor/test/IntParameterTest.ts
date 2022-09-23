@@ -14,6 +14,7 @@ describe("SimpleCCParameter", () => {
         
         deepStrictEqual(wam, {
                 type: "int",
+                label:"Filter Cutoff",
                 defaultValue: 60,
                 minValue: 0,
                 maxValue: 127,
