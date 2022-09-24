@@ -13,12 +13,21 @@ interface MicrokorgEditorViewProps {
     plugin: MIDIControllerNode
 }
 
-export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, any> {
+type MicrokorgPages = 'timbre1' | 'timbre2' | 'patch'
+
+type MicrokorgEditorViewState = {
+    page: MicrokorgPages
+}
+
+export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, MicrokorgEditorViewState> {
     kernel: MicrokorgKernel
 
     constructor() {
         super()
         this.kernel = new MicrokorgKernel()
+        this.state = {
+            page: 'timbre1'
+        }
     }
 
     valueChanged(id: string, value: number) {
@@ -42,6 +51,17 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, any
         }
 
         return this.kernel.parameters[id].toWAM().defaultValue
+    }
+
+    showPage(page: MicrokorgPages) {
+        this.setState({page})
+    }
+
+    renderTimbreParam(timbre: number, id: string) {
+        if (timbre == 2) {
+            return this.renderParam(`t2_${id}`)
+        }
+        return this.renderParam(id)
     }
 
     renderParam(id: string) {
@@ -86,81 +106,80 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, any
         }
     }
 
-    renderOsc1() {
+    renderOsc1(t: number) {
         return <div class={styles.group}>
-            {this.renderParam("osc1_wave")}
-            {this.renderParam("osc1_control1")}
-            {this.renderParam("osc1_control2")}
+            {this.renderTimbreParam(t, "osc1_wave")}
+            {this.renderTimbreParam(t, "osc1_control1")}
+            {this.renderTimbreParam(t, "osc1_control2")}
         </div>
     }
 
-    renderOsc2() {
+    renderOsc2(t: number) {
         return <div class={styles.group}>
-            {this.renderParam("osc2_wave")}
-            {this.renderParam("osc2_tune")}
-            {this.renderParam("osc2_finetune")}
-            {this.renderParam("osc_mod")}
+            {this.renderTimbreParam(t, "osc2_wave")}
+            {this.renderTimbreParam(t,"osc2_tune")}
+            {this.renderTimbreParam(t,"osc2_finetune")}
+            {this.renderTimbreParam(t,"osc_mod")}
         </div>
     }
 
-    renderMixer() {
+    renderMixer(t: number) {
         return <div class={styles.group}>
-            {this.renderParam("mixer_osc1")}
-            {this.renderParam("mixer_osc2")}
-            {this.renderParam("mixer_noise")}
+            {this.renderTimbreParam(t,"mixer_osc1")}
+            {this.renderTimbreParam(t,"mixer_osc2")}
+            {this.renderTimbreParam(t,"mixer_noise")}
         </div>
     }
 
-    renderFilter() {
+    renderFilter(t: number) {
         return <div class={styles.group}>
-            {this.renderParam("filter_type")}
-            {this.renderParam("filter_cutoff")}
-            {this.renderParam("filter_res")}
-            {this.renderParam("filter_env")}
-            {this.renderParam("filter_keyboard")}
+            {this.renderTimbreParam(t,"filter_type")}
+            {this.renderTimbreParam(t,"filter_cutoff")}
+            {this.renderTimbreParam(t,"filter_res")}
+            {this.renderTimbreParam(t,"filter_env")}
+            {this.renderTimbreParam(t,"filter_keyboard")}
         </div>
     }
 
-    renderFEG() {
+    renderFEG(t: number) {
         return <div class={styles.group}>
-            {this.renderParam("f_eg_attack")}
-            {this.renderParam("f_eg_decay")}
-            {this.renderParam("f_eg_sustain")}
-            {this.renderParam("f_eg_release")}
+            {this.renderTimbreParam(t,"f_eg_attack")}
+            {this.renderTimbreParam(t,"f_eg_decay")}
+            {this.renderTimbreParam(t,"f_eg_sustain")}
+            {this.renderTimbreParam(t,"f_eg_release")}
         </div>
     }
 
-    renderAmp() {
+    renderAmp(t: number) {
         return <div class={styles.group}>
-            {this.renderParam("amp_level")}
-            {this.renderParam("amp_pan")}
-            {this.renderParam("amp_distortion")}
+            {this.renderTimbreParam(t,"amp_level")}
+            {this.renderTimbreParam(t,"amp_pan")}
+            {this.renderTimbreParam(t,"amp_distortion")}
         </div>
     }
 
-    renderAEG() {
+    renderAEG(t: number) {
         return <div class={styles.group}>
-            {this.renderParam("amp_eg_attack")}
-            {this.renderParam("amp_eg_decay")}
-            {this.renderParam("amp_eg_sustain")}
-            {this.renderParam("amp_eg_release")}
+            {this.renderTimbreParam(t,"amp_eg_attack")}
+            {this.renderTimbreParam(t,"amp_eg_decay")}
+            {this.renderTimbreParam(t,"amp_eg_sustain")}
+            {this.renderTimbreParam(t,"amp_eg_release")}
         </div>
     }
 
-    renderLFOs() {
+    renderLFOs(t: number, n: number) {
         return <div class={styles.group}>
-            {this.renderParam("lfo1_wave")}
-            {this.renderParam("lfo1_freq")}
-            {this.renderParam("lfo2_wave")}
-            {this.renderParam("lfo2_freq")}
+            {this.renderTimbreParam(t,`lfo${n}_wave`)}
+            {this.renderTimbreParam(t,`lfo${n}_freq`)}
+           
         </div>
     }
 
-    renderPatchbay(n: number) {
+    renderPatchbay(t: number, n: number) {
         return <div class={styles.group}>
-            {this.renderParam(`patch${n}_src`)}
-            {this.renderParam(`patch${n}_dest`)}
-            {this.renderParam(`patch${n}_level`)}
+            {this.renderTimbreParam(t, `patch${n}_src`)}
+            {this.renderTimbreParam(t, `patch${n}_dest`)}
+            {this.renderTimbreParam(t, `patch${n}_level`)}
         </div>
     }
 
@@ -170,11 +189,12 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, any
             {this.renderParam('delay_depth')}
             {this.renderParam('modfx_speed')}
             {this.renderParam('modfx_depth')}
-</div>    }
+        </div>    
+    }
 
     renderArp() {
         return <div class={styles.group}>
-            {this.renderParam('arpeggiator')}
+            {this.renderParam('arp_enabled')}
             {this.renderParam('arp_range')}
             {this.renderParam('arp_latch')}
             {this.renderParam('arp_type')}
@@ -233,58 +253,81 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, any
     }
 
     renderHeader() {
-        return <div class={styles.container} style="padding: 10px">
-            <button onClick={() => this.initPressed()}>Init Patch</button>
-            <button onClick={() => this.detectMicrokorg()}>Detect Microkorg</button>
-            <button onClick={() => this.requestSysex()}>Request Sysex</button>
+        
+        return <div class={styles.header}>
+                    <div class={styles.container}>
+                        <button onClick={() => this.showPage('timbre1')}>Timbre 1</button>
+                        <button onClick={() => this.showPage('timbre2')}>Timbre 2</button>
+                        <button onClick={() => this.showPage('patch')}>Patch</button>
 
-            <button onClick={() => this.requestSysex()}>Send Patch</button>
-            <button onClick={() => this.allNotesOff()}>All Notes Off</button>
-        </div>
+                    </div>
+                    <div class={styles.container} style="padding: 10px">
+                        <button onClick={() => this.initPressed()}>Init Patch</button>
+                        <button onClick={() => this.detectMicrokorg()}>Detect Microkorg</button>
+                        <button onClick={() => this.requestSysex()}>Request Sysex</button>
+
+                        <button onClick={() => this.requestSysex()}>Send Patch</button>
+                        <button onClick={() => this.allNotesOff()}>All Notes Off</button>
+                    </div>
+            </div>
+    }
+
+    renderPage() {
+        switch (this.state.page) {
+            case 'timbre1':
+                return this.renderTimbrePage(1)
+            case 'timbre2':
+                return this.renderTimbrePage(2)
+            case 'patch':
+                return this.renderPatchPage()
+        }
     }
 
     render() {
         return <div class={styles.column}>
             {this.renderHeader()}
-            {this.renderTimbrePage()}
+            {this.renderPage()}
         </div>
     }
 
-    renderTimbrePage() {
+    renderPatchPage() {
+        return <div class={styles.column}>
+            <div class={styles.container}>
+                {this.renderFX()}
+            </div>
+            <div class={styles.container}>
+                {this.renderArp()}
+            </div>
+        </div>
+    }
+
+    renderTimbrePage(t: number) {
         return <div class={styles.column}>
                  <div class={styles.container}>
                     <div class={styles.column}>
-                        {this.renderOsc1()}
-                        {this.renderOsc2()}
-                        {this.renderMixer()}
-                        {this.renderLFOs()}
+                        {this.renderOsc1(t)}
+                        {this.renderOsc2(t)}
+                        {this.renderMixer(t)}
+                        {this.renderLFOs(t, 1)}
+                        {this.renderLFOs(t, 2)}
                     </div>
                     <div class={styles.column}>
-                        {this.renderFilter()}
-                        {this.renderFEG()}
-                        {this.renderAmp()}
-                        {this.renderAEG()}
+                        {this.renderFilter(t)}
+                        {this.renderFEG(t)}
+                        {this.renderAmp(t)}
+                        {this.renderAEG(t)}
                     </div>
                   </div>
                   <div class={styles.container}>
                     <div class={styles.column}>
                         <div class={styles.container}>
-                            {this.renderPatchbay(1)}
-                            {this.renderPatchbay(2)}
-                        </div>
-                        <div class={styles.container}>
-                            {this.renderPatchbay(3)}
-                            {this.renderPatchbay(4)}
+                            {this.renderPatchbay(t, 1)}
+                            {this.renderPatchbay(t, 2)}
+                            {this.renderPatchbay(t, 3)}
+                            {this.renderPatchbay(t, 4)}
                         </div>
                     </div>
-                    <div class={styles.column}>
-                        <div class={styles.container}>
-                            {this.renderFX()}
-                        </div>
-                        <div class={styles.container}>
-                            {this.renderArp()}
-                        </div>
-                    </div>
+                    
                   </div>
                 </div>
     }

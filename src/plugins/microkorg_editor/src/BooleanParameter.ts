@@ -7,40 +7,39 @@ export type SelectOption = {
     label: string
 }
 
-export class SelectParameter implements SynthParameter {
+export class BooleanParameter implements SynthParameter {
     id: string
     messager: MIDIMessager
     label: string
-    defaultValue: number
 
-    options: SelectOption[]
-    // SelectParameter.value holds the current index into the options array as it's value, which maps to the WAM parameter value but needs translation to become the MIDI value
     value: number
+    defaultValue: number
+    onMidiValue: number
+    offMidiValue: number
 
     midiDirty: boolean
     automationDirty: boolean
 
-    constructor(id: string, label: string, messager: MIDIMessager, defaultValue: number, options: SelectOption[]) {
+    constructor(id: string, label: string, messager: MIDIMessager, defaultValue: number, offMidiValue: number, onMidiValue: number) {
         this.id = id
         this.label = label
         this.messager = messager
         this.defaultValue = defaultValue
-        this.options = options
-
+        this.onMidiValue = onMidiValue
+        this.offMidiValue = offMidiValue
         this.value = this.defaultValue
     }
 
     toWAM(): WamParameterConfiguration {
         return {
             label: this.label,
-            type: "choice",
+            type: "boolean",
             defaultValue: this.defaultValue,
-            choices: this.options.map(o => o.label)
         }
     }
 
     ingestMIDI(currentChannel: number, event: WamMidiData): boolean {
-        let currentMidiValue = this.options[this.value].value
+        let currentMidiValue = this.value ? this.onMidiValue : this.offMidiValue
         let newMidiValue = this.messager.ingestMIDI(currentChannel, currentMidiValue, event)
 
         if (newMidiValue === undefined) {
@@ -51,13 +50,8 @@ export class SelectParameter implements SynthParameter {
             return false
         }
 
-        const index = this.options.findIndex(o => o.value == newMidiValue)
+        this.value = (newMidiValue == this.onMidiValue) ? 1 : 0
 
-        if (index < 0) {
-            return false
-        }
-
-        this.value = index
         this.automationDirty = true
 
         return true
@@ -69,13 +63,6 @@ export class SelectParameter implements SynthParameter {
     }
 
     parameterUpdate(newValue: number): boolean {
-        const option = this.options[newValue]
-
-        if (option === undefined) {
-            console.log("Could not find option for newvalue ", newValue, this.id, this.options)
-            return false
-        }
-
         const dirty = this.value != newValue
 
         if (dirty) {
@@ -94,13 +81,9 @@ export class SelectParameter implements SynthParameter {
         
         this.midiDirty = false
 
-        const option = this.options[this.value]
-        if (!option) {
-            console.error(`select ${this.id}: value ${this.value} should reference a select option index ${this.options}`)
-            return []
-        }
+        const midiValue = this.value ? this.onMidiValue : this.offMidiValue
 
-        return this.messager.toMIDI(channel, option.value)
+        return this.messager.toMIDI(channel, midiValue)
     }
 
     sysexNeeded(force: boolean = false): boolean {

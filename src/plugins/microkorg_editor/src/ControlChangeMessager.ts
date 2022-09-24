@@ -3,6 +3,7 @@ import { WamMidiData, WamMidiEvent } from "@webaudiomodules/api"
 export interface MIDIMessager {
     toMIDI(channel: number, value: number): WamMidiEvent[]
     ingestMIDI(currentChannel: number, currentValue: number, event: WamMidiData): number | undefined
+    sysexNeeded(): boolean
 }
 
 export const MIDI_CC = 0xB0
@@ -35,5 +36,9 @@ export class ControlChangeMessager implements MIDIMessager {
                 }
             }
         ]
+    }
+
+    sysexNeeded() {
+        return false
     }
 }

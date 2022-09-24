@@ -119,4 +119,8 @@ export class NRPNMessager implements MIDIMessager {
             }
         ]
     }
+
+    sysexNeeded() {
+        return false
+    }
 }

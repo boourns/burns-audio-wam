@@ -3,8 +3,12 @@ import { WamAutomationEvent, WamMidiData, WamMidiEvent, WamParameterConfiguratio
 export interface MIDIControllerKernel {
     wamParameters(): Record<string, WamParameterConfiguration>
     ingestMIDI(event: WamMidiData): boolean
-    ingestSysex(event: WamSysexEvent): boolean
+
     parameterUpdate(params: Record<string, number>): boolean
     automationMessages(force?: boolean): WamAutomationEvent[]
     midiMessages(channel: number, force?: boolean): WamMidiEvent[]
+    
+    sysexNeeded(): boolean
+    toSysex(): Uint8Array 
+    fromSysex(data: Uint8Array): boolean
 }

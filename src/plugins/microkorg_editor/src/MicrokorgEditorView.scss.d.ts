@@ -4,6 +4,7 @@ interface CssExports {
   'column': string;
   'container': string;
   'group': string;
+  'header': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

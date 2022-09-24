@@ -1,4 +1,4 @@
-import { WamEvent, WamMidiData, WamParameterInfoMap, WamTransportData } from "@webaudiomodules/api";
+import { WamBinaryData, WamEvent, WamMidiData, WamParameterInfoMap, WamTransportData } from "@webaudiomodules/api";
 import { AudioWorkletGlobalScope, WamParameterConfiguration } from "@webaudiomodules/api";
 import type { MIDIControllerKernel } from "./MIDIControllerKernel"
 
@@ -55,11 +55,30 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
                 midiPassThrough: "all",
             }
 
+            this.lastSysexTime = 0
+
             this.loadKernel()
         }
 
         loadKernel(): MIDIControllerKernel {
             throw new Error("loadKernel() not implemented!")
+        }
+
+        sysexTime: number
+
+        enqueueSysex() {
+            const { currentTime } = audioWorkletGlobalScope;
+
+            if (this.sysexTime > 0 && currentTime > this.sysexTime) {
+                this.sysexTime = 0
+
+                this.emitEvents({
+                    type: "wam-sysex",
+                    data: {
+                        bytes: this.kernel.toSysex()
+                    }
+                })
+            }
         }
         
         /**
@@ -83,15 +102,22 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
                 }
 
                 if (this.kernel.parameterUpdate(params)) {
-                    // some parameters updated, send the MIDI events
-                    this.emitEvents(...this.kernel.midiMessages(this.config.channel, false))
+                    if (this.kernel.sysexNeeded()) {
+                        this.sysexTime = currentTime + 0.2
+                    } else {
+                        // some parameters updated, send the MIDI events
+                        this.emitEvents(...this.kernel.midiMessages(this.config.channel, false))
+                    }
                 }
 
                 if (this.counts.sendMidi != this.rxCounts.sendMidi) {
                     // somebody (possibly remote) pressed sendMidi
-                    this.emitEvents(...this.kernel.midiMessages(this.config.channel, true))
+                    this.sysexTime = currentTime + 0.2
+
                     this.counts.sendMidi = this.rxCounts.sendMidi
                 }
+
+                this.enqueueSysex()
             } else {
                 console.log("no kernel")
             }
@@ -112,6 +138,22 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
             } else {
                 // only forward MIDI events we don't ingest
                 this.emitEvents({type:"wam-midi", data: midiData})
+            }
+        }
+
+        _onSysex(sysexData: WamBinaryData) {
+            const { currentTime } = audioWorkletGlobalScope;
+
+            const result = this.kernel.fromSysex(sysexData.bytes)
+            
+            if (result) {
+                const messages = this.kernel.automationMessages(false)
+                for (let message of messages) {                    
+                    this.scheduleEvents({...message, time: currentTime})
+                }
+            } else {
+                // only forward MIDI events we don't ingest
+                this.emitEvents({type:"wam-sysex", data: sysexData})
             }
         }
 
