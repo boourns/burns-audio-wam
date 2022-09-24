@@ -47,7 +47,7 @@ const WAMPlugin = {
   },
   mode: "development",
   resolve: {
-    extensions: [ '.tsx', '.ts', '.js', ".css", ".scss" ],
+    extensions: [ '', '.tsx', '.ts', '.js', ".css", ".scss" ],
   },
   experiments: {
     outputModule: true

@@ -33,6 +33,13 @@ describe("MicrokorgKernel", () => {
 
         const kernel = new MicrokorgKernel()
         let result = kernel.fromSysex(patch)
+
     })
 
+    it("Can generate sysex", async () => {
+        const kernel = new MicrokorgKernel()
+        let result = kernel.toSysex()
+        
+        console.log("result length ", result.length)
+    })
 })

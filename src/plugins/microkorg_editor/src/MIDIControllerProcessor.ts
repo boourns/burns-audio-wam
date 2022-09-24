@@ -103,7 +103,9 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
 
                 if (this.kernel.parameterUpdate(params)) {
                     if (this.kernel.sysexNeeded()) {
-                        this.sysexTime = currentTime + 0.2
+                        if (this.sysexTime < 0) {
+                            this.sysexTime = currentTime + 0.2
+                        }
                     } else {
                         // some parameters updated, send the MIDI events
                         this.emitEvents(...this.kernel.midiMessages(this.config.channel, false))
@@ -112,8 +114,10 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
 
                 if (this.counts.sendMidi != this.rxCounts.sendMidi) {
                     // somebody (possibly remote) pressed sendMidi
-                    this.sysexTime = currentTime + 0.2
-
+                    if (this.sysexTime < 0) {
+                        this.sysexTime = currentTime + 0.2
+                    }
+                    
                     this.counts.sendMidi = this.rxCounts.sendMidi
                 }
 

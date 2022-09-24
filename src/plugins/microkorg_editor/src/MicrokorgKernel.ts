@@ -1,13 +1,13 @@
 import { WamAutomationEvent, WamMidiData, WamMidiEvent, WamParameterConfiguration, WamParameterDataMap, WamParameterInfoMap, WamSysexEvent } from "@webaudiomodules/api";
 import { AudioWorkletGlobalScope } from "@webaudiomodules/api";
 
-import { SelectOption, SelectParameter } from "./SelectParameter.js";
-import { IntParameter, SynthParameter } from "./IntParameter.js";
-import { ControlChangeMessager } from "./ControlChangeMessager.js";
-import { NRPNMSBMessager } from "./NRPNMSBMessager.js"
-import { MIDIControllerKernel } from "./MIDIControllerKernel.js";
-import { SysexMessager } from "./SysexMessager.js";
-import { BooleanParameter } from "./BooleanParameter.js";
+import { SelectOption, SelectParameter } from "./SelectParameter";
+import { IntParameter, SynthParameter } from "./IntParameter";
+import { ControlChangeMessager } from "./ControlChangeMessager";
+import { NRPNMSBMessager } from "./NRPNMSBMessager"
+import { MIDIControllerKernel } from "./MIDIControllerKernel";
+import { SysexMessager } from "./SysexMessager";
+import { BooleanParameter } from "./BooleanParameter";
 
 export class MicrokorgKernel implements MIDIControllerKernel {
     channel: number
@@ -326,22 +326,53 @@ export class MicrokorgKernel implements MIDIControllerKernel {
 
         const lfo1Waves: SelectOption[] = [
             { value: 0, label: "Saw" },
-            { value: 43, label: "Square1" },
+            { value: 43, label: "Square" },
             { value: 85, label: "Triangle" },
             { value: 127, label: "S/H" }
         ]
 
         const lfo2Waves: SelectOption[] = [
             { value: 0, label: "Saw" },
-            { value: 43, label: "Square2" },
+            { value: 43, label: "Square" },
             { value: 85, label: "Triangle" },
             { value: 127, label: "S/H" }
         ]
 
+        const lfoKeySync: SelectOption[] = [
+            {value: 0, label: "Off"},
+            {value: 1, label: "Timbre"},
+            {value: 2, label: "Voice"},
+        ]
+
+        const lfoTimeBase: SelectOption[] = [
+{value:0, label: "1/1"},
+{value:1, label: "3/4"},
+{value:2, label: "2/3"},
+{value:3, label: "1/2"},
+{value:4, label: "3/8"},
+{value:5, label: "1/3"},
+{value:6, label: "1/4"},
+{value:7, label: "3/16"},
+{value:8, label: "1/6"},
+{value:9, label: "1/8"},
+{value:10, label: "3/32"},
+{value:11, label: "1/12"},
+{value:12, label: "1/16"},
+{value:13, label: "1/24"},
+{value:14, label: "1/32"},
+        ]
+
         this.parameters[p + "lfo1_wave"] = new SelectParameter(p + "lfo1_wave", l + "LFO1 Wave", new ControlChangeMessager(87), 0, lfo1Waves)
         this.parameters[p + "lfo1_freq"] = new IntParameter(p + "lfo1_freq", l + "LFO1 Freq", new ControlChangeMessager(27), 0, 0, 127)
+        this.parameters[p + "lfo1_keysync"] = new SelectParameter(p + "lfo1_keysync", l + "LFO1 Key Sync", new SysexMessager(), 0, lfoKeySync)
+        this.parameters[p + "lfo1_temposync"] = new SelectParameter(p + "lfo1_temposync", l + "LFO1 Tempo Sync", new SysexMessager(), 0, off_on)
+        this.parameters[p + "lfo1_timebase"] = new SelectParameter(p + "lfo1_timebase", l + "LFO1 Timebase", new SysexMessager(), 0, lfoTimeBase)
+
         this.parameters[p + "lfo2_wave"] = new SelectParameter(p + "lfo2_wave", l + "LFO2 Wave", new ControlChangeMessager(88), 0, lfo2Waves)
         this.parameters[p + "lfo2_freq"] = new IntParameter(p + "lfo2_freq", l + "LFO2 Freq", new ControlChangeMessager(76), 0, 0, 127)
+        this.parameters[p + "lfo2_keysync"] = new SelectParameter(p + "lfo2_keysync", l + "LFO2 Key Sync", new SysexMessager(), 0, lfoKeySync)
+        this.parameters[p + "lfo2_temposync"] = new SelectParameter(p + "lfo2_temposync", l + "LFO2 Tempo Sync", new SysexMessager(), 0, off_on)
+        this.parameters[p + "lfo2_timebase"] = new SelectParameter(p + "lfo2_timebase", l + "LFO2 Timebase", new SysexMessager(), 0, lfoTimeBase)
 
         this.parameters[p + "patch1_level"] = new IntParameter(p + "patch1_lebel", l + "Patch1 Level", new ControlChangeMessager(28), 0, -64, 63)
         this.parameters[p + "patch2_level"] = new IntParameter(p + "patch2_lebel", l + "Patch2 Level", new ControlChangeMessager(29), 0, -64, 63)
@@ -355,8 +386,8 @@ export class MicrokorgKernel implements MIDIControllerKernel {
             { value: 54, label: "LFO2" },
             { value: 72, label: "VELOCITY" },
             { value: 90, label: "KBD TRACK" },
-            { value: 108, label: "Mod wheel" },
-            { value: 126, label: "Pitch" }
+            { value: 108, label: "Pitch Bend" },
+            { value: 126, label: "Mod wheel" }
         ]
 
         const patchDest: SelectOption[] = [
@@ -429,10 +460,10 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         sysex.push(70, 61, 72, 74, 79, 0, 0, 0, 0, 0, 0, 0)
 
         // (dummy bytes)
-        sysex.push(0, 0)
+        sysex.push(0, 0) // 12, 13
 
         // arp steps
-        sysex.push(this.parameters["arp_steps"].value - 1)
+        sysex.push(this.parameters["arp_steps"].value - 1) // 14
 
         // arp pattern
         let pattern = 0
@@ -441,7 +472,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
                 pattern |= (1 << i)
             }
         }
-        sysex.push(pattern)
+        sysex.push(pattern) // 15
 
         const voice_mode = this.parameters["voice_mode"] as SelectParameter
         // byte 16: Voice Mode)
@@ -512,7 +543,12 @@ export class MicrokorgKernel implements MIDIControllerKernel {
             sysex.push(0)
         }
 
-        return new Uint8Array(sysex)
+        let packed = this.packKorg(sysex)
+
+        // note 0x30 should include midi channel
+        const preamble = [0xf0, 0x42, 0x30, 0x58, 0x4c]
+
+        return new Uint8Array([...preamble, ...packed, 0xf7])
     }
 
     vocoderToSysex(sysex: number[]) {
@@ -590,9 +626,42 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         sysex.push(this.parameters[p + "amp_eg_sustain"].value)
         sysex.push(this.parameters[p + "amp_eg_release"].value)
 
+        let lfo = this.parameters[p + "lfo1_wave"].value
+        lfo |= this.parameters[p + "lfo1_keysync"].value << 4
 
+        sysex.push(lfo) // +38
+        sysex.push(this.parameters[p+"lfo1_freq"].value) // +39
+        
+        lfo = (this.parameters[p + "lfo1_temposync"].value << 7)
+        lfo |= this.parameters[p + "lfo1_timebase"].value
+        sysex.push(lfo) // 40
 
+        lfo = this.parameters[p + "lfo2_wave"].value
+        lfo |= this.parameters[p + "lfo2_keysync"].value << 4
 
+        sysex.push(lfo) // +41
+        sysex.push(this.parameters[p+"lfo2_freq"].value) // +42
+        
+        lfo = (this.parameters[p + "lfo2_temposync"].value << 7)
+        lfo |= this.parameters[p + "lfo2_timebase"].value
+        sysex.push(lfo) // +43
+
+        sysex.push((this.parameters[p+"patch1_dest"].value<<4) | this.parameters[p+"patch1_src"].value)
+        sysex.push(this.parameters[p+"patch1_level"].value+64) // +45
+
+        sysex.push((this.parameters[p+"patch2_dest"].value<<4) | this.parameters[p+"patch2_src"].value)
+        sysex.push(this.parameters[p+"patch2_level"].value+64) // +47
+
+        sysex.push((this.parameters[p+"patch3_dest"].value<<4) | this.parameters[p+"patch3_src"].value)
+        sysex.push(this.parameters[p+"patch3_level"].value+64) // +49
+
+        sysex.push((this.parameters[p+"patch4_dest"].value<<4) | this.parameters[p+"patch4_src"].value)
+        sysex.push(this.parameters[p+"patch4_level"].value+64) // +51
+
+        for (let i = 52; i <= 107; i++) {
+            // dummy bytes
+            sysex.push(0)
+        }
 
         return sysex
     }

@@ -155,6 +155,8 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
             {this.renderTimbreParam(t,"amp_level")}
             {this.renderTimbreParam(t,"amp_pan")}
             {this.renderTimbreParam(t,"amp_distortion")}
+            {this.renderTimbreParam(t,"amp_keyboard")}
+
         </div>
     }
 
@@ -171,7 +173,10 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
         return <div class={styles.group}>
             {this.renderTimbreParam(t,`lfo${n}_wave`)}
             {this.renderTimbreParam(t,`lfo${n}_freq`)}
-           
+            {this.renderTimbreParam(t,`lfo${n}_keysync`)}
+            {this.renderTimbreParam(t,`lfo${n}_temposync`)}
+            {this.renderTimbreParam(t,`lfo${n}_timebase`)}
+
         </div>
     }
 
@@ -187,19 +192,35 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
         return <div class={styles.group}>
             {this.renderParam('delay_time')}
             {this.renderParam('delay_depth')}
+            {this.renderParam('delay_sync')}
+            {this.renderParam('delay_sync_division')}
+            {this.renderParam('delay_type')}
+
             {this.renderParam('modfx_speed')}
             {this.renderParam('modfx_depth')}
+            {this.renderParam('modfx_type')}
         </div>    
     }
 
     renderArp() {
+        let steps = []
+        for (let i = 1; i < 9; i++) {
+            steps.push(this.renderParam(`arp_step_${i}`))
+        }
+
         return <div class={styles.group}>
             {this.renderParam('arp_enabled')}
             {this.renderParam('arp_range')}
             {this.renderParam('arp_latch')}
             {this.renderParam('arp_type')}
             {this.renderParam('arp_gate')}
-
+            {this.renderParam('arp_steps')}
+            {this.renderParam('arp_tempo')}
+            {this.renderParam('arp_target')}
+            {this.renderParam('arp_key_sync')}
+            {this.renderParam('arp_resolution')}
+            {this.renderParam('arp_swing')}
+            {steps}
         </div>
     }
 
@@ -253,7 +274,6 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
     }
 
     renderHeader() {
-        
         return <div class={styles.header}>
                     <div class={styles.container}>
                         <button onClick={() => this.showPage('timbre1')}>Timbre 1</button>
@@ -293,11 +313,57 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
     renderPatchPage() {
         return <div class={styles.column}>
             <div class={styles.container}>
+                {this.renderVoice()}
+            </div>
+            <div class={styles.container}>
                 {this.renderFX()}
             </div>
             <div class={styles.container}>
                 {this.renderArp()}
             </div>
+            <div class={styles.container}>
+                {this.renderEQ()}
+            </div>
+
+        </div>
+    }
+
+    renderEQ() {
+        return <div class={styles.column}>
+            <div class={styles.container}>
+                {this.renderParam('eq_hi_freq')}
+                {this.renderParam('eq_hi_gain')}
+                {this.renderParam('eq_lo_freq')}
+                {this.renderParam('eq_lo_gain')}
+            </div>
+        </div>
+    }
+
+    renderVoice() {
+        return <div class={styles.column}>
+            <div class={styles.container}>
+                {this.renderParam('voice_mode')}
+            </div>
+        </div>
+    }
+
+    renderVoiceGroup(t: number) {
+        return <div class={styles.group}>
+            {this.renderTimbreParam(t, "voice_assign")}
+            {this.renderTimbreParam(t, "eg1_reset")}
+            {this.renderTimbreParam(t, "eg2_reset")}
+            {this.renderTimbreParam(t, "trig_mode")}
+            {this.renderTimbreParam(t, "unison_detune")}
+        </div>
+    }
+
+    renderTune(t: number) {
+        return <div class={styles.group}>
+        {this.renderTimbreParam(t, "tune")}
+        {this.renderTimbreParam(t, "transpose")}
+        {this.renderTimbreParam(t, "bend_range")}
+        {this.renderTimbreParam(t, "vibrato")}
+        {this.renderTimbreParam(t, "portamento")}
         </div>
     }
 
@@ -305,13 +371,16 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
         return <div class={styles.column}>
                  <div class={styles.container}>
                     <div class={styles.column}>
+                        {this.renderVoiceGroup(t)}
+                        {this.renderTune(t)}
+
                         {this.renderOsc1(t)}
                         {this.renderOsc2(t)}
-                        {this.renderMixer(t)}
                         {this.renderLFOs(t, 1)}
                         {this.renderLFOs(t, 2)}
                     </div>
                     <div class={styles.column}>
+                        {this.renderMixer(t)}
                         {this.renderFilter(t)}
                         {this.renderFEG(t)}
                         {this.renderAmp(t)}
