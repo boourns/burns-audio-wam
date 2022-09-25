@@ -126,8 +126,8 @@ export class MicrokorgKernel implements MIDIControllerKernel {
 
         const voice_types: SelectOption[] = [
             { value: 0, label: "Single" },
-            { value: 1, label: "Layer" },
-            { value: 2, label: "Vocoder" },
+            { value: 2, label: "Layer" },
+            { value: 3, label: "Vocoder" },
         ]
         this.parameters["voice_mode"] = new SelectParameter("voice_mode", "Voice Mode", new SysexMessager(), 0, voice_types)
 
@@ -200,26 +200,26 @@ export class MicrokorgKernel implements MIDIControllerKernel {
             { value: 29, label: "1000Hz" },
         ]
         this.parameters["eq_lo_freq"] = new SelectParameter("eq_lo_freq", "EQ Lo Freq", new SysexMessager(), 16, loFreqs)
-        this.parameters["eq_lo_gain"] = new IntParameter("eq_hi_gain", "EQ Hi Gain", new SysexMessager(), 0, -12, 12)
+        this.parameters["eq_lo_gain"] = new IntParameter("eq_lo_gain", "EQ Lo Gain", new SysexMessager(), 0, -12, 12)
 
         // TODO how do we merge/display/update vocoder parameters with the rest?
-        this.vocoderParameters["voc_ch1_level"] = new IntParameter("voc_ch1_level", "Ch1 Level", new NRPNMSBMessager(false, 4, 16), 100, 0, 127)
-        this.vocoderParameters["voc_ch2_level"] = new IntParameter("voc_ch2_level", "Ch2 Level", new NRPNMSBMessager(false, 4, 18), 100, 0, 127)
-        this.vocoderParameters["voc_ch3_level"] = new IntParameter("voc_ch3_level", "Ch3 Level", new NRPNMSBMessager(false, 4, 20), 100, 0, 127)
-        this.vocoderParameters["voc_ch4_level"] = new IntParameter("voc_ch4_level", "Ch4 Level", new NRPNMSBMessager(false, 4, 22), 100, 0, 127)
-        this.vocoderParameters["voc_ch5_level"] = new IntParameter("voc_ch5_level", "Ch5 Level", new NRPNMSBMessager(false, 4, 24), 100, 0, 127)
-        this.vocoderParameters["voc_ch6_level"] = new IntParameter("voc_ch6_level", "Ch6 Level", new NRPNMSBMessager(false, 4, 26), 100, 0, 127)
-        this.vocoderParameters["voc_ch7_level"] = new IntParameter("voc_ch7_level", "Ch7 Level", new NRPNMSBMessager(false, 4, 28), 100, 0, 127)
-        this.vocoderParameters["voc_ch8_level"] = new IntParameter("voc_ch8_level", "Ch8 Level", new NRPNMSBMessager(false, 4, 30), 100, 0, 127)
+        this.parameters["voc_ch1_level"] = new IntParameter("voc_ch1_level", "Ch1 Level", new NRPNMSBMessager(false, 4, 16), 100, 0, 127)
+        this.parameters["voc_ch2_level"] = new IntParameter("voc_ch2_level", "Ch2 Level", new NRPNMSBMessager(false, 4, 18), 100, 0, 127)
+        this.parameters["voc_ch3_level"] = new IntParameter("voc_ch3_level", "Ch3 Level", new NRPNMSBMessager(false, 4, 20), 100, 0, 127)
+        this.parameters["voc_ch4_level"] = new IntParameter("voc_ch4_level", "Ch4 Level", new NRPNMSBMessager(false, 4, 22), 100, 0, 127)
+        this.parameters["voc_ch5_level"] = new IntParameter("voc_ch5_level", "Ch5 Level", new NRPNMSBMessager(false, 4, 24), 100, 0, 127)
+        this.parameters["voc_ch6_level"] = new IntParameter("voc_ch6_level", "Ch6 Level", new NRPNMSBMessager(false, 4, 26), 100, 0, 127)
+        this.parameters["voc_ch7_level"] = new IntParameter("voc_ch7_level", "Ch7 Level", new NRPNMSBMessager(false, 4, 28), 100, 0, 127)
+        this.parameters["voc_ch8_level"] = new IntParameter("voc_ch8_level", "Ch8 Level", new NRPNMSBMessager(false, 4, 30), 100, 0, 127)
 
-        this.vocoderParameters["voc_ch1_pan"] = new IntParameter("voc_ch1_pan", "Ch1 Pan", new NRPNMSBMessager(false, 4, 32), 0, -64, 63)
-        this.vocoderParameters["voc_ch2_pan"] = new IntParameter("voc_ch2_pan", "Ch2 Pan", new NRPNMSBMessager(false, 4, 34), 0, -64, 63)
-        this.vocoderParameters["voc_ch3_pan"] = new IntParameter("voc_ch3_pan", "Ch3 Pan", new NRPNMSBMessager(false, 4, 36), 0, -64, 63)
-        this.vocoderParameters["voc_ch4_pan"] = new IntParameter("voc_ch4_pan", "Ch4 Pan", new NRPNMSBMessager(false, 4, 38), 0, -64, 63)
-        this.vocoderParameters["voc_ch5_pan"] = new IntParameter("voc_ch5_pan", "Ch5 Pan", new NRPNMSBMessager(false, 4, 40), 0, -64, 63)
-        this.vocoderParameters["voc_ch6_pan"] = new IntParameter("voc_ch6_pan", "Ch6 Pan", new NRPNMSBMessager(false, 4, 42), 0, -64, 63)
-        this.vocoderParameters["voc_ch7_pan"] = new IntParameter("voc_ch7_pan", "Ch7 Pan", new NRPNMSBMessager(false, 4, 44), 0, -64, 63)
-        this.vocoderParameters["voc_ch8_pan"] = new IntParameter("voc_ch8_pan", "Ch8 Pan", new NRPNMSBMessager(false, 4, 46), 0, -64, 63)
+        this.parameters["voc_ch1_pan"] = new IntParameter("voc_ch1_pan", "Ch1 Pan", new NRPNMSBMessager(false, 4, 32), 0, -64, 63)
+        this.parameters["voc_ch2_pan"] = new IntParameter("voc_ch2_pan", "Ch2 Pan", new NRPNMSBMessager(false, 4, 34), 0, -64, 63)
+        this.parameters["voc_ch3_pan"] = new IntParameter("voc_ch3_pan", "Ch3 Pan", new NRPNMSBMessager(false, 4, 36), 0, -64, 63)
+        this.parameters["voc_ch4_pan"] = new IntParameter("voc_ch4_pan", "Ch4 Pan", new NRPNMSBMessager(false, 4, 38), 0, -64, 63)
+        this.parameters["voc_ch5_pan"] = new IntParameter("voc_ch5_pan", "Ch5 Pan", new NRPNMSBMessager(false, 4, 40), 0, -64, 63)
+        this.parameters["voc_ch6_pan"] = new IntParameter("voc_ch6_pan", "Ch6 Pan", new NRPNMSBMessager(false, 4, 42), 0, -64, 63)
+        this.parameters["voc_ch7_pan"] = new IntParameter("voc_ch7_pan", "Ch7 Pan", new NRPNMSBMessager(false, 4, 44), 0, -64, 63)
+        this.parameters["voc_ch8_pan"] = new IntParameter("voc_ch8_pan", "Ch8 Pan", new NRPNMSBMessager(false, 4, 46), 0, -64, 63)
 
     }
 
@@ -457,7 +457,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         let sysex: number[] = []
 
         // 'party'
-        sysex.push(70, 61, 72, 74, 79, 0, 0, 0, 0, 0, 0, 0)
+        sysex.push(70, 61, 72, 74, 79, 32, 32, 32, 32, 32, 32, 32)
 
         // (dummy bytes)
         sysex.push(0, 0) // 12, 13
@@ -468,7 +468,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         // arp pattern
         let pattern = 0
         for (let i = 0; i < 8; i++) {
-            if (this.parameters[`arp_step_${i + 1}`]) {
+            if (this.parameters[`arp_step_${i + 1}`].value == 0) {
                 pattern |= (1 << i)
             }
         }
@@ -503,8 +503,8 @@ export class MicrokorgKernel implements MIDIControllerKernel {
 
         const tempo = this.parameters["arp_tempo"].value // 20-300
         // 30, 31
-        sysex.push(tempo >> 7) // TODO, is this 8 bit bytes or 7 bit bytes?
-        sysex.push(tempo & 0x7f)
+        sysex.push(tempo >> 8)
+        sysex.push(tempo & 0xff)
 
         let arp = 0
         if (this.parameters["arp_enabled"].value > 0) {
@@ -521,15 +521,15 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         arpTypeRange |= (this.parameters["arp_range"].value << 4)
         sysex.push(arpTypeRange) // 33
 
-        sysex.push(Math.round(this.parameters["arp_gate"].value / 127)) // 34
+        sysex.push(Math.round(this.parameters["arp_gate"].value * 100 / 127)) // 34
 
         sysex.push(this.parameters["arp_resolution"].value) // 35
-        sysex.push(0) // 36, keyboard octave
+        sysex.push(this.parameters["arp_swing"].value) // 36
+
+        sysex.push(0) // 37, keyboard octave
 
         switch (voice_mode.value) {
             case 0:
-                sysex = this.timbreToSysex(1, sysex)
-                break
             case 1:
                 sysex = this.timbreToSysex(1, sysex)
                 sysex = this.timbreToSysex(2, sysex)
@@ -666,20 +666,153 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         return sysex
     }
 
-    fromSysex(data: Uint8Array): boolean {
+    fromSysex(sysex: Uint8Array): boolean {
         // TODO note data[2] includes midi channel
-        if (data[0] != 0xf0 || data[1] != 0x42 || data[2] != 0x30 || data[3] != 0x58) {
+        if (sysex[0] != 0xf0 || sysex[1] != 0x42 || sysex[2] != 0x30 || sysex[3] != 0x58) {
             return false
         }
-        if (![0x40, 0x4c].includes(data[4])) {
+        if (![0x40, 0x4c].includes(sysex[4])) {
             console.error("sysex not single program data")
             return false
         }
 
-        let sysex = this.unpackKorg(data, 5, data.length-1)
+        let data = this.unpackKorg(sysex, 5, sysex.length-1)
 
-        return false
+        console.log("upacked data is ", data)
+
+        this.parameters["arp_steps"].updateFromSysex(data[14]+1)
+
+        // 15
+        for (let i = 0; i < 8; i++) {
+            if (data[15] & (0x1<<i)) {
+                this.parameters[`arp_step_${i+1}`].updateFromSysex(0)
+            } else {
+                this.parameters[`arp_step_${i+1}`].updateFromSysex(1)
+            }
+        }
+
+        let voice_mode = (data[16] & 0x30) >> 4
+        if (voice_mode > 0) {
+            // map 0, 2, 3 onto indices 0, 1, 2
+            voice_mode--
+        }
+        this.parameters['voice_mode'].updateFromSysex(voice_mode)
+
+        const delay = data[19]
+        this.parameters['delay_sync'].updateFromSysex((delay & 0x80) ? 1 : 0)
+        this.parameters['delay_sync_division'].updateFromSysex(delay & 0x0f)
+
+        this.parameters["delay_time"].updateFromSysex(data[20])
+        this.parameters["delay_depth"].updateFromSysex(data[21])
+        console.log("delayType", data[22])
+        this.parameters["delay_type"].updateFromSysex(data[22])
+
+        this.parameters["modfx_speed"].updateFromSysex(data[23])
+        this.parameters["modfx_depth"].updateFromSysex(data[24])
+        this.parameters["modfx_type"].updateFromSysex(data[25])
+
+        this.parameters["eq_hi_freq"].updateFromSysex(data[26])
+        this.parameters["eq_hi_gain"].updateFromSysex(data[27])
+        this.parameters["eq_lo_freq"].updateFromSysex(data[28])
+        this.parameters["eq_lo_gain"].updateFromSysex(data[29])
+
+        const tempo = (data[30] << 8) + data[31]
+        
+        this.parameters["arp_tempo"].updateFromSysex(tempo)
+        const arp = data[32]
+
+        this.parameters["arp_enabled"].updateFromSysex((arp&0x80) ? 1 : 0)
+        this.parameters["arp_latch"].updateFromSysex((arp&0x40) ? 1 : 0)
+        this.parameters["arp_target"].updateFromSysex((arp&0x30)>>4)
+        this.parameters["arp_latch"].updateFromSysex((arp&0x01) ? 1 : 0)
+
+        const arpTypeRange = data[33]
+        this.parameters["arp_type"].updateFromSysex(arpTypeRange&0x0f)
+        this.parameters["arp_range"].updateFromSysex(arpTypeRange>>4)
+
+        this.parameters["arp_gate"].updateFromSysex(Math.round(data[34] * 127 / 100))
+        this.parameters["arp_resolution"].updateFromSysex(data[35])
+        this.parameters["arp_swing"].updateFromSysex(data[36])
+
+        switch (voice_mode) {
+            case 0:
+            case 1:
+                this.sysexToTimbre(1, 38, data)
+                this.sysexToTimbre(2, 146, data)
+                break
+            case 2:
+                this.sysexToVocoder(data)
+                break
+        }
+
+        return true
     }
+
+    sysexToTimbre(t: number, idx: number, data: number[]) {
+        let p = ""
+        if (t == 2) {
+            p = "t2_"
+        }
+
+        const assign = data[idx+1]
+        this.parameters[p+"voice_assign"].updateFromSysex(assign>>6)
+        this.parameters[p+"eg2_reset"].updateFromSysex((assign&(0x1<<5)) ? 1 : 0)
+        this.parameters[p+"eg1_reset"].updateFromSysex((assign&(0x1<<4)) ? 1 : 0)
+        this.parameters[p+"trig_mode"].updateFromSysex((assign&(0x1<<3)) ? 1 : 0)
+
+        this.parameters[p + "unison_detune"].updateFromSysex(data[idx+2])
+        this.parameters[p + "tune"].updateFromSysex(data[idx+3]-64)
+        this.parameters[p + "bend_range"].updateFromSysex(data[idx+4]-64)
+        this.parameters[p + "transpose"].updateFromSysex(data[idx+5]-64)
+        this.parameters[p + "vibrato"].updateFromSysex(data[idx+6]-64)
+        this.parameters[p+"osc1_wave"].updateFromSysex(data[idx+7])
+        this.parameters[p+"osc1_control1"].updateFromSysex(data[idx+8])
+        this.parameters[p+"osc1_control2"].updateFromSysex(data[idx+9])
+
+        // TODO do we need a separate param for DWGS (+10)?
+
+        this.parameters[p+"osc2_wave"].updateFromSysex(data[idx+12]&0x0f)
+        this.parameters[p+"osc_mod"].updateFromSysex(data[idx+12]>>4)
+        this.parameters[p + "osc2_tune"].updateFromSysex((data[idx+13]-64)/24*64)
+        this.parameters[p + "osc2_finetune"].updateFromSysex(data[idx+14]-64)
+        this.parameters[p+"portamento"].updateFromSysex(data[idx+15])
+
+        this.parameters[p + "mixer_osc1"].updateFromSysex(data[idx+16])
+        this.parameters[p + "mixer_osc2"].updateFromSysex(data[idx+17])
+        this.parameters[p + "mixer_noise"].updateFromSysex(data[idx+18])
+
+        this.parameters[p + "filter_type"].updateFromSysex(data[idx+19])
+        this.parameters[p + "filter_cutoff"].updateFromSysex(data[idx+20])
+        this.parameters[p + "filter_res"].updateFromSysex(data[idx+21])
+        this.parameters[p + "filter_env"].updateFromSysex(data[idx+22]-64)
+        this.parameters[p + "filter_keyboard"].updateFromSysex(data[idx+24]-64)
+
+        this.parameters[p + "amp_level"].updateFromSysex(data[idx+25])
+        this.parameters[p + "amp_pan"].updateFromSysex(data[idx+26])
+        this.parameters[p + "amp_distortion"].updateFromSysex(data[idx+27])
+        this.parameters[p + "amp_keyboard"].updateFromSysex(data[idx+29])
+
+        this.parameters[p + "f_eg_attack"].updateFromSysex(data[idx+30])
+        this.parameters[p + "f_eg_decay"].updateFromSysex(data[idx+31])
+        this.parameters[p + "f_eg_sustain"].updateFromSysex(data[idx+32])
+        this.parameters[p + "f_eg_release"].updateFromSysex(data[idx+33])
+
+        this.parameters[p + "amp_eg_attack"].updateFromSysex(data[idx+34])
+        this.parameters[p + "amp_eg_decay"].updateFromSysex(data[idx+35])
+        this.parameters[p + "amp_eg_sustain"].updateFromSysex(data[idx+36])
+        this.parameters[p + "amp_eg_release"].updateFromSysex(data[idx+37])
+
+        this.parameters[p + "lfo1_wave"].updateFromSysex(data[idx+38]&0x0f)
+        this.parameters[p + "lfo1_keysync"].updateFromSysex(data[idx+38]>>4)
+        this.parameters[p + "lfo1_freq"].updateFromSysex(data[idx+39])
+
+        // TODO
+    }
+
+    sysexToVocoder(data: number[]) {
+
+    }
+
 
     midiMessages(channel: number, force: boolean = false): WamMidiEvent[] {
         let results: WamMidiEvent[] = []

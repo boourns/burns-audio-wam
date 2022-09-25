@@ -15,11 +15,13 @@
 .column {
     display: flex;
     flex-direction: column;
+    flex: 1;
 }
 
 .group {
     border: 1px solid black;
     display: flex;
     flex-direction: row;
+    flex: 1;
 }
 

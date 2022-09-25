@@ -29,6 +29,7 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
         config: MIDIControllerConfig
         counts: MIDIControllerCounts
         rxCounts: MIDIControllerCounts
+        sysexTime: number
 
         _generateWamParameterInfo(): WamParameterInfoMap {
             this.kernelParam = this.kernel.wamParameters()
@@ -55,7 +56,7 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
                 midiPassThrough: "all",
             }
 
-            this.lastSysexTime = 0
+            this.sysexTime = 0
 
             this.loadKernel()
         }
@@ -64,13 +65,15 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
             throw new Error("loadKernel() not implemented!")
         }
 
-        sysexTime: number
 
         enqueueSysex() {
             const { currentTime } = audioWorkletGlobalScope;
 
             if (this.sysexTime > 0 && currentTime > this.sysexTime) {
                 this.sysexTime = 0
+
+                // clear the midi message buffer since we're about to send sysex
+                this.kernel.midiMessages(this.config.channel, false)
 
                 this.emitEvents({
                     type: "wam-sysex",
@@ -103,7 +106,8 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
 
                 if (this.kernel.parameterUpdate(params)) {
                     if (this.kernel.sysexNeeded()) {
-                        if (this.sysexTime < 0) {
+
+                        if (this.sysexTime == 0) {
                             this.sysexTime = currentTime + 0.2
                         }
                     } else {
@@ -114,7 +118,7 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
 
                 if (this.counts.sendMidi != this.rxCounts.sendMidi) {
                     // somebody (possibly remote) pressed sendMidi
-                    if (this.sysexTime < 0) {
+                    if (this.sysexTime == 0) {
                         this.sysexTime = currentTime + 0.2
                     }
                     

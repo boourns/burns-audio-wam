@@ -190,36 +190,50 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
 
     renderFX() {
         return <div class={styles.group}>
-            {this.renderParam('delay_time')}
-            {this.renderParam('delay_depth')}
-            {this.renderParam('delay_sync')}
-            {this.renderParam('delay_sync_division')}
-            {this.renderParam('delay_type')}
-
             {this.renderParam('modfx_speed')}
             {this.renderParam('modfx_depth')}
             {this.renderParam('modfx_type')}
         </div>    
     }
 
-    renderArp() {
-        let steps = []
-        for (let i = 1; i < 9; i++) {
-            steps.push(this.renderParam(`arp_step_${i}`))
-        }
+    renderDelay() {
+        return <div class={styles.group}>
+            {this.renderParam('delay_time')}
+            {this.renderParam('delay_depth')}
+            {this.renderParam('delay_sync')}
+            {this.renderParam('delay_sync_division')}
+            {this.renderParam('delay_type')}
+        </div>    
+    }
 
+    renderArp1() {
         return <div class={styles.group}>
             {this.renderParam('arp_enabled')}
+            {this.renderParam('arp_steps')}
             {this.renderParam('arp_range')}
             {this.renderParam('arp_latch')}
             {this.renderParam('arp_type')}
             {this.renderParam('arp_gate')}
-            {this.renderParam('arp_steps')}
+            
+        </div>
+    }
+
+    renderArp2() {
+        return <div class={styles.group}>
             {this.renderParam('arp_tempo')}
             {this.renderParam('arp_target')}
             {this.renderParam('arp_key_sync')}
             {this.renderParam('arp_resolution')}
             {this.renderParam('arp_swing')}
+        </div>
+    }
+
+    renderArpSteps() {
+        let steps = []
+        for (let i = 1; i < 9; i++) {
+            steps.push(this.renderParam(`arp_step_${i}`))
+        }
+        return <div class={styles.group}>
             {steps}
         </div>
     }
@@ -274,18 +288,30 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
     }
 
     renderHeader() {
+        let channels = []
+        for (let i = 0; i < 16; i++) {
+            channels.push(<option value={i}>{i+1}</option>)
+        }
+
+        let channelSelector = <select>
+            {channels}
+        </select>
+
         return <div class={styles.header}>
+
                     <div class={styles.container}>
+                        {this.renderVoice()}
                         <button onClick={() => this.showPage('timbre1')}>Timbre 1</button>
                         <button onClick={() => this.showPage('timbre2')}>Timbre 2</button>
                         <button onClick={() => this.showPage('patch')}>Patch</button>
-
                     </div>
-                    <div class={styles.container} style="padding: 10px">
-                        <button onClick={() => this.initPressed()}>Init Patch</button>
-                        <button onClick={() => this.detectMicrokorg()}>Detect Microkorg</button>
-                        <button onClick={() => this.requestSysex()}>Request Sysex</button>
 
+                    <div class={styles.container} style="padding: 10px">
+                        <span>Channel: {channelSelector}</span>
+                        <button onClick={() => this.detectMicrokorg()}>🔴 Connect</button>
+
+                        <button onClick={() => this.initPressed()}>Init Patch</button>
+                        <button onClick={() => this.requestSysex()}>Request Sysex</button>
                         <button onClick={() => this.requestSysex()}>Send Patch</button>
                         <button onClick={() => this.allNotesOff()}>All Notes Off</button>
                     </div>
@@ -311,21 +337,42 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
     }
 
     renderPatchPage() {
-        return <div class={styles.column}>
+        return <div class={styles.column}> 
             <div class={styles.container}>
-                {this.renderVoice()}
+                <div class={styles.column}>
+                    <div class={styles.container}>
+                    </div>
+                    <div class={styles.container}>
+                        {this.renderTimbreSettings(1)}
+                    </div>
+                    <div class={styles.container}>
+                        {this.renderTimbreSettings(2)}
+                    </div>
+                    <div class={styles.container}>
+                        {this.renderFX()}
+                    </div>
+                    <div class={styles.container}>
+                        {this.renderEQ()}
+                    </div>
+                </div>
+                <div class={styles.column}>
+                    <div class={styles.container}>
+                        {this.renderDelay()}
+                    </div>
+                    <div class={styles.container}>
+                        {this.renderArp1()}
+                    </div>
+                    <div class={styles.container}>
+                        {this.renderArp2()}
+                    </div>
+                    <div class={styles.container}>
+                        {this.renderArpSteps()}
+                    </div>
+                </div>
             </div>
-            <div class={styles.container}>
-                {this.renderFX()}
-            </div>
-            <div class={styles.container}>
-                {this.renderArp()}
-            </div>
-            <div class={styles.container}>
-                {this.renderEQ()}
-            </div>
-
+            {this.renderVocoder()}
         </div>
+
     }
 
     renderEQ() {
@@ -340,30 +387,39 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
     }
 
     renderVoice() {
-        return <div class={styles.column}>
-            <div class={styles.container}>
-                {this.renderParam('voice_mode')}
-            </div>
-        </div>
+        return <div>{this.renderParam('voice_mode')}</div>
     }
 
     renderVoiceGroup(t: number) {
         return <div class={styles.group}>
             {this.renderTimbreParam(t, "voice_assign")}
-            {this.renderTimbreParam(t, "eg1_reset")}
-            {this.renderTimbreParam(t, "eg2_reset")}
-            {this.renderTimbreParam(t, "trig_mode")}
             {this.renderTimbreParam(t, "unison_detune")}
+            {this.renderTimbreParam(t, "tune")}
+            {this.renderTimbreParam(t, "transpose")}
+            {this.renderTimbreParam(t, "vibrato")}
+            {this.renderTimbreParam(t, "portamento")}
         </div>
     }
 
-    renderTune(t: number) {
+    renderTimbreSettings(t: number) {
         return <div class={styles.group}>
-        {this.renderTimbreParam(t, "tune")}
-        {this.renderTimbreParam(t, "transpose")}
-        {this.renderTimbreParam(t, "bend_range")}
-        {this.renderTimbreParam(t, "vibrato")}
-        {this.renderTimbreParam(t, "portamento")}
+            {this.renderTimbreParam(t, "eg1_reset")}
+            {this.renderTimbreParam(t, "eg2_reset")}
+            {this.renderTimbreParam(t, "trig_mode")}
+            {this.renderTimbreParam(t, "bend_range")}
+        </div>
+    }
+
+    renderVocoder() {
+        let el = []
+        for (let i = 1; i < 9; i++) {
+            el.push( <div style={styles.column}>
+                {this.renderParam(`voc_ch${i}_pan`)}
+                {this.renderParam(`voc_ch${i}_level`)}
+            </div>)
+        }
+        return <div class={styles.group}>
+           {el}
         </div>
     }
 
@@ -372,7 +428,6 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
                  <div class={styles.container}>
                     <div class={styles.column}>
                         {this.renderVoiceGroup(t)}
-                        {this.renderTune(t)}
 
                         {this.renderOsc1(t)}
                         {this.renderOsc2(t)}
