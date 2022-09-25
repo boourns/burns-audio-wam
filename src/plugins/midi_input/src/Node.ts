@@ -13,7 +13,6 @@ export class MIDIInputNode extends WamNode {
 
 	midiIn: WebMidi.MIDIInput[]
 	midiOut: WebMidi.MIDIOutput[]
-	selectedId: string
 	selectedMidi?: WebMidi.MIDIInput
 
 	_supportedEventTypes: Set<keyof WamEventMap>
