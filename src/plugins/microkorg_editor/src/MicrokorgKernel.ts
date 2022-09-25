@@ -805,6 +805,40 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         this.parameters[p + "lfo1_wave"].updateFromSysex(data[idx+38]&0x0f)
         this.parameters[p + "lfo1_keysync"].updateFromSysex(data[idx+38]>>4)
         this.parameters[p + "lfo1_freq"].updateFromSysex(data[idx+39])
+        if (data[idx+40] & 0x80) {
+            this.parameters[p + "lfo1_temposync"].updateFromSysex(1)
+        } else {
+            this.parameters[p + "lfo1_temposync"].updateFromSysex(0)
+        }
+        this.parameters[p + "lfo1_timebase"].updateFromSysex(data[idx+40] & 0x0f)
+
+
+        this.parameters[p + "lfo2_wave"].updateFromSysex(data[idx+41]&0x0f)
+        this.parameters[p + "lfo2_keysync"].updateFromSysex(data[idx+41]>>4)
+
+        this.parameters[p + "lfo2_freq"].updateFromSysex(data[idx+42])
+        if (data[idx+43] & 0x80) {
+            this.parameters[p + "lfo2_temposync"].updateFromSysex(1)
+        } else {
+            this.parameters[p + "lfo2_temposync"].updateFromSysex(0)
+        }
+        this.parameters[p + "lfo2_timebase"].updateFromSysex(data[idx+43] & 0x0f)
+        
+        this.parameters[p+"patch1_dest"].updateFromSysex(data[idx+44]>>4)
+        this.parameters[p+"patch1_src"].updateFromSysex(data[idx+44]&0x0f)
+        this.parameters[p+"patch1_level"].updateFromSysex(data[idx+45])
+
+        this.parameters[p+"patch2_dest"].updateFromSysex(data[idx+46]>>4)
+        this.parameters[p+"patch2_src"].updateFromSysex(data[idx+46]&0x0f)
+        this.parameters[p+"patch2_level"].updateFromSysex(data[idx+47])
+
+        this.parameters[p+"patch3_dest"].updateFromSysex(data[idx+48]>>4)
+        this.parameters[p+"patch3_src"].updateFromSysex(data[idx+48]&0x0f)
+        this.parameters[p+"patch3_level"].updateFromSysex(data[idx+49])
+
+        this.parameters[p+"patch4_dest"].updateFromSysex(data[idx+50]>>4)
+        this.parameters[p+"patch4_src"].updateFromSysex(data[idx+50]&0x0f)
+        this.parameters[p+"patch4_level"].updateFromSysex(data[idx+51])
 
         // TODO
     }
