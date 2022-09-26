@@ -10,7 +10,6 @@ import { SysexMessager } from "./SysexMessager";
 import { BooleanParameter } from "./BooleanParameter";
 
 export class MicrokorgKernel implements MIDIControllerKernel {
-    channel: number
     parameters: Record<string, SynthParameter>
     vocoderParameters: Record<string, SynthParameter>
 
@@ -18,7 +17,6 @@ export class MicrokorgKernel implements MIDIControllerKernel {
     paramDirty: boolean
 
     constructor() {
-        this.channel = -1
         this.parameters = {}
         this.vocoderParameters = {}
 
@@ -422,11 +420,11 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         return result
     }
 
-    ingestMIDI(event: WamMidiData): boolean {
+    ingestMIDI(channel: number, event: WamMidiData): boolean {
         let result = false
 
         for (let id of Object.keys(this.parameters)) {
-            if (this.parameters[id].ingestMIDI(this.channel, event)) {
+            if (this.parameters[id].ingestMIDI(channel, event)) {
                 result = true
             }
         }
@@ -453,7 +451,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         return Object.keys(this.parameters).some(id => this.parameters[id].sysexNeeded())
     }
 
-    toSysex(): Uint8Array {
+    toSysex(channel: number): Uint8Array {
         let sysex: number[] = []
 
         // 'party'
@@ -545,8 +543,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
 
         let packed = this.packKorg(sysex)
 
-        // note 0x30 should include midi channel
-        const preamble = [0xf0, 0x42, 0x30, 0x58, 0x4c]
+        const preamble = [0xf0, 0x42, 0x30 | channel, 0x58, 0x4c]
 
         return new Uint8Array([...preamble, ...packed, 0xf7])
     }
@@ -666,9 +663,9 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         return sysex
     }
 
-    fromSysex(sysex: Uint8Array): boolean {
+    fromSysex(channel: number, sysex: Uint8Array): boolean {
         // TODO note data[2] includes midi channel
-        if (sysex[0] != 0xf0 || sysex[1] != 0x42 || sysex[2] != 0x30 || sysex[3] != 0x58) {
+        if (sysex[0] != 0xf0 || sysex[1] != 0x42 || sysex[2] != (0x30 | channel) || sysex[3] != 0x58) {
             return false
         }
         if (![0x40, 0x4c].includes(sysex[4])) {
@@ -704,7 +701,6 @@ export class MicrokorgKernel implements MIDIControllerKernel {
 
         this.parameters["delay_time"].updateFromSysex(data[20])
         this.parameters["delay_depth"].updateFromSysex(data[21])
-        console.log("delayType", data[22])
         this.parameters["delay_type"].updateFromSysex(data[22])
 
         this.parameters["modfx_speed"].updateFromSysex(data[23])

@@ -9,6 +9,8 @@ import { MIDIControllerNode } from "./MIDIControllerNode";
 // @ts-ignore
 let styles = styleRoot.locals as typeof styleRoot
 
+type HTMLInputEvent = Event & {target: HTMLInputElement }
+
 interface MicrokorgEditorViewProps {
     plugin: MIDIControllerNode
 }
@@ -287,13 +289,17 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
         })
     }
 
+    channelChanged(ev: any) {
+        this.props.plugin.updateConfig({channel: ev.target!.value})
+    }
+
     renderHeader() {
         let channels = []
         for (let i = 0; i < 16; i++) {
-            channels.push(<option value={i}>{i+1}</option>)
+            channels.push(<option value={i} selected={i == this.props.plugin.config.channel}>{i+1}</option>)
         }
 
-        let channelSelector = <select>
+        let channelSelector = <select onChange={(ev) => this.channelChanged(ev)}>
             {channels}
         </select>
 

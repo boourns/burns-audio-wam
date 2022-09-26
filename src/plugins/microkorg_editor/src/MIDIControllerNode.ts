@@ -1,6 +1,8 @@
 import { WamEvent, WamParameterDataMap } from '@webaudiomodules/api';
 import { WebAudioModule, WamNode, addFunctionModule } from '@webaudiomodules/sdk';
-import loadMIDIControllerProcessor from './MIDIControllerProcessor';
+import loadMIDIControllerProcessor, { MIDIControllerConfig } from './MIDIControllerProcessor';
+
+import "wam-extensions"
 
 export class MIDIControllerNode extends WamNode {
     destroyed = false;
@@ -8,7 +10,7 @@ export class MIDIControllerNode extends WamNode {
     state: WamParameterDataMap
     statePoller: number
     pause: boolean
-    lastSetState?: any
+    config: MIDIControllerConfig
 
     static async addModules(audioContext: BaseAudioContext, moduleId: string): Promise<void> {
         await super.addModules(audioContext, moduleId)
@@ -27,29 +29,51 @@ export class MIDIControllerNode extends WamNode {
 
         this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-sysex']);
 
+        let channel = 0
+        if (window.WAMExtensions && window.WAMExtensions.userSetting) {
+            channel = window.WAMExtensions.userSetting.get(this.instanceId, "channel")
+            if (channel === undefined) {
+                channel = 0
+            }
+        }
+
+        this.config = {
+            channel,
+            midiPassThrough: "all"
+        }
+
         this.updateState = this.updateState.bind(this)
         this.updateState()
+
+        super.port.postMessage({action:"config", config: this.config})
 	}
 
     async getState(): Promise<any> {
         return {
-            paramState: await super.getState()
+            paramState: await super.getState(),
         }
     }
 
     async setState(state: any): Promise<void> {
-        if (!state.paramState) {
-            return
+        if (state.paramState) {
+            await super.setState(state.paramState)
         }
-        this.lastSetState = state.paramState
-        await super.setState(state.paramState)
+    }
+
+    updateConfig(config: Partial<MIDIControllerConfig>) {
+        this.config = {...this.config, ...config}
+
+        if (window.WAMExtensions && window.WAMExtensions.userSetting) {
+            window.WAMExtensions.userSetting.set(this.instanceId, "channel", config.channel)
+        }
+
+        super.port.postMessage({action:"config", config})
     }
 
     async initPressed() {
         this.pause = true
 
         let params = await this.getParameterInfo()
-        console.log("received params ", params)
 
         let update: WamParameterDataMap = {}
 

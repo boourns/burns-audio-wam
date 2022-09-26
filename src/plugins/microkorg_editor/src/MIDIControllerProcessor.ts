@@ -78,7 +78,7 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
                 this.emitEvents({
                     type: "wam-sysex",
                     data: {
-                        bytes: this.kernel.toSysex()
+                        bytes: this.kernel.toSysex(this.config.channel)
                     }
                 })
             }
@@ -136,7 +136,7 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
         _onMidi(midiData: WamMidiData) {
             const { currentTime } = audioWorkletGlobalScope;
 
-            const result = this.kernel.ingestMIDI(midiData)
+            const result = this.kernel.ingestMIDI(this.config.channel, midiData)
             
             if (result) {
                 const messages = this.kernel.automationMessages(false)
@@ -152,7 +152,7 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
         _onSysex(sysexData: WamBinaryData) {
             const { currentTime } = audioWorkletGlobalScope;
 
-            const result = this.kernel.fromSysex(sysexData.bytes)
+            const result = this.kernel.fromSysex(this.config.channel, sysexData.bytes)
             
             if (result) {
                 const messages = this.kernel.automationMessages(false)
@@ -170,7 +170,11 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
         //  * @param {MessageEvent} message
         //  */
         async _onMessage(message: any): Promise<void> {
-            if (message.data && message.data.action == "count") {
+            if (message.data && message.data.action == "config") {
+                if (message.data.config) {
+                    this.config = message.data.config
+                }
+            } else if (message.data && message.data.action == "count") {
                 if (message.data.count) {
                     this.rxCounts = message.data.count
                 }

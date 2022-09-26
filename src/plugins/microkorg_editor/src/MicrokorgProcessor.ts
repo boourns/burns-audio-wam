@@ -16,7 +16,5 @@ class MicrokorgProcessor extends MIDIControllerProcessor {
 try {
     // @ts-ignore
     audioWorkletGlobalScope.registerProcessor(moduleId, MicrokorgProcessor);
-} catch (error) {
-    // eslint-disable-next-line no-console
-    console.warn(error);
+} catch (error) {  
 }
