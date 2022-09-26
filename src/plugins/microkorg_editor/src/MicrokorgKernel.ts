@@ -198,6 +198,8 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         this.parameters["eq_lo_freq"] = new SelectParameter("eq_lo_freq", "EQ Lo Freq", new SysexMessager(), 16, loFreqs)
         this.parameters["eq_lo_gain"] = new IntParameter("eq_lo_gain", "EQ Lo Gain", new SysexMessager(), 0, -12, 12)
 
+        this.parameters["keyboard_oct"] = new IntParameter("keyboard_oct", "Keyboard Octave", new SysexMessager(), 0, -3,3)
+
         // TODO how do we merge/display/update vocoder parameters with the rest?
         this.parameters["voc_ch1_level"] = new IntParameter("voc_ch1_level", "Ch1 Level", new NRPNMSBMessager(false, 4, 16), 100, 0, 127)
         this.parameters["voc_ch2_level"] = new IntParameter("voc_ch2_level", "Ch2 Level", new NRPNMSBMessager(false, 4, 18), 100, 0, 127)
@@ -216,6 +218,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         this.parameters["voc_ch6_pan"] = new IntParameter("voc_ch6_pan", "Ch6 Pan", new NRPNMSBMessager(false, 4, 42), 0, -64, 63)
         this.parameters["voc_ch7_pan"] = new IntParameter("voc_ch7_pan", "Ch7 Pan", new NRPNMSBMessager(false, 4, 44), 0, -64, 63)
         this.parameters["voc_ch8_pan"] = new IntParameter("voc_ch8_pan", "Ch8 Pan", new NRPNMSBMessager(false, 4, 46), 0, -64, 63)
+
 
     }
 
@@ -473,12 +476,12 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         const voice_mode = this.parameters["voice_mode"] as SelectParameter
 
         // byte 16: Voice Mode)
-        sysex.push(voice_mode.options[voice_mode.value].value << 4)
+        sysex.push(0x40 | (voice_mode.options[voice_mode.value].value << 4))
 
         // byte 17: scale key and type (not used)
         sysex.push(0)
 
-        sysex.push(0) // byte 18: dummy byte
+        sysex.push(60) // byte 18: dummy byte
 
         let delay_sync = (this.parameters["delay_sync"].value == 1) ? 0x80 : 0
         const syncbase = this.parameters["delay_sync_division"] as SelectParameter
@@ -523,7 +526,11 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         sysex.push(this.parameters["arp_resolution"].value) // 35
         sysex.push(this.parameters["arp_swing"].value) // 36
 
-        sysex.push(0) // 37, keyboard octave
+        let oct = this.parameters["keyboard_oct"].value
+        if (oct < 0) {
+            oct += 256
+        }
+        sysex.push(oct) // 37, keyboard octave
 
         switch (voice_mode.value) {
             case 0:
@@ -537,7 +544,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         }
 
         while (sysex.length < 254) {
-            sysex.push(0)
+            sysex.push(64)
         }
 
         let packed = this.packKorg(sysex)
@@ -557,7 +564,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
             p = "t2_"
         }
 
-        sysex.push(0) // +0 (MIDI, note says -1=GLB)
+        sysex.push(255) // 0
 
         let assign = this.parameters[p+"voice_assign"].value << 6
         assign |= (this.parameters[p+"eg2_reset"].value) << 5
@@ -657,7 +664,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
 
         for (let i = 52; i <= 107; i++) {
             // dummy bytes
-            sysex.push(0)
+            sysex.push(64)
         }
 
         return sysex
@@ -686,7 +693,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
             }
         }
 
-        let voice_mode = (data[16] & 0x30) >> 4
+        let voice_mode = ((data[16] & 0x30) >> 4)
         if (voice_mode > 0) {
             // map 0, 2, 3 onto indices 0, 1, 2
             voice_mode--
@@ -728,6 +735,12 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         this.parameters["arp_resolution"].updateFromSysex(data[35])
         this.parameters["arp_swing"].updateFromSysex(data[36])
 
+        let oct = data[37]
+        if (oct > 3) {
+            oct -= 256
+        }
+        this.parameters["keyboard_oct"].updateFromSysex(oct)
+        
         switch (voice_mode) {
             case 0:
             case 1:
@@ -841,7 +854,6 @@ export class MicrokorgKernel implements MIDIControllerKernel {
     sysexToVocoder(data: number[]) {
 
     }
-
 
     midiMessages(channel: number, force: boolean = false): WamMidiEvent[] {
         let results: WamMidiEvent[] = []
