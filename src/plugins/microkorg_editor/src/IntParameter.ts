@@ -63,17 +63,17 @@ export class IntParameter implements SynthParameter {
             return false
         }
 
+        if (this.minValue < 0) {
+            this.value = value + this.minValue
+        } else {
+            this.value = value
+        }
+
         if (value > this.maxValue) {
             value = this.maxValue
         }
         if (value < this.minValue) {
             value = this.minValue
-        }
-
-        if (this.minValue < 0) {
-            this.value = value + this.minValue
-        } else {
-            this.value = value
         }
         
         this.automationDirty = true
@@ -113,7 +113,12 @@ export class IntParameter implements SynthParameter {
 
         this.midiDirty = false
         
-        return this.messager.toMIDI(channel, this.value)
+        let value = this.value
+        if (this.minValue < 0) {
+            value -= this.minValue
+        }
+        
+        return this.messager.toMIDI(channel, value)
     }
 
     automationMessage(force: boolean = false): WamAutomationEvent | undefined {
