@@ -73,8 +73,6 @@ export class MicrokorgKernel implements MIDIControllerKernel {
             { value: 127, label: "On" }
         ]
 
-        this.parameters["sync"] = new SelectParameter("sync", "Sync", new ControlChangeMessager(90), 0, off_on)
-
         this.parameters["arp_enabled"] = new SelectParameter("arp_enabled", "Arpeggiator", new NRPNMSBMessager(false, 0, 2), 0, off_on)
         const arp_range: SelectOption[] = [
             { value: 0, label: "1 Oct" },
@@ -95,7 +93,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
             { value: 127, label: "Trigger" }
         ]
         this.parameters["arp_type"] = new SelectParameter("arp_type", "Arp Type", new NRPNMSBMessager(false, 0, 7), 0, arp_type)
-        this.parameters["arp_gate"] = new IntParameter("arp_gate", "Arp Gate Len", new NRPNMSBMessager(false, 0, 10), 64, 0, 127)
+        this.parameters["arp_gate"] = new IntParameter("arp_gate", "Arp Gate Len", new SysexMessager(), 50, 0, 100)
         this.parameters["arp_steps"] = new IntParameter("arp_steps", "Arp Steps", new SysexMessager(), 8, 1, 8)
 
         for (let i = 1; i < 9; i++) {
@@ -282,7 +280,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
 
         this.parameters[p + "osc2_wave"] = new SelectParameter(p + "osc2_wave", l + "OSC2 Waveform", new ControlChangeMessager(78), 0, osc2WaveOptions)
         this.parameters[p + "osc_mod"] = new SelectParameter(p + "osc_mod", l + "OSC Modulation", new ControlChangeMessager(82), 0, oscModOptions)
-        this.parameters[p + "osc2_tune"] = new IntParameter(p + "osc2_tune", l + "OSC2 Tune", new ControlChangeMessager(18), 0, -64, 63)
+        this.parameters[p + "osc2_tune"] = new IntParameter(p + "osc2_tune", l + "OSC2 Tune", new SysexMessager, 0, -24, 24)
         this.parameters[p + "osc2_finetune"] = new IntParameter(p + "osc2_finetune", l + "OSC2 Finetune", new ControlChangeMessager(19), 0, -64, 63)
 
         this.parameters[p + "mixer_osc1"] = new IntParameter(p + "mixer_osc1", l + "OSC1 Level", new ControlChangeMessager(20), 100, 0, 127)
@@ -473,6 +471,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         sysex.push(pattern) // 15
 
         const voice_mode = this.parameters["voice_mode"] as SelectParameter
+
         // byte 16: Voice Mode)
         sysex.push(voice_mode.options[voice_mode.value].value << 4)
 
@@ -519,7 +518,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         arpTypeRange |= (this.parameters["arp_range"].value << 4)
         sysex.push(arpTypeRange) // 33
 
-        sysex.push(Math.round(this.parameters["arp_gate"].value * 100 / 127)) // 34
+        sysex.push(this.parameters["arp_gate"].value) // 34
 
         sysex.push(this.parameters["arp_resolution"].value) // 35
         sysex.push(this.parameters["arp_swing"].value) // 36
@@ -559,6 +558,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         }
 
         sysex.push(0) // +0 (MIDI, note says -1=GLB)
+
         let assign = this.parameters[p+"voice_assign"].value << 6
         assign |= (this.parameters[p+"eg2_reset"].value) << 5
         assign |= (this.parameters[p+"eg1_reset"].value) << 4
@@ -591,8 +591,8 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         osc2 |= this.parameters[p + "osc_mod"].value << 4
         sysex.push(osc2) // +12
 
-        sysex.push(64 + Math.round((this.parameters[p + "osc2_tune"].value/64)*24)) // +13
-        sysex.push(64+this.parameters[p + "osc2_finetune"].value) // +14
+        sysex.push(64 + this.parameters[p + "osc2_tune"].value) // +13
+        sysex.push(64 + this.parameters[p + "osc2_finetune"].value) // +14
         sysex.push(this.parameters[p+"portamento"].value) // +15
 
         sysex.push(this.parameters[p + "mixer_osc1"].value) // +16
@@ -607,7 +607,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         sysex.push(64+this.parameters[p + "filter_keyboard"].value) // +24
 
         sysex.push(this.parameters[p + "amp_level"].value) // +25
-        sysex.push(this.parameters[p + "amp_pan"].value) // +26
+        sysex.push(64 + this.parameters[p + "amp_pan"].value) // +26
         sysex.push(this.parameters[p + "amp_distortion"].value) // +27
 
         sysex.push(64) // +28 Velocity Sense
@@ -675,8 +675,6 @@ export class MicrokorgKernel implements MIDIControllerKernel {
 
         let data = this.unpackKorg(sysex, 5, sysex.length-1)
 
-        console.log("upacked data is ", data)
-
         this.parameters["arp_steps"].updateFromSysex(data[14]+1)
 
         // 15
@@ -708,9 +706,9 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         this.parameters["modfx_type"].updateFromSysex(data[25])
 
         this.parameters["eq_hi_freq"].updateFromSysex(data[26])
-        this.parameters["eq_hi_gain"].updateFromSysex(data[27])
+        this.parameters["eq_hi_gain"].updateFromSysex(data[27]-64)
         this.parameters["eq_lo_freq"].updateFromSysex(data[28])
-        this.parameters["eq_lo_gain"].updateFromSysex(data[29])
+        this.parameters["eq_lo_gain"].updateFromSysex(data[29]-64)
 
         const tempo = (data[30] << 8) + data[31]
         
@@ -720,13 +718,13 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         this.parameters["arp_enabled"].updateFromSysex((arp&0x80) ? 1 : 0)
         this.parameters["arp_latch"].updateFromSysex((arp&0x40) ? 1 : 0)
         this.parameters["arp_target"].updateFromSysex((arp&0x30)>>4)
-        this.parameters["arp_latch"].updateFromSysex((arp&0x01) ? 1 : 0)
+        this.parameters["arp_key_sync"].updateFromSysex((arp&0x01) ? 1 : 0)
 
         const arpTypeRange = data[33]
         this.parameters["arp_type"].updateFromSysex(arpTypeRange&0x0f)
         this.parameters["arp_range"].updateFromSysex(arpTypeRange>>4)
 
-        this.parameters["arp_gate"].updateFromSysex(Math.round(data[34] * 127 / 100))
+        this.parameters["arp_gate"].updateFromSysex(data[34])
         this.parameters["arp_resolution"].updateFromSysex(data[35])
         this.parameters["arp_swing"].updateFromSysex(data[36])
 
@@ -769,7 +767,8 @@ export class MicrokorgKernel implements MIDIControllerKernel {
 
         this.parameters[p+"osc2_wave"].updateFromSysex(data[idx+12]&0x0f)
         this.parameters[p+"osc_mod"].updateFromSysex(data[idx+12]>>4)
-        this.parameters[p + "osc2_tune"].updateFromSysex((data[idx+13]-64)/24*64)
+
+        this.parameters[p + "osc2_tune"].updateFromSysex((data[idx+13]-64))
         this.parameters[p + "osc2_finetune"].updateFromSysex(data[idx+14]-64)
         this.parameters[p+"portamento"].updateFromSysex(data[idx+15])
 
@@ -784,9 +783,9 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         this.parameters[p + "filter_keyboard"].updateFromSysex(data[idx+24]-64)
 
         this.parameters[p + "amp_level"].updateFromSysex(data[idx+25])
-        this.parameters[p + "amp_pan"].updateFromSysex(data[idx+26])
+        this.parameters[p + "amp_pan"].updateFromSysex(data[idx+26]-64)
         this.parameters[p + "amp_distortion"].updateFromSysex(data[idx+27])
-        this.parameters[p + "amp_keyboard"].updateFromSysex(data[idx+29])
+        this.parameters[p + "amp_keyboard"].updateFromSysex(data[idx+29] - 63)
 
         this.parameters[p + "f_eg_attack"].updateFromSysex(data[idx+30])
         this.parameters[p + "f_eg_decay"].updateFromSysex(data[idx+31])
@@ -822,19 +821,19 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         
         this.parameters[p+"patch1_dest"].updateFromSysex(data[idx+44]>>4)
         this.parameters[p+"patch1_src"].updateFromSysex(data[idx+44]&0x0f)
-        this.parameters[p+"patch1_level"].updateFromSysex(data[idx+45])
+        this.parameters[p+"patch1_level"].updateFromSysex(data[idx+45]-64)
 
         this.parameters[p+"patch2_dest"].updateFromSysex(data[idx+46]>>4)
         this.parameters[p+"patch2_src"].updateFromSysex(data[idx+46]&0x0f)
-        this.parameters[p+"patch2_level"].updateFromSysex(data[idx+47])
+        this.parameters[p+"patch2_level"].updateFromSysex(data[idx+47]-64)
 
         this.parameters[p+"patch3_dest"].updateFromSysex(data[idx+48]>>4)
         this.parameters[p+"patch3_src"].updateFromSysex(data[idx+48]&0x0f)
-        this.parameters[p+"patch3_level"].updateFromSysex(data[idx+49])
+        this.parameters[p+"patch3_level"].updateFromSysex(data[idx+49]-64)
 
         this.parameters[p+"patch4_dest"].updateFromSysex(data[idx+50]>>4)
         this.parameters[p+"patch4_src"].updateFromSysex(data[idx+50]&0x0f)
-        this.parameters[p+"patch4_level"].updateFromSysex(data[idx+51])
+        this.parameters[p+"patch4_level"].updateFromSysex(data[idx+51]-64)
 
         // TODO
     }

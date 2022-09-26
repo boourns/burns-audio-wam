@@ -3,6 +3,7 @@ import assert, { deepStrictEqual, strictEqual } from "assert"
 import {IntParameter} from "../src/IntParameter.js"
 import { ControlChangeMessager } from "../src/ControlChangeMessager.js"
 import {MicrokorgKernel} from "../src/MicrokorgKernel.js"
+import { parseFragment } from "lib0/dom.js"
 
 describe("MicrokorgKernel", () => {
     it("packKorg packs bytes", async() => {
@@ -40,7 +41,36 @@ describe("MicrokorgKernel", () => {
     it("Can generate sysex", async () => {
         const kernel = new MicrokorgKernel()
         let result = kernel.toSysex(0)
-        
-        console.log("result length ", result.length)
+    })
+
+    it("Sysex matches between read and write", () => {
+        const kernel = new MicrokorgKernel()
+
+        let startValues: Record<string, number> = {}
+
+        for (let id of Object.keys(kernel.parameters)) {
+            let wam = kernel.parameters[id].toWAM()
+            kernel.parameters[id].value = wam.minValue! + Math.round(Math.random() * (wam.maxValue! - wam.minValue!))
+
+            if (!id.startsWith("voc_")) {
+                startValues[id] = kernel.parameters[id].value
+            }
+        }
+        startValues["voice_mode"] = 1
+        kernel.parameters["voice_mode"].value = 1
+
+        const sysex = kernel.toSysex(0)
+
+        const kernel2 = new MicrokorgKernel()
+        assert(kernel2.fromSysex(0, sysex), "Failed to load sysex we generated!")
+
+        let endValues: Record<string, number> = {}
+        for (let id of Object.keys(kernel2.parameters)) {
+            if (!id.startsWith("voc_")) {
+                endValues[id] = kernel2.parameters[id].value
+            }
+        }
+
+        deepStrictEqual(endValues, startValues)
     })
 })

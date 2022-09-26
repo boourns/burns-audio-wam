@@ -35,6 +35,8 @@ export class SelectParameter implements SynthParameter {
             label: this.label,
             type: "choice",
             defaultValue: this.defaultValue,
+            minValue: 0,
+            maxValue: this.options.length - 1,
             choices: this.options.map(o => o.label)
         }
     }

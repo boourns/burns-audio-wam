@@ -35,6 +35,8 @@ export class BooleanParameter implements SynthParameter {
             label: this.label,
             type: "boolean",
             defaultValue: this.defaultValue,
+            minValue: 0,
+            maxValue: 1,
         }
     }
 
