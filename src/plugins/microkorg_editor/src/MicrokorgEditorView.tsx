@@ -290,7 +290,7 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
     }
 
     channelChanged(ev: any) {
-        this.props.plugin.updateConfig({channel: ev.target!.value})
+        this.props.plugin.updateConfig({channel: parseInt(ev.target!.value)})
     }
 
     renderHeader() {
