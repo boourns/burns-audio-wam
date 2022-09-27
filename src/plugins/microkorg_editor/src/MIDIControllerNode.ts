@@ -31,14 +31,15 @@ export class MIDIControllerNode extends WamNode {
 
         let channel = 0
         if (window.WAMExtensions && window.WAMExtensions.userSetting) {
-            channel = parseInt(window.WAMExtensions.userSetting.get(this.instanceId, "channel"))
+            channel = window.WAMExtensions.userSetting.get(this.instanceId, "channel")
             if (channel === undefined) {
                 channel = 0
             }
         }
 
         this.config = {
-            channel,
+            // @ts-ignore
+            channel: channel,
             midiPassThrough: "all"
         }
 

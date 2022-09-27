@@ -79,17 +79,19 @@ describe("MicrokorgKernel", () => {
         const kernel = new MicrokorgKernel()
 
         kernel.fromSysex(0, input)
-
+        //let og = kernel.unpackKorg(input, 5, input.length-1)
+        let og = input
+        
         const output = kernel.toSysex(0)
 
-        if (input.length != output.length) {
+        if (og.length != output.length) {
             throw new Error("generated sysex does not match length")
         }
         let correct = true
         for (let i = 0; i < input.length; i++) {
-            if (input[i] != output[i]) {
+            if (og[i] != output[i]) {
                 correct = false
-                console.error("Mismatch, index=", i, "original= ", input[i], ", generated= ", output[i])
+                console.error("Mismatch, index=", i, "original= ", og[i], ", generated= ", output[i])
             }
         }
     })
