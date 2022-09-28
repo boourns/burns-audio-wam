@@ -15,7 +15,7 @@ interface MicrokorgEditorViewProps {
     plugin: MIDIControllerNode
 }
 
-type MicrokorgPages = 'timbre1' | 'timbre2' | 'patch'
+type MicrokorgPages = 'timbre1' | 'timbre2' | 'patch' | 'vocoder'
 
 type MicrokorgEditorViewState = {
     page: MicrokorgPages
@@ -59,15 +59,20 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
         this.setState({page})
     }
 
-    renderTimbreParam(timbre: number, id: string) {
+    renderTimbreParam(timbre: number, id: string, label?: string) {
         if (timbre == 2) {
-            return this.renderParam(`t2_${id}`)
+            return this.renderParam(`t2_${id}`, label)
         }
-        return this.renderParam(id)
+        return this.renderParam(id, label)
     }
 
-    renderParam(id: string) {
+    renderParam(id: string, labelOverride?: string) {
+        if (!this.kernel.parameters[id]) {
+            console.error("Error: invalid id ", id)
+        }
+
         const info = this.kernel.parameters[id].toWAM()
+        const label = labelOverride || info.label || id
 
         switch(info.type) {
             case "float":
@@ -75,7 +80,7 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
                              minimumValue={info.minValue} 
                              maximumValue={info.maxValue}
                              value={() => this.getValue(id)}
-                             label={info.label || id}
+                             label={label}
                              bipolar={info.minValue < 0}
                              >
                         </Knob>
@@ -84,7 +89,7 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
                              minimumValue={info.minValue} 
                              maximumValue={info.maxValue}
                              value={() => this.getValue(id)}
-                             label={info.label || id}
+                             label={label}
                              bipolar={info.minValue < 0}
                              integer={true}
                              >
@@ -240,6 +245,44 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
         </div>
     }
 
+    renderAudioIn() {
+        return <div class={styles.group}>
+            {this.renderParam("voc_hpf_gate")}
+            {this.renderParam("voc_hpf_level")}
+            {this.renderParam("voc_gate_sense")}
+            {this.renderParam("voc_threshold")}
+        </div>
+    }
+
+    renderVocoderMixer() {
+        return <div class={styles.group}>
+            {this.renderTimbreParam(0,"mixer_osc1")}
+            {this.renderTimbreParam(0,"mixer_osc2", "Ext In")}
+            {this.renderTimbreParam(0,"mixer_noise")}
+        </div>
+    }
+
+    renderVocoderFilter() {
+        return <div class={styles.group}>
+            {this.renderParam("voc_shift")}
+            {this.renderTimbreParam(1, "filter_freq")}
+            {this.renderTimbreParam(1,"filter_res")}
+            {this.renderParam("voc_filter_mod")}
+            {this.renderParam("voc_mod_level")}
+
+            {this.renderParam("voc_ef_sense")}
+        </div>
+    }
+
+    renderVocoderAmp() {
+        return <div class={styles.group}>
+            {this.renderTimbreParam(1,"amp_level")}
+            {this.renderParam("voc_amp_direct")}
+            {this.renderTimbreParam(1,"amp_distortion")}
+            {this.renderTimbreParam(1,"amp_keyboard")}
+        </div>
+    }
+
     async initPressed() {
         await this.props.plugin.initPressed()
     }
@@ -309,6 +352,8 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
                         {this.renderVoice()}
                         <button onClick={() => this.showPage('timbre1')}>Timbre 1</button>
                         <button onClick={() => this.showPage('timbre2')}>Timbre 2</button>
+                        <button onClick={() => this.showPage('vocoder')}>Vocoder</button>
+
                         <button onClick={() => this.showPage('patch')}>Patch</button>
                     </div>
 
@@ -332,6 +377,8 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
                 return this.renderTimbrePage(2)
             case 'patch':
                 return this.renderPatchPage()
+            case 'vocoder':
+                return this.renderVocoderPage()
         }
     }
 
@@ -376,7 +423,6 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
                     </div>
                 </div>
             </div>
-            {this.renderVocoder()}
         </div>
 
     }
@@ -416,7 +462,7 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
         </div>
     }
 
-    renderVocoder() {
+    renderVocoderLevels() {
         let el = []
         for (let i = 1; i < 9; i++) {
             el.push( <div style={styles.column}>
@@ -427,6 +473,28 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
         return <div class={styles.group}>
            {el}
         </div>
+    }
+
+    renderVocoderPage() {
+        return <div class={styles.column}>
+                 <div class={styles.container}>
+                    <div class={styles.column}>
+                        {this.renderVoiceGroup(1)}
+                        {this.renderOsc1(1)}
+                        {this.renderAudioIn()}
+                        {this.renderLFOs(1, 1)}
+                        {this.renderLFOs(1, 2)}
+                        {this.renderVocoderMixer()}
+                    </div>
+                    <div class={styles.column}>
+                        {this.renderVocoderFilter()}
+                        {this.renderVocoderAmp()}
+                        {this.renderAEG(1)}
+                        {this.renderVocoderLevels()}
+                    </div>
+                  </div>
+                </div>
+ 
     }
 
     renderTimbrePage(t: number) {
@@ -446,6 +514,7 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
                         {this.renderFEG(t)}
                         {this.renderAmp(t)}
                         {this.renderAEG(t)}
+                        
                     </div>
                   </div>
                   <div class={styles.container}>
@@ -454,7 +523,6 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
                             {this.renderPatchbay(t, 1)}
                             {this.renderPatchbay(t, 2)}
                             {this.renderPatchbay(t, 3)}
-                            {this.renderPatchbay(t, 4)}
                         </div>
                     </div>
                     

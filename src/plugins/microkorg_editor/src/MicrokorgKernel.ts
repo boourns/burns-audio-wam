@@ -220,14 +220,43 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         this.voiceParameters["voc_ch7_level"] = new IntParameter("voc_ch7_level", "Ch7 Level", new NRPNMSBMessager(false, 4, 28), 100, 0, 127)
         this.voiceParameters["voc_ch8_level"] = new IntParameter("voc_ch8_level", "Ch8 Level", new NRPNMSBMessager(false, 4, 30), 100, 0, 127)
 
-        this.voiceParameters["voc_ch1_pan"] = new IntParameter("voc_ch1_pan", "Ch1 Pan", new NRPNMSBMessager(false, 4, 32), 0, -64, 63)
-        this.voiceParameters["voc_ch2_pan"] = new IntParameter("voc_ch2_pan", "Ch2 Pan", new NRPNMSBMessager(false, 4, 34), 0, -64, 63)
-        this.voiceParameters["voc_ch3_pan"] = new IntParameter("voc_ch3_pan", "Ch3 Pan", new NRPNMSBMessager(false, 4, 36), 0, -64, 63)
-        this.voiceParameters["voc_ch4_pan"] = new IntParameter("voc_ch4_pan", "Ch4 Pan", new NRPNMSBMessager(false, 4, 38), 0, -64, 63)
-        this.voiceParameters["voc_ch5_pan"] = new IntParameter("voc_ch5_pan", "Ch5 Pan", new NRPNMSBMessager(false, 4, 40), 0, -64, 63)
-        this.voiceParameters["voc_ch6_pan"] = new IntParameter("voc_ch6_pan", "Ch6 Pan", new NRPNMSBMessager(false, 4, 42), 0, -64, 63)
-        this.voiceParameters["voc_ch7_pan"] = new IntParameter("voc_ch7_pan", "Ch7 Pan", new NRPNMSBMessager(false, 4, 44), 0, -64, 63)
-        this.voiceParameters["voc_ch8_pan"] = new IntParameter("voc_ch8_pan", "Ch8 Pan", new NRPNMSBMessager(false, 4, 46), 0, -64, 63)
+        this.voiceParameters["voc_ch1_pan"] = new IntParameter("voc_ch1_pan", "Ch1 Pan", new NRPNMSBMessager(false, 4, 32), 0, -63, 63)
+        this.voiceParameters["voc_ch2_pan"] = new IntParameter("voc_ch2_pan", "Ch2 Pan", new NRPNMSBMessager(false, 4, 34), 0, -63, 63)
+        this.voiceParameters["voc_ch3_pan"] = new IntParameter("voc_ch3_pan", "Ch3 Pan", new NRPNMSBMessager(false, 4, 36), 0, -63, 63)
+        this.voiceParameters["voc_ch4_pan"] = new IntParameter("voc_ch4_pan", "Ch4 Pan", new NRPNMSBMessager(false, 4, 38), 0, -63, 63)
+        this.voiceParameters["voc_ch5_pan"] = new IntParameter("voc_ch5_pan", "Ch5 Pan", new NRPNMSBMessager(false, 4, 40), 0, -63, 63)
+        this.voiceParameters["voc_ch6_pan"] = new IntParameter("voc_ch6_pan", "Ch6 Pan", new NRPNMSBMessager(false, 4, 42), 0, -63, 63)
+        this.voiceParameters["voc_ch7_pan"] = new IntParameter("voc_ch7_pan", "Ch7 Pan", new NRPNMSBMessager(false, 4, 44), 0, -63, 63)
+        this.voiceParameters["voc_ch8_pan"] = new IntParameter("voc_ch8_pan", "Ch8 Pan", new NRPNMSBMessager(false, 4, 46), 0, -63, 63)
+    
+        this.voiceParameters["voc_hpf_gate"] = new BooleanParameter("voc_hpf_gate", "Input HPF Gate", new SysexMessager(), 0, 0, 1)
+        this.voiceParameters["voc_hpf_level"] = new IntParameter("voc_hpf_level", "HPF Level", new SysexMessager(), 0, 0, 127)
+        this.voiceParameters["voc_gate_sense"] = new IntParameter("voc_gate_sense", "Gate Sense", new SysexMessager(), 0, 0, 127)
+        this.voiceParameters["voc_threshold"] = new IntParameter("voc_threshold", "Threshold", new SysexMessager(), 0, 0, 127)
+       
+        const shifts: SelectOption[] = [
+            {value: 0, label: "0"},
+            {value: 1, label: "+1"},
+            {value: 2, label: "+2"},
+            {value: 3, label: "-1"},
+            {value: 4, label: "-2"},
+        ]
+        this.voiceParameters["voc_shift"] = new SelectParameter("voc_shift", "Voc: Formant Shift", new SysexMessager(), 0, shifts)
+        const modSources: SelectOption[] = [
+            {value: 0, label: "---"},
+            {value: 1, label: "EG"},
+            {value: 2, label: "LFO1"},
+            {value: 3, label: "LFO2"},
+            {value: 4, label: "Velocity"},
+            {value: 5, label: "Kbd Track"},
+            {value: 6, label: "Pitch Bend"},
+            {value: 7, label: "Mod Wheel"},
+        ]
+        this.voiceParameters["voc_filter_mod"] = new SelectParameter("voc_filter_mod", "Voc: Filter Mod Source", new SysexMessager(), 0, modSources)
+        this.voiceParameters["voc_mod_level"] = new IntParameter("voc_mod_level", "Mod Level", new SysexMessager(), 0, -64, 64)
+        this.voiceParameters["voc_ef_sense"] = new IntParameter("voc_ef_sense", "Voc: EF Sense", new SysexMessager(), 0, 0, 127)
+        this.voiceParameters["voc_amp_direct"] = new IntParameter("voc_amp_direct", "Voc: Direct Level", new SysexMessager(), 0, 0, 127)
+
     }
 
     initTimbre(t: number): Record<string, SynthParameter> {
@@ -608,7 +637,106 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         return new Uint8Array([...preamble, ...packed, 0xf7])
     }
 
-    vocoderToSysex(sysex: number[]) {
+    vocoderToSysex(sysex: number[]): number[] {
+        const parameters = this.parameters
+
+        sysex.push(255) // 0
+
+        let assign = parameters["voice_assign"].value << 6
+        assign |= (parameters["eg2_reset"].value) << 5
+        assign |= (parameters["eg1_reset"].value) << 4
+        assign |= (parameters["trig_mode"].value) << 3
+        sysex.push(assign) // +1
+
+        sysex.push(parameters["unison_detune"].value) // +2
+        sysex.push(64 + parameters["tune"].value) // +3
+        sysex.push(64 + parameters["bend_range"].value) // +4
+        sysex.push(64 + parameters["transpose"].value) // +5
+        sysex.push(64 + parameters["vibrato"].value) // +6
+        
+        const wave = parameters["osc1_wave"]
+        sysex.push(wave.value) // +7
+        sysex.push(parameters["osc1_control1"].value) // +8
+        sysex.push(parameters["osc1_control2"].value) // +9
+
+        if (wave.value == 5) {
+            let dwgs = parameters["osc1_control2"].value
+            if (dwgs > 64) {
+                dwgs = 64
+            }
+            sysex.push(dwgs) // +10
+        } else {
+            sysex.push(0) // +10
+        }
+        sysex.push(0) //+11
+        sysex.push(parameters["voc_hpf_gate"].value) // +12
+        sysex.push(0) //+13
+        sysex.push(parameters["portamento"].value) // +14
+        sysex.push(parameters["mixer_osc1"].value) // +15
+        sysex.push(parameters["mixer_osc2"].value) // +16
+        sysex.push(parameters["mixer_noise"].value) // +17
+        sysex.push(parameters["voc_hpf_level"].value) // +18
+        sysex.push(parameters["voc_gate_sense"].value) // +19
+        sysex.push(parameters["voc_threshold"].value) // +20
+
+        sysex.push(parameters["voc_shift"].value) // +21
+        sysex.push(parameters["filter_freq"].value) // +22
+        sysex.push(parameters["filter_res"].value) // +23
+        sysex.push(parameters["voc_filter_mod"].value) // +24
+        sysex.push(64+parameters["voc_mod_level"].value) // +25
+        sysex.push(parameters["voc_ef_sense"].value) // +26
+
+        sysex.push(parameters["amp_level"].value) // +27
+        sysex.push(parameters["amp_direct_level"].value) // +28
+        sysex.push(parameters["amp_distortion"].value) // +29
+
+        sysex.push(64) // +30
+        sysex.push(63 + parameters["amp_keyboard"].value) // +31
+        sysex.push(0)
+        sysex.push(0)        
+        sysex.push(127)
+        sysex.push(0) // +35
+
+        sysex.push(parameters["amp_eg_attack"].value) // +36
+        sysex.push(parameters["amp_eg_decay"].value)
+        sysex.push(parameters["amp_eg_sustain"].value)
+        sysex.push(parameters["amp_eg_release"].value)
+
+        let lfo = parameters["lfo1_wave"].value
+        lfo |= parameters["lfo1_keysync"].value << 4
+
+        sysex.push(lfo) // +40
+        sysex.push(parameters["lfo1_freq"].value) // +41
+        
+        lfo = (parameters["lfo1_temposync"].value << 7)
+        lfo |= parameters["lfo1_timebase"].value
+        sysex.push(lfo) // 42
+
+        lfo = parameters["lfo2_wave"].value
+        lfo |= parameters["lfo2_keysync"].value << 4
+
+        sysex.push(lfo) // +43
+        sysex.push(parameters["lfo2_freq"].value) // +44
+        
+        lfo = (parameters["lfo2_temposync"].value << 7)
+        lfo |= parameters["lfo2_timebase"].value
+        sysex.push(lfo) // +45
+
+        for (let i = 0; i < 8; i++) {
+            sysex.push(parameters[`voc_ch${i+1}_level`].value)
+            sysex.push(parameters[`voc_ch${i+1}_level`].value)
+        }
+        for (let i = 0; i < 8; i++) {
+            sysex.push(63+parameters[`voc_ch${i+1}_pan`].value)
+            sysex.push(63+parameters[`voc_ch${i+1}_pan`].value)
+        }
+        for (let i = 0; i < 16; i++) {
+            sysex.push(0x7f)
+            sysex.push(0xff)
+            sysex.push(0xff)
+            sysex.push(0x00)
+        }
+
         return sysex
     }
 
@@ -804,7 +932,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
                 this.sysexToTimbre(2, 146, data, this.timbre2Parameters)
                 break
             case 2:
-                this.sysexToVocoder(data)
+                this.sysexToVocoder(38, data)
                 break
         }
 
@@ -907,8 +1035,79 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         // TODO
     }
 
-    sysexToVocoder(data: number[]) {
+        sysexToVocoder(idx: number, data: number[]) {    
+            const parameters = this.parameters
 
+            const assign = data[idx+1]
+            parameters["voice_assign"].updateFromSysex(assign>>6)
+            parameters["eg2_reset"].updateFromSysex((assign&(0x1<<5)) ? 1 : 0)
+            parameters["eg1_reset"].updateFromSysex((assign&(0x1<<4)) ? 1 : 0)
+            parameters["trig_mode"].updateFromSysex((assign&(0x1<<3)) ? 1 : 0)
+    
+            parameters["unison_detune"].updateFromSysex(data[idx+2])
+            parameters["tune"].updateFromSysex(data[idx+3]-64)
+            parameters["bend_range"].updateFromSysex(data[idx+4]-64)
+            parameters["transpose"].updateFromSysex(data[idx+5]-64)
+            parameters["vibrato"].updateFromSysex(data[idx+6]-64)
+            parameters["osc1_wave"].updateFromSysex(data[idx+7])
+            parameters["osc1_control1"].updateFromSysex(data[idx+8])
+            parameters["osc1_control2"].updateFromSysex(data[idx+9])
+    
+            parameters["voc_hpf_gate"].updateFromSysex(data[idx+12]&0x01)
+
+            parameters["portamento"].updateFromSysex(data[idx+14] & 0x7F)
+            
+            parameters["mixer_osc1"].updateFromSysex(data[idx+15])
+            parameters["mixer_osc2"].updateFromSysex(data[idx+16])
+            parameters["mixer_noise"].updateFromSysex(data[idx+17])
+    
+            parameters["voc_hpf_level"].updateFromSysex(data[idx+18])
+            parameters["voc_gate_sense"].updateFromSysex(data[idx+19])
+            parameters["voc_threshold"].updateFromSysex(data[idx+20])
+
+            parameters["voc_shift"].updateFromSysex(data[idx+21])
+            parameters["filter_freq"].updateFromSysex(data[idx+22])
+            parameters["filter_res"].updateFromSysex(data[idx+23])
+            parameters["voc_filter_mod"].updateFromSysex(data[idx+24])
+            parameters["voc_mod_level"].updateFromSysex(data[idx+25]-64)
+            parameters["voc_ef_sense"].updateFromSysex(data[idx+26])
+
+            parameters["amp_level"].updateFromSysex(data[idx+27])
+            parameters["amp_direct_level"].updateFromSysex(data[idx+28])
+            parameters["amp_distortion"].updateFromSysex(data[idx+29])
+            parameters["amp_keyboard"].updateFromSysex(data[idx+31] - 63)
+
+            parameters["amp_eg_attack"].updateFromSysex(data[idx+36])
+            parameters["amp_eg_decay"].updateFromSysex(data[idx+37])
+            parameters["amp_eg_sustain"].updateFromSysex(data[idx+38])
+            parameters["amp_eg_release"].updateFromSysex(data[idx+39])
+    
+            parameters["lfo1_wave"].updateFromSysex(data[idx+40]&0x0f)
+            parameters["lfo1_keysync"].updateFromSysex(data[idx+40]>>4)
+            parameters["lfo1_freq"].updateFromSysex(data[idx+41])
+            if (data[idx+42] & 0x80) {
+                parameters["lfo1_temposync"].updateFromSysex(1)
+            } else {
+                parameters["lfo1_temposync"].updateFromSysex(0)
+            }
+            parameters["lfo1_timebase"].updateFromSysex(data[idx+42] & 0x0f)
+    
+    
+            parameters["lfo2_wave"].updateFromSysex(data[idx+43]&0x0f)
+            parameters["lfo2_keysync"].updateFromSysex(data[idx+43]>>4)
+    
+            parameters["lfo2_freq"].updateFromSysex(data[idx+44])
+            if (data[idx+45] & 0x80) {
+                parameters["lfo2_temposync"].updateFromSysex(1)
+            } else {
+                parameters["lfo2_temposync"].updateFromSysex(0)
+            }
+            parameters["lfo2_timebase"].updateFromSysex(data[idx+45] & 0x0f)
+            
+            for (let i = 0; i < 8; i++) {
+                parameters[`voc_ch${i+1}_level`].updateFromSysex(data[idx+46+(i*2)])
+                parameters[`voc_ch${i+1}_pan`].updateFromSysex(63+data[idx+62+(i*2)])
+            }
     }
 
     midiMessages(channel: number, force: boolean = false): WamMidiEvent[] {
