@@ -34,16 +34,12 @@ export default class MicrokorgControllerModule extends WebAudioModule<MIDIContro
 	}
 
 	async initialize(state: any) {
-		console.log("WAM::initialize")
-
 		await this._loadDescriptor();
 
 		return super.initialize(state);
 	}
 
 	async createAudioNode(initialState: any) {
-		console.log("WAM::createAudioNode")
-
 		await MIDIControllerNode.addModules(this.audioContext, this.moduleId)
 
 		let url = `${this._processorUrl}?v=${Math.random()}`
