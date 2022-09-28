@@ -56,6 +56,8 @@ const loadDynamicParameterProcessor = (moduleId: string) => {
                 if (message.data.parameters) {
                     this.updateParameters(message.data.parameters)
                 }
+            } else if (message.data && message.data.source == "emit") {
+                this.emitEvents(...message.data.events)
             } else {
                 // @ts-ignore
                 super._onMessage(message)

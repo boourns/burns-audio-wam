@@ -37,7 +37,7 @@ export class MIDIDebugNode extends WamNode {
 		this.recording = new MIDIRecording()
 
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
-		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi']);
+		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-sysex']);
 	}
 
 	async getState(): Promise<any> {
@@ -58,21 +58,32 @@ export class MIDIDebugNode extends WamNode {
 
 	_onMessage(message: MessageEvent<any>): void {
 		if (message.data && message.data.source == "midi") {
-			this.recording.messages.push({ incoming: true, timestamp: message.data.timestamp, bytes: message.data.bytes })
+			this.recording.messages.push({incoming: true, timestamp: message.data.timestamp, bytes: message.data.bytes })
 			if (this.callback) {
 				this.callback()
 			}
-		} else {
+		} else if (message.data && message.data.source == "sysex") {
+			let data: number[] = []
+			for (let b of message.data.bytes) {
+				data.push(b)
+			}
+			this.recording.messages.push({incoming: true, timestamp: message.data.timestamp, bytes: data })
+			if (this.callback) {
+				this.callback()
+			}
+		}
+		else {
 			super._onMessage(message)
 		}
 	}
 
 	emitMIDI(bytes: number[]) {
+		
 		this.port.postMessage({
 			source: 'midi',
 			bytes
 		})
 
-		this.recording.messages.push({ incoming: false, timestamp: this.context.currentTime, bytes })
+		this.recording.messages.push({incoming: false, timestamp: this.context.currentTime, bytes })
 	}
 }

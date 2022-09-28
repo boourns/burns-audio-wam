@@ -48,7 +48,11 @@ export class MIDIMessageAnalyzer {
     }
 
     channelMessage(): boolean {
-        return (this.bytes[0] & 0x80) === 0x80
+        return (this.bytes[0] & 0x80) !== 0x80
+    }
+
+    sysexMessage(): boolean {
+        return (this.bytes[0] == 0xf0)
     }
 
     channel(): number | undefined {
@@ -73,6 +77,8 @@ export class MIDIMessageAnalyzer {
                     result.push(`${v}: ${this.bytes[1 + i]}`)
                 })
             }
+        } else if (this.sysexMessage()) {
+            result.push(`Sysex`)
         }
 
         return result

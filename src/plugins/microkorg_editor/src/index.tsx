@@ -4,22 +4,24 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 
-import { WebAudioModule } from '@webaudiomodules/sdk';
 import { h, render } from 'preact';
+
+import { WebAudioModule } from '@webaudiomodules/sdk';
 import { getBaseUrl } from '../../shared/getBaseUrl';
-import { MIDIInputView } from './MIDIInputView';
-import { MIDIInputNode } from './Node';
+import styleRoot from "./MicrokorgEditorView.scss"
+import { MicrokorgEditorView } from './MicrokorgEditorView';
+import { MIDIControllerNode } from './MIDIControllerNode';
 
-import styleRoot from "./MIDIInputView.scss";
-
-export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
+export default class MicrokorgControllerModule extends WebAudioModule<MIDIControllerNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
-	_processorUrl = `${this._baseURL}/MIDIInputProcessor.js`;
+	_processorUrl = `${this._baseURL}/MicrokorgProcessor.js`;
+
 	nonce: string | undefined;
 
+	get instanceId() { return "SequencerPartyMicrokorg Editor" + this._timestamp; }
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -27,29 +29,33 @@ export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 		const response = await fetch(url);
 		const descriptor = await response.json();
 		Object.assign(this._descriptor, descriptor);
+
 		return descriptor
 	}
 
 	async initialize(state: any) {
+		console.log("WAM::initialize")
+
 		await this._loadDescriptor();
 
 		return super.initialize(state);
 	}
 
 	async createAudioNode(initialState: any) {
-		await MIDIInputNode.addModules(this.audioContext, this.moduleId)
-		await this.audioContext.audioWorklet.addModule(this._processorUrl)
+		console.log("WAM::createAudioNode")
 
-		const node: MIDIInputNode = new MIDIInputNode(this, {})
+		await MIDIControllerNode.addModules(this.audioContext, this.moduleId)
 
-		await node._initialize()
+		let url = `${this._processorUrl}?v=${Math.random()}`
+		await this.audioContext.audioWorklet.addModule(url)
 
-		this.audioNode = node
+		const node: MIDIControllerNode = new MIDIControllerNode(this, {});
 
-		await node.initializeMidi()
-	  
-		if (initialState) node.setState(initialState);
-		return node;
+		await node._initialize();
+
+		if (initialState) await node.setState(initialState);
+
+		return node
     }
 
 	async createGui() {
@@ -58,9 +64,7 @@ export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 		h("div", {})
 
 		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
-		div.setAttribute("width", "320")
-		div.setAttribute("height", "240")
-		
+
 		var shadow = div.attachShadow({mode: 'open'});
 
 		if (this.nonce) {
@@ -75,9 +79,9 @@ export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 		div.setAttribute("data-nonce", this.nonce)
 
 		// @ts-ignore
-		styleRoot.use({ target: shadow });
+    	styleRoot.use({ target: shadow });
 
-		render(<MIDIInputView plugin={this.audioNode}></MIDIInputView>, shadow);
+		render(<MicrokorgEditorView plugin={this.audioNode}></MicrokorgEditorView>, shadow)
 
 		return div;
 	}
@@ -89,7 +93,11 @@ export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 			//@ts-ignore
 			styleRoot.unuse()
 		}
-		
+
 		render(null, el.shadowRoot)
 	}
+	
 }
+
+
+

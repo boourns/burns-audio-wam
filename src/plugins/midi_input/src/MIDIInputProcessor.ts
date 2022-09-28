@@ -38,16 +38,17 @@ const getMIDIInputProcessor = (moduleId: string) => {
          * Messages from main thread appear here.
          * @param {MessageEvent} message
          */
-        async _onMessage(message: any): Promise<void> {
+        async _onMessage(message: any): Promise<void> {                
+            const { currentTime } = audioWorkletGlobalScope;
+
             if (message.data && message.data.source == "midi") {
-                const { currentTime } = audioWorkletGlobalScope;
-
-                console.log("processor emitting midi: ", message.data)
-
                 this.emitEvents(
                     { type: 'wam-midi', time: currentTime, data: { bytes: message.data.bytes } }
                 )
-
+            } else if (message.data && message.data.source == "sysex") {
+                this.emitEvents(
+                    { type: 'wam-sysex', time: currentTime, data: { bytes: message.data.bytes } }
+                )
             } else {
                 super._onMessage(message)
             }

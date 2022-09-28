@@ -1,0 +1,16 @@
+{
+    "name": "Randomizer",
+    "vendor": "Tom Burns",
+    "description": "WAM2 Randomizer Modulator",
+    "version": "1.0.0",
+    "sdkVersion": "1.0.0",
+    "thumbnail": "",
+    "keywords": ["random", "modulator"],
+    "isInstrument": false,
+    "website": "",
+    "hasMidiInput": false,
+    "hasMidiOutput": false,
+    "hasAudioInput": false,
+    "hasAudioOutput": false
+}
+

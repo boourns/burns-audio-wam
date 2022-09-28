@@ -40,6 +40,7 @@ export class Knob extends Component<KnobProps, KnobState> {
     pressed: boolean;
     ref?: HTMLDivElement;
     position?: { x: number; y: number; };
+    dragStartValue?: number
 
     center!: [number, number]
     radii!: [number, number]
@@ -171,6 +172,7 @@ export class Knob extends Component<KnobProps, KnobState> {
     onMousedown(e: MouseEvent) {
         this.pressed = true
         this.position = {x: e.screenX, y: e.screenY}
+        this.dragStartValue = this.props.value()
 
         window.addEventListener('mousemove', this.onMousemove)
         window.addEventListener('mouseup', this.onMouseup)
@@ -178,6 +180,7 @@ export class Knob extends Component<KnobProps, KnobState> {
 
     onMouseup(e: MouseEvent) {
         this.pressed = false
+        this.dragStartValue = undefined
         window.removeEventListener('mousemove', this.onMousemove)
         window.removeEventListener('mouseup', this.onMouseup)
     }
@@ -186,8 +189,7 @@ export class Knob extends Component<KnobProps, KnobState> {
         if (this.pressed) {
             let distance = (e.screenX - this.position!.x) - (e.screenY - this.position!.y)
             if (!this.props.integer || Math.abs(distance) > 0.5) {
-                this.position = {x: e.screenX, y: e.screenY}
-                this.setValue(this.props.value() + (distance * 0.005 * (this.props.maximumValue - this.props.minimumValue)))
+                this.setValue(this.dragStartValue! + (distance * 0.005 * (this.props.maximumValue - this.props.minimumValue)))
             }
         }
     }
