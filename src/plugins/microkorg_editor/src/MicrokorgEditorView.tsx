@@ -136,7 +136,7 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
     renderFilter(t: number) {
         return <div class={styles.group}>
             {this.renderTimbreParam(t,"filter_type")}
-            {this.renderTimbreParam(t,"filter_cutoff")}
+            {this.renderTimbreParam(t,"filter_freq")}
             {this.renderTimbreParam(t,"filter_res")}
             {this.renderTimbreParam(t,"filter_env")}
             {this.renderTimbreParam(t,"filter_keyboard")}

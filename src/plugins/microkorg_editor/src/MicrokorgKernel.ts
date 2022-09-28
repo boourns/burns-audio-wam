@@ -8,6 +8,7 @@ import { NRPNMSBMessager } from "./NRPNMSBMessager"
 import { MIDIControllerKernel } from "./MIDIControllerKernel";
 import { SysexMessager } from "./SysexMessager";
 import { BooleanParameter } from "./BooleanParameter";
+import { AssertionError } from "assert";
 
 export class MicrokorgKernel implements MIDIControllerKernel {
     voiceParameters: Record<string, SynthParameter>
@@ -306,7 +307,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
             { value: 127, label: "-12HPF" }
         ]
         parameters[p + "filter_type"] = new SelectParameter(p + "filter_type", l + "Filter Type", new ControlChangeMessager(83), 0, filterTypes)
-        parameters[p + "filter_cutoff"] = new IntParameter(p + "filter_freq", l + "Filter Frequency", new ControlChangeMessager(74), 100, 0, 127)
+        parameters[p + "filter_freq"] = new IntParameter(p + "filter_freq", l + "Filter Frequency", new ControlChangeMessager(74), 100, 0, 127)
         parameters[p + "filter_res"] = new IntParameter(p + "filter_res", l + "Filter Resonance", new ControlChangeMessager(71), 0, 0, 127)
         parameters[p + "filter_env"] = new IntParameter(p + "filter_env", l + "Filter Env Depth", new ControlChangeMessager(79), 0, -64, 63)
         parameters[p + "filter_keyboard"] = new IntParameter(p + "filter_keyboard", l + "Filter Keyboard Track", new ControlChangeMessager(85), 0, -64, 63)
@@ -330,7 +331,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         parameters[p + "amp_eg_sustain"] = new IntParameter(p + "amp_eg_sustain", l + "Amp EG Sustain", new ControlChangeMessager(70), 50, 0, 127)
         parameters[p + "amp_eg_release"] = new IntParameter(p + "amp_eg_release", l + "Amp EG Release", new ControlChangeMessager(72), 15, 0, 127)
 
-        parameters[p + "amp_keyboard"] = new IntParameter(p + "amp_keybord", l + "Amp Kybd Track", new SysexMessager(), 0, -63, 63)
+        parameters[p + "amp_keyboard"] = new IntParameter(p + "amp_keyboard", l + "Amp Kybd Track", new SysexMessager(), 0, -63, 63)
 
         const lfo1Waves: SelectOption[] = [
             { value: 0, label: "Saw" },
@@ -382,10 +383,10 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         parameters[p + "lfo2_temposync"] = new SelectParameter(p + "lfo2_temposync", l + "LFO2 Tempo Sync", new SysexMessager(), 0, off_on)
         parameters[p + "lfo2_timebase"] = new SelectParameter(p + "lfo2_timebase", l + "LFO2 Timebase", new SysexMessager(), 0, lfoTimeBase)
 
-        parameters[p + "patch1_level"] = new IntParameter(p + "patch1_lebel", l + "Patch1 Level", new ControlChangeMessager(28), 0, -64, 63)
-        parameters[p + "patch2_level"] = new IntParameter(p + "patch2_lebel", l + "Patch2 Level", new ControlChangeMessager(29), 0, -64, 63)
-        parameters[p + "patch3_level"] = new IntParameter(p + "patch3_lebel", l + "Patch3 Level", new ControlChangeMessager(30), 0, -64, 63)
-        parameters[p + "patch4_level"] = new IntParameter(p + "patch4_lebel", l + "Patch4 Level", new ControlChangeMessager(31), 0, -64, 63)
+        parameters[p + "patch1_level"] = new IntParameter(p + "patch1_level", l + "Patch1 Level", new ControlChangeMessager(28), 0, -64, 63)
+        parameters[p + "patch2_level"] = new IntParameter(p + "patch2_level", l + "Patch2 Level", new ControlChangeMessager(29), 0, -64, 63)
+        parameters[p + "patch3_level"] = new IntParameter(p + "patch3_level", l + "Patch3 Level", new ControlChangeMessager(30), 0, -64, 63)
+        parameters[p + "patch4_level"] = new IntParameter(p + "patch4_level", l + "Patch4 Level", new ControlChangeMessager(31), 0, -64, 63)
 
         const patchSources: SelectOption[] = [
             { value: 0, label: "Filter EG" },
@@ -426,6 +427,9 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         let result: Record<string, WamParameterConfiguration> = {}
         for (let id of Object.keys(this.parameters)) {
             result[id] = this.parameters[id].toWAM()
+            if (id != this.parameters[id].id) {
+                throw new Error(`Parameter ${id}: key does not match parameter id ${this.parameters[id].id}`)
+            }
         }
 
         return result
@@ -475,8 +479,10 @@ export class MicrokorgKernel implements MIDIControllerKernel {
     parameterUpdate(values: Record<string, number>): boolean {
         let result: boolean = false
 
+        const params = this.parameters
+
         for (let id of Object.keys(values)) {
-            if (this.voiceParameters[id].parameterUpdate(values[id])) {
+            if (params[id].parameterUpdate(values[id])) {
                 result = true
             }
         }
@@ -485,11 +491,14 @@ export class MicrokorgKernel implements MIDIControllerKernel {
     }
 
     automationMessages(force: boolean): WamAutomationEvent[] {
-        return Object.keys(this.voiceParameters).map(id => this.voiceParameters[id].automationMessage(force)).filter(ev => ev !== undefined)
+        const params = this.parameters
+        return Object.keys(params).map(id => params[id].automationMessage(force)).filter(ev => ev !== undefined)
     }
 
     sysexNeeded() {
-        return Object.keys(this.voiceParameters).some(id => this.voiceParameters[id].sysexNeeded())
+        const params = this.parameters
+
+        return Object.keys(params).some(id => params[id].sysexNeeded())
     }
 
     toSysex(channel: number): Uint8Array {
@@ -652,7 +661,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         sysex.push(parameters[p + "mixer_noise"].value) // +18
 
         sysex.push(parameters[p + "filter_type"].value) // +19
-        sysex.push(parameters[p + "filter_cutoff"].value) // +20
+        sysex.push(parameters[p + "filter_freq"].value) // +20
         sysex.push(parameters[p + "filter_res"].value) // +21
         sysex.push(64+parameters[p + "filter_env"].value) // +22
         sysex.push(64) // +23 (filter -> velocity)
@@ -837,7 +846,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         parameters[p + "mixer_noise"].updateFromSysex(data[idx+18])
 
         parameters[p + "filter_type"].updateFromSysex(data[idx+19])
-        parameters[p + "filter_cutoff"].updateFromSysex(data[idx+20])
+        parameters[p + "filter_freq"].updateFromSysex(data[idx+20])
         parameters[p + "filter_res"].updateFromSysex(data[idx+21])
         parameters[p + "filter_env"].updateFromSysex(data[idx+22]-64)
         parameters[p + "filter_keyboard"].updateFromSysex(data[idx+24]-64)
@@ -906,7 +915,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         let results: WamMidiEvent[] = []
         let timbre1Messages: WamMidiEvent[] = []
         let timbre2Messages: WamMidiEvent[] = []
-
+        
         for (let id of Object.keys(this.voiceParameters)) {
             results.push(...this.voiceParameters[id].midiMessage(channel, force))
         }
@@ -935,15 +944,15 @@ export class MicrokorgKernel implements MIDIControllerKernel {
             }
 
             if (timbre1Messages.length > 0) {
-                results.push(this.timbreSelectCC(channel, 1))
+                results.push(this.timbreSelectCC(channel, 0))
                 results.push(...timbre1Messages)
-                this.selectedTimbre = 1
+                this.selectedTimbre = 0
             }
         } else {
             if (timbre1Messages.length > 0) {
-                results.push(this.timbreSelectCC(channel, 1))
+                results.push(this.timbreSelectCC(channel, 0))
                 results.push(...timbre1Messages)
-                this.selectedTimbre = 1
+                this.selectedTimbre = 0
             }
 
             if (timbre2Messages.length > 0) {
@@ -1004,7 +1013,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         return {
             type: "wam-midi",
             data: {
-                bytes: [ 0xb0 | channel, 95, timbre == 0 ? 0 : 2]
+                bytes: [ 0xb0 | channel, 95, timbre]
             }
         }
     }

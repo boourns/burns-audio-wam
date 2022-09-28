@@ -6,9 +6,6 @@ type ParameterDefinition = {
     config: WamParameterConfiguration
 }
 
-
-
-
 type FunctionSequencer = {
     parameters?(): ParameterDefinition[]
     onTick?(ticks: number, params: Record<string, any>): {note: number, velocity: number, duration: number}[]

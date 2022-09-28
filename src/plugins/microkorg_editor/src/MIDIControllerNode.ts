@@ -31,14 +31,15 @@ export class MIDIControllerNode extends WamNode {
 
         let channel = 0
         if (window.WAMExtensions && window.WAMExtensions.userSetting) {
-            channel = window.WAMExtensions.userSetting.get(this.instanceId, "channel")
-            if (channel === undefined) {
+            let channelStr = window.WAMExtensions.userSetting.get(this.instanceId, "channel")
+            if (channelStr == undefined) {
                 channel = 0
+            } else {
+                channel = parseInt(channelStr)
             }
         }
 
         this.config = {
-            // @ts-ignore
             channel: channel,
             midiPassThrough: "all"
         }
@@ -68,7 +69,7 @@ export class MIDIControllerNode extends WamNode {
             window.WAMExtensions.userSetting.set(this.instanceId, "channel", config.channel)
         }
 
-        super.port.postMessage({action:"config", config})
+        super.port.postMessage({action:"config", config: this.config})
     }
 
     async initPressed() {
