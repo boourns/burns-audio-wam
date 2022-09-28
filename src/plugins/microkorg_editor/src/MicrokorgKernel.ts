@@ -687,7 +687,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
         sysex.push(parameters["voc_ef_sense"].value) // +26
 
         sysex.push(parameters["amp_level"].value) // +27
-        sysex.push(parameters["amp_direct_level"].value) // +28
+        sysex.push(parameters["voc_amp_direct"].value) // +28
         sysex.push(parameters["amp_distortion"].value) // +29
 
         sysex.push(64) // +30
@@ -1073,7 +1073,7 @@ export class MicrokorgKernel implements MIDIControllerKernel {
             parameters["voc_ef_sense"].updateFromSysex(data[idx+26])
 
             parameters["amp_level"].updateFromSysex(data[idx+27])
-            parameters["amp_direct_level"].updateFromSysex(data[idx+28])
+            parameters["voc_amp_direct"].updateFromSysex(data[idx+28])
             parameters["amp_distortion"].updateFromSysex(data[idx+29])
             parameters["amp_keyboard"].updateFromSysex(data[idx+31] - 63)
 

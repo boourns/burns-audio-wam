@@ -72,6 +72,11 @@ export class MIDIInputNode extends WamNode {
 
 		this.midiInitialized = true
 
+		const selected = window.WAMExtensions.userSetting.get(this.instanceId, "selectedMidiPort")
+		if (selected != undefined) {
+			this.selectMIDIInput(selected)
+		}
+
 		if (this.callback) {
 			this.callback()
 		}
@@ -84,8 +89,10 @@ export class MIDIInputNode extends WamNode {
 
 		this.selectedMidi = this.midiIn.find(midi => midi.id == id)
 
-		window.WAMExtensions.userSetting.set(this.instanceId, "selectedMidiPort", this.selectedMidi ? this.selectedMidi.id : undefined)
-
+		if (this.selectedMidi || id == "none") {
+			window.WAMExtensions.userSetting.set(this.instanceId, "selectedMidiPort", this.selectedMidi ? this.selectedMidi.id : undefined)
+		}
+		
 		if (this.selectedMidi) {
 			this.selectedMidi.addEventListener('midimessage', this.midiMessageReceived)
 		}

@@ -428,14 +428,12 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
     }
 
     renderEQ() {
-        return <div class={styles.column}>
-            <div class={styles.container}>
+        return <div class={styles.group}>
                 {this.renderParam('eq_hi_freq')}
                 {this.renderParam('eq_hi_gain')}
                 {this.renderParam('eq_lo_freq')}
                 {this.renderParam('eq_lo_gain')}
             </div>
-        </div>
     }
 
     renderVoice() {
@@ -523,6 +521,8 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
                             {this.renderPatchbay(t, 1)}
                             {this.renderPatchbay(t, 2)}
                             {this.renderPatchbay(t, 3)}
+                            {this.renderPatchbay(t, 4)}
+
                         </div>
                     </div>
                     

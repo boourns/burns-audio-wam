@@ -71,6 +71,11 @@ export default class MIDIOutputNode extends CompositeAudioNode {
 
 		this.midiInitialized = true
 
+		const selected = window.WAMExtensions.userSetting.get(this.instanceId, "selectedMidiPort")
+		if (selected != undefined) {
+			this.selectMIDIOutput(selected)
+		}
+
 		if (this.callback) {
 			this.callback()
 		}
@@ -79,7 +84,9 @@ export default class MIDIOutputNode extends CompositeAudioNode {
 	selectMIDIOutput(id: string) {
 		this.selectedMidi = this.midiOut.find(midi => midi.id == id)
 
-		window.WAMExtensions.userSetting.set(this.instanceId, "selectedMidiPort", this.selectedMidi ? this.selectedMidi.id : undefined)
+		if (this.selectedMidi || id == "none") {
+			window.WAMExtensions.userSetting.set(this.instanceId, "selectedMidiPort", this.selectedMidi ? this.selectedMidi.id : undefined)
+		}
 	}
 
     // MIDI note handling
