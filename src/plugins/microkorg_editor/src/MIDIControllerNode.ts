@@ -96,6 +96,10 @@ export class MIDIControllerNode extends WamNode {
         super.port.postMessage({action:"emit", event})
     }
 
+    sendSysex() {
+        super.port.postMessage({action:"sysex"})
+    }
+
     async updateState() {
         if (!this.pause) {
             this.state = await this.getParameterValues(false)

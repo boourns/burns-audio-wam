@@ -182,6 +182,12 @@ const loadMIDIControllerProcessor = (moduleId: string) => {
                 if (message.data.event) {
                     this.emitEvents(message.data.event)
                 }
+            } else if (message.data && message.data.action == "sysex") {
+                if (this.sysexTime == 0) {
+                    const { currentTime } = audioWorkletGlobalScope;
+
+                    this.sysexTime = currentTime + 0.2
+                }
             } else {
                 // @ts-ignore
                 super._onMessage(message)

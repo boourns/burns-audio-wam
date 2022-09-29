@@ -1,6 +1,6 @@
 {
     "name": "MIDIOut",
-    "vendor": "Tom",
+    "vendor": "SequencerParty",
     "description": "WAM2 WebMIDI Output",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",

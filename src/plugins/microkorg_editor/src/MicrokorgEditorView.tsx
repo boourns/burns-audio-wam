@@ -305,11 +305,15 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
         })
     }
 
+    sendSysex() {
+        this.props.plugin.sendSysex()
+    }
+
     requestSysex() {
         const message = [
             0xF0,
             0x42,
-            0x30, // needs to add on the current channel value
+            0x30 | this.props.plugin.config.channel, // needs to add on the current channel value
             0x58,
             0x10,
             0xF7
@@ -359,11 +363,9 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
 
                     <div class={styles.container} style="padding: 10px">
                         <span>Channel: {channelSelector}</span>
-                        <button onClick={() => this.detectMicrokorg()}>🔴 Connect</button>
-
                         <button onClick={() => this.initPressed()}>Init Patch</button>
                         <button onClick={() => this.requestSysex()}>Request Sysex</button>
-                        <button onClick={() => this.requestSysex()}>Send Patch</button>
+                        <button onClick={() => this.sendSysex()}>Send Patch</button>
                         <button onClick={() => this.allNotesOff()}>All Notes Off</button>
                     </div>
             </div>
