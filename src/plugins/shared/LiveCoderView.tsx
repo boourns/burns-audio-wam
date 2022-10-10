@@ -8,7 +8,7 @@ import { DynamicParameterNode } from './DynamicParameterNode';
 export interface LiveCoderNode extends DynamicParameterNode {
   error?: any
   renderCallback?: () => void
-  multiplayer?: MultiplayerHandler
+  multiplayers: MultiplayerHandler[]
   runPressed(): void
 	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor
 }
@@ -26,13 +26,15 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
   statePoller: number
   ref: HTMLDivElement | null
   editor: monaco.editor.IStandaloneCodeEditor
+  selectedMultiplayer: number
 
   constructor() {
     super();
     this.state = {
       panel: "GUI",
-      runCount: 0
+      runCount: 0,
     }
+    this.selectedMultiplayer = 0
     this.runPressed = this.runPressed.bind(this)
     this.panelPressed = this.panelPressed.bind(this)
   }
@@ -46,8 +48,8 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
 
   // Lifecycle: Called just before our component will be destroyed
   componentWillUnmount() {
-    if (this.props.plugin.multiplayer) {
-      this.props.plugin.multiplayer.unregisterEditor()
+    if (this.props.plugin.multiplayers.length > 0) {
+      this.props.plugin.multiplayers[this.selectedMultiplayer].unregisterEditor()
     }
 
     this.props.plugin.renderCallback = undefined
@@ -61,17 +63,7 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
     this.props.plugin.runPressed()
   }
 
-  panelPressed() {
-    let newPanel: "CODE" | "GUI"
-
-    switch(this.state.panel) {
-      case "GUI":
-        newPanel = "CODE"
-        break
-      case "CODE":
-        newPanel = "GUI"
-        break
-    }
+  panelPressed(newPanel: "CODE" | "GUI") {
 
     this.setState({panel:newPanel})
 
@@ -89,10 +81,11 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
     }
     this.ref = ref
 
+    console.log("Recreating editor")
     this.editor = this.props.plugin.createEditor(ref)
 
-    if (this.props.plugin.multiplayer) {
-      this.props.plugin.multiplayer.registerEditor(this.editor)
+    if (this.props.plugin.multiplayers.length > 0) {
+      this.props.plugin.multiplayers[this.selectedMultiplayer].registerEditor(this.editor)
     }
   }
 
@@ -106,6 +99,22 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
     return <div style="display: flex; flex: 1;">
        <DynamicParameterView plugin={this.props.plugin}></DynamicParameterView>
      </div>
+  }
+
+  editFile(i: number) {
+    if (i >= 0 && i < this.props.plugin.multiplayers.length) {
+      if (this.editor) {
+        this.props.plugin.multiplayers[this.selectedMultiplayer].unregisterEditor()
+      }
+      this.selectedMultiplayer = i
+      if (this.editor) {
+        this.props.plugin.multiplayers[this.selectedMultiplayer].registerEditor(this.editor)
+      }
+
+      this.setState({panel:"CODE"})
+    } else {
+      console.error("Invalid multiplayer document ID")
+    }
   }
 
   render() {
@@ -128,13 +137,19 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
         break
     }
 
+    const editFiles = this.props.plugin.multiplayers.map((m, i) => {
+      return <button onClick={() => this.editFile(i)} style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)">{m.label}</button>
+    })
+
     let result = (
     <div class="LiveCoderModule">
       <div style="display: flex; flex-direction: column">
         <div style="display: flex; justify-content: space-between; width: 100%">
           <div>
-            <button onClick={this.runPressed} style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)">Run</button>
-            <button onClick={this.panelPressed} style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)">{panelLabel}</button> 
+            <button onClick={() => this.runPressed} style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)">Run</button>
+            <button onClick={() => this.panelPressed("GUI")} style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)">GUI</button>
+
+            {editFiles}
           </div>
 
           <div style={statusStyle}>

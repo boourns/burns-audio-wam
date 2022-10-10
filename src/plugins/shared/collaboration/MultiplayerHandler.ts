@@ -3,15 +3,17 @@ import { CollaborationDocumentInterface, CollaborationExtension } from 'wam-exte
 import { MonacoBinding } from './MonacoBinding';
 
 export class MultiplayerHandler {
+    label: string
     documentId: string
     instanceId: string
     editor?: monaco.editor.ICodeEditor
     doc: CollaborationDocumentInterface
     binding: MonacoBinding
 
-    constructor(instanceId: string, docId: string) {
+    constructor(instanceId: string, docId: string, label: string) {
         this.instanceId = instanceId
         this.documentId = docId
+        this.label = label
 
         if (!window.WAMExtensions.collaboration) {
             console.error("MultiplayerHandler requires host implement Collaboration Extension")

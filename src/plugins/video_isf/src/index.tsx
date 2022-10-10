@@ -36,8 +36,7 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 	gl: WebGLRenderingContext
 	shader: ISFShader
 	options: VideoExtensionOptions;
-	multiplayer?: MultiplayerHandler;
-	multiplayerVertex?: MultiplayerHandler;
+	multiplayers: MultiplayerHandler[];
 	error?: any
 
 	/**
@@ -65,11 +64,14 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 
 	registerExtensions() {
 		if (window.WAMExtensions.collaboration) {
-			this.multiplayer = new MultiplayerHandler(this.instanceId, "fragment")
-			this.multiplayer.getDocumentFromHost(defaultFragmentShader())
+			this.multiplayers = []
+			const fragment = new MultiplayerHandler(this.instanceId, "fragment", "Fragment Shader")
+			fragment.getDocumentFromHost(defaultFragmentShader())
+			this.multiplayers.push(fragment)
 
-			this.multiplayerVertex = new MultiplayerHandler(this.instanceId, "vertex")
-			this.multiplayerVertex.getDocumentFromHost(defaultVertexShader())
+			const vertex = new MultiplayerHandler(this.instanceId, "vertex", "Vertex Shader")
+			vertex.getDocumentFromHost(defaultVertexShader())
+			this.multiplayers.push(vertex)
 
 			this.upload()
 
@@ -112,12 +114,12 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 	}
 
 	upload() {
-		if (!this.options || !this.multiplayer || !this.multiplayerVertex) {
+		if (!this.options || !this.multiplayers || this.multiplayers.length == 0) {
 			return
 		}
 
-		let fragmentSource = this.multiplayer.doc.toString()
-		let vertexSource = this.multiplayerVertex.doc.toString()
+		let fragmentSource = this.multiplayers[0].doc.toString()
+		let vertexSource = this.multiplayers[1].doc.toString()
 
 		try {
 			this.shader = new ISFShader(this.options, fragmentSource, vertexSource)
