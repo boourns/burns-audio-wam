@@ -21,6 +21,7 @@ import { LiveCoderNode, LiveCoderView } from '../../shared/LiveCoderView';
 import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
 import getThreeJSProcessor from './ThreeJSProcessor';
 import { defaultScript } from './editorDefaults';
+import {videoOptionsEqual} from "../../shared/videoOptions"
 
 import styleRoot from "./VideoThreeJS.scss"
 
@@ -85,13 +86,15 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 				connectVideo: (options: VideoExtensionOptions) => {
 					console.log("connectVideo!")
 
-					this.options = options
-					this.runner = new ThreeJSRunner(options)
+					//if (!this.runner || !videoOptionsEqual(this.options, options)) {
+						this.options = options
+						this.runner = new ThreeJSRunner(options)
+	
+						if (this.generator) {
+							this.generator.initialize(THREE, options)
+						}
+					//}
 
-					if (this.generator) {
-						this.generator.initialize(THREE, options)
-					}
-					 
 				},
 				config: () => {
 					return {
@@ -271,9 +274,11 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 
 	configureMonaco() {
 		const baseURL = this._baseURL
+		
 		// @ts-ignore
 		self.MonacoEnvironment = {
 			getWorkerUrl: function (moduleId: any, label: string) {
+				debugger
 				if (label === 'json') {
 					return `${baseURL}/monaco/json.worker.bundle.js`;
 				}

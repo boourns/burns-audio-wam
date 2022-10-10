@@ -60,6 +60,33 @@ export class ISFShader {
               }
             })
             break
+          case "color":
+            ['r', 'g', 'b', 'a'].forEach((v, i) => {
+              params.push({
+                id: `${input.NAME}_${v}`,
+                config: {
+                  type: "float",
+                  defaultValue: (input.DEFAULT as number[])[i],
+                  minValue: 0,
+                  maxValue: 1,
+                  label: `${input.NAME}_${v}`
+                }
+              })
+            })
+            break
+          case "point2D":
+              ['x', 'y'].forEach((v, i) => {
+                params.push({
+                  id: `${input.NAME}_${v}`,
+                  config: {
+                    type: "float",
+                    defaultValue: (input.DEFAULT as number[])[i],
+                    minValue: 0,
+                    maxValue: 1,
+                    label: `${input.NAME}_${v}`
+                  }
+                })
+              })
         }
       }
 
@@ -84,9 +111,21 @@ export class ISFShader {
           this.renderer.setValue(`_inputImage_flip`, false);
         }
         
-        for (let p of this.params) {
-          if (params[p.id]) {
-            this.renderer.setValue(p.id, params[p.id].value)
+        let shaderInputs = this.renderer.model.inputs.filter((u: ISFUniform) => u.TYPE != "image")
+        for (let i of shaderInputs) {
+          if (i.TYPE == "color") {
+            if (params[`${i.NAME}_r`] && params[`${i.NAME}_g`] && params[`${i.NAME}_b`] && params[`${i.NAME}_a`]) {
+              const value = [params[`${i.NAME}_r`].value, params[`${i.NAME}_g`].value, params[`${i.NAME}_b`].value, params[`${i.NAME}_a`].value]
+              this.renderer.setValue(i.NAME, value)
+            }
+          } else if (i.TYPE == "point2D") {
+            if (params[`${i.NAME}_x`] && params[`${i.NAME}_y`]) {
+              this.renderer.setValue(i.NAME, [params[`${i.NAME}_x`].value, params[`${i.NAME}_y`].value])
+            }
+          } else {
+            if (params[i.NAME]) {
+              this.renderer.setValue(i.NAME, params[i.NAME].value)
+            }
           }
         }
         

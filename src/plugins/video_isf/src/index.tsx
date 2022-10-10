@@ -19,6 +19,8 @@ import { ISFShader } from './ISFShader';
 import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
 import { defaultFragmentShader, defaultVertexShader } from './defaultShaders';
 
+import {videoOptionsEqual} from "../../shared/videoOptions"
+
 import styleRoot from "./ISFVideo.scss"
 
 type ISFVideoState = {
@@ -83,9 +85,11 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 				connectVideo: (options: VideoExtensionOptions) => {
 					console.log("connectVideo!")
 
-					this.options = options
+					if (!this.shader || !videoOptionsEqual(this.options, options)) {
+						this.options = options
 
-					this.upload()
+						this.upload()
+					}
 				},
 				config: () => {
 					return {
