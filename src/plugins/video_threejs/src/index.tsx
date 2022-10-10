@@ -278,7 +278,6 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 		// @ts-ignore
 		self.MonacoEnvironment = {
 			getWorkerUrl: function (moduleId: any, label: string) {
-				debugger
 				if (label === 'json') {
 					return `${baseURL}/monaco/json.worker.bundle.js`;
 				}
@@ -291,6 +290,7 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 				if (label === 'typescript' || label === 'javascript') {
 					return `${baseURL}/monaco/ts.worker.bundle.js`;
 				}
+
 				return `${baseURL}/monaco/editor.worker.bundle.js`;
 			}
 		}

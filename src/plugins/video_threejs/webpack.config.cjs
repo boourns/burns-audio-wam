@@ -34,16 +34,6 @@ const WAMPlugin = {
   module: {
     rules: [
       {
-        test: /\.worklet\.(ts|js)$/,
-        use: [{
-          loader: 'worklet-loader',
-          options: {
-            name: '[fullhash].worklet.js'
-          }
-        }],
-        exclude: /node_modules/
-      },
-      {
         test: /\.tsx?$/,
         use: 'ts-loader',
         exclude: /node_modules/,
@@ -57,8 +47,7 @@ const WAMPlugin = {
         test: /\.(sa|sc|c)ss$/,
         use: ['style-loader', 'css-loader'],
         exclude: /src\/plugins\//
-      },
-      
+      }
     ],
   },
   mode: "development",
@@ -83,7 +72,6 @@ const WAMPlugin = {
 };
 
 const monaco = {
-  mode: 'development',
   entry: {
     'editor.worker': 'monaco-editor/esm/vs/editor/editor.worker.js',
     'json.worker': 'monaco-editor/esm/vs/language/json/json.worker',
@@ -102,12 +90,9 @@ const monaco = {
         test: /\.css$/,
         use: ['style-loader', 'css-loader']
       },
-      {
-        test: /\.ttf$/,
-        use: ['file-loader']
-      }
     ]
-  }
+  },
+  mode: 'production'
 };
 
 module.exports = [WAMPlugin, monaco];
