@@ -93,7 +93,7 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 				},
 				config: () => {
 					return {
-						numberOfInputs: 1,
+						numberOfInputs: this.shader ? this.shader.numberOfInputs() : 1,
 						numberOfOutputs: 1,
 					}
 				},

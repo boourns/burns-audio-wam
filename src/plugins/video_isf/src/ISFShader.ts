@@ -101,14 +101,35 @@ export class ISFShader {
       
     }
 
+    numberOfInputs(): number {
+      return this.renderer.model.inputs.filter(i => i.TYPE == "image").length
+    }
+
     render(inputs: WebGLTexture[], currentTime: number, params: WamParameterDataMap): WebGLTexture[] {
         this.renderer.setValue("TIME", currentTime)
         
-        if (this.renderer.uniforms["inputImage"]) {
-          this.renderer.setValue("inputImage", inputs[0], true)
-          this.renderer.setValue(`_inputImage_imgSize`, [this.options.width, this.options.height]);
-          this.renderer.setValue(`_inputImage_imgRect`, [0, 0, 1, 1]);
-          this.renderer.setValue(`_inputImage_flip`, false);
+        // deal with input[0]
+        if (inputs.length > 0) {
+          if (this.renderer.uniforms["inputImage"]) {
+            this.renderer.setValue("inputImage", inputs[0], true)
+            this.renderer.setValue(`_inputImage_imgSize`, [this.options.width, this.options.height]);
+            this.renderer.setValue(`_inputImage_imgRect`, [0, 0, 1, 1]);
+            this.renderer.setValue(`_inputImage_flip`, false);
+          } else if (this.renderer.uniforms["startImage"]) {
+            this.renderer.setValue("startImage", inputs[0], true)
+            this.renderer.setValue(`_startImage_imgSize`, [this.options.width, this.options.height]);
+            this.renderer.setValue(`_startImage_imgRect`, [0, 0, 1, 1]);
+            this.renderer.setValue(`_startImage_flip`, false);
+          }
+          const remainingImages = this.renderer.model.inputs.filter(i => i.TYPE == "image" && i.NAME != "inputImage" && i.NAME != "startImage")
+          remainingImages.forEach((p, i) => {
+            if (inputs.length > i+1) {
+              this.renderer.setValue(p.NAME, inputs[i+1], true)
+              this.renderer.setValue(`_${p.NAME}_imgSize`, [this.options.width, this.options.height]);
+              this.renderer.setValue(`_${p.NAME}_imgRect`, [0, 0, 1, 1]);
+              this.renderer.setValue(`_${p.NAME}_flip`, false);
+            }
+          })
         }
         
         let shaderInputs = this.renderer.model.inputs.filter((u: ISFUniform) => u.TYPE != "image")
