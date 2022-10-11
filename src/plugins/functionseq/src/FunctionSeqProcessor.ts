@@ -1,15 +1,6 @@
 import { WamTransportData } from "@webaudiomodules/api";
 import { AudioWorkletGlobalScope, WamParameterConfiguration } from "@webaudiomodules/api";
-
-type ParameterDefinition = {
-    id: string
-    config: WamParameterConfiguration
-}
-
-type FunctionSequencer = {
-    parameters?(): ParameterDefinition[]
-    onTick?(ticks: number, params: Record<string, any>): {note: number, velocity: number, duration: number}[]
-}
+import { FunctionKernel } from "./FunctionKernel";
 
 const getFunctionSequencerProcessor = (moduleId: string) => {
     const PPQN = 96
@@ -36,7 +27,7 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
         lastTime: number
         proxyId: string
         ticks: number
-        function: FunctionSequencer
+        function: FunctionKernel
         transportData?: WamTransportData
         parameterIds: string[] = []
 
@@ -69,28 +60,8 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
                 if (this.ticks != tickPosition) {
                     let secondsPerTick = 1.0 / ((this.transportData!.tempo / 60.0) * PPQN);
                     this.ticks = tickPosition;
-                    try {
-                        if (this.function.onTick) {
-                            let params: any = {}
-                            for (let id of this.parameterIds) {
-                                params[id] = this._parameterInterpolators[id].values[startSample]
-                            }
-                            var notes = this.function.onTick(this.ticks, params)
-                            
-                            if (notes) {
-                                for (let note of notes) {
-                                    this.emitEvents(
-                                        { type: 'wam-midi', time: currentTime, data: { bytes: [MIDI.NOTE_ON, note.note, note.velocity] } },
-                                        { type: 'wam-midi', time: currentTime+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF, note.note, note.velocity] } }
-                                    )
-                                }
-                            }
-                        }
-                        
-                    } catch (e) {
-                        this.port.postMessage({source: "functionSeq", action:"error", error: e.toString()})
-                        this.function = undefined
-                    }
+
+                    
                 }
             }
 
