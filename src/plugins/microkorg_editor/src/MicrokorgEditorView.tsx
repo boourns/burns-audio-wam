@@ -385,7 +385,7 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
     }
 
     render() {
-        return <div class={styles.column}>
+        return <div class={[styles.column, styles.plugin].join(" ")}>
             {this.renderHeader()}
             {this.renderPage()}
         </div>
