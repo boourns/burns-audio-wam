@@ -27,7 +27,7 @@ type FunctionSeqState = {
 class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	destroyed = false;
 	renderCallback?: () => void
-	multiplayer?: MultiplayerHandler
+	multiplayers: MultiplayerHandler[]
 	runCount: number
 	error?: any;
 
@@ -53,6 +53,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		[]);
 
 		this.runCount = 0
+		this.multiplayers = []
 
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
@@ -60,8 +61,8 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 
 	registerExtensions() {
 		if (window.WAMExtensions.collaboration) {
-			this.multiplayer = new MultiplayerHandler(this.instanceId, "script")
-			this.multiplayer.getDocumentFromHost(this.defaultScript())
+			this.multiplayers = [new MultiplayerHandler(this.instanceId, "script", "Code")]
+			this.multiplayers[0].getDocumentFromHost(this.defaultScript())
 
 			this.upload()
 		} else {
@@ -88,8 +89,8 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	}
 
 	upload() {
-		if (this.multiplayer) {
-			let source = this.multiplayer.doc.toString()
+		if (this.multiplayers.length > 0) {
+			let source = this.multiplayers[0].doc.toString()
 			this.port.postMessage({action:"function", code: source})
 		}
 	}
@@ -254,7 +255,7 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 		// @ts-ignore
 		styleRoot.use({ target: div });
 
-		render(<LiveCoderView plugin={this.audioNode}></LiveCoderView>, div);
+		render(<LiveCoderView plugin={this.audioNode} actions={[]}></LiveCoderView>, div);
 
 		return div;
 	}

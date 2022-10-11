@@ -21,6 +21,7 @@ import { LiveCoderNode, LiveCoderView } from '../../shared/LiveCoderView';
 import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
 import getThreeJSProcessor from './ThreeJSProcessor';
 import { defaultScript } from './editorDefaults';
+import {videoOptionsEqual} from "../../shared/videoOptions"
 
 import styleRoot from "./VideoThreeJS.scss"
 
@@ -32,7 +33,7 @@ type ThreeJSState = {
 class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 	destroyed = false;
 	renderCallback?: () => void
-	multiplayer?: MultiplayerHandler
+	multiplayers: MultiplayerHandler[]
 	runCount: number
 	error?: any
 
@@ -66,6 +67,7 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 		);
 
 		this.runCount = 0
+		this.multiplayers = []
 
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi']);
@@ -73,8 +75,8 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 
 	registerExtensions() {
 		if (window.WAMExtensions.collaboration) {
-			this.multiplayer = new MultiplayerHandler(this.instanceId, "script")
-			this.multiplayer.getDocumentFromHost(defaultScript())
+			this.multiplayers = [new MultiplayerHandler(this.instanceId, "script", "Code")]
+			this.multiplayers[0].getDocumentFromHost(defaultScript())
 
 		} else {
 			console.warn("host has not implemented collaboration WAM extension")
@@ -85,13 +87,15 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 				connectVideo: (options: VideoExtensionOptions) => {
 					console.log("connectVideo!")
 
-					this.options = options
-					this.runner = new ThreeJSRunner(options)
+					//if (!this.runner || !videoOptionsEqual(this.options, options)) {
+						this.options = options
+						this.runner = new ThreeJSRunner(options)
+	
+						if (this.generator) {
+							this.generator.initialize(THREE, options)
+						}
+					//}
 
-					if (this.generator) {
-						this.generator.initialize(THREE, options)
-					}
-					 
 				},
 				config: () => {
 					return {
@@ -124,7 +128,7 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 	}
 
 	upload() {
-		let source = this.multiplayer.doc.toString()
+		let source = this.multiplayers[0].doc.toString()
 
 		try {
 			let generator = new Function(source)() as ThreeJSGenerator
@@ -271,6 +275,7 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 
 	configureMonaco() {
 		const baseURL = this._baseURL
+		
 		// @ts-ignore
 		self.MonacoEnvironment = {
 			getWorkerUrl: function (moduleId: any, label: string) {
@@ -286,6 +291,7 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 				if (label === 'typescript' || label === 'javascript') {
 					return `${baseURL}/monaco/ts.worker.bundle.js`;
 				}
+
 				return `${baseURL}/monaco/editor.worker.bundle.js`;
 			}
 		}
@@ -338,7 +344,7 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 		// @ts-ignore
 		styleRoot.use({ target: div });
 
-		render(<LiveCoderView plugin={this.audioNode}></LiveCoderView>, div);
+		render(<LiveCoderView plugin={this.audioNode} actions={[]}></LiveCoderView>, div);
 
 		return div;
 	}

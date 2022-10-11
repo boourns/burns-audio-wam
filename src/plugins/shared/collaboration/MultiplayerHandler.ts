@@ -2,16 +2,24 @@ import * as monaco from 'monaco-editor';
 import { CollaborationDocumentInterface, CollaborationExtension } from 'wam-extensions';
 import { MonacoBinding } from './MonacoBinding';
 
+export type MultiplayerEditorError = {
+    message: string
+    line: number
+}
+
 export class MultiplayerHandler {
+    label: string
     documentId: string
     instanceId: string
     editor?: monaco.editor.ICodeEditor
     doc: CollaborationDocumentInterface
     binding: MonacoBinding
+    error?: MultiplayerEditorError
 
-    constructor(instanceId: string, docId: string) {
+    constructor(instanceId: string, docId: string, label: string) {
         this.instanceId = instanceId
         this.documentId = docId
+        this.label = label
 
         if (!window.WAMExtensions.collaboration) {
             console.error("MultiplayerHandler requires host implement Collaboration Extension")
@@ -39,6 +47,7 @@ export class MultiplayerHandler {
 
         this.binding = new MonacoBinding(this.editor, this.doc)
         this.binding.attach()
+        this.updateModelMarkers()
     }
 
     unregisterEditor() {
@@ -48,5 +57,30 @@ export class MultiplayerHandler {
         
         this.editor = undefined
         this.binding = undefined
+    }
+
+    setError(error: MultiplayerEditorError | undefined) {
+        this.error = error
+
+        this.updateModelMarkers()
+    }
+
+    updateModelMarkers() {
+        let markers: monaco.editor.IMarkerData[] = []
+
+        if (this.binding && this.binding.model) {
+            if (this.error) {
+                markers.push({
+                    startLineNumber: this.error.line,
+                    startColumn: 0,
+                    endLineNumber: this.error.line,
+                    endColumn: 100,
+                    message: this.error.message,
+                    severity: monaco.MarkerSeverity.Error
+                })
+            }
+            
+            monaco.editor.setModelMarkers(this.binding.model, "owner", markers);
+        }
     }
 }

@@ -19,6 +19,8 @@ import { ISFShader } from './ISFShader';
 import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
 import { defaultFragmentShader, defaultVertexShader } from './defaultShaders';
 
+import {videoOptionsEqual} from "../../shared/videoOptions"
+
 import styleRoot from "./ISFVideo.scss"
 
 type ISFVideoState = {
@@ -34,8 +36,7 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 	gl: WebGLRenderingContext
 	shader: ISFShader
 	options: VideoExtensionOptions;
-	multiplayer?: MultiplayerHandler;
-	multiplayerVertex?: MultiplayerHandler;
+	multiplayers: MultiplayerHandler[];
 	error?: any
 
 	/**
@@ -63,11 +64,14 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 
 	registerExtensions() {
 		if (window.WAMExtensions.collaboration) {
-			this.multiplayer = new MultiplayerHandler(this.instanceId, "fragment")
-			this.multiplayer.getDocumentFromHost(defaultFragmentShader())
+			this.multiplayers = []
+			const fragment = new MultiplayerHandler(this.instanceId, "fragment", "Fragment Shader")
+			fragment.getDocumentFromHost(defaultFragmentShader())
+			this.multiplayers.push(fragment)
 
-			this.multiplayerVertex = new MultiplayerHandler(this.instanceId, "vertex")
-			this.multiplayerVertex.getDocumentFromHost(defaultVertexShader())
+			const vertex = new MultiplayerHandler(this.instanceId, "vertex", "Vertex Shader")
+			vertex.getDocumentFromHost(defaultVertexShader())
+			this.multiplayers.push(vertex)
 
 			this.upload()
 
@@ -83,13 +87,15 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 				connectVideo: (options: VideoExtensionOptions) => {
 					console.log("connectVideo!")
 
-					this.options = options
+					if (!this.shader || !videoOptionsEqual(this.options, options)) {
+						this.options = options
 
-					this.upload()
+						this.upload()
+					}
 				},
 				config: () => {
 					return {
-						numberOfInputs: 1,
+						numberOfInputs: this.shader ? this.shader.numberOfInputs() : 1,
 						numberOfOutputs: 1,
 					}
 				},
@@ -108,24 +114,53 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 	}
 
 	upload() {
-		if (!this.options || !this.multiplayer || !this.multiplayerVertex) {
+		if (!this.options || !this.multiplayers || this.multiplayers.length == 0) {
 			return
 		}
 
-		let fragmentSource = this.multiplayer.doc.toString()
-		let vertexSource = this.multiplayerVertex.doc.toString()
+		let fragmentSource = this.multiplayers[0].doc.toString()
+		let vertexSource = this.multiplayers[1].doc.toString()
+
+		this.error = undefined
+		this.multiplayers[0].setError(undefined)
+		this.multiplayers[1].setError(undefined)
 
 		try {
+
 			this.shader = new ISFShader(this.options, fragmentSource, vertexSource)
+			this.shader.compile()
 			let params = this.shader.wamParameters()
 
 			this.updateProcessor(params)
-		} catch(e) {
-			console.error("Error creating ISF Shader: ", e)
-			this.shader = undefined
 
+		} catch(e) {						
+			console.error("Error creating ISF Shader: ", e)
+			
 			this.error = e
+			
+			this.multiplayers[0].setError({line: this.shader.renderer.errorLine, message: e})
+			this.shader = undefined
 		}
+
+		if (this.renderCallback) {
+			this.renderCallback()
+		}
+	}
+
+	initVertexShader() {
+		const doc = this.multiplayers[1].doc
+
+		const orig = doc.toString()
+		doc.delete(0, orig.length)
+		doc.insert(0, defaultVertexShader())
+	}
+
+	initFragmentShader() {
+		const doc = this.multiplayers[0].doc
+
+		const orig = doc.toString()
+		doc.delete(0, orig.length)
+		doc.insert(0, defaultFragmentShader())
 	}
 
 	async runPressed() {
@@ -138,6 +173,14 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 		let editor = monaco.editor.create(ref, {
 			language: '',
 			automaticLayout: true
+		});
+
+		editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
+			this.upload()
+		});
+
+		editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_R, () => {
+			this.upload()
 		});
 
 		return editor
@@ -256,7 +299,11 @@ export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
 		// @ts-ignore
 		styleRoot.use({ target: div });
 
-		render(<LiveCoderView plugin={this._audioNode}></LiveCoderView>, div);
+		const actions = [
+			<button style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)" onClick={() => this.audioNode.initVertexShader()}>Init Vertex Shader</button>
+		]
+
+		render(<LiveCoderView plugin={this._audioNode} actions={actions}></LiveCoderView>, div);
 
 		return div;
 	}
