@@ -27,7 +27,7 @@ export class VideoInputView extends Component<VideoInputViewProps, any> {
     
     let tracks = node.stream.getAudioTracks().map(t => <div>{t.label}</div>)
 
-    return <div>
+    return <div class={styles.plugin}>
       Stream: {node.stream.id}<br />
       Tracks: {tracks}
     </div>

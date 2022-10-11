@@ -46,7 +46,7 @@ export interface MIDIOutputProps {
         selectedValue = "none"
       }
 
-      return <div>
+      return <div style="background-color: gray; width: 100%;">
         <div style="display: flex; flex-direction: row; padding: 8px;">
           <Select label="MIDI Output:" value={() => selectedValue} values={values} options={options} onChange={(i) => this.selectMIDIOutput(i)}></Select>
         </div>

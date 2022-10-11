@@ -58,8 +58,7 @@ export class AudioInputView extends Component<AudioInputViewProps, any> {
     let audioNode = this.props.plugin.audioNode
     let channelSelectOptions = audioNode.channelMapOptions.map(c => c.map(i=>i+1).join(" / "))
 
-    return <div>
-      <div class={styles.AudioInputMain}>
+    return <div class={styles.AudioInputMain}>
         <div>
           {meter}
         </div>
@@ -68,6 +67,5 @@ export class AudioInputView extends Component<AudioInputViewProps, any> {
           <Select label="Input" value={() => this.props.plugin.audioNode.channelMapIndex} options={channelSelectOptions} onChange={(i) => this.selectChannels(i)}></Select>
         </div>
       </div>
-    </div>
   }  
 }
