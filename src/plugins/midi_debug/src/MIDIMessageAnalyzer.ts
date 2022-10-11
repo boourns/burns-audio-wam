@@ -48,7 +48,7 @@ export class MIDIMessageAnalyzer {
     }
 
     channelMessage(): boolean {
-        return (this.bytes[0] & 0x80) !== 0x80
+        return (this.bytes[0] & 0x80) === 0x80 && this.bytes[0] != 0xf0
     }
 
     sysexMessage(): boolean {
