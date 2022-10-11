@@ -10,7 +10,7 @@ import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 import { ButterchurnView } from './ButterchurnView';
 
-import styleRoot from "./MIDIOutputView.scss";
+import styleRoot from "./ButterchurnView.scss";
 import ButterchurnNode from './Node';
 
 import { VideoExtensionOptions, VideoModuleConfig } from 'wam-extensions';
