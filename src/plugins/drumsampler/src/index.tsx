@@ -10,7 +10,7 @@ import { DrumSamplerNode } from './Node';
 import { h, render } from 'preact';
 import { DrumSamplerView } from './views/DrumSamplerView'
 import { getBaseUrl } from '../../shared/getBaseUrl';
-import styles from "./views/DrumSamplerView.scss"
+import styleRoot from "./views/DrumSamplerView.scss"
 
 export default class DrumSampler extends WebAudioModule<DrumSamplerNode> {
 	//@ts-ignore
@@ -162,7 +162,7 @@ export default class DrumSampler extends WebAudioModule<DrumSamplerNode> {
 		div.setAttribute("data-nonce", this.nonce)
 
 		// @ts-ignore
-    	styles.use({ target: shadow });
+    	styleRoot.use({ target: shadow });
 
 		div.setAttribute("style", "display: flex; flex-direction: column: width: 100%; height: 100%")
 
