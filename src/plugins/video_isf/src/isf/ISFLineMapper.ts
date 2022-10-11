@@ -7,7 +7,7 @@ function getMainLine(src: string) {
   return -1;
 }
 
-export default function mapGLErrorToISFLine(error: Error, glsl: string, isf: string) {
+export default function mapGLErrorToISFLine(error: Error, glsl: string, isf: string) {  
   const glslMainLine = getMainLine(glsl);
   const isfMainLine = getMainLine(isf);
   const regex = /ERROR: (\d+):(\d+): (.*)/g;

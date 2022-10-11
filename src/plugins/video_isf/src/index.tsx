@@ -121,17 +121,46 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 		let fragmentSource = this.multiplayers[0].doc.toString()
 		let vertexSource = this.multiplayers[1].doc.toString()
 
+		this.error = undefined
+		this.multiplayers[0].setError(undefined)
+		this.multiplayers[1].setError(undefined)
+
 		try {
+
 			this.shader = new ISFShader(this.options, fragmentSource, vertexSource)
+			this.shader.compile()
 			let params = this.shader.wamParameters()
 
 			this.updateProcessor(params)
-		} catch(e) {
-			console.error("Error creating ISF Shader: ", e)
-			this.shader = undefined
 
+		} catch(e) {						
+			console.error("Error creating ISF Shader: ", e)
+			
 			this.error = e
+			
+			this.multiplayers[0].setError({line: this.shader.renderer.errorLine, message: e})
+			this.shader = undefined
 		}
+
+		if (this.renderCallback) {
+			this.renderCallback()
+		}
+	}
+
+	initVertexShader() {
+		const doc = this.multiplayers[1].doc
+
+		const orig = doc.toString()
+		doc.delete(0, orig.length)
+		doc.insert(0, defaultVertexShader())
+	}
+
+	initFragmentShader() {
+		const doc = this.multiplayers[0].doc
+
+		const orig = doc.toString()
+		doc.delete(0, orig.length)
+		doc.insert(0, defaultFragmentShader())
 	}
 
 	async runPressed() {
@@ -144,6 +173,14 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 		let editor = monaco.editor.create(ref, {
 			language: '',
 			automaticLayout: true
+		});
+
+		editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
+			this.upload()
+		});
+
+		editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_R, () => {
+			this.upload()
 		});
 
 		return editor
@@ -262,7 +299,11 @@ export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
 		// @ts-ignore
 		styleRoot.use({ target: div });
 
-		render(<LiveCoderView plugin={this._audioNode}></LiveCoderView>, div);
+		const actions = [
+			<button style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)" onClick={() => this.audioNode.initVertexShader()}>Init Vertex Shader</button>
+		]
+
+		render(<LiveCoderView plugin={this._audioNode} actions={actions}></LiveCoderView>, div);
 
 		return div;
 	}

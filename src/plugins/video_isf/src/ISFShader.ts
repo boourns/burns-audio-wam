@@ -8,15 +8,22 @@ export class ISFShader {
     options: VideoExtensionOptions
     renderer: ISFRenderer
     params: DynamicParamEntry[]
+    fragmentSrc: string
+    vertexSrc?: string
 
     constructor(options: VideoExtensionOptions, fragmentSrc:string, vertexSrc?: string) {
         this.renderer = new ISFRenderer(options.gl)
         this.renderer.setupOutput(options.width, options.height)
         this.options = options
-        this.renderer.loadSource(fragmentSrc, vertexSrc);
-        if (!!this.renderer.error) {
-          throw this.renderer.error
-        }
+        this.fragmentSrc = fragmentSrc
+        this.vertexSrc = vertexSrc
+    }
+
+    compile() {
+      this.renderer.loadSource(this.fragmentSrc, this.vertexSrc);
+      if (!!this.renderer.error) {
+        throw this.renderer.error
+      }
     }
 
     wamParameters(): DynamicParamGroup[] {

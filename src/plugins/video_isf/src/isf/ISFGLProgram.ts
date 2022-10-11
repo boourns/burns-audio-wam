@@ -58,11 +58,7 @@ class ISFGLProgram {
       const lastError = this.gl.getShaderInfoLog(shader);
       console.log('Error Compiling Shader ', lastError);
 
-      // @ts-ignore
-      throw new Error({
-        message: lastError,
-        type: 'shader',
-      });
+      throw new Error(lastError)
     }
     return shader;
   }

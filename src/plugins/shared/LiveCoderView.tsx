@@ -15,6 +15,7 @@ export interface LiveCoderNode extends DynamicParameterNode {
 
 export interface LiveCoderViewProps {
   plugin: LiveCoderNode
+  actions: h.JSX.Element[]
 }
 
 type LiveCoderViewState = {
@@ -146,10 +147,11 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
       <div style="display: flex; flex-direction: column">
         <div style="display: flex; justify-content: space-between; width: 100%">
           <div>
-            <button onClick={() => this.runPressed} style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)">Run</button>
+            <button onClick={() => this.runPressed()} style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)">Run</button>
             <button onClick={() => this.panelPressed("GUI")} style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)">GUI</button>
 
             {editFiles}
+            {this.props.actions}
           </div>
 
           <div style={statusStyle}>
