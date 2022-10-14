@@ -53,7 +53,10 @@ export class DynamicParameterNode extends WamNode {
         if (!state.paramState) {
             return
         }
-        this.lastSetState = state.paramState
+
+        if (state.paramState.parameterValues && Object.keys(state.paramState.parameterValues).length > 0) {
+            this.lastSetState = state.paramState
+        }
         await super.setState(state.paramState)
     }
 

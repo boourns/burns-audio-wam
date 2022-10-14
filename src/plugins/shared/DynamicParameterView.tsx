@@ -78,8 +78,14 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
                                value={() => this.getValue(p)}
                                label={p.config.label || p.id}
                     >
-                </Select>  
-                default:
+                </Select>
+            case "choice":
+                return <Select onChange={(v) => this.valueChanged(p.id, parseInt(v))}
+                               options={p.config.choices}
+                               value={() => this.getValue(p)}
+                               label={p.config.label || p.id} />
+                               
+            default:
                 return <div>unknown!</div>
         }
     }

@@ -56,14 +56,18 @@ export class ISFShader {
             })
             break
           case "long":
+            const def = input.DEFAULT as number
+            const defIndex = input.VALUES.findIndex(v => v == def)
+
             params.push({
               id: input.NAME,
               config: {
-                type: "int",
-                defaultValue: input.DEFAULT as number,
-                minValue: input.MIN,
-                maxValue: input.MAX,
-                label: input.NAME
+                type: "choice",
+                defaultValue: defIndex,
+                minValue: 0,
+                maxValue: input.VALUES.length,
+                label: input.NAME,
+                choices: input.LABELS
               }
             })
             break
@@ -150,6 +154,9 @@ export class ISFShader {
             if (params[`${i.NAME}_x`] && params[`${i.NAME}_y`]) {
               this.renderer.setValue(i.NAME, [params[`${i.NAME}_x`].value, params[`${i.NAME}_y`].value])
             }
+          } else if (i.TYPE == "long") {
+            const isfValue = i.VALUES[params[i.NAME].value]
+            this.renderer.setValue(i.NAME, isfValue)
           } else {
             if (params[i.NAME]) {
               this.renderer.setValue(i.NAME, params[i.NAME].value)
