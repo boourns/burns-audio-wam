@@ -38,6 +38,8 @@ export type ISFUniform = {
   MIN?: number
   MAX?: number
   DEFAULT?: number | number[]
+  VALUES?: number[]
+  LABELS?: string[]
 }
 
 class ISFParser {

@@ -188,5 +188,9 @@ void main() {
 }
 
 export function defaultVertexShader() {
-    return ``
+    return `
+	void main() {
+		isf_vertShaderInit();
+	}
+	`
 }
