@@ -48,7 +48,7 @@ export class ISFShader {
               id: input.NAME,
               config: {
                 type: "float",
-                defaultValue: input.DEFAULT as number,
+                defaultValue: !!input.DEFAULT ? input.DEFAULT as number : input.MIN,
                 minValue: input.MIN,
                 maxValue: input.MAX,
                 label: input.NAME
@@ -56,7 +56,7 @@ export class ISFShader {
             })
             break
           case "long":
-            const def = input.DEFAULT as number
+            const def = !!input.DEFAULT ? input.DEFAULT as number : input.VALUES[0]
             const defIndex = input.VALUES.findIndex(v => v == def)
 
             params.push({
@@ -77,7 +77,7 @@ export class ISFShader {
                 id: `${input.NAME}_${v}`,
                 config: {
                   type: "float",
-                  defaultValue: (input.DEFAULT as number[])[i],
+                  defaultValue: !!input.DEFAULT ? (input.DEFAULT as number[])[i] : 0,
                   minValue: 0,
                   maxValue: 1,
                   label: `${input.NAME}_${v}`
@@ -91,7 +91,7 @@ export class ISFShader {
                   id: `${input.NAME}_${v}`,
                   config: {
                     type: "float",
-                    defaultValue: (input.DEFAULT as number[])[i],
+                    defaultValue: !!input.DEFAULT ? (input.DEFAULT as number[])[i] : 0,
                     minValue: 0,
                     maxValue: 1,
                     label: `${input.NAME}_${v}`
