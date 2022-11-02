@@ -66,19 +66,19 @@ export class ClipSettingsView extends Component<ClipSettingsProps, any> {
         let bars = this.props.clip.state.length / 96;
 
         let actions = [            
-            <button class="border m-1 px-2 py-1 border-gray-700 bg-gray-300 text-sm" onClick={() => this.clearClip()}>Clear Clip</button>,
-            <button class="border m-1 px-2 py-1 border-gray-700 bg-gray-300 text-sm" onClick={() => this.props.onClose()}>Close</button>
+            <button class="" onClick={() => this.clearClip()}>Clear Clip</button>,
+            <button class="" onClick={() => this.props.onClose()}>Close</button>
         ]
 
         return (
-        <div>
-            <div class="flex my-1">
+        <div style="background-color: lightgray; padding: 5px;">
+            <div style="display: flex; align-items: center">
                 <label>Quantize</label>
                 <Select style="flex-direction: row-reverse;" options={quantizeOptions} values={quantizeValues} value={() => this.props.clip.quantize} onChange={(e) => this.quantizeChanged(e)} />
             </div>
-            <div class="flex my-1 justify-between">
+            <div style="padding-top: 4px; padding-bottom: 4px;">
                 <label>Clip Length (bars)</label>
-                <TextInput className="w-20" value={bars} onChange={(e) => this.lengthChanged(e)} />
+                <TextInput value={bars} onChange={(e) => this.lengthChanged(e)} />
             </div>
             {actions}
         </div>

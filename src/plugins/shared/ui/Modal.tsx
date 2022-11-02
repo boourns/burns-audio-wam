@@ -6,8 +6,8 @@ export type ModalProps = {}
 export class Modal extends Component<ModalProps, any> {
   render() {
     return (
-      <div class={style.backdrop}>
-        <div class={style.modalContainer}>
+      <div class="GlowModalBackdrop">
+        <div class="GlowModalContainer">
             {this.props.children}
         </div>
       </div>

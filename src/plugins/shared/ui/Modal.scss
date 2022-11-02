@@ -1,4 +1,4 @@
-.backdrop {
+:global(.GlowModalBackdrop) {
     position: fixed;
     top: 0;
     bottom: 0;
@@ -9,7 +9,7 @@
     z-index: 99999998;
 }
 
-.modalContainer {
+:global(.GlowModalContainer) {
     position: fixed;
     top: 50%;
     left: 50%;

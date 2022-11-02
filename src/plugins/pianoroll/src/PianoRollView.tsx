@@ -9,6 +9,8 @@ import { ClipSettingsView } from './ClipSettingsView';
 import { Note, PPQN } from './Clip';
 import { Design, NoteCanvasRenderer, NoteCanvasRenderState } from './NoteCanvasRenderer';
 
+import {Modal} from "../../shared/ui/Modal"
+
 const logger = (...any: any) => {}
 //const logger = console.log
 
@@ -332,7 +334,9 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
         var settingsModal = null
         if (this.state.showSettingsModal) {
-            settingsModal = <ClipSettingsView clip={this.props.pianoRoll.getClip(this.props.clipId)} onChange={() => this.clipSettingsChanged()} onClose={() => this.closeClipSettings()} />
+            settingsModal = <Modal>
+                <ClipSettingsView clip={this.props.pianoRoll.getClip(this.props.clipId)} onChange={() => this.clipSettingsChanged()} onClose={() => this.closeClipSettings()} />
+            </Modal>
         }
 
         return (
@@ -361,12 +365,12 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         container.setAttribute("style", `height: ${Design.headerHeight}px; display: flex; background-color: rgba(255, 255, 255, 0.4)`)
 
         let span = document.createElement("div")
-        span.setAttribute("style", `width: ${Design.gutterWidth}px; display: inline-block; margin: 0 auto; `)
+        span.setAttribute("style", `width: ${Design.gutterWidth}px; display: flex; margin: auto; `)
         
         let settingsButton = document.createElement("button")
         settingsButton.textContent = "Settings"
-        // TODO this CSS doesn't exist in this project
-        settingsButton.setAttribute("class", "border m-1 px-2 py-1 border-gray-700 bg-gray-300 text-xs shadow-md")
+        settingsButton.setAttribute("style", "margin: auto;")
+        
         settingsButton.addEventListener("click", this.settingsButtonPressed.bind(this))
         span.appendChild(settingsButton)
         container.appendChild(span)
