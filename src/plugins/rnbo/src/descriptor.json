@@ -1,0 +1,15 @@
+{
+    "name": "Rainbow",
+    "vendor": "Tom Burns",
+    "description": "WAM2 RNBO Wrapper",
+    "version": "1.0.0",
+    "sdkVersion": "1.0.0",
+    "thumbnail": "",
+    "keywords": ["utility", "input"],
+    "isInstrument": false,
+    "hasAudioOutput": true,
+    "hasAudioInput": false,
+    "hasMidiInput": true,
+    "hasMidiOutput": false,
+    "website": ""
+}

@@ -1,0 +1,9 @@
+@import "../../../shared/ui/glow.scss";
+
+.RNBOMain {
+    display: flex; 
+    flex-direction: row; 
+    padding: 8px;
+    background-color: gray;
+    width: 100%;
+}
