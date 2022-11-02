@@ -41,7 +41,7 @@ class PianoRollProcessor extends WamProcessor {
 		this.lastTime = null;
 		this.ticks = -1;
         this.clips = new Map()
-        this.currentClipId = ""
+        this.currentClipId = "default"
         this.count = 0
 
         super.port.start();

@@ -30,7 +30,7 @@ export class PianoRoll {
 		this.instanceId = instanceId
 		this.futureEvents = []
 		this.dirty = false
-		this.clips = {"default": new Clip()}
+		this.clips = {"default": new Clip("default")}
 
 		this.registerNoteListHandler()
 		Object.keys(this.clips).forEach(id => this.clips[id].updateProcessor = (c) => {
