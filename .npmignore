@@ -1,8 +1,8 @@
-vendor/
 .yarn/
-src/*
+plugins/*
+node_modules/*
 .yarnrc.yml
 .github/*
 tools/*
-.gitmodules
-
+.gitignore
+categories.json

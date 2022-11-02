@@ -1,6 +1,6 @@
 {
   "name": "burns-audio-wam",
-  "version": "0.2.27",
+  "version": "0.2.28",
   "description": "Collection of Web Audio Modules (WAMs) by Burns Audio",
   "main": "index.js",
   "scripts": {
@@ -24,17 +24,15 @@
     "url": "https://github.com/boourns/burns-audio-wam/issues"
   },
   "homepage": "https://github.com/boourns/burns-audio-wam#readme",
-  "dependencies": {
+  "devDependencies": {
     "@types/dom-mediacapture-record": "^1.0.11",
     "@webaudiomodules/api": "webaudiomodules/api#commit=3ca912e8e08e66917eba22c330e85554932de494",
-    "lib0": "^0.2.47",
-    "monaco-editor": "^0.25.2",
-    "preact": "^10.5.5"
-  },
-  "devDependencies": {
     "@webaudiomodules/sdk": "webaudiomodules/sdk#commit=810ba256f58385c0d50c16e36c82c7818bd01ead",
     "@webaudiomodules/sdk-parammgr": "webaudiomodules/sdk-parammgr#commit=6eb3bc85fc30144502043f456f47268a62d3db5a",
     "copy-webpack-plugin": "^11.0.0",
+    "lib0": "^0.2.47",
+    "monaco-editor": "^0.25.2",
+    "preact": "^10.5.5",
     "wam-extensions": "boourns/wam-extensions#commit=4c94036bf99636935ed80fe9ef3c7a1d310305be"
   }
 }
