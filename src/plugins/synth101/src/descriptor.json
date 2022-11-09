@@ -1,7 +1,7 @@
 {
     "identifier": "com.sequencerParty.synth101",
     "name": "Synth-101",
-    "vendor": "Tom",
+    "vendor": "Sequencer Party",
     "description": "Software clone of a simple monophonic synthesizer classic, the Roland SH-101",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
