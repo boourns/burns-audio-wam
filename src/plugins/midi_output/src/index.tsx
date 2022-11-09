@@ -23,7 +23,7 @@ export default class MIDIOutputModule extends WebAudioModule<MIDIOutputNode> {
 	midiInitialized: boolean = false
 	nonce: string | undefined;
 
-	get instanceId() { return "SequencerPartyMIDIOut" + this._timestamp; }
+	get instanceId() { return "com.sequencerParty.midiOut" + this._timestamp; }
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
