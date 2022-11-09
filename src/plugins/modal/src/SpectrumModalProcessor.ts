@@ -257,7 +257,7 @@ const getSpectrumModalProcessor = (moduleId: string) => {
     }
 
     try {
-        registerProcessor('TomBurnsSpectrum: Modal', SpectrumModalProcessor as typeof WamProcessor);
+        registerProcessor('com.sequencerParty.modal', SpectrumModalProcessor as typeof WamProcessor);
     } catch (error) {
         // eslint-disable-next-line no-console
         console.warn(error);

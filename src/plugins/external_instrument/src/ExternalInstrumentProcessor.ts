@@ -120,7 +120,7 @@ const getExternalInstrumentProcessor = (moduleId: string) => {
     }
 
     try {
-        registerProcessor('SequencerPartyExternal Instrument', ExternalInstrumentProcessor as typeof WamProcessor);
+        registerProcessor('com.sequencerParty.externalInstrument', ExternalInstrumentProcessor as typeof WamProcessor);
     } catch (error) {
         // eslint-disable-next-line no-console
         console.warn(error);

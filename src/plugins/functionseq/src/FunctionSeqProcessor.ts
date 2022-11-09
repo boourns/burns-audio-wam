@@ -155,7 +155,7 @@ const getFunctionSequencerProcessor = (moduleId: string) => {
     }
 
     try {
-        registerProcessor('TomBurnsFunctionSequencer', FunctionSequencerProcessor as typeof WamProcessor);
+        registerProcessor('com.sequencerParty.functionSeq', FunctionSequencerProcessor as typeof WamProcessor);
     } catch (error) {
         // eslint-disable-next-line no-console
         console.warn(error);

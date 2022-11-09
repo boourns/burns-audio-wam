@@ -2,7 +2,7 @@ import { MIDI } from "../../shared/midi";
 import { AudioWorkletGlobalScope, WamTransportData } from "@webaudiomodules/api";
 import { Clip } from "./Clip";
 
-const moduleId = 'Tom BurnsPiano Roll'
+const moduleId = 'com.sequencerParty.pianoRoll'
 const PPQN = 24
 
 const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope

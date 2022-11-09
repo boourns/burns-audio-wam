@@ -1,13 +1,14 @@
 {
+    "identifier": "com.sequencerParty.modal",
     "name": "Spectrum: Modal",
-    "vendor": "TomBurns",
-    "description": "Port of a popular eurorack modal synthesizer",
+    "vendor": "Sequencer Party",
+    "description": "Port of a popular eurorack modal synthesizer.  It is a full-blown synthesis voice based on modal synthesis - an under-appreciated flavour of physical modelling synthesis with a strange and abstract feel.",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
     "thumbnail": "",
     "keywords": ["synthesizer", "modal", "instrument"],
     "isInstrument": true,
-    "website": "",
+    "website": "https://sequencer.party",
     "hasMidiInput": true,
     "hasMidiOutput": false,
     "hasAudioOutput": true

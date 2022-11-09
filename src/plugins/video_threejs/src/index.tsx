@@ -261,7 +261,7 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 
 	multiplayer?: MultiplayerHandler;
 
-	get instanceId() { return "TomBurnsThreeJSGenerator" + this._timestamp; }
+	get instanceId() { return "com.sequencerParty.threejs" + this._timestamp; }
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;

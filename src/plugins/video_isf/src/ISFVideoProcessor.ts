@@ -1,6 +1,6 @@
 import { AudioWorkletGlobalScope } from "@webaudiomodules/api";
 
-const moduleId = 'TomBurnsISFVideo'
+const moduleId = 'com.sequencerParty.isfVideo'
 
 const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
 const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);

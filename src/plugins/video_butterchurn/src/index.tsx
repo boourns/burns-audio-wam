@@ -26,7 +26,7 @@ export default class ButterchurnModule extends WebAudioModule<ButterchurnNode> {
 
 	nonce: string | undefined;
 
-	get instanceId() { return "SequencerPartyButterchurn" + this._timestamp; }
+	get instanceId() { return "com.sequencerParty.butterChurn" + this._timestamp; }
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;

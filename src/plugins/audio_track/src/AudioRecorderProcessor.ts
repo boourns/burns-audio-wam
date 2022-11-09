@@ -344,7 +344,7 @@ const getAudioRecorderProcessor = (moduleId: string) => {
     }
 
     try {
-        registerProcessor('TomBurnsAudioTrack', (AudioRecorderProcessor as typeof WamProcessor));
+        registerProcessor('com.sequencerParty.audioTrack', (AudioRecorderProcessor as typeof WamProcessor));
     } catch (error) {
     }
 
