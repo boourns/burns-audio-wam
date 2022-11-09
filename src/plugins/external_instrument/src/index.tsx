@@ -166,7 +166,7 @@ export default class ExternalInstrumentModule extends WebAudioModule<ExternalIns
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	nonce: string | undefined;
 
-	get instanceId() { return "TomBurnsExternalInstrument" + this._timestamp; }
+	get instanceId() { return "com.sequencerParty.externalInstrument" + this._timestamp; }
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;

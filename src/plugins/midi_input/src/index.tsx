@@ -20,7 +20,7 @@ export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 	_processorUrl = `${this._baseURL}/MIDIInputProcessor.js`;
 	nonce: string | undefined;
 
-	get instanceId() { return "SequencerPartyMIDIIn" + this._timestamp; }
+	get instanceId() { return "com.sequencerParty.MIDIIn" + this._timestamp; }
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;

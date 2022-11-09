@@ -20,7 +20,6 @@ export class RandomizerView extends Component<RandomizerViewProps, any> {
     }
 
     randomize() {
-        console.log("Calling randomize!")
         this.props.plugin.randomize()
     }
 

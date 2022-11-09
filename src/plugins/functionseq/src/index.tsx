@@ -177,7 +177,7 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 	sequencer: FunctionSeqNode
 	nonce: string | undefined;
 
-	get instanceId() { return "TomBurnsFunctionSequencer" + this._timestamp; }
+	get instanceId() { return "com.sequencerParty.functionSeq" + this._timestamp; }
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;

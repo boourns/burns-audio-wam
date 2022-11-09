@@ -1,13 +1,14 @@
 {
-    "name": "ThreeJSGenerator",
-    "vendor": "TomBurns",
-    "description": "Livecode 3d scenes with three.js",
+    "identifier": "com.sequencerParty.threejs",
+    "name": "ThreeJS Video Generator",
+    "vendor": "Sequencer Party",
+    "description": "Livecode 3d video scenes using three.js",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
     "thumbnail": "",
     "keywords": ["video", "generator"],
     "isInstrument": false,
-    "website": "",
+    "website": "https://sequencer.party",
     "hasVideoOutput": true,
     "hasMidiInput": true,
     "hasAudioInput": true

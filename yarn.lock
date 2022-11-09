@@ -46,10 +46,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webaudiomodules/api@webaudiomodules/api#commit=3ca912e8e08e66917eba22c330e85554932de494":
-  version: 2.0.0-alpha.3
-  resolution: "@webaudiomodules/api@https://github.com/webaudiomodules/api.git#commit=3ca912e8e08e66917eba22c330e85554932de494"
-  checksum: ec1cba804bc764cf2403889c52805aa3ad81403e9c66866a2a478cc71b4cdf1198c22630c536dbe1225697c7e589772aac5a56c05fdada45003ee237818ab491
+"@webaudiomodules/api@webaudiomodules/api#commit=d12879535761e27c6e475e84e799b8e43cc97e76":
+  version: 2.0.0-alpha.5
+  resolution: "@webaudiomodules/api@https://github.com/webaudiomodules/api.git#commit=d12879535761e27c6e475e84e799b8e43cc97e76"
+  checksum: 5025677bda92c3eee8c85ddc558445bc41fe8b4faa1a7006245a6a6dd2ccf4a3c077d0d9fac386f29fd109129130a3c311abb7d63ce388894e5333f0a2a59871
   languageName: node
   linkType: hard
 
@@ -60,10 +60,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webaudiomodules/sdk@webaudiomodules/sdk#commit=810ba256f58385c0d50c16e36c82c7818bd01ead":
-  version: 0.0.6
-  resolution: "@webaudiomodules/sdk@https://github.com/webaudiomodules/sdk.git#commit=810ba256f58385c0d50c16e36c82c7818bd01ead"
-  checksum: d26bf7fd371df29d91894214a36d7a70c17ce57beba7f047657611f31afbf29a66bb412825259333e35787af29dfc44d61adc3b287ea596406f11307e2aa29db
+"@webaudiomodules/sdk@webaudiomodules/sdk#commit=252e00c0d9f8a936fda11fbbaa01cdbd9758e32e":
+  version: 0.0.10
+  resolution: "@webaudiomodules/sdk@https://github.com/webaudiomodules/sdk.git#commit=252e00c0d9f8a936fda11fbbaa01cdbd9758e32e"
+  checksum: 532fa18796d24f5a45bc920919f7fd9311cb625525ccf58aa85ce5e53a5dd5b6540086ade59fb8914bf3f40c3be75e0ea193bebb6e1f3b7f18b8ace7b018fede
   languageName: node
   linkType: hard
 
@@ -118,8 +118,8 @@ __metadata:
   resolution: "burns-audio-wam@workspace:."
   dependencies:
     "@types/dom-mediacapture-record": ^1.0.11
-    "@webaudiomodules/api": "webaudiomodules/api#commit=3ca912e8e08e66917eba22c330e85554932de494"
-    "@webaudiomodules/sdk": "webaudiomodules/sdk#commit=810ba256f58385c0d50c16e36c82c7818bd01ead"
+    "@webaudiomodules/api": "webaudiomodules/api#commit=d12879535761e27c6e475e84e799b8e43cc97e76"
+    "@webaudiomodules/sdk": "webaudiomodules/sdk#commit=252e00c0d9f8a936fda11fbbaa01cdbd9758e32e"
     "@webaudiomodules/sdk-parammgr": "webaudiomodules/sdk-parammgr#commit=6eb3bc85fc30144502043f456f47268a62d3db5a"
     copy-webpack-plugin: ^11.0.0
     lib0: ^0.2.47

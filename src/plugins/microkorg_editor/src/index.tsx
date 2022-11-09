@@ -21,7 +21,7 @@ export default class MicrokorgControllerModule extends WebAudioModule<MIDIContro
 
 	nonce: string | undefined;
 
-	get instanceId() { return "SequencerPartyMicrokorg Editor" + this._timestamp; }
+	get instanceId() { return "com.sequencerParty.microkorg" + this._timestamp; }
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;

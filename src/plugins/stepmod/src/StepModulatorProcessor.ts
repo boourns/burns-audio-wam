@@ -1,7 +1,7 @@
 import { AudioWorkletGlobalScope, WamTransportData } from "@webaudiomodules/api";
 import { Clip } from "./Clip";
 
-const moduleId = 'Tom BurnsStep Sequencing Modulator'
+const moduleId = 'com.sequencerParty.stepmod'
 const PPQN = 24
 
 const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope

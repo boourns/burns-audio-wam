@@ -91,8 +91,7 @@ const getMIDIDebugProcessor = (moduleId: string) => {
     }
 
     try {
-        console.log("HERE!")
-        registerProcessor('SequencerPartyMIDIDebug', MIDIDebugProcessor as typeof WamProcessor);
+        registerProcessor('com.sequencerParty.midiDebug', MIDIDebugProcessor as typeof WamProcessor);
     } catch (error) {
         // eslint-disable-next-line no-console
         console.warn(error);

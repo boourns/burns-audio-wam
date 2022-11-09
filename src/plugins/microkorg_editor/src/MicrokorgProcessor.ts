@@ -1,7 +1,7 @@
 import { AudioWorkletGlobalScope } from "@webaudiomodules/api";
 import { MicrokorgKernel } from "./MicrokorgKernel";
 
-const moduleId = "SequencerPartyMicrokorg Editor"
+const moduleId = "com.sequencerParty.microkorg"
 const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
 
 const scope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
