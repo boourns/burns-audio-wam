@@ -48,9 +48,7 @@ onTick(tick, params) {
     // where note is the MIDI note number, velocity is an integer from 0 to 127, and duration is the length of the note in ticks.
 
     if (tick % 24 == 0) {
-        return [
-            {note: params.base + Math.floor(Math.random() * params.range), velocity: 100, duration: 20}
-        ]
+        api.emitNote(params.base + Math.floor(Math.random() * params.range), 100, 10);
     }
 }
 }

@@ -14,7 +14,6 @@ import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandle
 import { DynamicParameterNode } from '../../shared/DynamicParameterNode';
 import { LiveCoderNode, LiveCoderView } from "../../shared/LiveCoderView"
 
-import getFunctionSequencerProcessor from './FunctionSeqProcessor';
 import { defaultScript, editorDefinition } from './editor';
 
 import styleRoot from "./FunctionSequencer.scss"
@@ -32,11 +31,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	error?: any;
 
 	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
-		const { audioWorklet } = audioContext;
-
 		await super.addModules(audioContext, moduleId);
-
-		await addFunctionModule(audioWorklet, getFunctionSequencerProcessor, moduleId);
 	}
 
 	/**
@@ -173,7 +168,8 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
-	_functionProcessorUrl = `${this._baseURL}/FunctionSeqProcessor.js`;
+	_processorUrl = `${this._baseURL}/FunctionSeqProcessor.js`;
+
 	sequencer: FunctionSeqNode
 	nonce: string | undefined;
 
@@ -220,6 +216,10 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 
 	async createAudioNode(initialState: any) {
 		await FunctionSeqNode.addModules(this.audioContext, this.moduleId)
+
+		let url = `${this._processorUrl}?v=${Math.random()}`
+		await this.audioContext.audioWorklet.addModule(url)
+
 		const node: FunctionSeqNode = new FunctionSeqNode(this, {});
 		await node._initialize();
 
