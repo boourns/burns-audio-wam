@@ -22,6 +22,8 @@ const {
 
 const DynamicParameterProcessor = ModuleScope.DynamicParameterProcessor
 
+import {setProcessor, setKernel} from "./FunctionAPI"
+
 export class FunctionSequencerProcessor extends DynamicParameterProcessor {
     lastTime: number
     proxyId: string
@@ -34,6 +36,8 @@ export class FunctionSequencerProcessor extends DynamicParameterProcessor {
     constructor(options: any) {
         super(options)
         this.function = new FunctionKernel(this)
+        setProcessor(this)
+        setKernel(this.function)
     }
 
     /**

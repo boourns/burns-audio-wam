@@ -1,5 +1,20 @@
+import { AudioWorkletGlobalScope } from "@webaudiomodules/api"
 import { FunctionKernel } from "./FunctionKernel"
-import { MIDI } from "./FunctionSeqProcessor"
+import { FunctionSequencerProcessor, MIDI } from "./FunctionSeqProcessor"
+
+let processor: FunctionSequencerProcessor
+let kernel: FunctionKernel
+
+const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
+
+
+export function setProcessor(p: FunctionSequencerProcessor) {
+    processor = p
+}
+
+export function setKernel(k: FunctionKernel) {
+    kernel = k
+}
 
 export class FunctionAPI {
     port: MessagePort
@@ -15,7 +30,11 @@ export class FunctionAPI {
         this.emitMidiEvent([MIDI.NOTE_OFF, note, velocity], startTime+duration)
     }
 
-    emitMidiEvent(data: number[], eventTime: number) {
-        
+    emitMidiEvent(bytes: number[], eventTime: number) {
+        const {currentTime} = audioWorkletGlobalScope
+
+        processor.emitEvents(
+            { type: 'wam-midi', time: currentTime, data: { bytes } }
+        )
     }
 }
