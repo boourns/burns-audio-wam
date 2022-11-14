@@ -25,7 +25,6 @@ let quantizeValues = [
 ]
 
 export interface ClipSettingsProps {
-    onClose(): void
     onChange(): void
     clip: Clip
 }
@@ -65,13 +64,8 @@ export class ClipSettingsView extends Component<ClipSettingsProps, any> {
 
         let bars = this.props.clip.state.length / 96;
 
-        let actions = [            
-            <button class="" onClick={() => this.clearClip()}>Clear Clip</button>,
-            <button class="" onClick={() => this.props.onClose()}>Close</button>
-        ]
-
         return (
-        <div style="background-color: lightgray; padding: 5px;">
+        <div style="background-color: lightgray; padding: 5px; z-index: 2;">
             <div style="display: flex; align-items: center">
                 <label>Quantize</label>
                 <Select style="flex-direction: row-reverse;" options={quantizeOptions} values={quantizeValues} value={() => this.props.clip.quantize} onChange={(e) => this.quantizeChanged(e)} />
@@ -80,7 +74,6 @@ export class ClipSettingsView extends Component<ClipSettingsProps, any> {
                 <label>Clip Length (bars)</label>
                 <TextInput value={bars} onChange={(e) => this.lengthChanged(e)} />
             </div>
-            {actions}
         </div>
         )
     }

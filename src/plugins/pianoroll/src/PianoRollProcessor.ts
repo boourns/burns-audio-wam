@@ -1,6 +1,7 @@
 import { MIDI } from "../../shared/midi";
-import { AudioWorkletGlobalScope, WamTransportData } from "@webaudiomodules/api";
+import { AudioWorkletGlobalScope, WamMidiData, WamTransportData } from "@webaudiomodules/api";
 import { Clip } from "./Clip";
+import { MIDINoteRecorder } from "./MIDINoteRecorder";
 
 const moduleId = 'com.sequencerParty.pianoRoll'
 const PPQN = 24
@@ -30,6 +31,8 @@ class PianoRollProcessor extends WamProcessor {
 
     futureEvents: any[]
 
+    noteRecorder: MIDINoteRecorder
+
 	constructor(options: any) {
 		super(options);
 
@@ -43,6 +46,16 @@ class PianoRollProcessor extends WamProcessor {
         this.clips = new Map()
         this.currentClipId = "default"
         this.count = 0
+
+        this.noteRecorder = new MIDINoteRecorder(
+            () => {
+                return this.clips.get(this.currentClipId)
+            },
+            (tick: number, number: number, duration: number, velocity: number) => {
+                console.log("mide note recorder got new note")
+                super.port.postMessage({ event:"addNote", note: {tick, number, duration, velocity}})
+            }
+        )
 
         super.port.start();
 	}
@@ -80,6 +93,10 @@ class PianoRollProcessor extends WamProcessor {
 
             let clipPosition = tickPosition % clip.state.length;
 
+            if (this.recordingArmed && this.ticks > clipPosition) {
+                // we just circled back, so finalize any notes in the buffer
+                this.noteRecorder.finalizeAllNotes(clip.state.length-1)
+            }
 
             if (this.ticks != clipPosition) {
                 let secondsPerTick = 1.0 / ((this.transportData!.tempo / 60.0) * PPQN);
@@ -110,6 +127,8 @@ class PianoRollProcessor extends WamProcessor {
                 id: message.data.id,
                 timestamp: 0,
             }
+        } else if (message.data && message.data.action == "recording") {
+            this.recordingArmed = message.data.armed
         } else {
             super._onMessage(message)
         }
@@ -123,6 +142,22 @@ class PianoRollProcessor extends WamProcessor {
             transport: transportData
         })
     }
+
+    _onMidi(midiData: WamMidiData) {        
+        const { currentTime } = audioWorkletGlobalScope;
+
+        // /* eslint-disable no-lone-blocks */
+        const bytes = midiData.bytes;
+        if (!this.recordingArmed) {
+            return
+        }
+        if (!this.transportData?.playing || this.transportData!.currentBarStarted <= currentTime) {
+            return
+        }
+        
+        console.log("passing midi onto note recorder")
+        this.noteRecorder.onMIDI(bytes, currentTime)
+    }    
 }
 
 try {

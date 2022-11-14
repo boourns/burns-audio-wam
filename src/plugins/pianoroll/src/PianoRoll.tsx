@@ -16,6 +16,8 @@ export class PianoRoll {
 	instanceId: string
 	futureEvents: ScheduledMIDIEvent[];
 	dirty: boolean;
+	hostRecordingArmed: boolean;
+	pluginRecordingArmed: boolean;
 
 	clips: Record<string, Clip>
 
@@ -23,6 +25,7 @@ export class PianoRoll {
 
 	renderCallback?: () => void
 	updateProcessor?: (c: Clip) => void
+	updateProcessorRecording?: (armed: boolean) => void
 
 	noteList?: NoteDefinition[]
 
@@ -32,6 +35,9 @@ export class PianoRoll {
 		this.dirty = false
 		this.clips = {"default": new Clip("default")}
 		this.playingClip = "default"
+
+		this.pluginRecordingArmed = false
+		this.hostRecordingArmed = false
 
 		this.registerNoteListHandler()
 		Object.keys(this.clips).forEach(id => this.clips[id].updateProcessor = (c) => {
@@ -123,5 +129,19 @@ export class PianoRoll {
 
 	needsRender() {
 		return this.dirty;
+	}
+
+	armHostRecording(armed: boolean) {
+		this.hostRecordingArmed = armed
+		if (this.updateProcessorRecording) {
+			this.updateProcessorRecording(this.hostRecordingArmed && this.pluginRecordingArmed)
+		}
+	}
+
+	armPluginRecording(armed: boolean) {
+		this.pluginRecordingArmed = armed
+		if (this.updateProcessorRecording) {
+			this.updateProcessorRecording(this.hostRecordingArmed && this.pluginRecordingArmed)
+		}
 	}
 }
