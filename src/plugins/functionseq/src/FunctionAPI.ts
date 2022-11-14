@@ -31,10 +31,8 @@ export class FunctionAPI {
     }
 
     emitMidiEvent(bytes: number[], eventTime: number) {
-        const {currentTime} = audioWorkletGlobalScope
-
         processor.emitEvents(
-            { type: 'wam-midi', time: currentTime, data: { bytes } }
+            { type: 'wam-midi', time: eventTime, data: { bytes } }
         )
     }
 }
