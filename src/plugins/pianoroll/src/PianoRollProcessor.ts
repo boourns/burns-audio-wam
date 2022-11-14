@@ -4,7 +4,7 @@ import { Clip } from "./Clip";
 import { MIDINoteRecorder } from "./MIDINoteRecorder";
 
 const moduleId = 'com.sequencerParty.pianoRoll'
-const PPQN = 24
+export const PPQN = 24
 
 const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
 const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
@@ -136,6 +136,7 @@ class PianoRollProcessor extends WamProcessor {
 
     _onTransport(transportData: WamTransportData) {
         this.transportData = transportData
+        this.noteRecorder.transportData = transportData
 
         super.port.postMessage({
             event:"transport",
@@ -151,11 +152,10 @@ class PianoRollProcessor extends WamProcessor {
         if (!this.recordingArmed) {
             return
         }
-        if (!this.transportData?.playing || this.transportData!.currentBarStarted <= currentTime) {
+        if (!this.transportData?.playing || this.transportData!.currentBarStarted > currentTime) {
             return
         }
         
-        console.log("passing midi onto note recorder")
         this.noteRecorder.onMIDI(bytes, currentTime)
     }    
 }

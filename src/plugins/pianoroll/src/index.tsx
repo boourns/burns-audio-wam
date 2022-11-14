@@ -100,10 +100,13 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 			if (ev.data.event == "transport") {
 				this.transport = ev.data.transport
 			} else if (ev.data.event == "addNote") {
-				console.log("host received note")
 				const clip = this.sequencer.pianoRoll.getClip(this.sequencer.pianoRoll.playingClip)
 				const note = ev.data.note
+
 				clip?.addNote(note.tick, note.number, note.duration, note.velocity)
+				if (this.sequencer.pianoRoll.renderCallback) {
+					this.sequencer.pianoRoll.renderCallback()
+				}
 			}
 		})
 

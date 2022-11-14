@@ -1,6 +1,7 @@
+import { WamTransportData } from "@webaudiomodules/api"
 import { time } from "lib0"
 import { MIDI } from "../../shared/midi"
-import {Clip} from "./Clip"
+import {Clip, PPQN} from "./Clip"
 
 type NoteState = {
    onTimestamp?: number
@@ -10,6 +11,7 @@ type NoteState = {
 export class MIDINoteRecorder {
     states: NoteState[]
     channel: number
+    transportData?: WamTransportData
 
     addNote: (tick: number, number: number, duration: number, velocity: number) => void
     getClip: () => Clip
@@ -52,7 +54,7 @@ export class MIDINoteRecorder {
 
         if (isNoteOn) {
             this.states[event[1]] = {
-                onTimestamp: timestamp,
+                onTimestamp: this.getTick(timestamp),
                 onVelocity: event[2]
             }
         }
@@ -72,9 +74,17 @@ export class MIDINoteRecorder {
         this.addNote(
             state.onTimestamp,
             note,
-            timestamp - state.onTimestamp,
+            this.getTick(timestamp) - state.onTimestamp,
             state.onVelocity
         )
         this.states[note] = {}
+    }
+
+    getTick(timestamp: number) {
+        var timeElapsed = timestamp - this.transportData!.currentBarStarted
+        var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
+        var tickPosition = Math.floor(beatPosition * PPQN)
+
+        return tickPosition % this.getClip().state.length;
     }
 }
