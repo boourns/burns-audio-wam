@@ -4,7 +4,7 @@ import { MIDI } from "../../shared/midi"
 import {Clip, PPQN} from "./Clip"
 
 type NoteState = {
-   onTimestamp?: number
+   onTick?: number
    onVelocity?: number
 }
 
@@ -28,7 +28,7 @@ export class MIDINoteRecorder {
 
     onMIDI(event: number[], timestamp: number) {
         let isNoteOn = (event[0] & 0xF0) == MIDI.NOTE_ON
-        let isNoteOff = (event[0] & 0xF0) == MIDI.NOTE_OFF && (event[0] & 0x0f) == this.channel
+        let isNoteOff = (event[0] & 0xF0) == MIDI.NOTE_OFF
 
         // check channel
         if ((isNoteOn || isNoteOff) && this.channel != -1 && (event[0] & 0x0f) != this.channel) {
@@ -44,37 +44,39 @@ export class MIDINoteRecorder {
 
         const state = this.states[event[1]]!
 
-        if (isNoteOff && state.onTimestamp !== undefined) {
-            this.finalizeNote(event[1], timestamp)
+        const tick = this.getTick(timestamp)
+
+        if (isNoteOff && state.onTick !== undefined) {
+            this.finalizeNote(event[1], tick)
         }
 
-        if (isNoteOn && state.onTimestamp !== undefined) {
-            this.finalizeNote(event[1], timestamp)
+        if (isNoteOn && state.onTick !== undefined) {
+            this.finalizeNote(event[1], tick)
         }
 
         if (isNoteOn) {
             this.states[event[1]] = {
-                onTimestamp: this.getTick(timestamp),
+                onTick: tick,
                 onVelocity: event[2]
             }
         }
     }
 
-    finalizeAllNotes(finalTimestamp: number) {
+    finalizeAllNotes(finalTick: number) {
         for (let i = 0; i < 128; i++) {
-            if (this.states[i].onTimestamp !== undefined) {
-                this.finalizeNote(i, finalTimestamp)
+            if (this.states[i].onTick !== undefined) {
+                this.finalizeNote(i, finalTick)
             }
         }
     }
 
-    finalizeNote(note: number, timestamp: number) {
+    finalizeNote(note: number, tick: number) {
         const state = this.states[note]!
 
         this.addNote(
-            state.onTimestamp,
+            state.onTick,
             note,
-            this.getTick(timestamp) - state.onTimestamp,
+            tick - state.onTick,
             state.onVelocity
         )
         this.states[note] = {}
