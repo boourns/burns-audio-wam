@@ -111,6 +111,13 @@ export class Clip {
         this.dirty = dirty;
     }
 
+    setQuantize(quantize: number) {
+        if (this.quantize != quantize) {
+            this.dirty = true
+        }
+        this.quantize = quantize
+    }
+
     needsRender(): boolean {
         return this.dirty;
     }

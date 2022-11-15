@@ -1,3 +1,4 @@
+import { WamTransportData } from "@webaudiomodules/api";
 import { NoteDefinition } from "wam-extensions";
 import { Clip, Note } from "./Clip";
 
@@ -21,6 +22,7 @@ export type NoteCanvasRenderState = {
     clip: Clip
     visibleNotes: NoteDefinition[];
     layingNewNote: Note
+    transportData: WamTransportData
 }
 
 type NoteCanvasRenderFacts = {
@@ -121,6 +123,9 @@ export class NoteCanvasRenderer {
                     let lineWidth = 1
                     if (pos % 24 == 0) {
                         lineWidth = 2
+                    }
+                    if (pos % (24 * state.transportData.timeSigNumerator) == 0) {
+                        lineWidth = 3
                     }
 
                     line(ctx, x, 0, x, state.height, lineWidth, style)

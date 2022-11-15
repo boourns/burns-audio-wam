@@ -94,10 +94,14 @@ export class PianoRoll {
 			return
 		}
 		
+		const oldClips = this.clips
 		this.clips = {}
 
 		for (let id of Object.keys(state.clips)) {
 			this.clips[id] = new Clip(id, state.clips[id])
+			if (oldClips[id]) {
+				this.clips[id].quantize = oldClips[id].quantize
+			}
 		}
 
 		console.log("PianoRoll setState: loading clips ", state.clips)
