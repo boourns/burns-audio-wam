@@ -35,7 +35,7 @@ export class ClipSettingsView extends Component<ClipSettingsProps, any> {
     }
 
     quantizeChanged(value: string) {
-        this.props.clip.quantize = parseInt(value)
+        this.props.clip.setQuantize(parseInt(value))
         this.props.onChange()
     }
 

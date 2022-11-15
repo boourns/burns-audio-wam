@@ -13,6 +13,7 @@ const logger = (...any: any) => {}
 //const logger = console.log
 
 import styleRoot from "./PianoRollView.scss"
+import { WamTransportData } from '@webaudiomodules/api';
 
 // @ts-ignore
 let styles = styleRoot.locals as typeof styleRoot
@@ -262,7 +263,8 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
             horizontalZoom: this.zoom,
             clip: clip,
             visibleNotes: this.notes,
-            layingNewNote: this.state.layingNewNote
+            layingNewNote: this.state.layingNewNote,
+            transportData: this.props.plugin.transport ?? defaultTransport
         }
 
         let canvas = this.canvasRenderer.render(rendererState)
@@ -461,3 +463,11 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 }
 
 
+const defaultTransport: WamTransportData = {
+    currentBar: 0,
+    currentBarStarted: 0,
+    tempo: 120,
+    timeSigNumerator: 4,
+    timeSigDenominator: 4,
+    playing: false,
+}

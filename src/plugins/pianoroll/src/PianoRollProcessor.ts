@@ -57,7 +57,6 @@ class PianoRollProcessor extends WamProcessor {
                 return this.clips.get(this.currentClipId)
             },
             (tick: number, number: number, duration: number, velocity: number) => {
-                console.log("mide note recorder got new note")
                 super.port.postMessage({ event:"addNote", note: {tick, number, duration, velocity}})
             }
         )
