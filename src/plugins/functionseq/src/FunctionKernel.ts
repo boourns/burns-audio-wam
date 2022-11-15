@@ -8,8 +8,10 @@ type ParameterDefinition = {
 }
 
 type FunctionSequencer = {
+    init?(): void
     parameters?(): ParameterDefinition[]
-    onTick?(ticks: number, params: Record<string, any>): {note: number, velocity: number, duration: number}[]
+    onTick?(ticks: number, params: Record<string, any>): void
+    onMidi?(ticks: number, event: number[]): void
 }
 
 export class FunctionKernel {
@@ -85,6 +87,8 @@ export class FunctionKernel {
     onTransport(transportData: WamTransportData) {
         this.transport = transportData
     }
+
+    onMidi(tick: number, )
 
     validateParameter(p: ParameterDefinition) {
         if (p.id === undefined || p.config === undefined) {
