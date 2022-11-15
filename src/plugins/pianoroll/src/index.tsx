@@ -103,7 +103,10 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 				const clip = this.sequencer.pianoRoll.getClip(this.sequencer.pianoRoll.playingClip)
 				const note = ev.data.note
 
-				clip?.addNote(note.tick, note.number, note.duration, note.velocity)
+				// TODO: optionally don't quantize and just use note.tick
+				const quantizedTick = Math.round(note.tick / clip.quantize) * clip.quantize
+
+				clip?.addNote(quantizedTick, note.number, note.duration, note.velocity)
 				if (this.sequencer.pianoRoll.renderCallback) {
 					this.sequencer.pianoRoll.renderCallback()
 				}

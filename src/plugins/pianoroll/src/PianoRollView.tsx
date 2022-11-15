@@ -335,7 +335,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
             settingsPanel = <ClipSettingsView clip={this.props.pianoRoll.getClip(this.props.clipId)} onChange={() => this.clipSettingsChanged()} />
         }
 
-        let settingsLabel = this.state.showSettingsModal ? "Settings ▸" : "Settings ▾"
+        let settingsLabel = this.state.showSettingsModal ? "Settings ▾" : "Settings ▸"
 
         let recordingLabel = this.props.pianoRoll.pluginRecordingArmed ? "Rec armed 🔴" : "Press to record ⚫️"
 

@@ -18,9 +18,12 @@ class PianoRollProcessor extends WamProcessor {
 
     lastTime: number
     isPlaying: boolean
+
     ticks: number
+    startingTicks: number
+
     proxyId: string
-    lastBPM: number
+
     secondsPerTick: number
     transportData?: WamTransportData
     count: number
@@ -93,10 +96,10 @@ class PianoRollProcessor extends WamProcessor {
             this.isPlaying = true
 
             // current position in ticks = (current bar * beats per bar) * (ticks per beat) % (clip length in ticks)
-            this.ticks = ((this.transportData!.currentBar * this.transportData!.timeSigNumerator) * PPQN) % clip.state.length
+            this.startingTicks = ((this.transportData!.currentBar * this.transportData!.timeSigNumerator) * PPQN)
 
             // rewind one tick so that on our first loop we process notes for the first tick
-            this.ticks--
+            this.ticks = this.startingTicks - 1
         }
 
         if (!this.transportData.playing && this.isPlaying) {
@@ -106,24 +109,25 @@ class PianoRollProcessor extends WamProcessor {
 		if (this.transportData!.playing && this.transportData!.currentBarStarted <= schedulerTime) {
 			var timeElapsed = schedulerTime - this.transportData!.currentBarStarted
             var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
-            var tickPosition = Math.floor(beatPosition * PPQN)
+            var absoluteTickPosition = Math.floor(beatPosition * PPQN)
 
-            let clipPosition = tickPosition % clip.state.length;
+            let clipPosition = absoluteTickPosition % clip.state.length;
 
-            if (this.recordingArmed && this.ticks > clipPosition) {
+            if (this.recordingArmed && (this.ticks % clip.state.length) > clipPosition) {
                 // we just circled back, so finalize any notes in the buffer
                 this.noteRecorder.finalizeAllNotes(clip.state.length-1)
             }
 
             let secondsPerTick = 1.0 / ((this.transportData!.tempo / 60.0) * PPQN);
 
-            while (this.ticks != clipPosition) {
-                this.ticks = (this.ticks + 1) % clip.state.length;
+            while (this.ticks != absoluteTickPosition) {
+                this.ticks = this.ticks + 1
+                const tickMoment = this.transportData.currentBarStarted + ((this.ticks - this.startingTicks) * secondsPerTick)
 
-                clip.notesForTick(this.ticks).forEach(note => {
+                clip.notesForTick(this.ticks % clip.state.length).forEach(note => {
                     this.emitEvents(
-                        { type: 'wam-midi', time: schedulerTime, data: { bytes: [MIDI.NOTE_ON, note.number, note.velocity] } },
-                        { type: 'wam-midi', time: schedulerTime+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF, note.number, note.velocity] } }
+                        { type: 'wam-midi', time: tickMoment, data: { bytes: [MIDI.NOTE_ON, note.number, note.velocity] } },
+                        { type: 'wam-midi', time: tickMoment+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF, note.number, note.velocity] } }
                     )
                 })
             }
@@ -155,6 +159,7 @@ class PianoRollProcessor extends WamProcessor {
     _onTransport(transportData: WamTransportData) {
         this.transportData = transportData
         this.noteRecorder.transportData = transportData
+        this.isPlaying = false
 
         super.port.postMessage({
             event:"transport",
