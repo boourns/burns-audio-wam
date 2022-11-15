@@ -9,8 +9,6 @@ import { ClipSettingsView } from './ClipSettingsView';
 import { Note, PPQN } from './Clip';
 import { Design, NoteCanvasRenderer, NoteCanvasRenderState } from './NoteCanvasRenderer';
 
-import {Modal} from "../../shared/ui/Modal"
-
 const logger = (...any: any) => {}
 //const logger = console.log
 
@@ -332,16 +330,29 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         h("div", {})
         logger("entering render")
 
-        var settingsModal = null
+        var settingsPanel = null
         if (this.state.showSettingsModal) {
-            settingsModal = <Modal>
-                <ClipSettingsView clip={this.props.pianoRoll.getClip(this.props.clipId)} onChange={() => this.clipSettingsChanged()} onClose={() => this.closeClipSettings()} />
-            </Modal>
+            settingsPanel = <ClipSettingsView clip={this.props.pianoRoll.getClip(this.props.clipId)} onChange={() => this.clipSettingsChanged()} />
         }
 
+        let settingsLabel = this.state.showSettingsModal ? "Settings ▾" : "Settings ▸"
+
+        let recordingLabel = this.props.pianoRoll.pluginRecordingArmed ? "Rec armed 🔴" : "Press to record ⚫️"
+
         return (
-            <div ref={(ref) => this.setup(ref)} class={styles.pianorollContainer}>
-                {settingsModal}
+            <div style="display: flex; flex-direction: column; height: 100%">
+                <div style="height: 40px; background-color: darkgray; display: flex; flex-direction: row; justify-content: space-between;">
+                    <div>
+                        <button class={styles.menuButton} onClick={() => this.recordingPressed()}>{recordingLabel}</button>
+                        <button class={styles.menuButton} onClick={() => this.clearButtonPressed()}>Clear Pattern</button>
+                    </div>
+                    
+                    <div class={styles.anchor} style="text-align: right;">
+                        <button class={`${styles.menuButton}`} onClick={() => this.settingsButtonPressed()}>{settingsLabel}</button>
+                        {settingsPanel}
+                    </div>
+                </div>
+                <div ref={(ref) => this.setup(ref)} class={styles.pianorollContainer}></div>
             </div>
         )
     }
@@ -360,6 +371,14 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         }
     }
 
+    clearButtonPressed() {
+        const clip = this.props.pianoRoll.getClip(this.props.clipId)
+        let state = clip.getState()
+        state.notes = []
+        clip.setState(state)
+        this.forceUpdate()
+    }
+
     renderHeader() {
         let container = document.createElement("div")
         container.setAttribute("style", `height: ${Design.headerHeight}px; display: flex; background-color: rgba(255, 255, 255, 0.4)`)
@@ -367,12 +386,6 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         let span = document.createElement("div")
         span.setAttribute("style", `width: ${Design.gutterWidth}px; display: flex; margin: auto; `)
         
-        let settingsButton = document.createElement("button")
-        settingsButton.textContent = "Settings"
-        settingsButton.setAttribute("style", "margin: auto;")
-        
-        settingsButton.addEventListener("click", this.settingsButtonPressed.bind(this))
-        span.appendChild(settingsButton)
         container.appendChild(span)
 
         let scrubberLength = this.totalWidth-Design.gutterWidth;
@@ -390,10 +403,15 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
         return container
     }
 
-    settingsButtonPressed(e: MouseEvent) {
+    settingsButtonPressed() {
         this.setState({
-            showSettingsModal: true
+            showSettingsModal: !this.state.showSettingsModal
         })
+    }
+
+    recordingPressed() {
+        this.props.pianoRoll.armPluginRecording(!this.props.pianoRoll.pluginRecordingArmed)
+        this.forceUpdate()
     }
 
     scrubberMouseDown(e: MouseEvent) {
@@ -439,12 +457,6 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
     clipSettingsChanged() {
         this.forceUpdate()
-    }
-
-    closeClipSettings() {
-        this.setState({
-            showSettingsModal: false
-        })
     }
 }
 

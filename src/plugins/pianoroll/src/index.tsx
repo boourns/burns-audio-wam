@@ -92,13 +92,28 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 			this.sequencer.port.postMessage({action: "clip", id: c.state.id, state: c.getState()})
 		}
 
+		this.sequencer.pianoRoll.updateProcessorRecording = (armed: boolean) => {
+			this.sequencer.port.postMessage({action: "recording", armed})
+		}
+
 		this.sequencer.port.addEventListener("message", ev => {
 			if (ev.data.event == "transport") {
 				this.transport = ev.data.transport
+			} else if (ev.data.event == "addNote") {
+				const clip = this.sequencer.pianoRoll.getClip(this.sequencer.pianoRoll.playingClip)
+				const note = ev.data.note
+
+				// TODO: optionally don't quantize and just use note.tick
+				const quantizedTick = Math.round(note.tick / clip.quantize) * clip.quantize
+
+				clip?.addNote(quantizedTick, note.number, note.duration, note.velocity)
+				if (this.sequencer.pianoRoll.renderCallback) {
+					this.sequencer.pianoRoll.renderCallback()
+				}
 			}
 		})
 
-		this.updatePatternExtension()
+		this.updateExtensions()
 
 		return node
     }
@@ -157,7 +172,17 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 		render(null, el)
 	}
 
-	updatePatternExtension() {
+	updateExtensions() {
+		if (window.WAMExtensions && window.WAMExtensions.recording) {
+			window.WAMExtensions.recording.register(this.instanceId, {
+				armRecording: (armed: boolean) => {
+					this.sequencer.pianoRoll.armHostRecording(armed)
+				}
+			})
+		} else {
+			this.sequencer.pianoRoll.armHostRecording(true)
+		}
+
 		if (!(window.WAMExtensions && window.WAMExtensions.patterns)) {
 			return
 		}
@@ -214,5 +239,7 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 		}
 
 		window.WAMExtensions.patterns.setPatternDelegate(this.instanceId, patternDelegate)
+
+
 	}
 }

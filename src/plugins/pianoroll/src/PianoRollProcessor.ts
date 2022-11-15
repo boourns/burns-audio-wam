@@ -1,9 +1,10 @@
 import { MIDI } from "../../shared/midi";
-import { AudioWorkletGlobalScope, WamTransportData } from "@webaudiomodules/api";
+import { AudioWorkletGlobalScope, WamMidiData, WamTransportData } from "@webaudiomodules/api";
 import { Clip } from "./Clip";
+import { MIDINoteRecorder } from "./MIDINoteRecorder";
 
 const moduleId = 'com.sequencerParty.pianoRoll'
-const PPQN = 24
+export const PPQN = 24
 
 const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
 const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
@@ -16,9 +17,13 @@ class PianoRollProcessor extends WamProcessor {
     }
 
     lastTime: number
+    isPlaying: boolean
+
     ticks: number
+    startingTicks: number
+
     proxyId: string
-    lastBPM: number
+
     secondsPerTick: number
     transportData?: WamTransportData
     count: number
@@ -29,6 +34,8 @@ class PianoRollProcessor extends WamProcessor {
     currentClipId: string
 
     futureEvents: any[]
+
+    noteRecorder: MIDINoteRecorder
 
 	constructor(options: any) {
 		super(options);
@@ -43,6 +50,17 @@ class PianoRollProcessor extends WamProcessor {
         this.clips = new Map()
         this.currentClipId = "default"
         this.count = 0
+        this.isPlaying = false
+
+        this.noteRecorder = new MIDINoteRecorder(
+            () => {
+                return this.clips.get(this.currentClipId)
+            },
+            (tick: number, number: number, duration: number, velocity: number) => {
+                console.log("mide note recorder got new note")
+                super.port.postMessage({ event:"addNote", note: {tick, number, duration, velocity}})
+            }
+        )
 
         super.port.start();
 	}
@@ -73,22 +91,43 @@ class PianoRollProcessor extends WamProcessor {
         // lookahead
         var schedulerTime = currentTime + 0.05
 
+        // did we just start playing? set ticks to the beginning of 'currentBar'
+        if (!this.isPlaying && this.transportData.playing && this.transportData!.currentBarStarted <= currentTime) {
+            this.isPlaying = true
+
+            // current position in ticks = (current bar * beats per bar) * (ticks per beat) % (clip length in ticks)
+            this.startingTicks = ((this.transportData!.currentBar * this.transportData!.timeSigNumerator) * PPQN)
+
+            // rewind one tick so that on our first loop we process notes for the first tick
+            this.ticks = this.startingTicks - 1
+        }
+
+        if (!this.transportData.playing && this.isPlaying) {
+            this.isPlaying = false
+        }
+
 		if (this.transportData!.playing && this.transportData!.currentBarStarted <= schedulerTime) {
 			var timeElapsed = schedulerTime - this.transportData!.currentBarStarted
             var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
-            var tickPosition = Math.floor(beatPosition * PPQN)
+            var absoluteTickPosition = Math.floor(beatPosition * PPQN)
 
-            let clipPosition = tickPosition % clip.state.length;
+            let clipPosition = absoluteTickPosition % clip.state.length;
 
+            if (this.recordingArmed && (this.ticks % clip.state.length) > clipPosition) {
+                // we just circled back, so finalize any notes in the buffer
+                this.noteRecorder.finalizeAllNotes(clip.state.length-1)
+            }
 
-            if (this.ticks != clipPosition) {
-                let secondsPerTick = 1.0 / ((this.transportData!.tempo / 60.0) * PPQN);
+            let secondsPerTick = 1.0 / ((this.transportData!.tempo / 60.0) * PPQN);
 
-                this.ticks = clipPosition;
-                clip.notesForTick(clipPosition).forEach(note => {
+            while (this.ticks != absoluteTickPosition) {
+                this.ticks = this.ticks + 1
+                const tickMoment = this.transportData.currentBarStarted + ((this.ticks - this.startingTicks) * secondsPerTick)
+
+                clip.notesForTick(this.ticks % clip.state.length).forEach(note => {
                     this.emitEvents(
-                        { type: 'wam-midi', time: schedulerTime, data: { bytes: [MIDI.NOTE_ON, note.number, note.velocity] } },
-                        { type: 'wam-midi', time: schedulerTime+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF, note.number, note.velocity] } }
+                        { type: 'wam-midi', time: tickMoment, data: { bytes: [MIDI.NOTE_ON, note.number, note.velocity] } },
+                        { type: 'wam-midi', time: tickMoment+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF, note.number, note.velocity] } }
                     )
                 })
             }
@@ -110,6 +149,8 @@ class PianoRollProcessor extends WamProcessor {
                 id: message.data.id,
                 timestamp: 0,
             }
+        } else if (message.data && message.data.action == "recording") {
+            this.recordingArmed = message.data.armed
         } else {
             super._onMessage(message)
         }
@@ -117,12 +158,29 @@ class PianoRollProcessor extends WamProcessor {
 
     _onTransport(transportData: WamTransportData) {
         this.transportData = transportData
+        this.noteRecorder.transportData = transportData
+        this.isPlaying = false
 
         super.port.postMessage({
             event:"transport",
             transport: transportData
         })
     }
+
+    _onMidi(midiData: WamMidiData) {        
+        const { currentTime } = audioWorkletGlobalScope;
+
+        // /* eslint-disable no-lone-blocks */
+        const bytes = midiData.bytes;
+        if (!this.recordingArmed) {
+            return
+        }
+        if (!this.transportData?.playing || this.transportData!.currentBarStarted > currentTime) {
+            return
+        }
+        
+        this.noteRecorder.onMIDI(bytes, currentTime)
+    }    
 }
 
 try {
