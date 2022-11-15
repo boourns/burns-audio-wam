@@ -17,6 +17,7 @@ class PianoRollProcessor extends WamProcessor {
     }
 
     lastTime: number
+    isPlaying: boolean
     ticks: number
     proxyId: string
     lastBPM: number
@@ -46,6 +47,7 @@ class PianoRollProcessor extends WamProcessor {
         this.clips = new Map()
         this.currentClipId = "default"
         this.count = 0
+        this.isPlaying = false
 
         this.noteRecorder = new MIDINoteRecorder(
             () => {
@@ -86,6 +88,21 @@ class PianoRollProcessor extends WamProcessor {
         // lookahead
         var schedulerTime = currentTime + 0.05
 
+        // did we just start playing? set ticks to the beginning of 'currentBar'
+        if (!this.isPlaying && this.transportData.playing && this.transportData!.currentBarStarted <= currentTime) {
+            this.isPlaying = true
+
+            // current position in ticks = (current bar * beats per bar) * (ticks per beat) % (clip length in ticks)
+            this.ticks = ((this.transportData!.currentBar * this.transportData!.timeSigNumerator) * PPQN) % clip.state.length
+
+            // rewind one tick so that on our first loop we process notes for the first tick
+            this.ticks--
+        }
+
+        if (!this.transportData.playing && this.isPlaying) {
+            this.isPlaying = false
+        }
+
 		if (this.transportData!.playing && this.transportData!.currentBarStarted <= schedulerTime) {
 			var timeElapsed = schedulerTime - this.transportData!.currentBarStarted
             var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
@@ -98,11 +115,12 @@ class PianoRollProcessor extends WamProcessor {
                 this.noteRecorder.finalizeAllNotes(clip.state.length-1)
             }
 
-            if (this.ticks != clipPosition) {
-                let secondsPerTick = 1.0 / ((this.transportData!.tempo / 60.0) * PPQN);
+            let secondsPerTick = 1.0 / ((this.transportData!.tempo / 60.0) * PPQN);
 
-                this.ticks = clipPosition;
-                clip.notesForTick(clipPosition).forEach(note => {
+            while (this.ticks != clipPosition) {
+                this.ticks = (this.ticks + 1) % clip.state.length;
+
+                clip.notesForTick(this.ticks).forEach(note => {
                     this.emitEvents(
                         { type: 'wam-midi', time: schedulerTime, data: { bytes: [MIDI.NOTE_ON, note.number, note.velocity] } },
                         { type: 'wam-midi', time: schedulerTime+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF, note.number, note.velocity] } }
