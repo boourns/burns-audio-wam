@@ -3,6 +3,11 @@ import MIDIInputModule from '.';
 import { Select } from '../../shared/ui/Select'
 import { MIDIInputNode } from './Node';
 
+import styleRoot from "./MIDIInputView.scss";
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
+
 export interface MIDIInputProps {
     plugin: MIDIInputNode
   }
@@ -30,7 +35,7 @@ export interface MIDIInputProps {
       h("div", {})
 
       if (!this.props.plugin.midiInitialized) {
-        return <div>MIDI not initialized</div>
+        return <div><div class={styles.module}>MIDI not initialized</div></div>
       }
 
       if (!window.WAMExtensions.userSetting.get) {
@@ -46,7 +51,7 @@ export interface MIDIInputProps {
       }
 
       return <div>
-        <div style="display: flex; flex-direction: row; padding: 8px;">
+        <div class={styles.module}>
           <Select label="MIDI Input:" value={() => selectedValue} values={values} options={options} onChange={(i) => this.selectMIDIOutput(i)}></Select>
         </div>
       </div>

@@ -60,6 +60,7 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
                              value={() => this.getValue(p)}
                              label={p.config.label || p.id}
                              bipolar={p.config.minValue < 0}
+                             color="var(--var-RangeDefault)"
                              >
                         </Knob>
             case "int":
@@ -70,6 +71,7 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
                              label={p.config.label || p.id}
                              bipolar={p.config.minValue < 0}
                              integer={true}
+                             color="var(--var-RangeDefault)"
                              >
                         </Knob>
             case "boolean":
