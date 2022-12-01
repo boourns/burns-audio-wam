@@ -105,7 +105,7 @@ export class ExternalInstrumentView extends Component<ExternalInstrumentProps, E
         panel = this.renderEditor()
         break
       case "GUI":
-        panelLabel = "CODE"
+        panelLabel = "Edit"
         panel = this.renderParameters()
         break
     }
@@ -113,13 +113,9 @@ export class ExternalInstrumentView extends Component<ExternalInstrumentProps, E
     let result = (
     <div class={styles.module}>
       <div style="display: flex; flex-direction: column">
-        <div style="display: flex; justify-content: space-between; width: 100%">
+        <div style="display: flex; flex-direction: row-reverse; justify-content: space-between; width: 100%">
           <div>
-            <button onClick={this.panelPressed} style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)">{panelLabel}</button> 
-          </div>
-
-          <div style={statusStyle}>
-            { this.props.plugin.error != undefined ? this.props.plugin.error.toString() : "Running" }
+            <button onClick={this.panelPressed} class={styles.button}>{panelLabel}</button> 
           </div>
         </div>
       </div>

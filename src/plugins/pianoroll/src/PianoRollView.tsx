@@ -334,12 +334,12 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
 
         var settingsPanel = null
         if (this.state.showSettingsModal) {
-            settingsPanel = <ClipSettingsView clip={this.props.pianoRoll.getClip(this.props.clipId)} onChange={() => this.clipSettingsChanged()} />
+            settingsPanel = <ClipSettingsView pianoRoll={this.props.pianoRoll} clip={this.props.pianoRoll.getClip(this.props.clipId)} onChange={() => this.clipSettingsChanged()} />
         }
 
         let settingsLabel = this.state.showSettingsModal ? "Settings ▾" : "Settings ▸"
 
-        let recordingLabel = this.props.pianoRoll.pluginRecordingArmed ? "Rec armed 🔴" : "Press to record ⚫️"
+        let recordingLabel = this.props.pianoRoll.midiConfig.pluginRecordingArmed ? "Rec armed 🔴" : "Press to record ⚫️"
 
         return (
             <div style="display: flex; flex-direction: column; height: 100%">
@@ -412,7 +412,7 @@ export class PianoRollView extends Component<PianoRollProps, PianoRollState> {
     }
 
     recordingPressed() {
-        this.props.pianoRoll.armPluginRecording(!this.props.pianoRoll.pluginRecordingArmed)
+        this.props.pianoRoll.armPluginRecording(!this.props.pianoRoll.midiConfig.pluginRecordingArmed)
         this.forceUpdate()
     }
 

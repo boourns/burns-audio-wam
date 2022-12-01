@@ -3,10 +3,11 @@ import { Clip } from './Clip';
 
 import { Select } from '../../shared/ui/Select'
 import { TextInput } from '../../shared/ui/TextInput'
+import { PianoRoll } from './PianoRoll';
 
 export type HTMLInputEvent = Event & {target: HTMLInputElement }
 
-let quantizeOptions = [
+const quantizeOptions = [
     "off",
     "1/32",
     "1/16",
@@ -15,7 +16,7 @@ let quantizeOptions = [
     "1 bar"
 ]
 
-let quantizeValues = [
+const quantizeValues = [
     1,
     3,
     6,
@@ -24,9 +25,37 @@ let quantizeValues = [
     96
 ]
 
+const outputChannelOptions = [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+]
+
+const outputChannelValues = [
+    0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+]
+
+const inputChannelOptions = ["OMNI", ...outputChannelOptions]
+
+const inputChannelValues = [-1, ...outputChannelValues]
+
 export interface ClipSettingsProps {
     onChange(): void
     clip: Clip
+    pianoRoll: PianoRoll
 }
 
 export class ClipSettingsView extends Component<ClipSettingsProps, any> {
@@ -36,6 +65,16 @@ export class ClipSettingsView extends Component<ClipSettingsProps, any> {
 
     quantizeChanged(value: string) {
         this.props.clip.setQuantize(parseInt(value))
+        this.props.onChange()
+    }
+
+    inputMidiChanged(value: string) {
+        this.props.pianoRoll.inputMidiChanged(parseInt(value))
+        this.props.onChange()
+    }
+
+    outputMidiChanged(value: string) {
+        this.props.pianoRoll.outputMidiChanged(parseInt(value))
         this.props.onChange()
     }
 
@@ -65,7 +104,7 @@ export class ClipSettingsView extends Component<ClipSettingsProps, any> {
         let bars = this.props.clip.state.length / 96;
 
         return (
-        <div style="background-color: lightgray; padding: 5px; z-index: 2;">
+        <div style="background-color: var(--var-SecondaryBackground); color: var(--var-SecondaryForeground); padding: 5px; z-index: 2;">
             <div style="display: flex; align-items: center">
                 <label>Quantize</label>
                 <Select style="flex-direction: row-reverse;" options={quantizeOptions} values={quantizeValues} value={() => this.props.clip.quantize} onChange={(e) => this.quantizeChanged(e)} />
@@ -73,6 +112,14 @@ export class ClipSettingsView extends Component<ClipSettingsProps, any> {
             <div style="padding-top: 4px; padding-bottom: 4px;">
                 <label>Clip Length (bars)</label>
                 <TextInput value={bars} onChange={(e) => this.lengthChanged(e)} />
+            </div>
+            <div style="display: flex; align-items: center">
+                <label>Input MIDI Ch</label>
+                <Select style="flex-direction: row-reverse;" options={inputChannelOptions} values={inputChannelValues} value={() => this.props.pianoRoll.midiConfig.inputMidiChannel} onChange={(e) => this.inputMidiChanged(e)} />
+            </div>
+            <div style="display: flex; align-items: center">
+                <label>Output MIDI Ch</label>
+                <Select style="flex-direction: row-reverse;" options={outputChannelOptions} values={outputChannelValues} value={() => this.props.pianoRoll.midiConfig.outputMidiChannel} onChange={(e) => this.outputMidiChanged(e)} />
             </div>
         </div>
         )

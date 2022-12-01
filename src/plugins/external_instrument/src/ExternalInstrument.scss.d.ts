@@ -2,6 +2,7 @@
 // Please do not change this file!
 interface CssExports {
   'blah': string;
+  'button': string;
   'module': string;
 }
 export const cssExports: CssExports;

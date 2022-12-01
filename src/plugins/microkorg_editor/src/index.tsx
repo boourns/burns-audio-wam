@@ -10,7 +10,7 @@ import { WebAudioModule } from '@webaudiomodules/sdk';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 import styleRoot from "./MicrokorgEditorView.scss"
 import { MicrokorgEditorView } from './MicrokorgEditorView';
-import { MIDIControllerNode } from './MIDIControllerNode';
+import { MIDIControllerNode } from '../../shared/midi/MIDIControllerNode';
 
 export default class MicrokorgControllerModule extends WebAudioModule<MIDIControllerNode> {
 	//@ts-ignore

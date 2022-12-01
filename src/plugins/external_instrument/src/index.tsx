@@ -8,7 +8,7 @@ import { h, render } from 'preact';
 
 import { WebAudioModule, addFunctionModule } from '@webaudiomodules/sdk';
 import { getBaseUrl } from '../../shared/getBaseUrl';
-import { DynamicParameterNode, DynamicParamGroup } from '../../shared/DynamicParameterNode';
+import { DynamicParameterNode } from '../../shared/DynamicParameterNode';
 
 import getExternalInstrumentProcessor, { ExternalInstrumentConfig } from './ExternalInstrumentProcessor';
 import { ExternalInstrumentView } from './ExternalInstrumentView';

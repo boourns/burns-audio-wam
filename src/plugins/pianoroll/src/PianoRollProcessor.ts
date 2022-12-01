@@ -2,6 +2,7 @@ import { MIDI } from "../../shared/midi";
 import { AudioWorkletGlobalScope, WamMidiData, WamTransportData } from "@webaudiomodules/api";
 import { Clip } from "./Clip";
 import { MIDINoteRecorder } from "./MIDINoteRecorder";
+import { MIDIConfiguration } from "./MIDIConfiguration";
 
 const moduleId = 'com.sequencerParty.pianoRoll'
 export const PPQN = 24
@@ -36,6 +37,7 @@ class PianoRollProcessor extends WamProcessor {
     futureEvents: any[]
 
     noteRecorder: MIDINoteRecorder
+    midiConfig: MIDIConfiguration
 
 	constructor(options: any) {
 		super(options);
@@ -51,6 +53,12 @@ class PianoRollProcessor extends WamProcessor {
         this.currentClipId = "default"
         this.count = 0
         this.isPlaying = false
+        this.midiConfig = {
+            hostRecordingArmed: false,
+            pluginRecordingArmed: false,
+            inputMidiChannel: -1,
+            outputMidiChannel: 0,
+        }
 
         this.noteRecorder = new MIDINoteRecorder(
             () => {
@@ -125,8 +133,8 @@ class PianoRollProcessor extends WamProcessor {
 
                 clip.notesForTick(this.ticks % clip.state.length).forEach(note => {
                     this.emitEvents(
-                        { type: 'wam-midi', time: tickMoment, data: { bytes: [MIDI.NOTE_ON, note.number, note.velocity] } },
-                        { type: 'wam-midi', time: tickMoment+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF, note.number, note.velocity] } }
+                        { type: 'wam-midi', time: tickMoment, data: { bytes: [MIDI.NOTE_ON & this.midiConfig.outputMidiChannel, note.number, note.velocity] } },
+                        { type: 'wam-midi', time: tickMoment+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF & this.midiConfig.outputMidiChannel, note.number, note.velocity] } }
                     )
                 })
             }
@@ -148,8 +156,9 @@ class PianoRollProcessor extends WamProcessor {
                 id: message.data.id,
                 timestamp: 0,
             }
-        } else if (message.data && message.data.action == "recording") {
-            this.recordingArmed = message.data.armed
+        } else if (message.data && message.data.action == "midiConfig") {
+            this.midiConfig = message.data.config
+            this.noteRecorder.channel = this.midiConfig.inputMidiChannel
         } else {
             super._onMessage(message)
         }
@@ -171,7 +180,7 @@ class PianoRollProcessor extends WamProcessor {
 
         // /* eslint-disable no-lone-blocks */
         const bytes = midiData.bytes;
-        if (!this.recordingArmed) {
+        if (!(this.midiConfig.pluginRecordingArmed && this.midiConfig.hostRecordingArmed)) {
             return
         }
         if (!this.transportData?.playing || this.transportData!.currentBarStarted > currentTime) {
