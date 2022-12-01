@@ -79,7 +79,7 @@ export class FunctionSequencerProcessor extends DynamicParameterProcessor {
      * @param {MessageEvent} message
      */
     async _onMessage(message: any): Promise<void> {
-        if (message.data && message.data.action == "function") {
+        if (message.data && message.data.source == "function") {
             this.function.onMessage(message)
         } else {
             // @ts-ignore

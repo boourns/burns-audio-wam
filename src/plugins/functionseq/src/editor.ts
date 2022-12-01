@@ -14,6 +14,13 @@ export function defaultScript(): string {
  * */
 class RandomNoteSequencer {
     /**
+     * @param {FunctionAPI} api
+     * */
+    constructor(api) {
+        this.api = api
+    }
+
+    /**
      * @returns {WAMParameterDefinition[]}
      */
     parameters() {
@@ -42,8 +49,8 @@ class RandomNoteSequencer {
     }
 
     /**
-     * @param tick {number}
-     * @param params {Record<string, number>}
+     * @param {number} tick
+     * @param {Record<string, number>} params
      * */
     onTick(tick, params) {
         // onTick is called once every sequencer tick, which is 96 PPQN
@@ -51,20 +58,20 @@ class RandomNoteSequencer {
         // where note is the MIDI note number, velocity is an integer from 0 to 127, and duration is the length of the note in ticks.
 
         if (tick % 24 == 0) {
-            api.emitNote(params.base + Math.floor(Math.random() * params.range), 100, 10);
+            this.api.emitNote(params.base + Math.floor(Math.random() * params.range), 100, 10);
         }
     }
 
     /** 
      * onMidi is called when a MIDI message is sent to the FunctionSeq instance.
-     * @param bytes number[]
+     * @param bytes {number[]}
      * */
     onMidi(bytes) {
         
     }
 }
 
-return new RandomNoteSequencer()
+return new RandomNoteSequencer(api)
 `
 }
 
@@ -95,15 +102,67 @@ declare type WAMParameterDefinition = {
 }
 
 declare type ParameterDefinition = {
-    id: string
-    config: WAMParameterDefinition
+    id: string;
+    config: WamParameterConfiguration;
+};
+
+declare type FunctionSequencer = {
+    /**
+     * Called once when the processor has been loaded and is starting up.
+     */
+    init?(): void;
+    /**
+     * Returns a list of parameters to expose to the host as automateable.  Also generates the UI controls.
+     * @returns {ParameterDefinition[]} a list of parameters used to control the script
+     */
+    parameters?(): ParameterDefinition[];
+    /**
+     * Called 96 times per beat when the host transport is running. For example in 4/4 time, when ticks is divisible by 24, it is the start of a 16th note.
+     * @param ticks {number} the number of ticks since host transport started.
+     * @param params {Record<string, number>} the current values of all registered parameters.
+     */
+    onTick?(ticks: number, params: Record<string, number>): void;
+    /**
+     * Called when a MIDI event is received by this plugin.
+     * @param event {number[]} the bytes of the MIDI event
+     */
+    onMidi?(event: number[]): void;
+    /**
+     * Called when a downstream device updates the list of MIDI notes it responds to.  Especially useful for drum machines.
+     * @param noteList {NoteDefinition[]} An optional list of MIDI note numbers, with names, supported by downstream MIDI devices
+     */
+    onCustomNoteList(noteList?: NoteDefinition[]): void;
+};
+
+declare type NoteDefinition = {
+    number: number;
+    name?: string;
+    blackKey: boolean;
+};
+
+declare class FunctionAPI {
+    /**
+     * emits a MIDI Note on message followed by a MIDI Note off message delayed by the duration
+     * @param note {number} the MIDI note number, from 0-127
+     * @param velocity {number} MIDI note on velocity, from 0-127
+     * @param duration {number} the midi note duration, in seconds.
+     * @param startTime {number} optionally set the starting time of the note, in relation to api.getCurrentTime()
+     * */
+    emitNote(note: number, velocity: number, duration: number, startTime?: number): void;
+    emitMidiEvent(bytes: number[], eventTime: number): void;
+    /**
+     * returns the current time
+     * @returns {number} the current audioContext time, in seconds
+     */
+    getCurrentTime(): number;
+    /**
+     * Set (or unset) a list of named MIDI notes.  Used to inform earlier MIDI processors what MIDI notes are valid.
+     * @param noteList {NoteDefinition[]} a list of midi notes this processor accepts.  Set to undefined to clear the custom note list.
+     */
+    setCustomNoteList(noteList?: NoteDefinition[]): void;
 }
 
-declare interface FunctionSequencer = {
-    init?(): void
-    parameters?(): ParameterDefinition[]
-    onTick?(ticks: number, params: Record<string, number>): void
-    onMidi?(event: number[]): void
-}
+declare const api: FunctionAPI;
+
     `
   }

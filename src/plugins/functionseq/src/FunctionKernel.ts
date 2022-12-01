@@ -1,4 +1,5 @@
 import { WamMidiData, WamParameterConfiguration, WamTransportData } from "@webaudiomodules/api";
+import { NoteDefinition } from "wam-extensions";
 import { FunctionAPI } from "./FunctionAPI";
 import {FunctionSequencerProcessor} from "./FunctionSeqProcessor";
 
@@ -8,10 +9,32 @@ type ParameterDefinition = {
 }
 
 type FunctionSequencer = {
+    /**
+     * Called once when the processor has been loaded and is starting up.
+     */
     init?(): void
+    /**
+     * Returns a list of parameters to expose to the host as automateable.  Also generates the UI controls.
+     * @returns {ParameterDefinition[]} a list of parameters used to control the script
+     */
     parameters?(): ParameterDefinition[]
+    /**
+     * Called 96 times per beat when the host transport is running. For example in 4/4 time, when ticks is divisible by 24, it is the start of a 16th note.
+     * @param ticks {number} the number of ticks since host transport started.  
+     * @param params {Record<string, number>} the current values of all registered parameters.
+     */
     onTick?(ticks: number, params: Record<string, number>): void
+    /**
+     * Called when a MIDI event is received by this plugin.
+     * @param event {number[]} the bytes of the MIDI event
+     */
     onMidi?(event: number[]): void
+
+    /**
+     * Called when a downstream device updates the list of MIDI notes it responds to.  Especially useful for drum machines.
+     * @param noteList {NoteDefinition[]} An optional list of MIDI note numbers, with names, supported by downstream MIDI devices
+     */
+    onCustomNoteList(noteList?: NoteDefinition[]): void
 }
 
 export class FunctionKernel {
@@ -20,9 +43,10 @@ export class FunctionKernel {
     transport: WamTransportData
     parameterIds: string[]
     processor: FunctionSequencerProcessor
+    noteList?: NoteDefinition[]
 
     constructor(processor: FunctionSequencerProcessor) {
-        this.api = new FunctionAPI(processor.port, this)
+        this.api = new FunctionAPI()
 
         this.parameterIds = []
         this.processor = processor
@@ -75,6 +99,11 @@ export class FunctionKernel {
                 this.processor.port.postMessage({source: "functionSeq", action:"error", error: e.toString()})
                 this.function = undefined
             }
+        } else if (message.data && message.data.action == "noteList") {
+            this.noteList = message.data.noteList
+            if (this.function && this.function.onCustomNoteList) {
+                this.function.onCustomNoteList(message.data.noteList)
+            }
         } else {
             // @ts-ignore
             super._onMessage(message)
@@ -102,5 +131,4 @@ export class FunctionKernel {
             throw new Error(`Invalid parameter type ${p.config.type}`)
         }
     }
-
 }

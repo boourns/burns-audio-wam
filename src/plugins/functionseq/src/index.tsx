@@ -17,6 +17,7 @@ import { LiveCoderNode, LiveCoderView } from "../../shared/LiveCoderView"
 import { defaultScript, editorDefinition } from './editor';
 
 import styleRoot from "./FunctionSequencer.scss"
+import { NoteDefinition } from 'wam-extensions';
 	
 type FunctionSeqState = {
 	runCount: number
@@ -63,18 +64,25 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		} else {
 			console.warn("host has not implemented collaboration WAM extension")
 		}
+
+		if (window.WAMExtensions.notes) {
+			window.WAMExtensions.notes.addListener(this.instanceId, (notes?: NoteDefinition[]) => {
+				this.port.postMessage({source: "function", action: "noteList", noteList: notes})
+			})
+		}
 	}
 
 	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor {	
 		monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-			allowJs: true
+			allowJs: true,
+			checkJs: true,
+			alwaysStrict: true,
 		})
 	
 		monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
 			noSemanticValidation: false,
 			noSyntaxValidation: false,
 		});
-
 
 		const libUriString = 'ts:filename/functionSequencer.d.ts'
 		const libUri = monaco.Uri.parse(libUriString)
@@ -101,7 +109,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	upload() {
 		if (this.multiplayers.length > 0) {
 			let source = this.multiplayers[0].doc.toString()
-			this.port.postMessage({action:"function", code: source})
+			this.port.postMessage({source:"function", action:"function", code: source})
 		}
 	}
 
@@ -140,7 +148,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	 * */
 	 _onMessage(message: MessageEvent) {
 		if (message.data && message.data.source == "functionSeq") {
-			if (message.data.params) {
+			if (message.data.action == "newParams" && message.data.params) {
 				this.groupedParameters = [
 					{
 						name: "Parameters",
@@ -157,11 +165,18 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 				}
 
 				this.state = state
+			} else if (message.data.action == "error") {
+				this.error = message.data.error
+			} else if (message.data.action == "noteList") {
+				if (window.WAMExtensions.notes) {
+					window.WAMExtensions.notes.setNoteList(this.instanceId, message.data.noteList)
+				}
 			}
-			this.error = message.data.error
 			if (this.renderCallback) {
 				this.renderCallback()
 			}
+		} else if (message.data && message.data.source == "") {
+
 		} else {
 			// @ts-ignore
 			super._onMessage(message)
