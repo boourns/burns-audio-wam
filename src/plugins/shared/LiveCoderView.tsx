@@ -123,7 +123,7 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
 
     let contentChanged = false
 
-    const statusStyle = "padding: 2px; margin: 4px; " + (this.props.plugin.error ? "background-color: yellow;" : contentChanged ? "background-color: gray;" : "background-color: green;")
+    const statusStyle = "padding: 2px; margin: 4px; " + (this.props.plugin.error ? "background-color: yellow; color: black;" : contentChanged ? "background-color: gray;" : "background-color: green;")
 
     let panelLabel
     let panel

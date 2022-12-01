@@ -86,9 +86,7 @@ export class FunctionKernel {
     }
 
     onMidi(event: WamMidiData) {
-        console.log("Kernel onMidi ", event)
         if (this.function && this.function.onMidi) {
-            console.log("onMidi defined by function")
             this.function.onMidi(event.bytes)
         }
     }

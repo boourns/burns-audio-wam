@@ -69,19 +69,22 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
 			allowJs: true
 		})
-	  
+	
 		monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
 			noSemanticValidation: false,
 			noSyntaxValidation: false,
 		});
 
-	
-		const libUri = 'ts:filename/functionSequencer.d.ts';
-		const libSource = this.editorDefinition()
 
-		monaco.languages.typescript.javascriptDefaults.addExtraLib(libSource, libUri)
-		
-		monaco.editor.createModel(libSource, 'typescript', monaco.Uri.parse(libUri));
+		const libUriString = 'ts:filename/functionSequencer.d.ts'
+		const libUri = monaco.Uri.parse(libUriString)
+
+		if (!monaco.editor.getModel(libUri)) {
+			const libSource = this.editorDefinition()
+			monaco.languages.typescript.javascriptDefaults.addExtraLib(libSource, libUriString)
+			
+			monaco.editor.createModel(libSource, 'typescript', libUri);
+		}
 
 		let editor = monaco.editor.create(ref, {
 			language: 'javascript',
