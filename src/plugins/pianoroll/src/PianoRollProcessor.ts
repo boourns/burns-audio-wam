@@ -133,8 +133,8 @@ class PianoRollProcessor extends WamProcessor {
 
                 clip.notesForTick(this.ticks % clip.state.length).forEach(note => {
                     this.emitEvents(
-                        { type: 'wam-midi', time: tickMoment, data: { bytes: [MIDI.NOTE_ON & this.midiConfig.outputMidiChannel, note.number, note.velocity] } },
-                        { type: 'wam-midi', time: tickMoment+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF & this.midiConfig.outputMidiChannel, note.number, note.velocity] } }
+                        { type: 'wam-midi', time: tickMoment, data: { bytes: [MIDI.NOTE_ON | this.midiConfig.outputMidiChannel, note.number, note.velocity] } },
+                        { type: 'wam-midi', time: tickMoment+(note.duration*secondsPerTick) - 0.001, data: { bytes: [MIDI.NOTE_OFF | this.midiConfig.outputMidiChannel, note.number, note.velocity] } }
                     )
                 })
             }
