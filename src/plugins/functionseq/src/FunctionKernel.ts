@@ -1,4 +1,4 @@
-import { WamParameterConfiguration, WamTransportData } from "@webaudiomodules/api";
+import { WamMidiData, WamParameterConfiguration, WamTransportData } from "@webaudiomodules/api";
 import { FunctionAPI } from "./FunctionAPI";
 import {FunctionSequencerProcessor} from "./FunctionSeqProcessor";
 
@@ -10,8 +10,8 @@ type ParameterDefinition = {
 type FunctionSequencer = {
     init?(): void
     parameters?(): ParameterDefinition[]
-    onTick?(ticks: number, params: Record<string, any>): void
-    onMidi?(ticks: number, event: number[]): void
+    onTick?(ticks: number, params: Record<string, number>): void
+    onMidi?(event: number[]): void
 }
 
 export class FunctionKernel {
@@ -52,9 +52,6 @@ export class FunctionKernel {
             try {
                 this.function = new Function('api', message.data.code)(this.api)
 
-                if (!this.function.onTick) {
-                    throw new Error("onTick function missing")
-                }
                 if (!!this.function.parameters) {
                     let parameters = this.function.parameters()
 
@@ -88,7 +85,13 @@ export class FunctionKernel {
         this.transport = transportData
     }
 
-    onMidi(tick: number, )
+    onMidi(event: WamMidiData) {
+        console.log("Kernel onMidi ", event)
+        if (this.function && this.function.onMidi) {
+            console.log("onMidi defined by function")
+            this.function.onMidi(event.bytes)
+        }
+    }
 
     validateParameter(p: ParameterDefinition) {
         if (p.id === undefined || p.config === undefined) {

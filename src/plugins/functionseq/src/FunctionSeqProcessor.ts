@@ -1,4 +1,4 @@
-import { WamTransportData } from "@webaudiomodules/api";
+import { WamMidiData, WamTransportData } from "@webaudiomodules/api";
 import { AudioWorkletGlobalScope } from "@webaudiomodules/api";
 import { FunctionKernel } from "./FunctionKernel";
 
@@ -90,6 +90,10 @@ export class FunctionSequencerProcessor extends DynamicParameterProcessor {
     _onTransport(transportData: WamTransportData) {
         this.transportData = transportData
         this.function.onTransport(transportData)
+    }
+
+    _onMidi(midiData: WamMidiData) {        
+        this.function.onMidi(midiData)
     }
 }
 

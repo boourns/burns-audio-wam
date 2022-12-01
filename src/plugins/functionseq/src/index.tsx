@@ -65,7 +65,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		}
 	}
 
-	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor {
+	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor {	
 		monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
 			allowJs: true
 		})
@@ -74,13 +74,25 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 			noSemanticValidation: false,
 			noSyntaxValidation: false,
 		});
+
 	
-		monaco.languages.typescript.javascriptDefaults.addExtraLib(this.editorDefinition(), "")
-	
-		return monaco.editor.create(ref, {
+		const libUri = 'ts:filename/functionSequencer.d.ts';
+		const libSource = this.editorDefinition()
+
+		monaco.languages.typescript.javascriptDefaults.addExtraLib(libSource, libUri)
+		
+		monaco.editor.createModel(libSource, 'typescript', monaco.Uri.parse(libUri));
+
+		let editor = monaco.editor.create(ref, {
 			language: 'javascript',
 			automaticLayout: true
 		});	
+
+		editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
+			this.upload()
+		});
+
+		return editor
 	}
 
 	upload() {
