@@ -300,7 +300,7 @@ export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
 		styleRoot.use({ target: div });
 
 		const actions = [
-			<button style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)" onClick={() => this.audioNode.initVertexShader()}>Init Vertex Shader</button>
+			<button style="padding: 2px; margin: 4px; background-color: var(--var-ButtonBackground); color: var(--var-ButtonForeground); border: 1px solid var(--var-ButtonForeground);" onClick={() => this.audioNode.initVertexShader()}>Init Vertex Shader</button>
 		]
 
 		render(<LiveCoderView plugin={this._audioNode} actions={actions}></LiveCoderView>, div);
