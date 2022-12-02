@@ -33,6 +33,6 @@
     "lib0": "^0.2.47",
     "monaco-editor": "^0.25.2",
     "preact": "^10.5.5",
-    "wam-extensions": "boourns/wam-extensions#commit=4c94036bf99636935ed80fe9ef3c7a1d310305be"
+    "wam-extensions": "boourns/wam-extensions#commit=94e7c5f0c1cf6a0def14f6c8c49147f56779b68a"
   }
 }

@@ -11,6 +11,7 @@ import { MIDIInputView } from './MIDIInputView';
 import { MIDIInputNode } from './Node';
 
 import styleRoot from "./MIDIInputView.scss";
+import {ThemeUpdateListener} from "../../shared/ThemeUpdateListener"
 
 export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 	//@ts-ignore
@@ -22,6 +23,8 @@ export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 
 	get instanceId() { return "com.sequencerParty.MIDIIn" + this._timestamp; }
 
+	themeUpdateListener: ThemeUpdateListener
+
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
 		if (!url) throw new TypeError('Descriptor not found');
@@ -32,6 +35,8 @@ export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 	}
 
 	async initialize(state: any) {
+		this.themeUpdateListener = new ThemeUpdateListener()
+		
 		await this._loadDescriptor();
 
 		return super.initialize(state);
@@ -75,6 +80,8 @@ export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 		this.nonce = Math.random().toString(16).substr(2, 8);
 		div.setAttribute("data-nonce", this.nonce)
 
+		this.themeUpdateListener.addTarget(this.nonce, shadow)
+
 		// @ts-ignore
 		styleRoot.use({ target: shadow });
 
@@ -87,6 +94,8 @@ export default class MIDIInputModule extends WebAudioModule<MIDIInputNode> {
 		if (el.getAttribute("data-nonce") == this.nonce) {
 			// this was the last time we rendered the GUI so clear the style
 			
+			this.themeUpdateListener.removeTarget(this.nonce)
+
 			//@ts-ignore
 			styleRoot.unuse()
 		}

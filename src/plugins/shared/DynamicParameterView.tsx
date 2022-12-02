@@ -60,6 +60,7 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
                              value={() => this.getValue(p)}
                              label={p.config.label || p.id}
                              bipolar={p.config.minValue < 0}
+                             color="var(--var-ControlDefault)"
                              >
                         </Knob>
             case "int":
@@ -70,6 +71,7 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
                              label={p.config.label || p.id}
                              bipolar={p.config.minValue < 0}
                              integer={true}
+                             color="var(--var-ControlDefault)"
                              >
                         </Knob>
             case "boolean":
@@ -91,7 +93,7 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
     }
 
     renderGroup(group: DynamicParamGroup) {
-        return <div style="display: flex; flex-direction: column; margin: 10px; border: 1px solid black; border-radius: 1%; padding: 5px;">
+        return <div style="display: flex; flex-direction: column; margin: 10px; border: 1px solid var(--var-PrimaryForeground); border-radius: 1%; padding: 5px;">
             <b>{group.name}</b>
             <div style="display: flex; flex-direction: row; margin: 5px;">
                 {group.params.map(p => this.renderParam(p))}
@@ -102,7 +104,7 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
     render() {
         let groups = this.props.plugin.groupedParameters
 
-        return <div style="display: flex; flex-direction: column">
+        return <div style="display: flex; flex-direction: column; font-family: var(--var-FontFamily);">
             {groups.map(g => this.renderGroup(g))}
         </div>
     }

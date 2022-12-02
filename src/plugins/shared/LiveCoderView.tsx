@@ -139,7 +139,7 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
     }
 
     const editFiles = this.props.plugin.multiplayers.map((m, i) => {
-      return <button onClick={() => this.editFile(i)} style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)">{m.label}</button>
+      return <button onClick={() => this.editFile(i)} style="padding: 2px; margin: 4px; background-color: var(--var-ButtonBackground); color: var(--var-ButtonForeground); border: 1px solid var(--var-ButtonForeground);">{m.label}</button>
     })
 
     let result = (
@@ -147,8 +147,8 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
       <div style="display: flex; flex-direction: column">
         <div style="display: flex; justify-content: space-between; width: 100%">
           <div>
-            <button onClick={() => this.runPressed()} style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)">Run</button>
-            <button onClick={() => this.panelPressed("GUI")} style="padding: 2px; margin: 4px; background-color: rgb(16, 185, 129)">GUI</button>
+            <button onClick={() => this.runPressed()} style="padding: 2px; margin: 4px; background-color: var(--var-ButtonBackground); color: var(--var-ButtonForeground); border: 1px solid var(--var-ButtonForeground);">Run</button>
+            <button onClick={() => this.panelPressed("GUI")} style="padding: 2px; margin: 4px; background-color: var(--var-ButtonBackground); color: var(--var-ButtonForeground); border: 1px solid var(--var-ButtonForeground);">GUI</button>
 
             {editFiles}
             {this.props.actions}
