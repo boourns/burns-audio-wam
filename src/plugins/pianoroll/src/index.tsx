@@ -16,6 +16,7 @@ import { Clip } from './Clip';
 import { PianoRoll } from './PianoRoll';
 
 import styleRoot from "./PianoRollView.scss";
+import { MIDIConfiguration } from './MIDIConfiguration';
 
 const logger = console.log
 
@@ -92,8 +93,8 @@ export default class PianoRollModule extends WebAudioModule<PianoRollNode> {
 			this.sequencer.port.postMessage({action: "clip", id: c.state.id, state: c.getState()})
 		}
 
-		this.sequencer.pianoRoll.updateProcessorRecording = (armed: boolean) => {
-			this.sequencer.port.postMessage({action: "recording", armed})
+		this.sequencer.pianoRoll.updateProcessorMIDIConfig = (config: MIDIConfiguration) => {
+			this.sequencer.port.postMessage({action: "midiConfig", config})
 		}
 
 		this.sequencer.port.addEventListener("message", ev => {
