@@ -1,6 +1,7 @@
 import { Clip, ClipState } from './Clip'
 import { NoteDefinition } from 'wam-extensions'
 import { string } from 'lib0'
+import { MIDIConfiguration } from './MIDIConfiguration'
 
 export type MIDIEvent = Uint8Array
  export type ScheduledMIDIEvent = {
@@ -16,16 +17,16 @@ export class PianoRoll {
 	instanceId: string
 	futureEvents: ScheduledMIDIEvent[];
 	dirty: boolean;
-	hostRecordingArmed: boolean;
-	pluginRecordingArmed: boolean;
 
 	clips: Record<string, Clip>
 
 	playingClip: string | undefined
 
+	midiConfig: MIDIConfiguration
+
 	renderCallback?: () => void
 	updateProcessor?: (c: Clip) => void
-	updateProcessorRecording?: (armed: boolean) => void
+	updateProcessorMIDIConfig?: (config: MIDIConfiguration) => void
 
 	noteList?: NoteDefinition[]
 
@@ -36,8 +37,12 @@ export class PianoRoll {
 		this.clips = {"default": new Clip("default")}
 		this.playingClip = "default"
 
-		this.pluginRecordingArmed = false
-		this.hostRecordingArmed = false
+		this.midiConfig = {
+			pluginRecordingArmed: false,
+			hostRecordingArmed: false,
+			inputMidiChannel: -1,
+			outputMidiChannel: 0
+		}
 
 		this.registerNoteListHandler()
 		Object.keys(this.clips).forEach(id => this.clips[id].updateProcessor = (c) => {
@@ -136,16 +141,36 @@ export class PianoRoll {
 	}
 
 	armHostRecording(armed: boolean) {
-		this.hostRecordingArmed = armed
-		if (this.updateProcessorRecording) {
-			this.updateProcessorRecording(this.hostRecordingArmed && this.pluginRecordingArmed)
+		this.midiConfig.hostRecordingArmed = armed
+		if (this.updateProcessorMIDIConfig) {
+			this.updateProcessorMIDIConfig(this.midiConfig)
 		}
 	}
 
 	armPluginRecording(armed: boolean) {
-		this.pluginRecordingArmed = armed
-		if (this.updateProcessorRecording) {
-			this.updateProcessorRecording(this.hostRecordingArmed && this.pluginRecordingArmed)
+		this.midiConfig.pluginRecordingArmed = armed
+		if (this.updateProcessorMIDIConfig) {
+			this.updateProcessorMIDIConfig(this.midiConfig)
+		}
+	}
+
+	inputMidiChanged(v: number) {
+		if (v < -1 || v > 15) {
+			throw `Invalid input midi value: ${v}`
+		}
+		this.midiConfig.inputMidiChannel = v
+		if (this.updateProcessorMIDIConfig) {
+			this.updateProcessorMIDIConfig(this.midiConfig)
+		}
+	}
+
+	outputMidiChanged(v: number) {
+		if (v < 0 || v > 15) {
+			throw `Invalid output midi value: ${v}`
+		}
+		this.midiConfig.outputMidiChannel = v
+		if (this.updateProcessorMIDIConfig) {
+			this.updateProcessorMIDIConfig(this.midiConfig)
 		}
 	}
 }
