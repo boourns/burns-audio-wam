@@ -2,6 +2,8 @@ import { WamMidiData, WamParameterConfiguration, WamTransportData } from "@webau
 import { NoteDefinition } from "wam-extensions";
 import { FunctionAPI } from "./FunctionAPI";
 import {FunctionSequencerProcessor} from "./FunctionSeqProcessor";
+import { RemoteUIElement, ui } from "./RemoteUI";
+import { RemoteUIController } from "./RemoteUIController";
 
 type ParameterDefinition = {
     id: string
@@ -44,12 +46,22 @@ export class FunctionKernel {
     parameterIds: string[]
     processor: FunctionSequencerProcessor
     noteList?: NoteDefinition[]
+    ui: RemoteUIController
 
     constructor(processor: FunctionSequencerProcessor) {
         this.api = new FunctionAPI()
+        this.transport = {
+            tempo: 120,
+            timeSigDenominator: 4,
+            timeSigNumerator: 4,
+            playing: false,
+            currentBar: 0,
+            currentBarStarted: 0
+        }
 
         this.parameterIds = []
         this.processor = processor
+        this.ui = new RemoteUIController(processor.port)
     }
 
     onTick(ticks: number, params: Record<string, number>) {
@@ -74,7 +86,11 @@ export class FunctionKernel {
      async onMessage(message: any): Promise<void> {
         if (message.data && message.data.action == "function") {
             try {
-                this.function = new Function('api', message.data.code)(this.api)
+                this.function = new Function('api', 'ui', message.data.code)(this.api, ui)
+
+                if (!!this.function.init) {
+                    this.function.init()
+                }
 
                 if (!!this.function.parameters) {
                     let parameters = this.function.parameters()
@@ -131,4 +147,4 @@ export class FunctionKernel {
             throw new Error(`Invalid parameter type ${p.config.type}`)
         }
     }
-}
+} 

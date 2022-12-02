@@ -1,9 +1,9 @@
 import { AudioWorkletGlobalScope } from "@webaudiomodules/api"
 import { FunctionKernel } from "./FunctionKernel"
 import { FunctionSequencerProcessor, MIDI } from "./FunctionSeqProcessor"
-
+const PPQN = 96
 let processor: FunctionSequencerProcessor
-let kernel: FunctionKernel
+export let kernel: FunctionKernel
 
 const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
 
@@ -30,6 +30,10 @@ export class FunctionAPI {
      * @param startTime {number} optionally set the starting time of the note, in relation to api.getCurrentTime()
      * */
     emitNote(note: number, velocity: number, duration: number, startTime?: number) {
+        if (startTime === undefined) {
+            startTime = audioWorkletGlobalScope.currentTime
+        }
+
         this.emitMidiEvent([MIDI.NOTE_ON, note, velocity], startTime)
         this.emitMidiEvent([MIDI.NOTE_OFF, note, velocity], startTime+duration)
     }
@@ -46,6 +50,14 @@ export class FunctionAPI {
      */
     getCurrentTime(): number {
         return audioWorkletGlobalScope.currentTime
+    }
+
+    /**
+     * returns the duration, in seconds, for the input number of ticks
+     * @param ticks {number} the number of ticks to convert to seconds
+     */
+    getTickDuration(ticks: number): number {
+        return ticks * 1.0 / ((kernel.transport.tempo / 60.0) * PPQN);
     }
 
     /**

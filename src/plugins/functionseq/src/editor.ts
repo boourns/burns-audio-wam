@@ -156,6 +156,11 @@ declare class FunctionAPI {
      */
     getCurrentTime(): number;
     /**
+     * returns the duration, in seconds, for the input number of ticks
+     * @param ticks {number} the number of ticks to convert to seconds
+     */
+    getTickDuration(ticks: number): number;
+    /**
      * Set (or unset) a list of named MIDI notes.  Used to inform earlier MIDI processors what MIDI notes are valid.
      * @param noteList {NoteDefinition[]} a list of midi notes this processor accepts.  Set to undefined to clear the custom note list.
      */
@@ -163,6 +168,25 @@ declare class FunctionAPI {
 }
 
 declare const api: FunctionAPI;
+
+declare type RemoteUIElement = {
+    type: "action" | "toggle" | "knob" | "slider" | "label" | "col" | "row";
+    name: string;
+    width?: number;
+    height?: number;
+    label?: string;
+    children?: RemoteUIElement[];
+};
+declare namespace ui {
+    const Col: (name: string, children: RemoteUIElement[], width?: number, height?: number) => RemoteUIElement;
+    const Row: (name: string, children: RemoteUIElement[], width?: number, height?: number) => RemoteUIElement;
+    const Action: (name: string, width?: number, height?: number) => RemoteUIElement;
+    const Toggle: (name: string, width?: number, height?: number) => RemoteUIElement;
+    const Knob: (name: string, width?: number, height?: number) => RemoteUIElement;
+    const Slider: (name: string, width?: number, height?: number) => RemoteUIElement;
+    const Label: (name: string, label: string, width?: number, height?: number) => RemoteUIElement;
+    const Register: (root: RemoteUIElement) => void;
+}
 
     `
   }

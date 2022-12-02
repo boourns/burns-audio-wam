@@ -96,4 +96,13 @@ export class DynamicParameterNode extends WamNode {
         }
     }
 
+    findParameter(id: string): DynamicParamEntry | undefined {
+        for (let group of this.groupedParameters) {
+            let found = group.params.find(p => p.id == id)
+            if (found) {
+                return found
+            }
+        }
+        return undefined
+    }
 }

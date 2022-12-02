@@ -16,6 +16,7 @@ export interface LiveCoderNode extends DynamicParameterNode {
 export interface LiveCoderViewProps {
   plugin: LiveCoderNode
   actions: h.JSX.Element[]
+  parametersView?: () => h.JSX.Element
 }
 
 type LiveCoderViewState = {
@@ -134,7 +135,7 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
         break
       case "GUI":
         panelLabel = "CODE"
-        panel = this.renderParameters()
+        panel = this.props.parametersView ? this.props.parametersView() : this.renderParameters()
         break
     }
 

@@ -18,6 +18,9 @@ import { defaultScript, editorDefinition } from './editor';
 
 import styleRoot from "./FunctionSequencer.scss"
 import { NoteDefinition } from 'wam-extensions';
+import { RemoteUIElement } from './RemoteUI';
+import { DynamicParameterView } from '../../shared/DynamicParameterView';
+import { RemoteUIRenderer } from './RemoteUIRenderer';
 	
 type FunctionSeqState = {
 	runCount: number
@@ -30,6 +33,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	multiplayers: MultiplayerHandler[]
 	runCount: number
 	error?: any;
+	ui?: RemoteUIElement
 
 	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
 		await super.addModules(audioContext, moduleId);
@@ -171,6 +175,13 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 				if (window.WAMExtensions.notes) {
 					window.WAMExtensions.notes.setNoteList(this.instanceId, message.data.noteList)
 				}
+			} else if (message.data.action == "ui") {
+				console.log("node received ui: ", message.data)
+				if (message.data.ui) {
+					this.ui = JSON.parse(message.data.ui)
+				} else {
+					this.ui = undefined
+				}
 			}
 			if (this.renderCallback) {
 				this.renderCallback()
@@ -265,6 +276,20 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 		return node
     }
 
+	renderParametersView() {
+		console.log("rederParametersView called, ui ", this.audioNode.ui)
+
+		if (this.audioNode.ui) {
+			return <div style="display: flex; flex: 1;">
+				<RemoteUIRenderer plugin={this.audioNode} ui={this.audioNode.ui}></RemoteUIRenderer>
+			</div>
+		} else {
+			return <div style="display: flex; flex: 1;">
+			<DynamicParameterView plugin={this.audioNode}></DynamicParameterView>
+		  </div>
+		}
+	}
+
 	async createGui() {
 		const div = document.createElement('div');
 		// hack because h() is getting stripped for non-use despite it being what the JSX compiles to
@@ -285,7 +310,7 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 		// @ts-ignore
 		styleRoot.use({ target: div });
 
-		render(<LiveCoderView plugin={this.audioNode} actions={[]}></LiveCoderView>, div);
+		render(<LiveCoderView plugin={this.audioNode} parametersView={() => this.renderParametersView()} actions={[]}></LiveCoderView>, div);
 
 		return div;
 	}

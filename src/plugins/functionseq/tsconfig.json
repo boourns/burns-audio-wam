@@ -22,10 +22,10 @@
       "allowUnreachableCode": false,
       "experimentalDecorators": true,
       "downlevelIteration": true,
-      "removeComments": true,
+      //"removeComments": true,
       /* uncomment to regenerate API declaration */
-      //"declaration": true,      
-      //"removeComments": false,
+      "declaration": true,      
+      "removeComments": false,
     },
     "include": [
       "./src/*"
