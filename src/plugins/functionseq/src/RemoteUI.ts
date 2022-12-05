@@ -78,12 +78,10 @@ export namespace ui {
     }
 
     export const Register = (root: RemoteUIElement) => {
-        kernel.registerUI(root)
+        kernel.ui.register(root)
     }
 
-    export const Highlight = (name: string, value: boolean) = {
-        kernel.highlightUIElement(name, value)
+    export const Highlight = (name: string, value: boolean) => {
+        kernel.ui.highlight(name, value)
     }
-
-
 }

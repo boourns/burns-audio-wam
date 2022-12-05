@@ -177,6 +177,7 @@ declare type RemoteUIElement = {
     label?: string;
     children?: RemoteUIElement[];
 };
+
 declare namespace ui {
     const Col: (name: string, children: RemoteUIElement[], width?: number, height?: number) => RemoteUIElement;
     const Row: (name: string, children: RemoteUIElement[], width?: number, height?: number) => RemoteUIElement;
@@ -186,7 +187,9 @@ declare namespace ui {
     const Slider: (name: string, width?: number, height?: number) => RemoteUIElement;
     const Label: (name: string, label: string, width?: number, height?: number) => RemoteUIElement;
     const Register: (root: RemoteUIElement) => void;
+    const Highlight: (name: string, value: boolean) => void;
 }
+
 
     `
   }

@@ -73,6 +73,8 @@ export class FunctionKernel {
             if (this.function.onTick) {
                 this.function.onTick(ticks, params)
             }
+
+            this.ui.flush()
         } catch (e) {
             this.processor.port.postMessage({source: "functionSeq", action:"error", error: e.toString()})
             this.function = undefined
@@ -111,15 +113,17 @@ export class FunctionKernel {
                 } else {
                     console.warn("parameters() function missing, sequencer has no parameters.")
                 }
+
             } catch(e) {
-                this.processor.port.postMessage({source: "functionSeq", action:"error", error: e.toString()})
-                this.function = undefined
+                this.error(e)
             }
+            this.ui.flush()
         } else if (message.data && message.data.action == "noteList") {
             this.noteList = message.data.noteList
             if (this.function && this.function.onCustomNoteList) {
                 this.function.onCustomNoteList(message.data.noteList)
             }
+            this.ui.flush()
         } else {
             // @ts-ignore
             super._onMessage(message)
@@ -132,7 +136,12 @@ export class FunctionKernel {
 
     onMidi(event: WamMidiData) {
         if (this.function && this.function.onMidi) {
-            this.function.onMidi(event.bytes)
+            try {
+                this.function.onMidi(event.bytes)
+                this.ui.flush()
+            } catch (e) {
+                this.error(e)
+            }
         }
     }
 
@@ -146,5 +155,10 @@ export class FunctionKernel {
         if (['float', 'int', 'boolean','choice'].findIndex(t => t == p.config.type) == -1) {
             throw new Error(`Invalid parameter type ${p.config.type}`)
         }
+    }
+
+    error(e: any) {
+        this.processor.port.postMessage({source: "functionSeq", action:"error", error: e.toString()})
+        this.function = undefined
     }
 } 

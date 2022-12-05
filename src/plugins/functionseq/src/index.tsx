@@ -21,6 +21,7 @@ import { NoteDefinition } from 'wam-extensions';
 import { RemoteUIElement } from './RemoteUI';
 import { DynamicParameterView } from '../../shared/DynamicParameterView';
 import { RemoteUIRenderer } from './RemoteUIRenderer';
+import { RemoteUIReceiver } from './RemoteUIReceiver';
 	
 type FunctionSeqState = {
 	runCount: number
@@ -33,7 +34,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	multiplayers: MultiplayerHandler[]
 	runCount: number
 	error?: any;
-	ui?: RemoteUIElement
+	uiReceiver: RemoteUIReceiver;
 
 	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
 		await super.addModules(audioContext, moduleId);
@@ -54,6 +55,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 
 		this.runCount = 0
 		this.multiplayers = []
+		this.uiReceiver = new RemoteUIReceiver(this.port)
 
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
@@ -175,18 +177,17 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 				if (window.WAMExtensions.notes) {
 					window.WAMExtensions.notes.setNoteList(this.instanceId, message.data.noteList)
 				}
-			} else if (message.data.action == "ui") {
-				console.log("node received ui: ", message.data)
-				if (message.data.ui) {
-					this.ui = JSON.parse(message.data.ui)
-				} else {
-					this.ui = undefined
-				}
 			}
 			if (this.renderCallback) {
 				this.renderCallback()
 			}
-		} else if (message.data && message.data.source == "") {
+		} else if (message.data && message.data.source == "remoteUI") {
+			if (this.uiReceiver.onMessage(message)) {
+				if (this.renderCallback) {
+					this.renderCallback()
+				}
+			}
+
 
 		} else {
 			// @ts-ignore
@@ -201,7 +202,6 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	editorDefinition(): string {
 		return editorDefinition()
 	}
-
 }
 
 export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
@@ -277,11 +277,11 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
     }
 
 	renderParametersView() {
-		console.log("rederParametersView called, ui ", this.audioNode.ui)
+		console.log("rederParametersView called, ui ", this.audioNode.uiReceiver.ui)
 
-		if (this.audioNode.ui) {
+		if (this.audioNode.uiReceiver.ui) {
 			return <div style="display: flex; flex: 1;">
-				<RemoteUIRenderer plugin={this.audioNode} ui={this.audioNode.ui}></RemoteUIRenderer>
+				<RemoteUIRenderer plugin={this.audioNode} ui={this.audioNode.uiReceiver}></RemoteUIRenderer>
 			</div>
 		} else {
 			return <div style="display: flex; flex: 1;">

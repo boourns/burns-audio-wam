@@ -4,11 +4,12 @@ import { DynamicParamEntry, DynamicParameterNode } from "../../shared/DynamicPar
 import { Knob } from "../../shared/ui/Knob";
 import { Slider } from "../../shared/ui/Slider"
 import { RemoteUIElement } from "./RemoteUI";
+import { RemoteUIReceiver } from "./RemoteUIReceiver";
 
 export interface RemoteUIRendererProps {
     plugin: DynamicParameterNode
 
-    ui: RemoteUIElement
+    ui: RemoteUIReceiver
 }
 
 export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
@@ -60,7 +61,6 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
                              bipolar={p.config.minValue < 0}
                              size={size}
                              showValue={false}
-
                              >
                         </Knob>
             case "int":
@@ -72,7 +72,6 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
                              integer={true}
                              size={size}
                              showValue={false}
-
                              >
                         </Knob>
             default:
@@ -90,6 +89,7 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
                              width={element.width}
                              height={element.height}
                              showValue={false}
+                             color={() => this.props.ui.controlColour(p.id)}
                              >
                         </Slider>
             case "int":
@@ -101,6 +101,7 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
                              value={() => this.getValue(p)}
                              showValue={false}
                              decimals={0}
+                             color={() => this.props.ui.controlColour(p.id)}
                              >
                         </Slider>
             default:
@@ -160,7 +161,7 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
     render() {
         let body
         try {
-            body = this.renderElement(this.props.ui)
+            body = this.renderElement(this.props.ui.ui)
         } catch (e) {
             body = <div style="background-color: red">{e}</div>
         }

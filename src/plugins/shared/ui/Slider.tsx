@@ -26,19 +26,21 @@ type SliderState = {
 export class Slider extends Component<SliderProps, SliderState> {
     ref?: HTMLCanvasElement
 
+    static editing: boolean = false
+
     context!: CanvasRenderingContext2D
     valueLabel?: HTMLLabelElement | null
 
     animationRequest?: number
     animationTimeout?: number
     lastValue?: number
+    lastColor?: string
 
     static defaultProps = {
         minimumValue: 0.0,
         maximumValue: 1.0,
         width: 30,
         height: 120,
-        color: 'var(--var-ControlDefault)',
         units: "",
         decimals: 2
     }
@@ -47,6 +49,8 @@ export class Slider extends Component<SliderProps, SliderState> {
         super()
 
         this.onMousemove = this.onMousemove.bind(this)
+        this.onMouseUp = this.onMouseUp.bind(this)
+
         this.animationFrame = this.animationFrame.bind(this)
         this.scheduleFrame = this.scheduleFrame.bind(this)
         this.scheduleAnimation = this.scheduleAnimation.bind(this)
@@ -54,6 +58,7 @@ export class Slider extends Component<SliderProps, SliderState> {
 
     componentWillUnmount() {
         this.cancelAnimation()
+        window.removeEventListener('mouseup', this.onMouseUp)
     }
 
     cancelAnimation() {
@@ -77,8 +82,14 @@ export class Slider extends Component<SliderProps, SliderState> {
     }
 
     animationFrame() {
+        if (!this.context) {
+            return
+        }
+
         let newValue = this.props.value()
-        if (newValue == this.lastValue) {
+        let newColor = this.props.color()
+
+        if (newValue == this.lastValue && newColor == this.lastColor) {
             this.scheduleAnimation()
             return
         }
@@ -91,30 +102,34 @@ export class Slider extends Component<SliderProps, SliderState> {
             }
         }
 
-        if (this.lastValue != newValue) {
-            this.draw(newValue)
-        }
-
+        this.draw(newColor, newValue)
+        
+        this.lastColor = newColor
         this.lastValue = newValue
 
         this.scheduleAnimation()
     }
 
-    draw(value: number) {
+    draw(color: string, value: number) {
         var percent = (value - this.props.minimumValue) / (this.props.maximumValue - this.props.minimumValue)
         var position = (this.props.height) - ((this.props.height) * percent)
+
+        if (!this.context || !this.context.beginPath) {
+            console.error("BAD STATE WHY? ", this.context)
+            return
+        }
 
         // clear
         this.context.beginPath();
         this.context.rect(0, 0, this.props.width, this.props.height);
         this.context.fillStyle = 'rgb(0,0,0)' //'var(--var-ControlBackground)';
-        this.context.strokeStyle = 'rgb(255, 0, 0)'
+        this.context.strokeStyle = color
         this.context.fill();
         this.context.stroke();
 
         this.context.beginPath();
         this.context.rect(0, position, this.props.width, this.props.height - position);
-        this.context.fillStyle = 'rgb(255,0,0)'
+        this.context.fillStyle = color
         this.context.fill();
 
         this.context.closePath();
@@ -136,6 +151,10 @@ export class Slider extends Component<SliderProps, SliderState> {
         this.ref.setAttribute('height', `${this.props.height}`);
 
         this.context = this.ref.getContext("2d")!
+        
+        if (!this.context) {
+            console.error("Failed to get 2d context for canvas")
+        }
 
         this.cancelAnimation()
 
@@ -147,7 +166,7 @@ export class Slider extends Component<SliderProps, SliderState> {
             return
         }
 
-        if (e.buttons == 1) {
+        if (e.buttons == 1 && Slider.editing) {
             var rect = this.ref.getBoundingClientRect();
             const position = (e.clientY - rect.top) / (rect.bottom - rect.top)
 
@@ -159,6 +178,19 @@ export class Slider extends Component<SliderProps, SliderState> {
         if (this.props.defaultValue !== undefined) {
             this.setValue(this.props.defaultValue)
         }
+    }
+
+    onMouseDown(e: MouseEvent) {
+        Slider.editing = true
+
+        window.addEventListener('mouseup', this.onMouseUp)
+    }
+
+    onMouseUp(e: MouseEvent) {
+        Slider.editing = false
+
+        window.removeEventListener('mouseup', this.onMouseUp)
+
     }
 
     setValue(v: number) {
@@ -182,6 +214,7 @@ export class Slider extends Component<SliderProps, SliderState> {
             <canvas ref={(ref) => this.setup(ref)} class=""
                 onMouseMove={(e) => this.onMousemove(e)}
                 onDblClick={(e) => this.onDoubleClick(e)}
+                onMouseDown={(e) => this.onMouseDown(e)}
                 ></canvas>
 
             <small><label ref={ref => { this.valueLabel = ref; this.lastValue = undefined} }></label></small>
