@@ -25,7 +25,6 @@ export class RemoteUIController {
     }
 
     register(root?: RemoteUIElement) {
-        console.log("Kernel registerUI: ", root)
         this.ui = root
 
         this.uiMap = {}
@@ -48,13 +47,16 @@ export class RemoteUIController {
         }
 
         this.port.postMessage({source: "remoteUI", action:"ui", ui: root ? JSON.stringify(root) : undefined})
-        console.log("message has been sent")
     }
 
     highlight(name: string, value: boolean) {
-        if (this.uiMap[name].highlighted != value) {
-            this.uiMap[name].highlighted = value
-            this.pendingUpdates.push({t: "high", f: name, v: value})
+        try {
+            if (this.uiMap[name].highlighted != value) {
+                this.uiMap[name].highlighted = value
+                this.pendingUpdates.push({t: "high", f: name, v: value})
+            }
+        } catch (e) {
+            console.error(`error highlighting ${name}: ${e}`)
         }
     }
 

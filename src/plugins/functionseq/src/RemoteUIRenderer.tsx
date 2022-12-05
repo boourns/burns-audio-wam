@@ -3,6 +3,8 @@ import { Component, h } from "preact";
 import { DynamicParamEntry, DynamicParameterNode } from "../../shared/DynamicParameterNode";
 import { Knob } from "../../shared/ui/Knob";
 import { Slider } from "../../shared/ui/Slider"
+import { Toggle } from "../../shared/ui/Toggle"
+
 import { RemoteUIElement } from "./RemoteUI";
 import { RemoteUIReceiver } from "./RemoteUIReceiver";
 
@@ -48,8 +50,8 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
 
     renderKnob(element: RemoteUIElement, p: DynamicParamEntry) {
         let size = 40
-        if (element.width && element.height) {
-            size = (element.width > element.height) ? element.height - 5 : element.width - 5
+        if (element.props.width && element.props.height) {
+            size = (element.props.width > element.props.height) ? element.props.height - 5 : element.props.width - 5
         }
         
         switch(p.config.type) {
@@ -57,21 +59,23 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
                 return <Knob onChange={(v) => this.valueChanged(p.id, v)} 
                              minimumValue={p.config.minValue} 
                              maximumValue={p.config.maxValue}
+                             label={element.props.label}
                              value={() => this.getValue(p)}
                              bipolar={p.config.minValue < 0}
                              size={size}
-                             showValue={false}
+                             showValue={element.props.showValue ?? false}
                              >
                         </Knob>
             case "int":
                 return <Knob onChange={(v) => this.valueChanged(p.id, Math.round(v))} 
                              minimumValue={p.config.minValue} 
                              maximumValue={p.config.maxValue}
+                             label={element.props.label}
                              value={() => this.getValue(p)}
                              bipolar={p.config.minValue < 0}
                              integer={true}
                              size={size}
-                             showValue={false}
+                             showValue={element.props.showValue ?? false}
                              >
                         </Knob>
             default:
@@ -85,10 +89,11 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
                 return <Slider onChange={(v) => this.valueChanged(p.id, v)} 
                              minimumValue={p.config.minValue} 
                              maximumValue={p.config.maxValue}
+                             label={element.props.label}
                              value={() => this.getValue(p)}
-                             width={element.width}
-                             height={element.height}
-                             showValue={false}
+                             width={element.props.width}
+                             height={element.props.height}
+                             showValue={element.props.showValue}
                              color={() => this.props.ui.controlColour(p.id)}
                              >
                         </Slider>
@@ -96,10 +101,11 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
                 return <Slider onChange={(v) => this.valueChanged(p.id, Math.round(v))} 
                              minimumValue={p.config.minValue} 
                              maximumValue={p.config.maxValue}
-                             width={element.width}
-                             height={element.height}
+                             label={element.props.label}
+                             width={element.props.width}
+                             height={element.props.height}
                              value={() => this.getValue(p)}
-                             showValue={false}
+                             showValue={element.props.showValue}
                              decimals={0}
                              color={() => this.props.ui.controlColour(p.id)}
                              >
@@ -108,19 +114,39 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
                 throw "Knob ui element must reference float or int parameter"
         }
     }
+
+    renderToggle(element: RemoteUIElement, p: DynamicParamEntry) {
+        switch(p.config.type) {
+            case "boolean":
+                return <Toggle onChange={(v) => this.valueChanged(p.id, v ? 1 : 0)} 
+                             value={() => this.getValue(p) == 1}
+                             width={element.props.width}
+                             height={element.props.height}
+                             color={() => this.props.ui.controlColour(p.id)}
+                             label={element.props.label}
+                             >
+                        </Toggle>
+            
+            default:
+                throw "Toggle ui element must reference boolean parameter"
+        }
+    }
     
 
     sizeStyles(el: RemoteUIElement): string[] {
         let result: string[] = []
-        if (el.width !== undefined) {
-            result.push("width: ${el.width}px;")
+        if (el.props.width !== undefined) {
+            result.push(`width: ${el.props.width}px;`)
         } else {
             result.push("width: 100%;")
         }
-        if (el.height !== undefined) {
-            result.push("height: ${el.height}px;")
+        if (el.props.height !== undefined) {
+            result.push(`height: ${el.props.height}px;`)
         } else {
             result.push("height: 100%;")
+        }
+        if (el.props.padding !== undefined) {
+            result.push(`padding: ${el.props.padding}px;`)
         }
         return result
     }
@@ -130,31 +156,41 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
 
         console.log("renderElement ", el)
 
-        switch (el.type) {
-            case "col":
-                style.push("display: flex;", "flex-direction: column;", "justify-content: center;", "align-items: center;")
-
-                return <div style={style.join(" ")}>{el.children.map(ch => this.renderElement(ch))}</div>
-            case "row":
-                style.push("display: flex;", "flex-direction: row;", "justify-content: center;", "align-items: center;")
-
-                return <div style={style.join(" ")}>{el.children.map(ch => this.renderElement(ch))}</div>
-            case "knob":
-                const knobParam = this.props.plugin.findParameter(el.name)
-                if (!knobParam) {
-                    throw "Failed to find parameter " + el.name
-                }
-                return this.renderKnob(el, knobParam)
-            case "slider":
-                const sliderParam = this.props.plugin.findParameter(el.name)
-                if (!sliderParam) {
-                    throw "Failed to find parameter " + el.name
-                }
-                return this.renderSlider(el, sliderParam)
-            case "label":
-                return <div style={style.join(" ")}>{el.label ?? el.name}</div>
-         }
-
+        try {
+            switch (el.type) {
+                case "col":
+                    style.push("display: flex;", "flex-direction: column;", "justify-content: center;", "align-items: center;")
+    
+                    return <div style={style.join(" ")}>{el.children.map(ch => this.renderElement(ch))}</div>
+                case "row":
+                    style.push("display: flex;", "flex-direction: row;", "justify-content: center;", "align-items: center;")
+    
+                    return <div style={style.join(" ")}>{el.children.map(ch => this.renderElement(ch))}</div>
+                case "knob":
+                    const knobParam = this.props.plugin.findParameter(el.name)
+                    if (!knobParam) {
+                        throw "Failed to find parameter " + el.name
+                    }
+                    return this.renderKnob(el, knobParam)
+                case "slider":
+                    const sliderParam = this.props.plugin.findParameter(el.name)
+                    if (!sliderParam) {
+                        throw "Failed to find parameter " + el.name
+                    }
+                    return this.renderSlider(el, sliderParam)
+                case "toggle":
+                    const toggleParam = this.props.plugin.findParameter(el.name)
+                    if (!toggleParam) {
+                        throw "Failed to find parameter " + el.name
+                    }
+                    return this.renderToggle(el, toggleParam)
+                case "label":
+                    return <div style={style.join(" ")}>{el.props.label ?? el.name}</div>
+             }
+        } catch(e) {
+            console.error(`Error rendering element ${el.name}: ${e}`)
+        }
+        
          return <div></div>
     }
     

@@ -115,7 +115,6 @@ export class Slider extends Component<SliderProps, SliderState> {
         var position = (this.props.height) - ((this.props.height) * percent)
 
         if (!this.context || !this.context.beginPath) {
-            console.error("BAD STATE WHY? ", this.context)
             return
         }
 

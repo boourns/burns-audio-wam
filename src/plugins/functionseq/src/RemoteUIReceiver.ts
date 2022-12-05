@@ -42,7 +42,6 @@ export class RemoteUIReceiver {
             }
             return true
         } else if (message.data.action == "up") {
-            console.log("applying updates?")
             for (let update of message.data.updates) {
                 
                 if (update.t == "high") {

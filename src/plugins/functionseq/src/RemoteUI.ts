@@ -1,79 +1,78 @@
 import {kernel} from "./FunctionAPI"
 
-export type RemoteUIElement = {
-    type: "action" | "toggle" | "knob" | "slider" | "label" | "col" | "row"
-    name: string
+export type RemoteUIElementProperties = {
     width?: number
     height?: number
     label?: string
-    children?: RemoteUIElement[]
     highlighted?: boolean
+    padding?: number
+    showValue?: boolean
+}
+
+export type RemoteUIElement = {
+    type: "action" | "toggle" | "knob" | "slider" | "label" | "col" | "row"
+    name: string
+    props: RemoteUIElementProperties
+
+    children?: RemoteUIElement[]
 }
 
 export namespace ui {
-    export const Col = (name: string, children: RemoteUIElement[], width?: number, height?: number): RemoteUIElement => {
+    export const Col = (name: string, children: RemoteUIElement[], properties?: RemoteUIElementProperties): RemoteUIElement => {
         return {
             type: "col",
             name,
             children,
-            width,
-            height
+            props: properties ?? {}
         }
     }
 
-    export const Row = (name: string, children: RemoteUIElement[], width?: number, height?: number): RemoteUIElement => {
+    export const Row = (name: string, children: RemoteUIElement[], properties?: RemoteUIElementProperties): RemoteUIElement => {
         return {
             type: "row",
             name,
             children,
-            width,
-            height
+            props: properties ?? {}
         }
     }
 
-    export const Action = (name: string, width?: number, height?: number): RemoteUIElement => {
+    export const Action = (name: string, properties?: RemoteUIElementProperties): RemoteUIElement => {
         return {
             type:"action",
             name,
-            width,
-            height
+            props: properties ?? {}
         }
     }
 
-    export const Toggle = (name: string, width?: number, height?: number): RemoteUIElement => {
+    export const Toggle = (name: string, properties?: RemoteUIElementProperties): RemoteUIElement => {
         return {
             type: "toggle",
             name,
-            width,
-            height
+            props: properties ?? {}
         }
     }
 
-    export const Knob = (name: string, width?: number, height?: number): RemoteUIElement => {
+    export const Knob = (name: string, properties?: RemoteUIElementProperties): RemoteUIElement => {
         return {
             type: "knob",
             name,
-            width,
-            height
+            props: properties ?? {}
         }
     }
 
-    export const Slider = (name: string, width?: number, height?: number): RemoteUIElement => {
+    export const Slider = (name: string, properties?: RemoteUIElementProperties): RemoteUIElement => {
         return {
             type: "slider",
             name,
-            width,
-            height
+            props: properties ?? {}
         }
     }
 
-    export const Label = (name: string, label: string, width?: number, height?: number): RemoteUIElement => {
+    export const Label = (name: string, properties?: RemoteUIElementProperties): RemoteUIElement => {
         return {
             type: "label",
-            label,
             name,
-            width,
-            height
+            props: properties ?? {}
         }
     }
 

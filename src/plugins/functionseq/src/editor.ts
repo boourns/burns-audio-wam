@@ -169,23 +169,28 @@ declare class FunctionAPI {
 
 declare const api: FunctionAPI;
 
-declare type RemoteUIElement = {
-    type: "action" | "toggle" | "knob" | "slider" | "label" | "col" | "row";
-    name: string;
+declare type RemoteUIElementProperties = {
     width?: number;
     height?: number;
     label?: string;
+    highlighted?: boolean;
+    padding?: number;
+    showValue?: boolean;
+};
+declare type RemoteUIElement = {
+    type: "action" | "toggle" | "knob" | "slider" | "label" | "col" | "row";
+    name: string;
+    props: RemoteUIElementProperties;
     children?: RemoteUIElement[];
 };
-
 declare namespace ui {
-    const Col: (name: string, children: RemoteUIElement[], width?: number, height?: number) => RemoteUIElement;
-    const Row: (name: string, children: RemoteUIElement[], width?: number, height?: number) => RemoteUIElement;
-    const Action: (name: string, width?: number, height?: number) => RemoteUIElement;
-    const Toggle: (name: string, width?: number, height?: number) => RemoteUIElement;
-    const Knob: (name: string, width?: number, height?: number) => RemoteUIElement;
-    const Slider: (name: string, width?: number, height?: number) => RemoteUIElement;
-    const Label: (name: string, label: string, width?: number, height?: number) => RemoteUIElement;
+    const Col: (name: string, children: RemoteUIElement[], properties?: RemoteUIElementProperties) => RemoteUIElement;
+    const Row: (name: string, children: RemoteUIElement[], properties?: RemoteUIElementProperties) => RemoteUIElement;
+    const Action: (name: string, properties?: RemoteUIElementProperties) => RemoteUIElement;
+    const Toggle: (name: string, properties?: RemoteUIElementProperties) => RemoteUIElement;
+    const Knob: (name: string, properties?: RemoteUIElementProperties) => RemoteUIElement;
+    const Slider: (name: string, properties?: RemoteUIElementProperties) => RemoteUIElement;
+    const Label: (name: string, properties?: RemoteUIElementProperties) => RemoteUIElement;
     const Register: (root: RemoteUIElement) => void;
     const Highlight: (name: string, value: boolean) => void;
 }
