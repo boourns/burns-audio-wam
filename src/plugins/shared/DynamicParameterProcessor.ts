@@ -73,6 +73,7 @@ const loadDynamicParameterProcessor = (moduleId: string) => {
 
             this.parameters = output
             let oldState = this._parameterState
+            console.log("updateParameters oldState ", oldState)
 
             this._initialize()
 
@@ -85,6 +86,7 @@ const loadDynamicParameterProcessor = (moduleId: string) => {
                     }
                     this._setParameterValue(update, false)
 
+                    console.log(`Resetting ${paramID} to ${oldState[paramID].value}`)
                     // this is a hack and should be unnecessary.
                     this._parameterState[paramID].value = oldState[paramID].value
                 }

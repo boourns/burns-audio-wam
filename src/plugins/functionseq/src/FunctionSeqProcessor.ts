@@ -31,7 +31,7 @@ export class FunctionSequencerProcessor extends DynamicParameterProcessor {
     function: FunctionKernel
     transportData?: WamTransportData
 
-    count = 0;
+    count = 0
 
     constructor(options: any) {
         super(options)
@@ -81,6 +81,8 @@ export class FunctionSequencerProcessor extends DynamicParameterProcessor {
     async _onMessage(message: any): Promise<void> {
         if (message.data && message.data.source == "function") {
             this.function.onMessage(message)
+        } else if (message.data && message.data.source == "remoteUI") {
+            this.function.ui.onMessage(message)
         } else {
             // @ts-ignore
             super._onMessage(message)

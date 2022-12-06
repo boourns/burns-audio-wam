@@ -61,4 +61,8 @@ export class RemoteUIReceiver {
         }
         return el.highlighted ? "blue" : "yellow"
     }
+
+    dispatchAction(name: string) {
+        this.port.postMessage({source: "remoteUI", action:"action", name})
+    }
 }

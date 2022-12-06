@@ -10,7 +10,7 @@ export type RemoteUIElementProperties = {
 }
 
 export type RemoteUIElement = {
-    type: "action" | "toggle" | "knob" | "slider" | "label" | "col" | "row"
+    type: "action" | "toggle" | "knob" | "slider" | "select" | "label" | "col" | "row"
     name: string
     props: RemoteUIElementProperties
 
@@ -71,6 +71,14 @@ export namespace ui {
     export const Label = (name: string, properties?: RemoteUIElementProperties): RemoteUIElement => {
         return {
             type: "label",
+            name,
+            props: properties ?? {}
+        }
+    }
+
+    export const Select = (name: string, properties?: RemoteUIElementProperties): RemoteUIElement => {
+        return {
+            type: "select",
             name,
             props: properties ?? {}
         }

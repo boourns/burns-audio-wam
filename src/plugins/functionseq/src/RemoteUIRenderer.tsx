@@ -2,6 +2,7 @@ import { WamParameterDataMap } from "@webaudiomodules/api";
 import { Component, h } from "preact";
 import { DynamicParamEntry, DynamicParameterNode } from "../../shared/DynamicParameterNode";
 import { Knob } from "../../shared/ui/Knob";
+import { Select } from "../../shared/ui/Select";
 import { Slider } from "../../shared/ui/Slider"
 import { Toggle } from "../../shared/ui/Toggle"
 
@@ -131,7 +132,39 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
                 throw "Toggle ui element must reference boolean parameter"
         }
     }
-    
+
+    renderSelect(element: RemoteUIElement, p: DynamicParamEntry) {
+        switch(p.config.type) {
+            case "choice":
+                return <Select onChange={(v) => this.valueChanged(p.id, parseInt(v))}
+                             options={p.config.choices}
+                             value={() => this.getValue(p) == 1}
+                             label={element.props.label}
+                             >
+                        </Select>
+            
+            default:
+                throw "Toggle ui element must reference parameter of type 'choice'"
+        }
+    }
+
+    actionButtonPressed(name: string) {
+        this.props.ui.dispatchAction(name)
+    }
+
+    renderActionButton(element: RemoteUIElement) {
+        return <button onClick={() => this.actionButtonPressed(element.name)}>{element.props.label ?? element.name}</button>
+    }
+
+    paddingStyle(el: RemoteUIElement): string[] {
+        let result = []
+        if (el.props.padding !== undefined) {
+            result.push(`padding: ${el.props.padding}px;`)
+        } else {
+            result.push(`padding: 5px;`)
+        }
+        return result
+    }
 
     sizeStyles(el: RemoteUIElement): string[] {
         let result: string[] = []
@@ -145,16 +178,14 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
         } else {
             result.push("height: 100%;")
         }
-        if (el.props.padding !== undefined) {
-            result.push(`padding: ${el.props.padding}px;`)
-        }
+
+        result.push(...this.paddingStyle(el))
+        
         return result
     }
 
     renderElement(el: RemoteUIElement) {
         let style=this.sizeStyles(el)
-
-        console.log("renderElement ", el)
 
         try {
             switch (el.type) {
@@ -171,21 +202,29 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
                     if (!knobParam) {
                         throw "Failed to find parameter " + el.name
                     }
-                    return this.renderKnob(el, knobParam)
+                    return <div style={this.paddingStyle(el).join(" ")}>{this.renderKnob(el, knobParam)}</div>
                 case "slider":
                     const sliderParam = this.props.plugin.findParameter(el.name)
                     if (!sliderParam) {
                         throw "Failed to find parameter " + el.name
                     }
-                    return this.renderSlider(el, sliderParam)
+                    return <div style={this.paddingStyle(el).join(" ")}>{this.renderSlider(el, sliderParam)}</div>
                 case "toggle":
                     const toggleParam = this.props.plugin.findParameter(el.name)
                     if (!toggleParam) {
                         throw "Failed to find parameter " + el.name
                     }
-                    return this.renderToggle(el, toggleParam)
+                    return <div style={this.paddingStyle(el).join(" ")}>{this.renderToggle(el, toggleParam)}</div>
+                case "select":
+                    const selectParam = this.props.plugin.findParameter(el.name)
+                    if (!selectParam) {
+                        throw "Failed to find parameter " + el.name
+                    }
+                    return <div style={style.join(" ")}>{this.renderSelect(el, selectParam)}</div>
                 case "label":
                     return <div style={style.join(" ")}>{el.props.label ?? el.name}</div>
+                case "action":
+                    return <div style={style.join(" ")}>{this.renderActionButton(el)}</div>
              }
         } catch(e) {
             console.error(`Error rendering element ${el.name}: ${e}`)

@@ -115,6 +115,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	upload() {
 		if (this.multiplayers.length > 0) {
 			let source = this.multiplayers[0].doc.toString()
+			this.error = undefined
 			this.port.postMessage({source:"function", action:"function", code: source})
 		}
 	}

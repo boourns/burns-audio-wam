@@ -1,5 +1,6 @@
 // this class runs in the remote context, handling the client's ui perspective
 
+import { FunctionKernel } from "./FunctionKernel"
 import { RemoteUIElement } from "./RemoteUI"
 
 export type RemoteUIUpdate = {
@@ -16,10 +17,12 @@ export class RemoteUIController {
     port: MessagePort
     ui?: RemoteUIElement
     uiMap: Record<string, RemoteUIExtendedState>
+    kernel: FunctionKernel
 
     pendingUpdates: RemoteUIUpdate[]
 
-    constructor(port: MessagePort) {
+    constructor(kernel: FunctionKernel, port: MessagePort) {
+        this.kernel = kernel
         this.port = port
         this.pendingUpdates = []
     }
@@ -65,6 +68,15 @@ export class RemoteUIController {
         this.pendingUpdates = []
         if (updates.length > 0) {
             this.port.postMessage({source:"remoteUI", action:"up", updates})
+        }
+    }
+    
+    onMessage(message: any) {
+        if (!message.data || message.data.source != "remoteUI") {
+            return
+        }
+        if (message.data.action == "action" && message.data.name) {
+            this.kernel.onAction(message.data.name)
         }
     }
 }

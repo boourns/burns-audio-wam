@@ -31,6 +31,23 @@ type FunctionSequencer = {
      * @param event {number[]} the bytes of the MIDI event
      */
     onMidi?(event: number[]): void
+    /**
+     * Called when the host transport changes.
+     * @param transport {WamTransportData} the transport state, including tempo, time signature, and playing state
+     */
+    onTransportStart?(transport: WamTransportData): void
+
+    /**
+     * Called when the host transport changes.
+     * @param transport {WamTransportData} the transport state, including tempo, time signature, and playing state
+     */
+    onTransportStop?(transport: WamTransportData): void
+
+    /**
+     * Called when an 'action' button has been pressed.
+     * @param name {string} the name of the registered action that has been pressed
+     */
+    onAction?(name: string): void
 
     /**
      * Called when a downstream device updates the list of MIDI notes it responds to.  Especially useful for drum machines.
@@ -61,7 +78,7 @@ export class FunctionKernel {
 
         this.parameterIds = []
         this.processor = processor
-        this.ui = new RemoteUIController(processor.port)
+        this.ui = new RemoteUIController(this, processor.port)
     }
 
     onTick(ticks: number, params: Record<string, number>) {
@@ -115,7 +132,7 @@ export class FunctionKernel {
                 }
 
             } catch(e) {
-                this.error(e)
+                this.error(`Error initializing function: ${e}`)
             }
             this.ui.flush()
         } else if (message.data && message.data.action == "noteList") {
@@ -131,7 +148,24 @@ export class FunctionKernel {
     }
 
     onTransport(transportData: WamTransportData) {
-        this.transport = transportData
+        try {
+            if (this.transport && this.function) {
+                if (this.transport.playing && !transportData.playing) {
+                    if (this.function.onTransportStop) {
+                        this.function.onTransportStop(transportData)
+                    }
+                } else if (!this.transport.playing && transportData.playing) {
+                    if (this.function.onTransportStart) {
+                        this.function.onTransportStart(transportData)
+                    }
+                }
+                this.ui.flush()
+                
+                this.transport = transportData
+            }
+        } catch (e) {
+            this.error(`Error in onTransport: ${e}`)
+        }
     }
 
     onMidi(event: WamMidiData) {
@@ -140,7 +174,17 @@ export class FunctionKernel {
                 this.function.onMidi(event.bytes)
                 this.ui.flush()
             } catch (e) {
-                this.error(e)
+                this.error(`Error in onMidi: ${e}`)
+            }
+        }
+    }
+
+    onAction(name: string) {
+        if (this.function && this.function.onAction) {
+            try {
+                this.function.onAction(name)
+            } catch (e) {
+                this.error(`Error in onAction: ${e}`)
             }
         }
     }

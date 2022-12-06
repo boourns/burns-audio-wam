@@ -208,6 +208,11 @@ export class Slider extends Component<SliderProps, SliderState> {
     render() {
         h("div", {})
 
+        let valueLabel
+        if (this.props.showValue) {
+            valueLabel = <small><label ref={ref => { this.valueLabel = ref; this.lastValue = undefined} }></label></small>
+        }
+
         return <div style="display: flex; flex-direction: column;">
             {this.props.label ? <label>this.props.label</label> : ""}
             <canvas ref={(ref) => this.setup(ref)} class=""
@@ -215,8 +220,7 @@ export class Slider extends Component<SliderProps, SliderState> {
                 onDblClick={(e) => this.onDoubleClick(e)}
                 onMouseDown={(e) => this.onMouseDown(e)}
                 ></canvas>
-
-            <small><label ref={ref => { this.valueLabel = ref; this.lastValue = undefined} }></label></small>
+            {valueLabel}
         </div>
         
     }
