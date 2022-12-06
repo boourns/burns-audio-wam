@@ -65,7 +65,7 @@ export class FunctionSequencerProcessor extends DynamicParameterProcessor {
 
                 let params: Record<string, number> = {}
                 for (let id of this.function.parameterIds) {
-                    params[id] = this._parameterInterpolators[id].values[startSample]
+                    params[id] = this._parameterState[id].value
                 }
                 this.function.onTick(this.ticks, params)
             }
