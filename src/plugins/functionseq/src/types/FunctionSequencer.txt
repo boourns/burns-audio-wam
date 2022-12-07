@@ -5,13 +5,9 @@ declare type ParameterDefinition = {
 declare type FunctionSequencer = {
     /**
      * Called once when the processor has been loaded and is starting up.
+     * This is a good place to call api.RegisterParameters and ui.Register
      */
     init?(): void;
-    /**
-     * Returns a list of parameters to expose to the host as automateable.  Also generates the UI controls.
-     * @returns {ParameterDefinition[]} a list of parameters used to control the script
-     */
-    parameters?(): ParameterDefinition[];
     /**
      * Called 96 times per beat when the host transport is running. For example in 4/4 time, when ticks is divisible by 24, it is the start of a 16th note.
      * @param ticks {number} the number of ticks since host transport started.
