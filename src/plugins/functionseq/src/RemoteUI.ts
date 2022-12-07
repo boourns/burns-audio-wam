@@ -1,4 +1,4 @@
-import {kernel} from "./FunctionAPI"
+import { kernel } from "./globals"
 
 export type RemoteUIElementProperties = {
     width?: number

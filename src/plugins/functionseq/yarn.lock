@@ -49,6 +49,203 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tonaljs/abc-notation@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/abc-notation@npm:4.8.0"
+  dependencies:
+    "@tonaljs/core": ^4.8.0
+  checksum: 3f559c637bbc9a22be64d13f58832b54e548c8298ac1167a17ce03ed3a8b9c30b49a6cb7f29fb36f0732f2a47cd71ffa54c79e0f91e77871455d724f911e5c58
+  languageName: node
+  linkType: hard
+
+"@tonaljs/array@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/array@npm:4.8.0"
+  dependencies:
+    "@tonaljs/core": ^4.8.0
+  checksum: f3c396d4d8325d14ee99c7adb8335fc925fca67f58a49996f5a9e99e216f9cd160e5d40b2832a1783af88f8c7b0eaa6f95536d9a005ad6042dfb99298235c121
+  languageName: node
+  linkType: hard
+
+"@tonaljs/chord-detect@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/chord-detect@npm:4.8.0"
+  dependencies:
+    "@tonaljs/chord-type": ^4.8.0
+    "@tonaljs/core": ^4.8.0
+    "@tonaljs/pcset": ^4.8.0
+  checksum: c654932f5dc0f3547c34b9c5e7556747eecf7a21077991c56ab7ca61c44452670cfa055affc7e1eeafbb7549793da7425b622fdbe264d39b78f32dca7d10b4a2
+  languageName: node
+  linkType: hard
+
+"@tonaljs/chord-type@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/chord-type@npm:4.8.0"
+  dependencies:
+    "@tonaljs/core": ^4.8.0
+    "@tonaljs/pcset": ^4.8.0
+  checksum: 03c5226c62fef7ee95a28050201b05e23fe87c647c7c9134446186f28a17aff843a41a20a37584d76396bf5faea616d7405a4496c5638bb3472f274f5f9b7ff8
+  languageName: node
+  linkType: hard
+
+"@tonaljs/chord@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/chord@npm:4.8.0"
+  dependencies:
+    "@tonaljs/chord-detect": ^4.8.0
+    "@tonaljs/chord-type": ^4.8.0
+    "@tonaljs/collection": ^4.8.0
+    "@tonaljs/core": ^4.8.0
+    "@tonaljs/pcset": ^4.8.0
+    "@tonaljs/scale-type": ^4.8.0
+  checksum: 71209569515ee3adf9a75cc6700dceb8916b2f206c554a3125cf9590d9b290e364d7abc0ae0510096f4abc2fa024c025e86a80cb438b5b423ef1600f3ddbf200
+  languageName: node
+  linkType: hard
+
+"@tonaljs/collection@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/collection@npm:4.8.0"
+  checksum: 9b0d4c89d7289bafc78546767fa609451550aa5387297609ddf1c343db1855d66de4e7098a4df2c0a379cae256d4eb3480ccb10a5fb4ea77e6f273aa56afc7f6
+  languageName: node
+  linkType: hard
+
+"@tonaljs/core@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/core@npm:4.8.0"
+  checksum: 09ec5d268db7af9c7aa52243c16a0ec006f06134c41548de5aae43fe32031cdfa7bedb4e3bac1bfe287ab6c7b6e467d394878db3841c04c102f5a501904c8fca
+  languageName: node
+  linkType: hard
+
+"@tonaljs/duration-value@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/duration-value@npm:4.8.0"
+  checksum: b21ccdb66fc67270f6cc9a2214b3efb640c6aec3a9723745562953036723dc87302ac065254b249e44829c7bd8013d80fa8a1eeb294152b6f90c9278a364a2ca
+  languageName: node
+  linkType: hard
+
+"@tonaljs/interval@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/interval@npm:4.8.0"
+  dependencies:
+    "@tonaljs/core": ^4.8.0
+  checksum: c2b4289ae56df5b9ba59ecd322ae8f11eb895fccf5ad8aa34ce5e30f53948f0f875b24d9e1068af768c3835d0203580973d99dcd3063ed59d8f0eb7992367d84
+  languageName: node
+  linkType: hard
+
+"@tonaljs/key@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/key@npm:4.8.0"
+  dependencies:
+    "@tonaljs/core": ^4.8.0
+    "@tonaljs/note": ^4.8.0
+    "@tonaljs/roman-numeral": ^4.8.0
+  checksum: b4ddb8d242727d529daf657a26a936cc5dfe410a42d68f4035ad7181f967491d154cea7b9a2b5dc392477f85f19d8b177a4c957db0d6e321fd2ffa33288b1421
+  languageName: node
+  linkType: hard
+
+"@tonaljs/midi@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/midi@npm:4.8.0"
+  dependencies:
+    "@tonaljs/core": ^4.8.0
+  checksum: 53d5ce1ff1eeb6cd7dfe1873dd8c76d9c827ae75d3569ce5d45bad26c0d74d6f342cc97bcb4c0f7c8444f46c9c052f84ea6b141c57e512c3eabaf35a89319d4d
+  languageName: node
+  linkType: hard
+
+"@tonaljs/mode@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/mode@npm:4.8.0"
+  dependencies:
+    "@tonaljs/collection": ^4.8.0
+    "@tonaljs/core": ^4.8.0
+    "@tonaljs/interval": ^4.8.0
+    "@tonaljs/pcset": ^4.8.0
+    "@tonaljs/scale-type": ^4.8.0
+  checksum: 809f82a8c097ac906d43d7cacd02eecf31740d4d10860bf6fa1a80030d4b4307043b186a343a3664426bc0ecbf9ebf30c54cf6d2b832347a4d949ac8e1c031d5
+  languageName: node
+  linkType: hard
+
+"@tonaljs/note@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/note@npm:4.8.0"
+  dependencies:
+    "@tonaljs/core": ^4.8.0
+    "@tonaljs/midi": ^4.8.0
+  checksum: 25999b3d07299259e5e831a3ee61fa9f747aa6e3af507b2a62c9040501aa69a96c45c8c90974653e66910cc2785087a3cd4b1184c72cc2cc0eb81464326dcd76
+  languageName: node
+  linkType: hard
+
+"@tonaljs/pcset@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/pcset@npm:4.8.0"
+  dependencies:
+    "@tonaljs/collection": ^4.8.0
+    "@tonaljs/core": ^4.8.0
+  checksum: e6dd28c03be8ce545fa7c82f30861b7fe43399be1057544e490a17802a7432037fd1d0ce94332caacae74f4cb2a7e157aac15cb1f448be14ddc756bede8eba42
+  languageName: node
+  linkType: hard
+
+"@tonaljs/progression@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/progression@npm:4.8.0"
+  dependencies:
+    "@tonaljs/chord": ^4.8.0
+    "@tonaljs/core": ^4.8.0
+    "@tonaljs/roman-numeral": ^4.8.0
+  checksum: e7b934f9662a00a6a4ff1fb1eaed0aeeee1e26bb4dbe12ae001e0c27b5ebc384a994dcd006f26cf512bfae16c774d1f64f3a2cb67162c3ab2b8dcb9ee3ce8ea6
+  languageName: node
+  linkType: hard
+
+"@tonaljs/range@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/range@npm:4.8.0"
+  dependencies:
+    "@tonaljs/collection": ^4.8.0
+    "@tonaljs/midi": ^4.8.0
+  checksum: 545b93ee49a779f1a3b524fed89b255fb52ea7a715e454bb3abc87b2952baefba76f097d777e045bec13c2f6cbe43023e036f751cb3506c05f3e05191e02f8f6
+  languageName: node
+  linkType: hard
+
+"@tonaljs/roman-numeral@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/roman-numeral@npm:4.8.0"
+  dependencies:
+    "@tonaljs/core": ^4.8.0
+  checksum: d3cbf7e25cee59aad636f2f399a30acd5c4e32d4b7e1a4e0b43517323220019d77ad19fd775f5e4c1641f770549068aa563e9c2c02dea1b6157e7898982849e7
+  languageName: node
+  linkType: hard
+
+"@tonaljs/scale-type@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/scale-type@npm:4.8.0"
+  dependencies:
+    "@tonaljs/core": ^4.8.0
+    "@tonaljs/pcset": ^4.8.0
+  checksum: a695e0c3dfdf7ce82d8f4afc9879e426cb43490302f4ec15e01159cce4ed6f013a94d5d3f95f69bad00140e3ed9c0ffd69ce65382203dd8b0d4d0f7c7e75f5ea
+  languageName: node
+  linkType: hard
+
+"@tonaljs/scale@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/scale@npm:4.8.0"
+  dependencies:
+    "@tonaljs/chord-type": ^4.8.0
+    "@tonaljs/collection": ^4.8.0
+    "@tonaljs/core": ^4.8.0
+    "@tonaljs/note": ^4.8.0
+    "@tonaljs/pcset": ^4.8.0
+    "@tonaljs/scale-type": ^4.8.0
+  checksum: e7196af862cd4a2d65ce73b9fad1c953fd7eb0b18a99f9179048f99f0d99b54a81dd32d2c52aa2577b03ecb438ebd22f759e7e989351c79dc8b9d4debc79b399
+  languageName: node
+  linkType: hard
+
+"@tonaljs/time-signature@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "@tonaljs/time-signature@npm:4.8.0"
+  checksum: 9e454e478380596ccbb348a2620eb670c2888e98f61d8b37eacc21cf484529cf786bfce3cebd5cb4103a9ac345856ccffcdc27e6de61da4c139df084b54bcf3f
+  languageName: node
+  linkType: hard
+
 "@tootallnate/once@npm:1":
   version: 1.1.2
   resolution: "@tootallnate/once@npm:1.1.2"
@@ -1036,9 +1233,11 @@ fsevents@~2.3.2:
     css-modules-typescript-loader: ^4.0.1
     debug: ^4.3.1
     preact: ^10.5.5
+    raw-loader: ^4.0.2
     sass: ^1.39.2
     sass-loader: ^12.1.0
     style-loader: ^3.2.1
+    tonal: ^4.8.0
     ts-loader: ^8.0.12
     typescript: ^4.0.2
     webpack: ^5.11.1
@@ -2070,6 +2269,18 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
+"raw-loader@npm:^4.0.2":
+  version: 4.0.2
+  resolution: "raw-loader@npm:4.0.2"
+  dependencies:
+    loader-utils: ^2.0.0
+    schema-utils: ^3.0.0
+  peerDependencies:
+    webpack: ^4.0.0 || ^5.0.0
+  checksum: 51cc1b0d0e8c37c4336b5318f3b2c9c51d6998ad6f56ea09612afcfefc9c1f596341309e934a744ae907177f28efc9f1654eacd62151e82853fcc6d37450e795
+  languageName: node
+  linkType: hard
+
 "readable-stream@npm:^2.0.1, readable-stream@npm:^2.0.6":
   version: 2.3.7
   resolution: "readable-stream@npm:2.3.7"
@@ -2537,6 +2748,33 @@ resolve@^1.9.0:
   dependencies:
     is-number: ^7.0.0
   checksum: f76fa01b3d5be85db6a2a143e24df9f60dd047d151062d0ba3df62953f2f697b16fe5dad9b0ac6191c7efc7b1d9dcaa4b768174b7b29da89d4428e64bc0a20ed
+  languageName: node
+  linkType: hard
+
+"tonal@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "tonal@npm:4.8.0"
+  dependencies:
+    "@tonaljs/abc-notation": ^4.8.0
+    "@tonaljs/array": ^4.8.0
+    "@tonaljs/chord": ^4.8.0
+    "@tonaljs/chord-type": ^4.8.0
+    "@tonaljs/collection": ^4.8.0
+    "@tonaljs/core": ^4.8.0
+    "@tonaljs/duration-value": ^4.8.0
+    "@tonaljs/interval": ^4.8.0
+    "@tonaljs/key": ^4.8.0
+    "@tonaljs/midi": ^4.8.0
+    "@tonaljs/mode": ^4.8.0
+    "@tonaljs/note": ^4.8.0
+    "@tonaljs/pcset": ^4.8.0
+    "@tonaljs/progression": ^4.8.0
+    "@tonaljs/range": ^4.8.0
+    "@tonaljs/roman-numeral": ^4.8.0
+    "@tonaljs/scale": ^4.8.0
+    "@tonaljs/scale-type": ^4.8.0
+    "@tonaljs/time-signature": ^4.8.0
+  checksum: 6939ed2633d47df8c3efa662a60d3ed8ff47c6902764354ee76f54e428cf16576df3844b0bdeabef4836ae9932457354aee29acb8361c579bba64a0f6645eba1
   languageName: node
   linkType: hard
 

@@ -106,6 +106,13 @@ export class Toggle extends Component<ToggleProps, ToggleState> {
 
     setup(ref: HTMLCanvasElement | null) {
         if (ref == null) {
+            this.cancelAnimation()
+
+            this.context = undefined
+            this.ref = undefined
+            this.lastColor = undefined
+            this.lastValue = undefined
+
             return
         }
         if (this.ref == ref) {

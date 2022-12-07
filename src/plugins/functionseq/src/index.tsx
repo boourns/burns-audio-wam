@@ -26,6 +26,7 @@ import { RemoteUIReceiver } from './RemoteUIReceiver';
 type FunctionSeqState = {
 	runCount: number
 	params: any
+	additionalState: Record<string, any>
 }
 
 class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
@@ -35,6 +36,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	runCount: number
 	error?: any;
 	uiReceiver: RemoteUIReceiver;
+	additionalState: Record<string, any>
 
 	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
 		await super.addModules(audioContext, moduleId);
@@ -56,6 +58,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		this.runCount = 0
 		this.multiplayers = []
 		this.uiReceiver = new RemoteUIReceiver(this.port)
+		this.additionalState = {}
 
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
@@ -95,6 +98,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 
 		if (!monaco.editor.getModel(libUri)) {
 			const libSource = this.editorDefinition()
+			console.log("editorDfinition ", libSource)
 			monaco.languages.typescript.javascriptDefaults.addExtraLib(libSource, libUriString)
 			
 			monaco.editor.createModel(libSource, 'typescript', libUri);
@@ -120,6 +124,11 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		}
 	}
 
+	uploadAdditionalState() {
+		console.log("Uploading additional state from host thread: ", this.additionalState)
+		this.port.postMessage({source:"function", action: "additionalState", state: this.additionalState})
+	}
+
 	async runPressed() {
 		this.setState({
 			runCount: this.runCount+1
@@ -127,9 +136,11 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	}
 
 	async getState(): Promise<FunctionSeqState> {
+		
 		return {
 			runCount: this.runCount,
-			params: await super.getState()
+			params: await super.getState(),
+			additionalState: {...this.additionalState}
 		}
 	}
 
@@ -142,6 +153,16 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 			this.runCount = state.runCount
 
 			this.upload()
+		}
+
+		if (state.additionalState) {
+			if (Object.keys(state.additionalState).length == 0) {
+				console.log("Where did this setState come from?")
+				debugger
+			}
+
+			this.additionalState = {...state.additionalState}
+			this.uploadAdditionalState()
 		}
 
 		if (state.params) {
@@ -178,6 +199,8 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 				if (window.WAMExtensions.notes) {
 					window.WAMExtensions.notes.setNoteList(this.instanceId, message.data.noteList)
 				}
+			} else if (message.data.action == "additionalState") {
+				this.additionalState = message.data.state
 			}
 			if (this.renderCallback) {
 				this.renderCallback()

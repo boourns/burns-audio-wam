@@ -1,6 +1,7 @@
 import { WamMidiData, WamTransportData } from "@webaudiomodules/api";
 import { AudioWorkletGlobalScope } from "@webaudiomodules/api";
 import { FunctionKernel } from "./FunctionKernel";
+import { setProcessor, setKernel } from "./globals";
 
 const moduleId = "com.sequencerParty.functionSeq"
 const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
@@ -21,8 +22,6 @@ const {
 } = ModuleScope;
 
 const DynamicParameterProcessor = ModuleScope.DynamicParameterProcessor
-
-import {setProcessor, setKernel} from "./FunctionAPI"
 
 export class FunctionSequencerProcessor extends DynamicParameterProcessor {
     lastTime: number

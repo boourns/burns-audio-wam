@@ -136,6 +136,13 @@ export class Slider extends Component<SliderProps, SliderState> {
 
     setup(ref: HTMLCanvasElement | null) {
         if (ref == null) {
+            this.cancelAnimation()
+
+            this.context = undefined
+            this.ref = undefined
+            this.lastColor = undefined
+            this.lastValue = undefined
+
             return
         }
         if (this.ref == ref) {

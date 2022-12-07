@@ -1,60 +1,11 @@
 import { WamMidiData, WamParameterConfiguration, WamTransportData } from "@webaudiomodules/api";
 import { NoteDefinition } from "wam-extensions";
-import { FunctionAPI } from "./FunctionAPI";
+import { FunctionAPI } from "./FunctionSequencer";
 import {FunctionSequencerProcessor} from "./FunctionSeqProcessor";
-import { RemoteUIElement, ui } from "./RemoteUI";
+import { ui } from "./RemoteUI";
 import { RemoteUIController } from "./RemoteUIController";
-
-type ParameterDefinition = {
-    id: string
-    config: WamParameterConfiguration
-}
-
-type FunctionSequencer = {
-    /**
-     * Called once when the processor has been loaded and is starting up.
-     */
-    init?(): void
-    /**
-     * Returns a list of parameters to expose to the host as automateable.  Also generates the UI controls.
-     * @returns {ParameterDefinition[]} a list of parameters used to control the script
-     */
-    parameters?(): ParameterDefinition[]
-    /**
-     * Called 96 times per beat when the host transport is running. For example in 4/4 time, when ticks is divisible by 24, it is the start of a 16th note.
-     * @param ticks {number} the number of ticks since host transport started.  
-     * @param params {Record<string, number>} the current values of all registered parameters.
-     */
-    onTick?(ticks: number, params: Record<string, number>): void
-    /**
-     * Called when a MIDI event is received by this plugin.
-     * @param event {number[]} the bytes of the MIDI event
-     */
-    onMidi?(event: number[]): void
-    /**
-     * Called when the host transport changes.
-     * @param transport {WamTransportData} the transport state, including tempo, time signature, and playing state
-     */
-    onTransportStart?(transport: WamTransportData): void
-
-    /**
-     * Called when the host transport changes.
-     * @param transport {WamTransportData} the transport state, including tempo, time signature, and playing state
-     */
-    onTransportStop?(transport: WamTransportData): void
-
-    /**
-     * Called when an 'action' button has been pressed.
-     * @param name {string} the name of the registered action that has been pressed
-     */
-    onAction?(name: string): void
-
-    /**
-     * Called when a downstream device updates the list of MIDI notes it responds to.  Especially useful for drum machines.
-     * @param noteList {NoteDefinition[]} An optional list of MIDI note numbers, with names, supported by downstream MIDI devices
-     */
-    onCustomNoteList(noteList?: NoteDefinition[]): void
-}
+import * as tonal from "tonal"
+import { FunctionSequencer, ParameterDefinition } from "./FunctionSequencer";
 
 export class FunctionKernel {
     function: FunctionSequencer
@@ -64,6 +15,8 @@ export class FunctionKernel {
     processor: FunctionSequencerProcessor
     noteList?: NoteDefinition[]
     ui: RemoteUIController
+    additionalState: Record<string, any>
+    additionalStateDirty: boolean
 
     constructor(processor: FunctionSequencerProcessor) {
         this.api = new FunctionAPI()
@@ -78,6 +31,9 @@ export class FunctionKernel {
 
         this.parameterIds = []
         this.processor = processor
+        this.additionalState = {}
+        this.additionalStateDirty = false
+
         this.ui = new RemoteUIController(this, processor.port)
     }
 
@@ -91,7 +47,7 @@ export class FunctionKernel {
                 this.function.onTick(ticks, params)
             }
 
-            this.ui.flush()
+            this.flush()
         } catch (e) {
             this.processor.port.postMessage({source: "functionSeq", action:"error", error: e.toString()})
             this.function = undefined
@@ -105,42 +61,25 @@ export class FunctionKernel {
      async onMessage(message: any): Promise<void> {
         if (message.data && message.data.action == "function") {
             try {
-                this.function = new Function('api', 'ui', message.data.code)(this.api, ui)
+                this.function = new Function('api', 'ui', 'tonal', message.data.code)(this.api, ui, tonal)
 
                 if (!!this.function.init) {
                     this.function.init()
                 }
-
-                if (!!this.function.parameters) {
-                    let parameters = this.function.parameters()
-
-                    let map: Record<string, WamParameterConfiguration> = {}
-                    this.parameterIds = []
-
-                    for (let p of parameters) {
-                        this.validateParameter(p)
-
-                        map[p.id] = p.config
-                        this.parameterIds.push(p.id)
-                    }
-
-                    this.processor.port.postMessage({source: "functionSeq", action:"newParams", params: parameters})
-
-                    this.processor.updateParameters(map)
-                } else {
-                    console.warn("parameters() function missing, sequencer has no parameters.")
-                }
-
             } catch(e) {
                 this.error(`Error initializing function: ${e}`)
             }
-            this.ui.flush()
+            this.flush()
         } else if (message.data && message.data.action == "noteList") {
             this.noteList = message.data.noteList
             if (this.function && this.function.onCustomNoteList) {
                 this.function.onCustomNoteList(message.data.noteList)
             }
-            this.ui.flush()
+            this.flush()
+        } else if (message.data && message.data.action == "additionalState") {
+            this.additionalState = message.data.state
+            this.additionalStateDirty = true
+            this.flush()
         } else {
             // @ts-ignore
             super._onMessage(message)
@@ -159,7 +98,7 @@ export class FunctionKernel {
                         this.function.onTransportStart(transportData)
                     }
                 }
-                this.ui.flush()
+                this.flush()
                 
                 this.transport = transportData
             }
@@ -172,7 +111,7 @@ export class FunctionKernel {
         if (this.function && this.function.onMidi) {
             try {
                 this.function.onMidi(event.bytes)
-                this.ui.flush()
+                this.flush()
             } catch (e) {
                 this.error(`Error in onMidi: ${e}`)
             }
@@ -183,10 +122,38 @@ export class FunctionKernel {
         if (this.function && this.function.onAction) {
             try {
                 this.function.onAction(name)
+                this.flush()
             } catch (e) {
                 this.error(`Error in onAction: ${e}`)
             }
         }
+    }
+
+    onStateChange() {
+        if (this.function && this.function.onStateChange) {
+            try {
+                this.function.onStateChange({...this.additionalState})
+                this.flush()
+            } catch (e) {
+                this.error(`Error in onAction: ${e}`)
+            }
+        }
+    }
+
+    registerParameters(parameters: ParameterDefinition[]) {
+        let map: Record<string, WamParameterConfiguration> = {}
+        this.parameterIds = []
+
+        for (let p of parameters) {
+            this.validateParameter(p)
+
+            map[p.id] = p.config
+            this.parameterIds.push(p.id)
+        }
+
+        this.processor.port.postMessage({source: "functionSeq", action:"newParams", params: parameters})
+
+        this.processor.updateParameters(map)
     }
 
     validateParameter(p: ParameterDefinition) {
@@ -201,8 +168,26 @@ export class FunctionKernel {
         }
     }
 
+    setAdditionalState(name: string, value: any) {
+        this.additionalState[name] = value
+        this.additionalStateDirty = true
+    }
+
+    getAdditionalState(name: string) {
+        return this.additionalState[name]
+    }
+
     error(e: any) {
         this.processor.port.postMessage({source: "functionSeq", action:"error", error: e.toString()})
         this.function = undefined
+    }
+
+    flush() {
+        this.ui.flush()
+        if (this.additionalStateDirty) {
+            this.additionalStateDirty = false
+            this.processor.port.postMessage({source: "functionSeq", action:"additionalState", state: this.additionalState})
+            this.onStateChange()
+        }
     }
 } 

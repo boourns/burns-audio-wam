@@ -185,8 +185,7 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
     }
 
     renderElement(el: RemoteUIElement) {
-        let style=this.sizeStyles(el)
-
+        let style=this.sizeStyles(el)        
         try {
             switch (el.type) {
                 case "col":

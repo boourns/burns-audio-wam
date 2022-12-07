@@ -34,6 +34,10 @@ const WAMPlugin = {
   module: {
     rules: [
       {
+        test: /\.txt$/,
+        use: 'raw-loader'
+      },
+      {
         test: /\.worklet\.(ts|js)$/,
         use: [{
           loader: 'worklet-loader',
@@ -57,12 +61,12 @@ const WAMPlugin = {
         test: /\.(sa|sc|c)ss$/,
         use: ['style-loader', 'css-loader'],
         exclude: /src\/plugins\//
-      },
+      }
     ],
   },
   mode: "development",
   resolve: {
-    extensions: [ '.tsx', '.ts', '.js', ".css", ".scss" ],
+    extensions: [ '.tsx', '.ts', '.js', ".css", ".scss", ".txt" ],
   },
   experiments: {
     outputModule: true
