@@ -17,6 +17,7 @@ export type KnobProps = {
     valueString?(value: number): string
     units?: string
     decimals?: number
+    showValue?: boolean
 }
 
 type KnobState = {
@@ -34,7 +35,8 @@ export class Knob extends Component<KnobProps, KnobState> {
         label: "",
         bipolar: false,
         units: "",
-        decimals: 2
+        decimals: 2,
+        showValue: true,
     }
 
     pressed: boolean;
@@ -209,6 +211,11 @@ export class Knob extends Component<KnobProps, KnobState> {
     render() {
         h("div", {})
 
+        let value
+        if (this.props.showValue) {
+            value = <small><label ref={ref => { this.valueLabel = ref; this.lastValue = undefined} }></label></small>
+        }
+
         return (
         <div class="ComponentWrapper">
             <label>{this.props.label}</label>
@@ -217,7 +224,7 @@ export class Knob extends Component<KnobProps, KnobState> {
                 onDblClick={(e) => this.onDoubleClick(e)}
                 >
             </div>
-            <small><label ref={ref => { this.valueLabel = ref; this.lastValue = undefined} }></label></small>
+            {value}
         </div>
         )
     }

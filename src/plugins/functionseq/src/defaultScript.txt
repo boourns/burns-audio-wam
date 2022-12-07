@@ -1,0 +1,288 @@
+
+// Write a MIDI sequencer in ES6 javascript.
+// Press "Run" to load changes.  This also distributes changes to other users.
+// It is loaded directly into the browser's audio thread, no transpilation occurs.
+// For better error reporting check your console.
+
+/*
+ Your Sequencer class implements various callback functions that the host will call when the events occur.
+ For example, `onTick` is called 96 times every quarter note.  
+              `onTransportStart` is called when the 'play' button is pressed.
+              etc..
+
+ There is an `api` object in scope that your script can call to perform various functions, such as:
+ - register a list of parameters for automation
+ - emit MIDI events
+
+ There is also a `ui` object in scope that you call for various UI-related functions, such as:
+ - register a custom UI
+ - highlight UI elements
+
+ Lastly, there is an object in scope called 'tonal' which is the tonal js library.  This is useful for working
+ with intervals, chords, and scales.  See https://github.com/tonaljs/tonal for details.
+
+*/
+
+let scales = {}
+// our scale selector will return a number to map into scales, we need the names to match the indices here
+let orderedScaleNames = []
+
+/** 
+ * @class
+ * @implements {FunctionSequencer}
+ * */
+class SimpleStepSequencer {
+    constructor() {   
+    }
+
+    init() {
+        // loads all of the scales from tonaljs into one map like
+        // scales["major"] = [0, 2, 4, 5, 7, 9, 11]
+        for (let scale of tonal.ScaleType.all()) {
+            scales[scale.name] = scale.intervals.map(i => tonal.Interval.semitones(i))
+        }
+        // keep track of all the scale names for the ui selector
+        orderedScaleNames = Object.keys(scales).sort()
+
+        // most of the plugin's state is stored in parameters which are also exposed to the host
+        // for automation.
+        this.registerParameters()
+
+        // Plugins may optionally register their own UI layout
+        this.registerUI()
+    }
+
+    /**
+     * Registers the automate-able parameters with the host.
+     * @returns {ParameterDefinition[]}
+     */
+    registerParameters() {
+        /**
+         * @type {ParameterDefinition[]}
+         */
+        let params = []
+        
+        // if we have no value of stepCount saved, default to 16.
+        // we do not write a default value into the state on startup, so that previously written values
+        // do not get overwritten every time we run the script.
+        let STEPS = api.getState("stepCount") || 16
+
+        // generate a list of parameters for 0..STEPS
+        // we will generate for each step a 'step' boolean, a 'pitch' integer and a 'slide' boolean.
+        for (let i = 0; i < STEPS; i++) {
+            params.push(
+            {
+                id: `step${i}`,
+                config: {
+                    label: `Step ${i+1}`,
+                    type: "boolean",
+                    defaultValue: 0
+                }
+            })
+            params.push(
+            {
+                id: `pitch${i}`,
+                config: {
+                    label: `Pitch ${i+1}`,
+                    type: "int",
+                    defaultValue: 0,
+                    minimumValue: 0,
+                    maxValue: 32,
+                }
+            })
+            params.push(
+            {
+                id: `slide${i}`,
+                config: {
+                    label: `Slide ${i+1}`,
+                    type: "boolean",
+                    defaultValue: 0
+                }
+            })
+        }
+
+        // also register a parameter for picking the scale from the 90+ scales in tonal js.
+        params.push({
+            id: "scale",
+            config: {
+                label: "Scale",
+                type: "choice",
+                choices: orderedScaleNames
+            }
+        })
+
+        // this call updates the parameter list exposed by the plugin.
+        api.registerParameters(params)
+    }
+
+    registerUI() {
+        // register a custom UI.
+
+        // For our step sequencer, each 'step' will be a ui.Column so that the pitch slider 
+        // and step toggles are above and below one another.
+        // All these steps will be presented from the left to the right, in one row.
+        // by setting the width and height on each element we can be sure that subsequent rows will be aligned.
+
+        let STEPS = api.getState("stepCount") || 16
+        let steps = []
+
+        // leftmost column: a list of labels for each row of controls.
+        steps.push(ui.Col(`stepLabels`, [
+            ui.Label("Pitch", {width: 40, height: 120}),
+            ui.Label("Step", {width: 40, height: 40}),
+            ui.Label("Slide", {width: 40, height: 40}),
+        ]))
+        
+        // for every step, insert a column of controls
+        for (let i = 0; i < STEPS; i++) {
+            steps.push(ui.Col(`stepColumn${i}`, [
+                ui.Slider(`pitch${i}`, {width: 40, height: 120}),
+                ui.Toggle(`step${i}`, {width: 40, height: 40}),
+                ui.Toggle(`slide${i}`, {width: 40, height: 40}),
+            ]))
+        }
+
+        // finally, below this main row we'll put other controls.
+        // a 'select' for picking the scale
+        // and two 'actions'.  'actions' are rendered as buttons.  When the button is pressed,
+        // the 'onAction' callback (below) is called, so the script can take action.
+        let actions = ui.Row("actionsRow", [
+            ui.Select('scale'),
+            ui.Action("addStep"),
+            ui.Action("delStep")
+        ])
+
+        // finally, register this whole tree of UI elements.  This causes the host
+        // to re-render.  Try not to call this often as it is very expensive.
+        ui.Register(ui.Col("main", [ui.Row("allSteps", steps), actions]))
+    }
+
+
+    /**
+     * @param {number} tick - a monotonically increasing count, 96 ticks = 1 beat.
+     * @param {Record<string, number>} params
+     * */
+    onTick(tick, params) {
+        // onTick is called once every sequencer tick, which is 96 PPQN
+        
+        // Our step sequencer will move every 1/16th note so calculate what 16th note step we're on
+        // based on the incoming 'tick' count.
+        var cumulativeStep = Math.floor(tick / 24)
+
+        // look up the active number of steps, default to 16.
+        let STEPS = api.getState("stepCount") || 16
+
+        // based on the value of our 'scale' parameter, pick the current scale intervals out of the map
+        const scale = scales[orderedScaleNames[params.scale]]
+
+        // now scale is an array of offsets like [0, 2, 3, 5, 7, 9, 11].
+
+        if (cumulativeStep != this.lastStep) {
+            // we're on a different step than the last time we were called
+            this.lastStep = cumulativeStep
+
+            // figure out what step we're on in the sequence.
+            const step = cumulativeStep % (STEPS)
+
+            // update the UI, highlighting the current step and disabling highlighting on the previous step.
+            if (step > 0) {
+                ui.Highlight(`step${step-1}`, false)
+            } else {
+                ui.Highlight(`step${STEPS-1}`, false)
+            }
+            ui.Highlight(`step${step}`, true)
+
+            // if this step is enabled, emit a note.
+            if (params[`step${step}`] != 0) {
+
+                // how long should the note be? api.getTickDuration will return the length of the number of ticks.
+                // if slide is enabled for this step, we want the note to end after the start of the next step, which would be 25 ticks.
+                // otherwise we want the note to last 20 ticks.
+                const duration = api.getTickDuration(params[`slide${step}`] == 1 ? 25 : 20)
+
+                // get the pitch slider value.
+                const pitch = params[`pitch${step}`]
+
+                // using the pitch slider value, and the scale, calculate a final midi note pitch
+                const oct = Math.floor(pitch / scale.length) - 1
+                const offset = pitch % scale.length
+                const finalPitch = 50 + (oct * 12) + scale[offset]
+
+                // emit the MIDI note for the desired duration.  This schedules the MIDI ON message, and the MIDI OFF message in the future
+                // and returns immediately.
+                api.emitNote(finalPitch, 100, duration)
+            }
+        }
+    }
+
+    /** 
+     * onMidi is called when a MIDI message is sent to the FunctionSeq instance.
+     * @param bytes {number[]}
+     * */
+    onMidi(bytes) {
+        // pass any incoming midi events through to the output
+        api.emitMidiEvent(bytes, 0)
+    }
+
+    /**
+     * Called when a downstream device updates the list of MIDI notes it responds to.  Especially useful for drum machines.
+     * @param noteList {NoteDefinition[]} An optional list of MIDI note numbers, with names, supported by downstream MIDI devices
+     */
+    onCustomNoteList(noteList) {
+        console.log("Received custom note list: ", noteList)
+    }
+
+    /**
+     * Called when the host transport stops playing.
+     * @param transport {WamTransportData} the transport state, including tempo, time signature, and playing state
+     */
+    onTransportStop() {
+        let STEPS = api.getState("stepCount") || 16
+
+        for (let i = 0; i < STEPS; i++) {
+            ui.Highlight(`step${i}`, false)
+        }
+    }
+
+
+    /**
+     * Called when the host transport starts playing.
+     * @param transport {WamTransportData} the transport state, including tempo, time signature, and playing state
+     */
+    onTransportStart() {
+    }
+
+
+    /**
+     * Called when an 'action' button has been pressed.
+     * @param name {string} the name of the registered action that has been pressed
+     */
+    onAction(name) {
+        if (name == "addStep") {
+            let STEPS = api.getState("stepCount") || 16
+            api.setState("stepCount", STEPS+1)
+        } else if (name == "delStep") {
+            let STEPS = api.getState("stepCount") || 16
+            STEPS--
+            if (STEPS == 0) {
+                STEPS = 1
+            }
+            api.setState("stepCount", STEPS)
+        }
+    }
+
+    /**
+     * Called when an extra piece of state is set with 'api.setState', either locally
+     * or remotely from some other collaborator.
+     */
+    onStateChange(state) {        
+        // in our case this happens when 'addStep' or 'deleteStep' buttons are pressed
+        // and a new value of `stepCount` has been set.
+
+        // time to re-register the parameter list and UI to match the number of steps
+        this.init()
+    }
+}
+
+// this script must return a single instance of the new sequencer.
+return new SimpleStepSequencer()

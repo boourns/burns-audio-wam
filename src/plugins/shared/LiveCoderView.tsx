@@ -16,6 +16,7 @@ export interface LiveCoderNode extends DynamicParameterNode {
 export interface LiveCoderViewProps {
   plugin: LiveCoderNode
   actions: h.JSX.Element[]
+  parametersView?: () => h.JSX.Element
 }
 
 type LiveCoderViewState = {
@@ -123,7 +124,7 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
 
     let contentChanged = false
 
-    const statusStyle = "padding: 2px; margin: 4px; " + (this.props.plugin.error ? "background-color: yellow;" : contentChanged ? "background-color: gray;" : "background-color: green;")
+    const statusStyle = "padding: 2px; margin: 4px; " + (this.props.plugin.error ? "background-color: yellow; color: black;" : contentChanged ? "background-color: gray;" : "background-color: green;")
 
     let panelLabel
     let panel
@@ -134,7 +135,7 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
         break
       case "GUI":
         panelLabel = "CODE"
-        panel = this.renderParameters()
+        panel = this.props.parametersView ? this.props.parametersView() : this.renderParameters()
         break
     }
 

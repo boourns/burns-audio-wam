@@ -36,7 +36,7 @@ export class MIDIDebugView extends Component<MIDIDebugProps, MIDIDebugState> {
     const dir = msg.incoming ? "<- " : "-> "
     return <>
       <tr>
-        <td colSpan={2}><b>{dir} [{msg.bytes.join(", ")}]</b></td>
+        <td colSpan={2}><i>{msg.timestamp.toFixed(3)}</i>: <b>{dir} [{msg.bytes.join(", ")}]</b></td>
       </tr>
       <tr>
         <td>{a.description().join(" ")}</td>

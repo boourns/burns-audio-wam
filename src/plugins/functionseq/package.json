@@ -8,18 +8,20 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "del dist",
-    "build": "./node_modules/.bin/webpack",
+    "build": "./node_modules/.bin/webpack; ./tools/post-build.sh",
     "test": "echo 'no tests'"
   },
   "dependencies": {
     "@types/debug": "^4.1.6",
     "debug": "^4.3.1",
-    "preact": "^10.5.5"
+    "preact": "^10.5.5",
+    "tonal": "^4.8.0"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^9.0.0",
     "css-loader": "^6.2.0",
     "css-modules-typescript-loader": "^4.0.1",
+    "raw-loader": "^4.0.2",
     "sass": "^1.39.2",
     "sass-loader": "^12.1.0",
     "style-loader": "^3.2.1",

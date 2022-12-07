@@ -72,6 +72,7 @@ export class DynamicParameterView extends Component<DPProps, DPState> {
                              bipolar={p.config.minValue < 0}
                              integer={true}
                              color="var(--var-ControlDefault)"
+                             decimals={0}
                              >
                         </Knob>
             case "boolean":

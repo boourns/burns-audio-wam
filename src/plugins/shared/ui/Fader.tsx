@@ -18,6 +18,7 @@ export interface FaderProps {
     valueString?(value: number): string
     units?: string
     decimals?: number
+    showValue?: boolean
 }
 
 type FaderState = {
@@ -48,7 +49,8 @@ export class Fader extends Component<FaderProps, FaderState> {
         capHeight: 8,
         color: 'yellow',
         units: "",
-        decimals: 2
+        decimals: 2,
+        showValue: true
     }
 
     constructor() {

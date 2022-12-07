@@ -14,14 +14,19 @@ import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandle
 import { DynamicParameterNode } from '../../shared/DynamicParameterNode';
 import { LiveCoderNode, LiveCoderView } from "../../shared/LiveCoderView"
 
-import getFunctionSequencerProcessor from './FunctionSeqProcessor';
 import { defaultScript, editorDefinition } from './editor';
 
 import styleRoot from "./FunctionSequencer.scss"
+import { NoteDefinition } from 'wam-extensions';
+import { RemoteUIElement } from './RemoteUI';
+import { DynamicParameterView } from '../../shared/DynamicParameterView';
+import { RemoteUIRenderer } from './RemoteUIRenderer';
+import { RemoteUIReceiver } from './RemoteUIReceiver';
 	
 type FunctionSeqState = {
 	runCount: number
 	params: any
+	additionalState: Record<string, any>
 }
 
 class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
@@ -30,13 +35,11 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	multiplayers: MultiplayerHandler[]
 	runCount: number
 	error?: any;
+	uiReceiver: RemoteUIReceiver;
+	additionalState: Record<string, any>
 
 	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
-		const { audioWorklet } = audioContext;
-
 		await super.addModules(audioContext, moduleId);
-
-		await addFunctionModule(audioWorklet, getFunctionSequencerProcessor, moduleId);
 	}
 
 	/**
@@ -54,6 +57,8 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 
 		this.runCount = 0
 		this.multiplayers = []
+		this.uiReceiver = new RemoteUIReceiver(this.port)
+		this.additionalState = {}
 
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
@@ -68,31 +73,60 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		} else {
 			console.warn("host has not implemented collaboration WAM extension")
 		}
+
+		if (window.WAMExtensions.notes) {
+			window.WAMExtensions.notes.addListener(this.instanceId, (notes?: NoteDefinition[]) => {
+				this.port.postMessage({source: "function", action: "noteList", noteList: notes})
+			})
+		}
 	}
 
-	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor {
+	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor {	
 		monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-			allowJs: true
+			allowJs: true,
+			checkJs: true,
+			alwaysStrict: true,
 		})
-	  
+	
 		monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
 			noSemanticValidation: false,
 			noSyntaxValidation: false,
 		});
-	
-		monaco.languages.typescript.javascriptDefaults.addExtraLib(this.editorDefinition(), "")
-	
-		return monaco.editor.create(ref, {
+
+		const libUriString = 'ts:filename/functionSequencer.d.ts'
+		const libUri = monaco.Uri.parse(libUriString)
+
+		if (!monaco.editor.getModel(libUri)) {
+			const libSource = this.editorDefinition()
+			console.log("editorDfinition ", libSource)
+			monaco.languages.typescript.javascriptDefaults.addExtraLib(libSource, libUriString)
+			
+			monaco.editor.createModel(libSource, 'typescript', libUri);
+		}
+
+		let editor = monaco.editor.create(ref, {
 			language: 'javascript',
 			automaticLayout: true
 		});	
+
+		editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
+			this.upload()
+		});
+
+		return editor
 	}
 
 	upload() {
 		if (this.multiplayers.length > 0) {
 			let source = this.multiplayers[0].doc.toString()
-			this.port.postMessage({action:"function", code: source})
+			this.error = undefined
+			this.port.postMessage({source:"function", action:"function", code: source})
 		}
+	}
+
+	uploadAdditionalState() {
+		console.log("Uploading additional state from host thread: ", this.additionalState)
+		this.port.postMessage({source:"function", action: "additionalState", state: this.additionalState})
 	}
 
 	async runPressed() {
@@ -102,9 +136,11 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	}
 
 	async getState(): Promise<FunctionSeqState> {
+		
 		return {
 			runCount: this.runCount,
-			params: await super.getState()
+			params: await super.getState(),
+			additionalState: {...this.additionalState}
 		}
 	}
 
@@ -119,6 +155,16 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 			this.upload()
 		}
 
+		if (state.additionalState) {
+			if (Object.keys(state.additionalState).length == 0) {
+				console.log("Where did this setState come from?")
+				debugger
+			}
+
+			this.additionalState = {...state.additionalState}
+			this.uploadAdditionalState()
+		}
+
 		if (state.params) {
 			await super.setState(state.params)
 		}
@@ -130,7 +176,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	 * */
 	 _onMessage(message: MessageEvent) {
 		if (message.data && message.data.source == "functionSeq") {
-			if (message.data.params) {
+			if (message.data.action == "newParams" && message.data.params) {
 				this.groupedParameters = [
 					{
 						name: "Parameters",
@@ -147,11 +193,26 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 				}
 
 				this.state = state
+			} else if (message.data.action == "error") {
+				this.error = message.data.error
+			} else if (message.data.action == "noteList") {
+				if (window.WAMExtensions.notes) {
+					window.WAMExtensions.notes.setNoteList(this.instanceId, message.data.noteList)
+				}
+			} else if (message.data.action == "additionalState") {
+				this.additionalState = message.data.state
 			}
-			this.error = message.data.error
 			if (this.renderCallback) {
 				this.renderCallback()
 			}
+		} else if (message.data && message.data.source == "remoteUI") {
+			if (this.uiReceiver.onMessage(message)) {
+				if (this.renderCallback) {
+					this.renderCallback()
+				}
+			}
+
+
 		} else {
 			// @ts-ignore
 			super._onMessage(message)
@@ -165,7 +226,6 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	editorDefinition(): string {
 		return editorDefinition()
 	}
-
 }
 
 export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
@@ -173,7 +233,8 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
-	_functionProcessorUrl = `${this._baseURL}/FunctionSeqProcessor.js`;
+	_processorUrl = `${this._baseURL}/FunctionSeqProcessor.js`;
+
 	sequencer: FunctionSeqNode
 	nonce: string | undefined;
 
@@ -220,6 +281,10 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 
 	async createAudioNode(initialState: any) {
 		await FunctionSeqNode.addModules(this.audioContext, this.moduleId)
+
+		let url = `${this._processorUrl}?v=${Math.random()}`
+		await this.audioContext.audioWorklet.addModule(url)
+
 		const node: FunctionSeqNode = new FunctionSeqNode(this, {});
 		await node._initialize();
 
@@ -234,6 +299,20 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 
 		return node
     }
+
+	renderParametersView() {
+		console.log("rederParametersView called, ui ", this.audioNode.uiReceiver.ui)
+
+		if (this.audioNode.uiReceiver.ui) {
+			return <div style="display: flex; flex: 1;">
+				<RemoteUIRenderer plugin={this.audioNode} ui={this.audioNode.uiReceiver}></RemoteUIRenderer>
+			</div>
+		} else {
+			return <div style="display: flex; flex: 1;">
+			<DynamicParameterView plugin={this.audioNode}></DynamicParameterView>
+		  </div>
+		}
+	}
 
 	async createGui() {
 		const div = document.createElement('div');
@@ -255,7 +334,7 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 		// @ts-ignore
 		styleRoot.use({ target: div });
 
-		render(<LiveCoderView plugin={this.audioNode} actions={[]}></LiveCoderView>, div);
+		render(<LiveCoderView plugin={this.audioNode} parametersView={() => this.renderParametersView()} actions={[]}></LiveCoderView>, div);
 
 		return div;
 	}
