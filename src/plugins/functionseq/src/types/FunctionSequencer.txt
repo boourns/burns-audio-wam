@@ -51,6 +51,8 @@ declare type NoteDefinition = {
     blackKey: boolean;
 };
 declare class FunctionAPI {
+    #private;
+    constructor(ui: RemoteUI, kernel: FunctionKernel);
     /**
      * emits a MIDI Note on message followed by a MIDI Note off message delayed by the duration
      * @param note {number} the MIDI note number, from 0-127

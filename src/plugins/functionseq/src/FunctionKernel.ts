@@ -2,7 +2,7 @@ import { WamMidiData, WamParameterConfiguration, WamTransportData } from "@webau
 import { NoteDefinition } from "wam-extensions";
 import { FunctionAPI } from "./FunctionSequencer";
 import {FunctionSequencerProcessor} from "./FunctionSeqProcessor";
-import { ui } from "./RemoteUI";
+import { RemoteUI } from "./RemoteUI";
 import { RemoteUIController } from "./RemoteUIController";
 import * as tonal from "tonal"
 import { FunctionSequencer, ParameterDefinition } from "./FunctionSequencer";
@@ -14,12 +14,14 @@ export class FunctionKernel {
     parameterIds: string[]
     processor: FunctionSequencerProcessor
     noteList?: NoteDefinition[]
-    ui: RemoteUIController
+    uiController: RemoteUIController
+    remoteUI: RemoteUI
     additionalState: Record<string, any>
     additionalStateDirty: boolean
 
     constructor(processor: FunctionSequencerProcessor) {
-        this.api = new FunctionAPI()
+        this.remoteUI = new RemoteUI(this)
+        this.api = new FunctionAPI(this.remoteUI, this)
         this.transport = {
             tempo: 120,
             timeSigDenominator: 4,
@@ -34,7 +36,7 @@ export class FunctionKernel {
         this.additionalState = {}
         this.additionalStateDirty = false
 
-        this.ui = new RemoteUIController(this, processor.port)
+        this.uiController = new RemoteUIController(this, processor.port)
     }
 
     onTick(ticks: number, params: Record<string, number>) {
@@ -61,10 +63,14 @@ export class FunctionKernel {
      async onMessage(message: any): Promise<void> {
         if (message.data && message.data.action == "function") {
             try {
-                this.function = new Function('api', 'ui', 'tonal', message.data.code)(this.api, ui, tonal)
+                this.function = new Function('api', 'ui', 'tonal', message.data.code)(this.api, this.remoteUI, tonal)
 
                 if (!!this.function.init) {
                     this.function.init()
+                }
+                
+                if (this.noteList && this.function.onCustomNoteList) {
+                    this.function.onCustomNoteList(this.noteList)
                 }
             } catch(e) {
                 this.error(`Error initializing function: ${e}`)
@@ -183,7 +189,7 @@ export class FunctionKernel {
     }
 
     flush() {
-        this.ui.flush()
+        this.uiController.flush()
         if (this.additionalStateDirty) {
             this.additionalStateDirty = false
             this.processor.port.postMessage({source: "functionSeq", action:"additionalState", state: this.additionalState})

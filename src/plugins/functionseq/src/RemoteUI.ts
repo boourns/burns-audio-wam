@@ -1,4 +1,4 @@
-import { kernel } from "./globals"
+import { FunctionKernel } from "./FunctionKernel"
 
 export type RemoteUIElementProperties = {
     width?: number
@@ -17,8 +17,13 @@ export type RemoteUIElement = {
     children?: RemoteUIElement[]
 }
 
-export namespace ui {
-    export const Col = (name: string, children: RemoteUIElement[], properties?: RemoteUIElementProperties): RemoteUIElement => {
+export class RemoteUI {
+    #kernel: FunctionKernel
+    constructor(kernel: FunctionKernel) {
+        this.#kernel = kernel
+    }
+
+    Col(name: string, children: RemoteUIElement[], properties?: RemoteUIElementProperties): RemoteUIElement {
         return {
             type: "col",
             name,
@@ -27,7 +32,7 @@ export namespace ui {
         }
     }
 
-    export const Row = (name: string, children: RemoteUIElement[], properties?: RemoteUIElementProperties): RemoteUIElement => {
+    Row(name: string, children: RemoteUIElement[], properties?: RemoteUIElementProperties): RemoteUIElement {
         return {
             type: "row",
             name,
@@ -36,7 +41,7 @@ export namespace ui {
         }
     }
 
-    export const Action = (name: string, properties?: RemoteUIElementProperties): RemoteUIElement => {
+    Action(name: string, properties?: RemoteUIElementProperties): RemoteUIElement {
         return {
             type:"action",
             name,
@@ -44,7 +49,7 @@ export namespace ui {
         }
     }
 
-    export const Toggle = (name: string, properties?: RemoteUIElementProperties): RemoteUIElement => {
+    Toggle(name: string, properties?: RemoteUIElementProperties): RemoteUIElement {
         return {
             type: "toggle",
             name,
@@ -52,7 +57,7 @@ export namespace ui {
         }
     }
 
-    export const Knob = (name: string, properties?: RemoteUIElementProperties): RemoteUIElement => {
+    Knob(name: string, properties?: RemoteUIElementProperties): RemoteUIElement {
         return {
             type: "knob",
             name,
@@ -60,7 +65,7 @@ export namespace ui {
         }
     }
 
-    export const Slider = (name: string, properties?: RemoteUIElementProperties): RemoteUIElement => {
+    Slider(name: string, properties?: RemoteUIElementProperties): RemoteUIElement {
         return {
             type: "slider",
             name,
@@ -68,7 +73,7 @@ export namespace ui {
         }
     }
 
-    export const Label = (name: string, properties?: RemoteUIElementProperties): RemoteUIElement => {
+    Label(name: string, properties?: RemoteUIElementProperties): RemoteUIElement {
         return {
             type: "label",
             name,
@@ -76,7 +81,7 @@ export namespace ui {
         }
     }
 
-    export const Select = (name: string, properties?: RemoteUIElementProperties): RemoteUIElement => {
+    Select(name: string, properties?: RemoteUIElementProperties): RemoteUIElement {
         return {
             type: "select",
             name,
@@ -84,11 +89,11 @@ export namespace ui {
         }
     }
 
-    export const Register = (root: RemoteUIElement) => {
-        kernel.ui.register(root)
+    Register(root: RemoteUIElement) {
+        this.#kernel.uiController.register(root)
     }
 
-    export const Highlight = (name: string, value: boolean) => {
-        kernel.ui.highlight(name, value)
+    Highlight(name: string, value: boolean) {
+        this.#kernel.uiController.highlight(name, value)
     }
 }
