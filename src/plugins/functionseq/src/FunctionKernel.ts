@@ -1,4 +1,4 @@
-import { WamMidiData, WamParameterConfiguration, WamTransportData } from "@webaudiomodules/api";
+import { WamMidiData, WamParameterConfiguration, WamParameterDataMap, WamTransportData } from "@webaudiomodules/api";
 import { NoteDefinition } from "wam-extensions";
 import { FunctionAPI } from "./FunctionSequencer";
 import {FunctionSequencerProcessor} from "./FunctionSeqProcessor";
@@ -19,6 +19,9 @@ export class FunctionKernel {
     additionalState: Record<string, any>
     additionalStateDirty: boolean
 
+    cachedSetState: WamParameterDataMap[]
+    registerParametersCalled: boolean
+
     constructor(processor: FunctionSequencerProcessor) {
         this.remoteUI = new RemoteUI(this)
         this.api = new FunctionAPI(this.remoteUI, this)
@@ -31,10 +34,13 @@ export class FunctionKernel {
             currentBarStarted: 0
         }
 
+        this.registerParametersCalled = false
+
         this.parameterIds = []
         this.processor = processor
         this.additionalState = {}
         this.additionalStateDirty = false
+        this.cachedSetState = []
 
         this.uiController = new RemoteUIController(this, processor.port)
     }
@@ -63,6 +69,8 @@ export class FunctionKernel {
      async onMessage(message: any): Promise<void> {
         if (message.data && message.data.action == "function") {
             try {
+                this.registerParametersCalled = false
+
                 this.function = new Function('api', 'ui', 'tonal', message.data.code)(this.api, this.remoteUI, tonal)
 
                 if (!!this.function.init) {
@@ -160,6 +168,14 @@ export class FunctionKernel {
         this.processor.port.postMessage({source: "functionSeq", action:"newParams", params: parameters})
 
         this.processor.updateParameters(map)
+
+        for (let state of this.cachedSetState) {
+            this.processor._setParameterValues(state, false);
+        }
+        
+        this.cachedSetState = []
+
+        this.registerParametersCalled = true
     }
 
     validateParameter(p: ParameterDefinition) {

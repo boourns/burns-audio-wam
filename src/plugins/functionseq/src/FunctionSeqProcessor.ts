@@ -79,6 +79,13 @@ export class FunctionSequencerProcessor extends DynamicParameterProcessor {
         } else if (message.data && message.data.source == "remoteUI") {
             this.function.uiController.onMessage(message)
         } else {
+            if (message.data && message.data.request == "set/state") {
+                if (!this.function.registerParametersCalled && message.data?.content?.state?.parameterValues) {
+                    // we queue up any setState calls until the script registers parameters, and then we send them out.
+                    // otherwise we drop initial state values saved in the script
+                    this.function.cachedSetState.push(message.data.content.state.parameterValues)
+                }
+            }
             // @ts-ignore
             super._onMessage(message)
         }
