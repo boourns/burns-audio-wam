@@ -97,7 +97,7 @@ export default class ButterchurnNode extends CompositeAudioNode {
 	loadPreset() {
 		const preset = this.presets[this.chosenPreset]
 
-		if (preset) {
+		if (preset && this.visualizer) {
 			this.visualizer.loadPreset(preset)
 		}
 	}

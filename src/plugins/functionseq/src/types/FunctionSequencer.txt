@@ -55,12 +55,18 @@ declare class FunctionAPI {
     constructor(ui: RemoteUI, kernel: FunctionKernel);
     /**
      * emits a MIDI Note on message followed by a MIDI Note off message delayed by the duration
+     * @param channel {number} the MIDI channel minus one, from 0-15. So to emit on channel 1, send a 0.
      * @param note {number} the MIDI note number, from 0-127
      * @param velocity {number} MIDI note on velocity, from 0-127
      * @param duration {number} the midi note duration, in seconds.
      * @param startTime {number} optionally set the starting time of the note, in relation to api.getCurrentTime()
      * */
-    emitNote(note: number, velocity: number, duration: number, startTime?: number): void;
+    emitNote(channel: number, note: number, velocity: number, duration: number, startTime?: number): void;
+    /**
+     * Emit a regular, non-sysex MIDI message up to 3 bytes in length.
+     * @param bytes {number[]} a 1 to 3 array of bytes, the raw MIDI message.
+     * @param eventTime {number} the time to emit the event, relative to api.getCurrentTime()
+     * */
     emitMidiEvent(bytes: number[], eventTime: number): void;
     /**
      * returns the current time

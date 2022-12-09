@@ -79,20 +79,30 @@ export class FunctionAPI {
     
     /**
      * emits a MIDI Note on message followed by a MIDI Note off message delayed by the duration
+     * @param channel {number} the MIDI channel minus one, from 0-15. So to emit on channel 1, send a 0.
      * @param note {number} the MIDI note number, from 0-127
      * @param velocity {number} MIDI note on velocity, from 0-127
      * @param duration {number} the midi note duration, in seconds.
      * @param startTime {number} optionally set the starting time of the note, in relation to api.getCurrentTime()
      * */
-    emitNote(note: number, velocity: number, duration: number, startTime?: number) {
+    emitNote(channel: number, note: number, velocity: number, duration: number, startTime?: number) {
         if (startTime === undefined) {
             startTime = audioWorkletGlobalScope.currentTime
         }
 
-        this.emitMidiEvent([MIDI.NOTE_ON, note, velocity], startTime)
-        this.emitMidiEvent([MIDI.NOTE_OFF, note, velocity], startTime+duration)
+        if (!(Number.isInteger(channel) && channel >= 0 && channel <= 15)) {
+            throw `emitNote: channel value ${channel} invalid.  Must be integer value from 0-15 (ch#1-#16)`
+        }
+
+        this.emitMidiEvent([MIDI.NOTE_ON | channel, note, velocity], startTime)
+        this.emitMidiEvent([MIDI.NOTE_OFF | channel, note, velocity], startTime+duration)
     }
 
+    /**
+     * Emit a regular, non-sysex MIDI message up to 3 bytes in length.
+     * @param bytes {number[]} a 1 to 3 array of bytes, the raw MIDI message.
+     * @param eventTime {number} the time to emit the event, relative to api.getCurrentTime()
+     * */
     emitMidiEvent(bytes: number[], eventTime: number) {
         if (bytes.length > 3) {
             throw "emitMidiEvent can only emit regular MIDI messages - use emitSysex to emit sysex messages."
