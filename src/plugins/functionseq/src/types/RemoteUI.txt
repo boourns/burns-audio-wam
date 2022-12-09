@@ -12,15 +12,17 @@ declare type RemoteUIElement = {
     props: RemoteUIElementProperties;
     children?: RemoteUIElement[];
 };
-declare namespace ui {
-    const Col: (name: string, children: RemoteUIElement[], properties?: RemoteUIElementProperties) => RemoteUIElement;
-    const Row: (name: string, children: RemoteUIElement[], properties?: RemoteUIElementProperties) => RemoteUIElement;
-    const Action: (name: string, properties?: RemoteUIElementProperties) => RemoteUIElement;
-    const Toggle: (name: string, properties?: RemoteUIElementProperties) => RemoteUIElement;
-    const Knob: (name: string, properties?: RemoteUIElementProperties) => RemoteUIElement;
-    const Slider: (name: string, properties?: RemoteUIElementProperties) => RemoteUIElement;
-    const Label: (name: string, properties?: RemoteUIElementProperties) => RemoteUIElement;
-    const Select: (name: string, properties?: RemoteUIElementProperties) => RemoteUIElement;
-    const Register: (root: RemoteUIElement) => void;
-    const Highlight: (name: string, value: boolean) => void;
+declare class RemoteUI {
+    #private;
+    constructor(kernel: FunctionKernel);
+    Col(name: string, children: RemoteUIElement[], properties?: RemoteUIElementProperties): RemoteUIElement;
+    Row(name: string, children: RemoteUIElement[], properties?: RemoteUIElementProperties): RemoteUIElement;
+    Action(name: string, properties?: RemoteUIElementProperties): RemoteUIElement;
+    Toggle(name: string, properties?: RemoteUIElementProperties): RemoteUIElement;
+    Knob(name: string, properties?: RemoteUIElementProperties): RemoteUIElement;
+    Slider(name: string, properties?: RemoteUIElementProperties): RemoteUIElement;
+    Label(name: string, properties?: RemoteUIElementProperties): RemoteUIElement;
+    Select(name: string, properties?: RemoteUIElementProperties): RemoteUIElement;
+    Register(root: RemoteUIElement): void;
+    Highlight(name: string, value: boolean): void;
 }

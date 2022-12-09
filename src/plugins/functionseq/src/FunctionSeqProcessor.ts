@@ -1,7 +1,6 @@
 import { WamMidiData, WamTransportData } from "@webaudiomodules/api";
 import { AudioWorkletGlobalScope } from "@webaudiomodules/api";
 import { FunctionKernel } from "./FunctionKernel";
-import { setProcessor, setKernel } from "./globals";
 
 const moduleId = "com.sequencerParty.functionSeq"
 const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
@@ -18,7 +17,6 @@ const { registerProcessor } = audioWorkletGlobalScope;
 const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
 const {
     WamProcessor,
-    WamParameterInfo,
 } = ModuleScope;
 
 const DynamicParameterProcessor = ModuleScope.DynamicParameterProcessor
@@ -35,8 +33,6 @@ export class FunctionSequencerProcessor extends DynamicParameterProcessor {
     constructor(options: any) {
         super(options)
         this.function = new FunctionKernel(this)
-        setProcessor(this)
-        setKernel(this.function)
     }
 
     /**
@@ -81,7 +77,7 @@ export class FunctionSequencerProcessor extends DynamicParameterProcessor {
         if (message.data && message.data.source == "function") {
             this.function.onMessage(message)
         } else if (message.data && message.data.source == "remoteUI") {
-            this.function.ui.onMessage(message)
+            this.function.uiController.onMessage(message)
         } else {
             // @ts-ignore
             super._onMessage(message)
