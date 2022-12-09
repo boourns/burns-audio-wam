@@ -211,7 +211,7 @@ class SimpleStepSequencer {
 
                 // emit the MIDI note for the desired duration.  This schedules the MIDI ON message, and the MIDI OFF message in the future
                 // and returns immediately.
-                api.emitNote(finalPitch, 100, duration)
+                api.emitNote(0, finalPitch, 100, duration)
             }
         }
     }
