@@ -160,9 +160,10 @@ class SimpleStepSequencer {
 
     /**
      * @param {number} tick - a monotonically increasing count, 96 ticks = 1 beat.
-     * @param {Record<string, number>} params
      * */
-    onTick(tick, params) {
+    onTick(tick) {
+        const params = api.getParams()
+        
         // onTick is called once every sequencer tick, which is 96 PPQN
         
         // Our step sequencer will move every 1/16th note so calculate what 16th note step we're on

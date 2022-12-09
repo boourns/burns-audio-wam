@@ -43,7 +43,6 @@ export class FunctionSequencerProcessor extends DynamicParameterProcessor {
      * @param {Float32Array[][]} outputs
      */
     _process(startSample: number, endSample: number, inputs: Float32Array[][], outputs: Float32Array[][]) {
-        // @ts-ignore
         const { currentTime } = audioWorkletGlobalScope;
         
         if (!this.transportData) {
@@ -58,11 +57,7 @@ export class FunctionSequencerProcessor extends DynamicParameterProcessor {
             if (this.ticks != tickPosition) {
                 this.ticks = tickPosition;
 
-                let params: Record<string, number> = {}
-                for (let id of this.function.parameterIds) {
-                    params[id] = this._parameterState[id].value
-                }
-                this.function.onTick(this.ticks, params)
+                this.function.onTick(this.ticks)
             }
         }
 
@@ -96,7 +91,7 @@ export class FunctionSequencerProcessor extends DynamicParameterProcessor {
         this.function.onTransport(transportData)
     }
 
-    _onMidi(midiData: WamMidiData) {        
+    _onMidi(midiData: WamMidiData) {                
         this.function.onMidi(midiData)
     }
 }

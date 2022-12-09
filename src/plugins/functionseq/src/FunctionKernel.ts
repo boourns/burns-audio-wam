@@ -45,14 +45,14 @@ export class FunctionKernel {
         this.uiController = new RemoteUIController(this, processor.port)
     }
 
-    onTick(ticks: number, params: Record<string, number>) {
+    onTick(ticks: number) {
         if (!this.function) {
             return
         }
 
         try {
             if (this.function.onTick) {
-                this.function.onTick(ticks, params)
+                this.function.onTick(ticks)
             }
 
             this.flush()

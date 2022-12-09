@@ -23,9 +23,8 @@ export type FunctionSequencer = {
     /**
      * Called 96 times per beat when the host transport is running. For example in 4/4 time, when ticks is divisible by 24, it is the start of a 16th note.
      * @param ticks {number} the number of ticks since host transport started.  
-     * @param params {Record<string, number>} the current values of all registered parameters.
      */
-    onTick?(ticks: number, params: Record<string, number>): void
+    onTick?(ticks: number): void
     /**
      * Called when a MIDI event is received by this plugin.
      * @param event {number[]} the bytes of the MIDI event
@@ -112,6 +111,7 @@ export class FunctionAPI {
                 throw `MIDI event byte at index ${i} is not an integer between 0-255, is ${bytes[i]}`
             }
         }
+
         this.#kernel.processor.emitEvents(
             { type: 'wam-midi', time: eventTime, data: { bytes } }
         )
@@ -168,5 +168,19 @@ export class FunctionAPI {
      */
     getState(name: string) {
         return this.#kernel.getAdditionalState(name)
+    }
+
+    /**
+     * Returns the values for all parameters that were registered by registerParameters.
+     * @returns {Record<string, number>} a map of parameter names to parameter values
+     */
+    getParams(): Record<string, number> {
+        let params: Record<string, number> = {}
+        
+        for (let id of this.#kernel.parameterIds) {
+            params[id] = this.#kernel.processor._parameterState[id].value
+        }
+
+        return params
     }
 }
