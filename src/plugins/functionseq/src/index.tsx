@@ -98,7 +98,6 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 
 		if (!monaco.editor.getModel(libUri)) {
 			const libSource = this.editorDefinition()
-			console.log("editorDfinition ", libSource)
 			monaco.languages.typescript.javascriptDefaults.addExtraLib(libSource, libUriString)
 			
 			monaco.editor.createModel(libSource, 'typescript', libUri);
@@ -125,7 +124,6 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	}
 
 	uploadAdditionalState() {
-		console.log("Uploading additional state from host thread: ", this.additionalState)
 		this.port.postMessage({source:"function", action: "additionalState", state: this.additionalState})
 	}
 
@@ -156,11 +154,6 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		}
 
 		if (state.additionalState) {
-			if (Object.keys(state.additionalState).length == 0) {
-				console.log("Where did this setState come from?")
-				debugger
-			}
-
 			this.additionalState = {...state.additionalState}
 			this.uploadAdditionalState()
 		}
@@ -301,8 +294,6 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
     }
 
 	renderParametersView() {
-		console.log("rederParametersView called, ui ", this.audioNode.uiReceiver.ui)
-
 		if (this.audioNode.uiReceiver.ui) {
 			return <div style="display: flex; flex: 1;">
 				<RemoteUIRenderer plugin={this.audioNode} ui={this.audioNode.uiReceiver}></RemoteUIRenderer>
