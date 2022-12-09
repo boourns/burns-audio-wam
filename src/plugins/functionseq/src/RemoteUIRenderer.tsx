@@ -169,12 +169,12 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
     sizeStyles(el: RemoteUIElement): string[] {
         let result: string[] = []
         if (el.props.width !== undefined) {
-            result.push(`width: ${el.props.width}px;`)
+            result.push(`width: ${el.props.width}px; min-width: ${el.props.width}px; max-width: ${el.props.width}px; overflow: hidden;`)
         } else {
             result.push("width: 100%;")
         }
         if (el.props.height !== undefined) {
-            result.push(`height: ${el.props.height}px;`)
+            result.push(`height: ${el.props.height}px; min-height: ${el.props.height}px; max-height: ${el.props.height}px; overflow: hidden;`)
         } else {
             result.push("height: 100%;")
         }
@@ -189,11 +189,11 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
         try {
             switch (el.type) {
                 case "col":
-                    style.push("display: flex;", "flex-direction: column;", "justify-content: center;", "align-items: center;")
+                    style.push("display: flex;", "flex-direction: column;", "justify-content: center;", "align-items: flex-start;")
     
                     return <div style={style.join(" ")}>{el.children.map(ch => this.renderElement(ch))}</div>
                 case "row":
-                    style.push("display: flex;", "flex-direction: row;", "justify-content: center;", "align-items: center;")
+                    style.push("display: flex;", "flex-direction: row;", "justify-content: flex-start;", "align-items: center;")
     
                     return <div style={style.join(" ")}>{el.children.map(ch => this.renderElement(ch))}</div>
                 case "knob":

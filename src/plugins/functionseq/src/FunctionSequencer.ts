@@ -1,7 +1,8 @@
 import { WamParameterConfiguration, WamTransportData } from "@webaudiomodules/api"
 import { AudioWorkletGlobalScope } from "@webaudiomodules/api"
+import { FunctionKernel } from "./FunctionKernel"
 import { MIDI } from "./FunctionSeqProcessor"
-import { kernel, processor } from "./globals"
+import { RemoteUI } from "./RemoteUI"
 
 const PPQN = 96
 
@@ -68,6 +69,14 @@ export type NoteDefinition = {
 }
 
 export class FunctionAPI {
+    #ui: RemoteUI
+    #kernel: FunctionKernel
+
+    constructor(ui: RemoteUI, kernel: FunctionKernel) {
+        this.#ui = ui
+        this.#kernel = kernel
+    }
+    
     /**
      * emits a MIDI Note on message followed by a MIDI Note off message delayed by the duration
      * @param note {number} the MIDI note number, from 0-127
@@ -85,7 +94,15 @@ export class FunctionAPI {
     }
 
     emitMidiEvent(bytes: number[], eventTime: number) {
-        processor.emitEvents(
+        if (bytes.length > 3) {
+            throw "emitMidiEvent can only emit regular MIDI messages - use emitSysex to emit sysex messages."
+        }
+        for (let i = 0; i < bytes.length; i++) {
+            if (!Number.isInteger(bytes[i]) || bytes[i] < 0 || bytes[i] > 255) {
+                throw `MIDI event byte at index ${i} is not an integer between 0-255, is ${bytes[i]}`
+            }
+        }
+        this.#kernel.processor.emitEvents(
             { type: 'wam-midi', time: eventTime, data: { bytes } }
         )
     }
@@ -103,7 +120,7 @@ export class FunctionAPI {
      * @param ticks {number} the number of ticks to convert to seconds
      */
     getTickDuration(ticks: number): number {
-        return ticks * 1.0 / ((kernel.transport.tempo / 60.0) * PPQN);
+        return ticks * 1.0 / ((this.#kernel.transport.tempo / 60.0) * PPQN);
     }
 
     /**
@@ -111,7 +128,7 @@ export class FunctionAPI {
      * @param noteList {NoteDefinition[]} a list of midi notes this processor accepts.  Set to undefined to clear the custom note list.
      */
     setCustomNoteList(noteList?: NoteDefinition[]) {
-        processor.port.postMessage({source: "functionSeq", action:"noteList", noteList})
+        this.#kernel.processor.port.postMessage({source: "functionSeq", action:"noteList", noteList})
     }
 
     /**
@@ -119,7 +136,7 @@ export class FunctionAPI {
      * @param parameters {ParameterDefinition[]} the list of parameters to register for the plugin.
      */
     registerParameters(parameters: ParameterDefinition[]) {
-        kernel.registerParameters(parameters)
+        this.#kernel.registerParameters(parameters)
     }
 
     /**
@@ -131,7 +148,7 @@ export class FunctionAPI {
      * @param value {any} the value to store
      */
     setState(name: string, value: any) {
-        kernel.setAdditionalState(name, value)
+        this.#kernel.setAdditionalState(name, value)
     }
 
     /**
@@ -140,6 +157,6 @@ export class FunctionAPI {
      * @returns {any} the previously stored value, or undefined if nothing is stored.
      */
     getState(name: string) {
-        return kernel.getAdditionalState(name)
+        return this.#kernel.getAdditionalState(name)
     }
 }
