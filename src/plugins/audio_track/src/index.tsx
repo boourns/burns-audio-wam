@@ -7,17 +7,14 @@ import { AudioRecorderNode } from './AudioRecorderNode';
 
 import { AudioRecorderView } from './views/AudioRecorderView';
 
-import styleRoot from "./views/AudioRecorderView.scss"
-
-// @ts-ignore
-let styles = styleRoot.locals as typeof styleRoot
+import styles from "./views/AudioRecorderView.scss"
+import { insertStyle} from "../../shared/insertStyle"
 
 export default class AudioRecorderModule extends WebAudioModule<AudioRecorderNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
-	nonce: string | undefined;
 
 	async _loadDescriptor() {		
 		const url = this._descriptorUrl;
@@ -54,19 +51,7 @@ export default class AudioRecorderModule extends WebAudioModule<AudioRecorderNod
 		h("div", {})
 
 		var shadow = div.attachShadow({mode: 'open'});
-		
-		if (this.nonce) {
-			// we've already rendered before, unuse the styles before using them again
-			this.nonce = undefined
-
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
-		this.nonce = Math.random().toString(16).substr(2, 8);
-		div.setAttribute("data-nonce", this.nonce)
-		// @ts-ignore
-		styleRoot.use({ target: shadow });
+		insertStyle(shadow, styles.toString())
 
 		div.setAttribute("style", "display: flex; flex-direction: column: width: 100%; height: 100%")
 
@@ -76,13 +61,6 @@ export default class AudioRecorderModule extends WebAudioModule<AudioRecorderNod
 	}
 
 	destroyGui(el: Element) {
-		if (el.getAttribute("data-nonce") == this.nonce) {
-			// this was the last time we rendered the GUI so clear the style
-			
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
 		render(null, el)
 	}
 

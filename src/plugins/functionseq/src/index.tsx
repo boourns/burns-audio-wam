@@ -134,12 +134,12 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	}
 
 	async getState(): Promise<FunctionSeqState> {
-		
-		return {
+		const state = {
 			runCount: this.runCount,
 			params: await super.getState(),
 			additionalState: {...this.additionalState}
 		}
+		return state
 	}
 
 	async setState(state?: Partial<FunctionSeqState>): Promise<void> {

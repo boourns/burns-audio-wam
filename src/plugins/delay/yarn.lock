@@ -842,7 +842,6 @@ __metadata:
     preact: ^10.5.5
     sass: ^1.39.2
     sass-loader: ^12.1.0
-    style-loader: ^3.2.1
     ts-loader: ^8.0.12
     typescript: ^4.0.2
     webpack: ^5.11.1
@@ -2478,15 +2477,6 @@ fsevents@~2.3.2:
   dependencies:
     ansi-regex: ^3.0.0
   checksum: d9186e6c0cf78f25274f6750ee5e4a5725fb91b70fdd79aa5fe648eab092a0ec5b9621b22d69d4534a56319f75d8944efbd84e3afa8d4ad1b9a9491f12c84eca
-  languageName: node
-  linkType: hard
-
-"style-loader@npm:^3.2.1":
-  version: 3.3.1
-  resolution: "style-loader@npm:3.3.1"
-  peerDependencies:
-    webpack: ^5.0.0
-  checksum: 470feef680f59e2fce4d6601b5c55b88c01ad8d1dd693c528ffd591ff5fd7c01a4eff3bdbe62f26f847d6bd2430c9ab594be23307cfe7a3446ab236683f0d066
   languageName: node
   linkType: hard
 

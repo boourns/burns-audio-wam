@@ -12,16 +12,14 @@ import { h, render } from 'preact';
 import { DelayView } from './views/DelayView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
-import styleRoot from "./views/DelayView.scss"
+import styles from "./views/DelayView.scss"
+import { insertStyle} from "../../shared/insertStyle"
 
 export default class Delay extends WebAudioModule<DelayPluginNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
-
-	flavors = ["soft", "hard"]
-	nonce: string | undefined;
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -153,34 +151,14 @@ export default class Delay extends WebAudioModule<DelayPluginNode> {
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
+		insertStyle(shadow, styles.toString())
 
-		if (this.nonce) {
-			// we've already rendered before, unuse the styles before using them again
-			this.nonce = undefined
-
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
-		this.nonce = Math.random().toString(16).substr(2, 8);
-		div.setAttribute("data-nonce", this.nonce)
-
-		// @ts-ignore
-		styleRoot.use({ target: shadow });
-		
 		render(<DelayView plugin={this}></DelayView>, shadow);
 
 		return div;
 	}
 
 	destroyGui(el: Element) {
-		if (el.getAttribute("data-nonce") == this.nonce) {
-			// this was the last time we rendered the GUI so clear the style
-			
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
 		render(null, el.shadowRoot)
 	}
 }

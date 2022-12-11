@@ -5,13 +5,14 @@
 /* eslint-disable no-underscore-dangle */
 
 import { WebAudioModule,  } from '@webaudiomodules/sdk';
-import {ParamMgrFactory, CompositeAudioNode} from '@webaudiomodules/sdk-parammgr'
+import {ParamMgrFactory} from '@webaudiomodules/sdk-parammgr'
 import DistortionNode from './Node';
 import { h, render } from 'preact';
 import { DistortionView } from './views/DistortionView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
-import styleRoot from "./views/DistortionView.scss"
+import styles from "./views/DistortionView.scss"
+import { insertStyle} from "../../shared/insertStyle"
 
 export default class Distortion extends WebAudioModule<DistortionNode> {
 	//@ts-ignore
@@ -87,20 +88,7 @@ export default class Distortion extends WebAudioModule<DistortionNode> {
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
-
-		if (this.nonce) {
-			// we've already rendered before, unuse the styles before using them again
-			this.nonce = undefined
-
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
-		this.nonce = Math.random().toString(16).substr(2, 8);
-		div.setAttribute("data-nonce", this.nonce)
-
-		// @ts-ignore
-		styleRoot.use({ target: shadow });
+		insertStyle(shadow, styles.toString())
 
 		render(<DistortionView plugin={this}></DistortionView>, shadow);
 
@@ -108,13 +96,6 @@ export default class Distortion extends WebAudioModule<DistortionNode> {
 	}
 
 	destroyGui(el: Element) {
-		if (el.getAttribute("data-nonce") == this.nonce) {
-			// this was the last time we rendered the GUI so clear the style
-			
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-		
 		render(null, el.shadowRoot)
 	}
 }

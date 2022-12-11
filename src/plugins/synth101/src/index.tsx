@@ -11,7 +11,8 @@ import { h, render } from 'preact';
 import { SynthView } from './SynthView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
-import styleRoot from "./Synth101.scss"
+import styles from "./Synth101.scss"
+import { insertStyle} from "../../shared/insertStyle"
 
 let lfoWaves: OscillatorType[] = ["triangle", "square"]
 let ranges = ["32'", "16'", "8'", "4'"]
@@ -295,20 +296,7 @@ export default class Synth101 extends WebAudioModule<Synth101Node> {
 		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
-
-		if (this.nonce) {
-			// we've already rendered before, unuse the styles before using them again
-			this.nonce = undefined
-
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
-		this.nonce = Math.random().toString(16).substr(2, 8);
-		div.setAttribute("data-nonce", this.nonce)
-
-		// @ts-ignore
-		styleRoot.use({ target: shadow });
+		insertStyle(shadow, styles.toString())
 
 		let initialState = this.audioNode.paramMgr.getParamsValues()
 
@@ -318,13 +306,6 @@ export default class Synth101 extends WebAudioModule<Synth101Node> {
 	}
 
 	destroyGui(el: Element) {
-		if (el.getAttribute("data-nonce") == this.nonce) {
-			// this was the last time we rendered the GUI so clear the style
-			
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-		
 		render(null, el.shadowRoot)
 	}
 }

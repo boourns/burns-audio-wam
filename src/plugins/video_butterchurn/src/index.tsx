@@ -10,7 +10,9 @@ import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 import { ButterchurnView } from './ButterchurnView';
 
-import styleRoot from "./ButterchurnView.scss";
+import styles from "./ButterchurnView.scss";
+import { insertStyle} from "../../shared/insertStyle"
+
 import ButterchurnNode from './Node';
 
 import { VideoExtensionOptions, VideoModuleConfig } from 'wam-extensions';
@@ -91,8 +93,7 @@ export default class ButterchurnModule extends WebAudioModule<ButterchurnNode> {
 		div.setAttribute("height", "240")
 		
 		var shadow = div.attachShadow({mode: 'open'});
-		// @ts-ignore
-		styleRoot.use({ target: shadow });
+		insertStyle(shadow, styles.toString())
 
 		render(<ButterchurnView plugin={this.audioNode}></ButterchurnView>, shadow);
 
@@ -100,9 +101,6 @@ export default class ButterchurnModule extends WebAudioModule<ButterchurnNode> {
 	}
 
 	destroyGui(el: Element) {
-		//@ts-ignore
-		styleRoot.unuse()
-
 		render(null, el.shadowRoot)
 	}
 }
