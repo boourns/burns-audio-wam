@@ -11,7 +11,8 @@ import { h, render } from 'preact';
 import { SimpleEQView } from './SimpleEQView';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
-import styleRoot from "./SimpleEQView.scss"
+import styles from "./SimpleEQView.scss"
+import { insertStyle} from "../../shared/insertStyle"
 
 export default class SimpleEQ extends WebAudioModule<SimpleEQNode> {
 	//@ts-ignore
@@ -102,20 +103,7 @@ export default class SimpleEQ extends WebAudioModule<SimpleEQNode> {
 
 		var shadow = div.attachShadow({mode: 'open'});
 
-		if (this.nonce) {
-			// we've already rendered before, unuse the styles before using them again
-			this.nonce = undefined
-
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
-		this.nonce = Math.random().toString(16).substr(2, 8);
-		div.setAttribute("data-nonce", this.nonce)
-
-
-		// @ts-ignore
-		styleRoot.use({ target: shadow });
+		insertStyle(shadow, styles.toString())
 
 		render(<SimpleEQView plugin={this}></SimpleEQView>, shadow);
 
@@ -123,12 +111,6 @@ export default class SimpleEQ extends WebAudioModule<SimpleEQNode> {
 	}
 
 	destroyGui(el: Element) {
-		if (el.getAttribute("data-nonce") == this.nonce) {
-			// this was the last time we rendered the GUI so clear the style
-			
-			//@ts-ignore
-			styleRoot.unuse()
-		}
 		render(null, el.shadowRoot)
 	}
 }

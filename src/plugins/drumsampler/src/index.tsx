@@ -10,7 +10,9 @@ import { DrumSamplerNode } from './Node';
 import { h, render } from 'preact';
 import { DrumSamplerView } from './views/DrumSamplerView'
 import { getBaseUrl } from '../../shared/getBaseUrl';
-import styleRoot from "./views/DrumSamplerView.scss"
+
+import styles from "./views/DrumSamplerView.scss"
+import { insertStyle} from "../../shared/insertStyle"
 
 export default class DrumSampler extends WebAudioModule<DrumSamplerNode> {
 	//@ts-ignore
@@ -149,20 +151,7 @@ export default class DrumSampler extends WebAudioModule<DrumSamplerNode> {
 		h("div", {})
 
 		var shadow = div.attachShadow({mode: 'open'});
-
-		if (this.nonce) {
-			// we've already rendered before, unuse the styles before using them again
-			this.nonce = undefined
-
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
-		this.nonce = Math.random().toString(16).substr(2, 8);
-		div.setAttribute("data-nonce", this.nonce)
-
-		// @ts-ignore
-    	styleRoot.use({ target: shadow });
+		insertStyle(shadow, styles.toString())
 
 		div.setAttribute("style", "display: flex; flex-direction: column: width: 100%; height: 100%")
 
@@ -174,13 +163,6 @@ export default class DrumSampler extends WebAudioModule<DrumSamplerNode> {
 	}
 
 	destroyGui(el: Element) {
-		if (el.getAttribute("data-nonce") == this.nonce) {
-			// this was the last time we rendered the GUI so clear the style
-			
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-		
 		render(null, el.shadowRoot)
 	}
 }

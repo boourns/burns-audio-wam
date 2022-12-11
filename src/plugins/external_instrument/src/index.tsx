@@ -8,15 +8,16 @@ import { h, render } from 'preact';
 
 import { WebAudioModule, addFunctionModule } from '@webaudiomodules/sdk';
 import { getBaseUrl } from '../../shared/getBaseUrl';
-import { DynamicParameterNode, DynamicParamGroup } from '../../shared/DynamicParameterNode';
+import { DynamicParameterNode } from '../../shared/DynamicParameterNode';
 
 import getExternalInstrumentProcessor, { ExternalInstrumentConfig } from './ExternalInstrumentProcessor';
 import { ExternalInstrumentView } from './ExternalInstrumentView';
 import { InstrumentDefinition, InstrumentKernelType } from './InstrumentDefinition';
 import getInstrumentKernel from './InstrumentDefinition';
 
-import styleRoot from './ExternalInstrument.scss'
+import styles from './ExternalInstrument.scss'
 import diff from "microdiff"
+import { insertStyle} from "../../shared/insertStyle"
 
 const InstrumentKernel = getInstrumentKernel("test")
 
@@ -210,20 +211,7 @@ export default class ExternalInstrumentModule extends WebAudioModule<ExternalIns
 		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
-
-		if (this.nonce) {
-			// we've already rendered before, unuse the styles before using them again
-			this.nonce = undefined
-
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
-		this.nonce = Math.random().toString(16).substr(2, 8);
-		div.setAttribute("data-nonce", this.nonce)
-
-		// @ts-ignore
-    	styleRoot.use({ target: shadow });
+		insertStyle(shadow, styles.toString())
 
 		render(<ExternalInstrumentView plugin={this.audioNode}></ExternalInstrumentView>, shadow);
 
@@ -231,13 +219,6 @@ export default class ExternalInstrumentModule extends WebAudioModule<ExternalIns
 	}
 
 	destroyGui(el: Element) {
-		if (el.getAttribute("data-nonce") == this.nonce) {
-			// this was the last time we rendered the GUI so clear the style
-			
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
 		render(null, el.shadowRoot)
 	}
 	

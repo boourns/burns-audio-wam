@@ -11,7 +11,8 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import MIDIOutputNode from "./Node"
 import { MIDIOutputView } from './MIDIOutputView';
 
-import styleRoot from "./MIDIOutputView.scss";
+import styles from "./MIDIOutputView.scss";
+import { insertStyle} from "../../shared/insertStyle"
 
 export default class MIDIOutputModule extends WebAudioModule<MIDIOutputNode> {
 	//@ts-ignore
@@ -68,8 +69,7 @@ export default class MIDIOutputModule extends WebAudioModule<MIDIOutputNode> {
 		div.setAttribute("height", "240")
 		
 		var shadow = div.attachShadow({mode: 'open'});
-		// @ts-ignore
-		styleRoot.use({ target: shadow });
+		insertStyle(shadow, styles.toString())
 
 		render(<MIDIOutputView plugin={this.audioNode}></MIDIOutputView>, shadow);
 
@@ -77,9 +77,6 @@ export default class MIDIOutputModule extends WebAudioModule<MIDIOutputNode> {
 	}
 
 	destroyGui(el: Element) {
-		//@ts-ignore
-		styleRoot.unuse()
-
 		render(null, el.shadowRoot)
 	}
 }

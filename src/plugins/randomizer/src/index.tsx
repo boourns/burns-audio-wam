@@ -6,7 +6,9 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import { RandomizerView } from './RandomizerView';
 import { DynamicParameterNode } from '../../shared/DynamicParameterNode';
 
-import styleRoot from "./RandomizerView.scss"
+import styles from "./RandomizerView.scss"
+import { insertStyle} from "../../shared/insertStyle"
+
 import loadRandomizerProcessor from './RandomizerProcessor';
 
 var logger = console.log
@@ -134,20 +136,7 @@ export default class RandomizerModule extends WebAudioModule<RandomizerNode> {
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
 		var shadow = div.attachShadow({mode: 'open'});
-
-		if (this.nonce) {
-			// we've already rendered before, unuse the styles before using them again
-			this.nonce = undefined
-
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
-		this.nonce = Math.random().toString(16).substr(2, 8);
-		div.setAttribute("data-nonce", this.nonce)
-
-		// @ts-ignore
-		styleRoot.use({ target: shadow });
+		insertStyle(shadow, styles.toString())
 
 		render(<RandomizerView plugin={this.audioNode} ></RandomizerView>, shadow);
 
@@ -155,13 +144,6 @@ export default class RandomizerModule extends WebAudioModule<RandomizerNode> {
 	}
 
 	destroyGui(el: Element) {
-		if (el.getAttribute("data-nonce") == this.nonce) {
-			// this was the last time we rendered the GUI so clear the style
-			
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-		
 		render(null, el)
 	}
 

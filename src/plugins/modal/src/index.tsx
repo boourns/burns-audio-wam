@@ -13,7 +13,9 @@ import getSpectrumModalProcessor from "./SpectrumModalProcessor"
 
 import { SpectrumModalView } from './SpectrumModalView';
 
-import styleRoot from "./SpectrumModalView.scss";
+import styles from "./SpectrumModalView.scss";
+import { insertStyle} from "../../shared/insertStyle"
+
 	
 class SpectrumModalNode extends WamNode {
 	destroyed = false;
@@ -85,19 +87,7 @@ export default class SpectrumModalModule extends WebAudioModule<WamNode> {
 
 		var shadow = div.attachShadow({mode: 'open'});
 
-		if (this.nonce) {
-			// we've already rendered before, unuse the styles before using them again
-			this.nonce = undefined
-
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
-		this.nonce = Math.random().toString(16).substr(2, 8);
-		div.setAttribute("data-nonce", this.nonce)
-
-		// @ts-ignore
-		styleRoot.use({ target: shadow });
+		insertStyle(shadow, styles.toString())
 
 		render(<SpectrumModalView plugin={this}></SpectrumModalView>, shadow);
 
@@ -105,13 +95,6 @@ export default class SpectrumModalModule extends WebAudioModule<WamNode> {
 	}
 
 	destroyGui(el: Element) {
-		if (el.getAttribute("data-nonce") == this.nonce) {
-			// this was the last time we rendered the GUI so clear the style
-			
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-		
 		render(null, el)
 	}
 }

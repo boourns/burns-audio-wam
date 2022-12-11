@@ -11,7 +11,8 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import { VideoInputView } from './VideoInputView';
 import VideoInputNode from './Node';
 
-import styleRoot from "./VideoInput.scss"
+import styles from "./VideoInput.scss"
+import { insertStyle} from "../../shared/insertStyle"
 
 export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
 	//@ts-ignore
@@ -63,20 +64,7 @@ export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
 		div.setAttribute("height", "300")
 
 		var shadow = div.attachShadow({mode: 'open'});
-
-		if (this.nonce) {
-			// we've already rendered before, unuse the styles before using them again
-			this.nonce = undefined
-
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
-		this.nonce = Math.random().toString(16).substr(2, 8);
-		div.setAttribute("data-nonce", this.nonce)
-
-		// @ts-ignore
-		styleRoot.use({ target: shadow });
+		insertStyle(shadow, styles.toString())
 
 		render(<VideoInputView plugin={this}></VideoInputView>, shadow);
 
@@ -84,13 +72,6 @@ export default class VideoInputModule extends WebAudioModule<VideoInputNode> {
 	}
 
 	destroyGui(el: Element) {
-		if (el.getAttribute("data-nonce") == this.nonce) {
-			// this was the last time we rendered the GUI so clear the style
-			
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-		
 		render(null, el.shadowRoot)
 	}
 }

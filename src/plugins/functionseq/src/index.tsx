@@ -134,12 +134,13 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	}
 
 	async getState(): Promise<FunctionSeqState> {
-		
-		return {
+		const state = {
 			runCount: this.runCount,
 			params: await super.getState(),
 			additionalState: {...this.additionalState}
 		}
+		console.log("WOOF getState ", JSON.stringify(state))
+		return state
 	}
 
 	async setState(state?: Partial<FunctionSeqState>): Promise<void> {
@@ -169,6 +170,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	 * */
 	 _onMessage(message: MessageEvent) {
 		if (message.data && message.data.source == "functionSeq") {
+			console.log("WOOF functionseq message to host: ", JSON.stringify(message.data))
 			if (message.data.action == "newParams" && message.data.params) {
 				this.groupedParameters = [
 					{
