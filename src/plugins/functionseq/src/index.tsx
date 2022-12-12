@@ -239,7 +239,11 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		this.errorStack = stack
 		
 		if (stack) {
-			const matches = stack.match(/<anonymous>:[\d]+/g)
+			let matches = stack.match(/<anonymous>:[\d]+/g)
+			if (!matches) {
+				matches = stack.match(/ Function:[\d]+/g)
+			}
+			
 			if (matches && matches.length > 0) {
 				const rawLine = matches[0].split(":")
 				if (rawLine.length > 1) {
