@@ -69,6 +69,8 @@ export class FunctionKernel {
      async onMessage(message: any): Promise<void> {
         if (message.data && message.data.action == "function") {
             try {
+                this.uiController.register(undefined)
+                
                 this.registerParametersCalled = false
 
                 this.function = new Function('api', 'ui', 'tonal', message.data.code)(this.api, this.remoteUI, tonal)
@@ -79,6 +81,11 @@ export class FunctionKernel {
                 
                 if (this.noteList && this.function.onCustomNoteList) {
                     this.function.onCustomNoteList(this.noteList)
+                }
+
+                if (!this.registerParametersCalled) {
+                    // may have to not clear the cached set state or something like that. not sure.
+                    this.registerParameters([])
                 }
             } catch(e) {
                 this.error(`Error initializing function: ${e}`)

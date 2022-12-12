@@ -82,6 +82,14 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 				this.port.postMessage({source: "function", action: "noteList", noteList: notes})
 			})
 		}
+
+		if (window.WAMExtensions.runPreset) {
+			window.WAMExtensions.runPreset.register(this.instanceId, {
+				runPreset: () => {
+					this.upload()
+				}
+			})
+		}
 	}
 
 	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor {	
