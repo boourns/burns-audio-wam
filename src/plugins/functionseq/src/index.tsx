@@ -37,7 +37,9 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	renderCallback?: () => void
 	multiplayers: MultiplayerHandler[]
 	runCount: number
-	error?: any;
+	error?: string;
+	errorStack?: string;
+
 	uiReceiver: RemoteUIReceiver;
 	additionalState: Record<string, any>
 
@@ -130,6 +132,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		if (this.multiplayers.length > 0) {
 			let source = this.multiplayers[0].doc.toString()
 			this.error = undefined
+			this.multiplayers[0].setError(undefined)
 			this.port.postMessage({source:"function", action:"function", code: source})
 		}
 	}
@@ -198,7 +201,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 
 				this.state = state
 			} else if (message.data.action == "error") {
-				this.error = message.data.error
+				this.setError(message.data.error, message.data.stack)
 			} else if (message.data.action == "noteList") {
 				if (window.WAMExtensions.notes) {
 					window.WAMExtensions.notes.setNoteList(this.instanceId, message.data.noteList)
@@ -229,6 +232,25 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 
 	editorDefinition(): string {
 		return editorDefinition()
+	}
+
+	setError(error?: string, stack?: string) {
+		this.error = error
+		this.errorStack = stack
+		
+		if (stack) {
+			const matches = stack.match(/<anonymous>:[\d]+/g)
+			if (matches && matches.length > 0) {
+				const rawLine = matches[0].split(":")
+				if (rawLine.length > 1) {
+					const line = parseInt(rawLine[1]) - 2
+					this.multiplayers[0].setError({message: error, line})
+				}
+			}
+		} else {
+			this.multiplayers[0].setError(undefined)
+		}
+
 	}
 }
 

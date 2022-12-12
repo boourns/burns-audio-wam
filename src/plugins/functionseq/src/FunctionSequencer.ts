@@ -90,7 +90,7 @@ export class FunctionAPI {
         }
 
         if (!(Number.isInteger(channel) && channel >= 0 && channel <= 15)) {
-            throw `emitNote: channel value ${channel} invalid.  Must be integer value from 0-15 (ch#1-#16)`
+            throw new Error(`emitNote: channel value ${channel} invalid.  Must be integer value from 0-15 (ch#1-#16)`)
         }
 
         this.emitMidiEvent([MIDI.NOTE_ON | channel, note, velocity], startTime)
@@ -104,11 +104,11 @@ export class FunctionAPI {
      * */
     emitMidiEvent(bytes: number[], eventTime: number) {
         if (bytes.length > 3) {
-            throw "emitMidiEvent can only emit regular MIDI messages - use emitSysex to emit sysex messages."
+            throw new Error("emitMidiEvent can only emit regular MIDI messages - use emitSysex to emit sysex messages.")
         }
         for (let i = 0; i < bytes.length; i++) {
             if (!Number.isInteger(bytes[i]) || bytes[i] < 0 || bytes[i] > 255) {
-                throw `MIDI event byte at index ${i} is not an integer between 0-255, is ${bytes[i]}`
+                throw new Error(`MIDI event byte at index ${i} is not an integer between 0-255, is ${bytes[i]}`)
             }
         }
 

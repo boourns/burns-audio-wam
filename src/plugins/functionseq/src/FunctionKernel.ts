@@ -57,7 +57,7 @@ export class FunctionKernel {
 
             this.flush()
         } catch (e) {
-            this.processor.port.postMessage({source: "functionSeq", action:"error", error: e.toString()})
+            this.processor.port.postMessage({source: "functionSeq", action:"error", error: e.toString(), stack: e.stack})
             this.function = undefined
         }
     }
@@ -88,7 +88,7 @@ export class FunctionKernel {
                     this.registerParameters([])
                 }
             } catch(e) {
-                this.error(`Error initializing function: ${e}`)
+                this.error(e)
             }
             this.flush()
         } else if (message.data && message.data.action == "noteList") {
@@ -124,7 +124,7 @@ export class FunctionKernel {
                 this.transport = transportData
             }
         } catch (e) {
-            this.error(`Error in onTransport: ${e}`)
+            this.error(e)
         }
     }
 
@@ -134,7 +134,7 @@ export class FunctionKernel {
                 this.function.onMidi(event.bytes)
                 this.flush()
             } catch (e) {
-                this.error(`Error in onMidi: ${e}`)
+                this.error(e)
             }
         }
     }
@@ -145,7 +145,7 @@ export class FunctionKernel {
                 this.function.onAction(name)
                 this.flush()
             } catch (e) {
-                this.error(`Error in onAction: ${e}`)
+                this.error(e)
             }
         }
     }
@@ -156,7 +156,7 @@ export class FunctionKernel {
                 this.function.onStateChange({...this.additionalState})
                 this.flush()
             } catch (e) {
-                this.error(`Error in onAction: ${e}`)
+                this.error(e)
             }
         }
     }
@@ -195,6 +195,13 @@ export class FunctionKernel {
         if (['float', 'int', 'boolean','choice'].findIndex(t => t == p.config.type) == -1) {
             throw new Error(`Invalid parameter type ${p.config.type}`)
         }
+        const VALID_CONFIG_KEYS = [ "label", "type", "defaultValue", "minValue", "maxValue", "discreteStep", "exponent", "choices", "units"]
+
+        for (let key of Object.keys(p.config)) {
+            if (VALID_CONFIG_KEYS.indexOf(key) == -1) {
+                throw new Error(`Param ${p.id}: Invalid configuration key ${key}.  Valid configuration keys are ${VALID_CONFIG_KEYS.join(",")}`)
+            }
+        }
     }
 
     setAdditionalState(name: string, value: any) {
@@ -206,8 +213,8 @@ export class FunctionKernel {
         return this.additionalState[name]
     }
 
-    error(e: any) {
-        this.processor.port.postMessage({source: "functionSeq", action:"error", error: e.toString()})
+    error(e: Error) {
+        this.processor.port.postMessage({source: "functionSeq", action:"error", error: e.toString(), stack: e.stack})
         this.function = undefined
     }
 
