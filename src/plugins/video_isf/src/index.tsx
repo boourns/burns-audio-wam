@@ -113,6 +113,14 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 				},
 			})
 		}
+
+		if (window.WAMExtensions.runPreset) {
+			window.WAMExtensions.runPreset.register(this.instanceId, {
+				runPreset: () => {
+					this.upload()
+				}
+			})
+		}
 	}
 
 	upload() {
