@@ -222,7 +222,6 @@ export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_processorUrl = `${this._baseURL}/ISFVideoProcessor.js`;
-	nonce: string | undefined;
 
 	get instanceId() { return "com.sequencerParty.isfVideo" + this._timestamp; }
 
