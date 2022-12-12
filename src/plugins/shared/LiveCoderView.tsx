@@ -6,7 +6,8 @@ import { MultiplayerHandler } from './collaboration/MultiplayerHandler';
 import { DynamicParameterNode } from './DynamicParameterNode';
 
 export interface LiveCoderNode extends DynamicParameterNode {
-  error?: any
+  error?: string
+
   renderCallback?: () => void
   multiplayers: MultiplayerHandler[]
   runPressed(): void
@@ -83,7 +84,6 @@ export class LiveCoderView extends Component<LiveCoderViewProps, LiveCoderViewSt
     }
     this.ref = ref
 
-    console.log("Recreating editor")
     this.editor = this.props.plugin.createEditor(ref)
 
     if (this.props.plugin.multiplayers.length > 0) {

@@ -16,7 +16,10 @@ import { LiveCoderNode, LiveCoderView } from "../../shared/LiveCoderView"
 
 import { defaultScript, editorDefinition } from './editor';
 
-import styleRoot from "./FunctionSequencer.scss"
+import styles from "./FunctionSequencer.module.scss"
+import { insertStyle} from "../../shared/insertStyle"
+import monacoStyle from "../../../../node_modules/monaco-editor/min/vs/editor/editor.main.css"
+
 import { NoteDefinition } from 'wam-extensions';
 import { RemoteUIElement } from './RemoteUI';
 import { DynamicParameterView } from '../../shared/DynamicParameterView';
@@ -34,7 +37,9 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	renderCallback?: () => void
 	multiplayers: MultiplayerHandler[]
 	runCount: number
-	error?: any;
+	error?: string;
+	errorStack?: string;
+
 	uiReceiver: RemoteUIReceiver;
 	additionalState: Record<string, any>
 
@@ -79,6 +84,14 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 				this.port.postMessage({source: "function", action: "noteList", noteList: notes})
 			})
 		}
+
+		if (window.WAMExtensions.runPreset) {
+			window.WAMExtensions.runPreset.register(this.instanceId, {
+				runPreset: () => {
+					this.upload()
+				}
+			})
+		}
 	}
 
 	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor {	
@@ -119,6 +132,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		if (this.multiplayers.length > 0) {
 			let source = this.multiplayers[0].doc.toString()
 			this.error = undefined
+			this.multiplayers[0].setError(undefined)
 			this.port.postMessage({source:"function", action:"function", code: source})
 		}
 	}
@@ -187,7 +201,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 
 				this.state = state
 			} else if (message.data.action == "error") {
-				this.error = message.data.error
+				this.setError(message.data.error, message.data.stack)
 			} else if (message.data.action == "noteList") {
 				if (window.WAMExtensions.notes) {
 					window.WAMExtensions.notes.setNoteList(this.instanceId, message.data.noteList)
@@ -218,6 +232,29 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 
 	editorDefinition(): string {
 		return editorDefinition()
+	}
+
+	setError(error?: string, stack?: string) {
+		this.error = error
+		this.errorStack = stack
+		
+		if (stack) {
+			let matches = stack.match(/<anonymous>:[\d]+/g)
+			if (!matches) {
+				matches = stack.match(/ Function:[\d]+/g)
+			}
+			
+			if (matches && matches.length > 0) {
+				const rawLine = matches[0].split(":")
+				if (rawLine.length > 1) {
+					const line = parseInt(rawLine[1]) - 2
+					this.multiplayers[0].setError({message: error, line})
+				}
+			}
+		} else {
+			this.multiplayers[0].setError(undefined)
+		}
+
 	}
 }
 
@@ -311,37 +348,18 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 		h("div", {})
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
-		if (this.nonce) {
-			// we've already rendered before, unuse the styles before using them again
-			this.nonce = undefined
+		var shadow = div.attachShadow({mode: 'open'});
+		insertStyle(shadow, styles.toString())
+		insertStyle(shadow, monacoStyle.toString())
 
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
-		this.nonce = Math.random().toString(16).substr(2, 8);
-		div.setAttribute("data-nonce", this.nonce)
-
-		// @ts-ignore
-		styleRoot.use({ target: div });
-
-		render(<LiveCoderView plugin={this.audioNode} parametersView={() => this.renderParametersView()} actions={[]}></LiveCoderView>, div);
+		render(<LiveCoderView plugin={this.audioNode} parametersView={() => this.renderParametersView()} actions={[]}></LiveCoderView>, shadow);
 
 		return div;
 	}
 
 	destroyGui(el: Element) {
-		if (el.getAttribute("data-nonce") == this.nonce) {
-			// this was the last time we rendered the GUI so clear the style
-			
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
 		render(null, el)
 	}
-
-
 }
 
 

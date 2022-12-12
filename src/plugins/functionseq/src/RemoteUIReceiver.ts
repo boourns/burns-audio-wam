@@ -24,7 +24,7 @@ export class RemoteUIReceiver {
                 if (this.ui) {
                     const setMapValues = (el: RemoteUIElement) => {
                         if (this.uiMap[el.name]) {
-                            throw `UI has two elements named ${el.name}`
+                            throw new Error(`UI has two elements named ${el.name}`)
                         }
         
                         this.uiMap[el.name] = {}

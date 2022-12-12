@@ -21,7 +21,9 @@ import { defaultFragmentShader, defaultVertexShader } from './defaultShaders';
 
 import {videoOptionsEqual} from "../../shared/videoOptions"
 
-import styleRoot from "./ISFVideo.scss"
+import styles from "./ISFVideo.module.scss"
+import { insertStyle} from "../../shared/insertStyle"
+import monacoStyle from "../../../../node_modules/monaco-editor/min/vs/editor/editor.main.css"
 
 type ISFVideoState = {
 	runCount: number
@@ -109,6 +111,14 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 				disconnectVideo: () => {
 					console.log("disconnectVideo")
 				},
+			})
+		}
+
+		if (window.WAMExtensions.runPreset) {
+			window.WAMExtensions.runPreset.register(this.instanceId, {
+				runPreset: () => {
+					this.upload()
+				}
 			})
 		}
 	}
@@ -220,7 +230,6 @@ export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_processorUrl = `${this._baseURL}/ISFVideoProcessor.js`;
-	nonce: string | undefined;
 
 	get instanceId() { return "com.sequencerParty.isfVideo" + this._timestamp; }
 
@@ -283,39 +292,20 @@ export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
 
 		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
 
-		//var shadow = div.attachShadow({mode: 'open'});
-		if (this.nonce) {
-			// we've already rendered before, unuse the styles before using them again
-			this.nonce = undefined
-
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
-		this.nonce = Math.random().toString(16).substr(2, 8);
-		div.setAttribute("data-nonce", this.nonce)
-
-
-		// @ts-ignore
-		styleRoot.use({ target: div });
+		var shadow = div.attachShadow({mode: 'open'});
+		insertStyle(shadow, styles.toString())
+		insertStyle(shadow, monacoStyle.toString())
 
 		const actions = [
 			<button style="padding: 2px; margin: 4px; background-color: var(--var-ButtonBackground); color: var(--var-ButtonForeground); border: 1px solid var(--var-ButtonForeground);" onClick={() => this.audioNode.initVertexShader()}>Init Vertex Shader</button>
 		]
 
-		render(<LiveCoderView plugin={this._audioNode} actions={actions}></LiveCoderView>, div);
+		render(<LiveCoderView plugin={this._audioNode} actions={actions}></LiveCoderView>, shadow);
 
 		return div;
 	}
 
-	destroyGui(el: Element) {
-		if (el.getAttribute("data-nonce") == this.nonce) {
-			// this was the last time we rendered the GUI so clear the style
-			
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-		
+	destroyGui(el: Element) {		
 		render(null, el)
 	}
 }
