@@ -86,7 +86,7 @@ class SimpleStepSequencer {
                     label: `Pitch ${i+1}`,
                     type: "int",
                     defaultValue: 0,
-                    minimumValue: 0,
+                    minValue: 0,
                     maxValue: 32,
                 }
             })
