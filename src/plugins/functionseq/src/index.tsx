@@ -16,7 +16,10 @@ import { LiveCoderNode, LiveCoderView } from "../../shared/LiveCoderView"
 
 import { defaultScript, editorDefinition } from './editor';
 
-import styleRoot from "./FunctionSequencer.scss"
+import styles from "./FunctionSequencer.module.scss"
+import { insertStyle} from "../../shared/insertStyle"
+import monacoStyle from "../../../../node_modules/monaco-editor/min/vs/editor/editor.main.css"
+
 import { NoteDefinition } from 'wam-extensions';
 import { RemoteUIElement } from './RemoteUI';
 import { DynamicParameterView } from '../../shared/DynamicParameterView';
@@ -311,37 +314,18 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 		h("div", {})
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
-		if (this.nonce) {
-			// we've already rendered before, unuse the styles before using them again
-			this.nonce = undefined
+		var shadow = div.attachShadow({mode: 'open'});
+		insertStyle(shadow, styles.toString())
+		insertStyle(shadow, monacoStyle.toString())
 
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
-		this.nonce = Math.random().toString(16).substr(2, 8);
-		div.setAttribute("data-nonce", this.nonce)
-
-		// @ts-ignore
-		styleRoot.use({ target: div });
-
-		render(<LiveCoderView plugin={this.audioNode} parametersView={() => this.renderParametersView()} actions={[]}></LiveCoderView>, div);
+		render(<LiveCoderView plugin={this.audioNode} parametersView={() => this.renderParametersView()} actions={[]}></LiveCoderView>, shadow);
 
 		return div;
 	}
 
 	destroyGui(el: Element) {
-		if (el.getAttribute("data-nonce") == this.nonce) {
-			// this was the last time we rendered the GUI so clear the style
-			
-			//@ts-ignore
-			styleRoot.unuse()
-		}
-
 		render(null, el)
 	}
-
-
 }
 
 
