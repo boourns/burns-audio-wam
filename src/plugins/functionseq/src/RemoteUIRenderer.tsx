@@ -90,6 +90,7 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
                 return <Slider onChange={(v) => this.valueChanged(p.id, v)} 
                              minimumValue={p.config.minValue} 
                              maximumValue={p.config.maxValue}
+                             horizontal={element.props.horizontal ?? false}
                              label={element.props.label}
                              value={() => this.getValue(p)}
                              width={element.props.width}
@@ -102,6 +103,7 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
                 return <Slider onChange={(v) => this.valueChanged(p.id, Math.round(v))} 
                              minimumValue={p.config.minValue} 
                              maximumValue={p.config.maxValue}
+                             horizontal={element.props.horizontal ?? false}
                              label={element.props.label}
                              width={element.props.width}
                              height={element.props.height}

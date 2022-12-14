@@ -9,6 +9,7 @@ export interface SliderProps {
     maximumValue: number
     defaultValue?: number
     showValue?: boolean
+    horizontal?: boolean
 
     color: () => string
     label?: string
@@ -110,9 +111,15 @@ export class Slider extends Component<SliderProps, SliderState> {
         this.scheduleAnimation()
     }
 
+    bipolar(): boolean {
+        return this.props.minimumValue < 0
+    }
+
     draw(color: string, value: number) {
         var percent = (value - this.props.minimumValue) / (this.props.maximumValue - this.props.minimumValue)
-        var position = (this.props.height) - ((this.props.height) * percent)
+
+        const length = this.props.horizontal ? this.props.width : this.props.height
+        const position = (length) - (length * percent)
 
         if (!this.context || !this.context.beginPath) {
             return
@@ -127,7 +134,21 @@ export class Slider extends Component<SliderProps, SliderState> {
         this.context.stroke();
 
         this.context.beginPath();
-        this.context.rect(0, position, this.props.width, this.props.height - position);
+        if (this.bipolar()) {
+            if (this.props.horizontal) {
+                this.context.rect((this.props.width/2), 0, (this.props.width/2) - position, this.props.height)
+            } else {
+                this.context.rect(0, position, this.props.width, (this.props.height/2) - position)
+            }
+            
+        } else {
+            if (this.props.horizontal) {
+                this.context.rect(0, 0, position, this.props.height);
+            } else {
+                this.context.rect(0, position, this.props.width, this.props.height - position);
+            }
+        }
+
         this.context.fillStyle = color
         this.context.fill();
 
@@ -174,9 +195,14 @@ export class Slider extends Component<SliderProps, SliderState> {
 
         if (e.buttons == 1 && Slider.editing) {
             var rect = this.ref.getBoundingClientRect();
-            const position = (e.clientY - rect.top) / (rect.bottom - rect.top)
+            let position: number
+            if (this.props.horizontal) {
+                position = (e.clientX - rect.left) / (rect.right - rect.left)
+            } else {
+                position = 1 - ((e.clientY - rect.top) / (rect.bottom - rect.top))
+            }
 
-            this.setValue((1-position) * (this.props.maximumValue - this.props.minimumValue))
+            this.setValue(this.props.minimumValue + (position * (this.props.maximumValue - this.props.minimumValue)))
         }
     }
 

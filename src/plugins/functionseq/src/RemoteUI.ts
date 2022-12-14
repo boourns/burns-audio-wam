@@ -7,6 +7,7 @@ export type RemoteUIElementProperties = {
     highlighted?: boolean
     padding?: number
     showValue?: boolean
+    horizontal?: boolean
 }
 
 export type RemoteUIElement = {
