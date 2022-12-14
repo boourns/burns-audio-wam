@@ -158,8 +158,16 @@ class PianoRollProcessor extends WamProcessor {
                 timestamp: 0,
             }
         } else if (message.data && message.data.action == "midiConfig") {
+            const currentlyRecording = this.midiConfig.hostRecordingArmed && this.midiConfig.pluginRecordingArmed
+            const stillRecording = message.data.config.hostRecordingArmed && message.data.config.pluginRecordingArmed
+            
+            if (currentlyRecording && !stillRecording) {
+                this.noteRecorder.finalizeAllNotes(this.ticks)
+            }
+
             this.midiConfig = message.data.config
             this.noteRecorder.channel = this.midiConfig.inputMidiChannel
+            
         } else {
             super._onMessage(message)
         }
