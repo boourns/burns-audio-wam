@@ -72,12 +72,15 @@ export class MIDINoteRecorder {
     finalizeNote(note: number, tick: number) {
         const state = this.states[note]!
 
-        this.addNote(
-            state.onTick,
-            note,
-            tick - state.onTick,
-            state.onVelocity
-        )
+        if (tick > state.onTick) {
+            this.addNote(
+                state.onTick,
+                note,
+                tick - state.onTick,
+                state.onVelocity
+            )
+        }
+        
         this.states[note] = {}
     }
 
