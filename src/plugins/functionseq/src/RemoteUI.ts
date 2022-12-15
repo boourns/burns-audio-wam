@@ -8,6 +8,7 @@ export type RemoteUIElementProperties = {
     padding?: number
     showValue?: boolean
     horizontal?: boolean
+    centered?: boolean
 }
 
 export type RemoteUIElement = {

@@ -246,9 +246,9 @@ export class Slider extends Component<SliderProps, SliderState> {
             valueLabel = <small><label ref={ref => { this.valueLabel = ref; this.lastValue = undefined} }></label></small>
         }
 
-        return <div style="display: flex; flex-direction: column;">
-            {this.props.label ? <label>this.props.label</label> : ""}
-            <canvas ref={(ref) => this.setup(ref)} class=""
+        return <div class="ComponentWrapper">
+            {this.props.label ? <label>{this.props.label}</label> : ""}
+            <canvas style={`width: ${this.props.width}px; height: ${this.props.height}px;`} ref={(ref) => this.setup(ref)}
                 onMouseMove={(e) => this.onMousemove(e)}
                 onDblClick={(e) => this.onDoubleClick(e)}
                 onMouseDown={(e) => this.onMouseDown(e)}

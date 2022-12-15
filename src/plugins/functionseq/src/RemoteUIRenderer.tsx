@@ -191,11 +191,11 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
         try {
             switch (el.type) {
                 case "col":
-                    style.push("display: flex;", "flex-direction: column;", "justify-content: center;", "align-items: flex-start;")
+                    style.push("display: flex;", "flex-direction: column;", "justify-content: center;", el.props.centered ? "align-items: center;" : "align-items: flex-start;")
     
                     return <div style={style.join(" ")}>{el.children.map(ch => this.renderElement(ch))}</div>
                 case "row":
-                    style.push("display: flex;", "flex-direction: row;", "justify-content: flex-start;", "align-items: center;")
+                    style.push("display: flex;", "flex-direction: row;", el.props.centered ? "justify-content: space-around;" : "justify-content: flex-start;", "align-items: center;")
     
                     return <div style={style.join(" ")}>{el.children.map(ch => this.renderElement(ch))}</div>
                 case "knob":
@@ -203,7 +203,7 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
                     if (!knobParam) {
                         throw "Failed to find parameter " + el.name
                     }
-                    return <div style={this.paddingStyle(el).join(" ")}>{this.renderKnob(el, knobParam)}</div>
+                    return <div style={style.join(" ")}>{this.renderKnob(el, knobParam)}</div>
                 case "slider":
                     const sliderParam = this.props.plugin.findParameter(el.name)
                     if (!sliderParam) {
@@ -215,16 +215,20 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
                     if (!toggleParam) {
                         throw "Failed to find parameter " + el.name
                     }
-                    return <div style={this.paddingStyle(el).join(" ")}>{this.renderToggle(el, toggleParam)}</div>
+                    return <div style={style.join(" ")}>{this.renderToggle(el, toggleParam)}</div>
                 case "select":
                     const selectParam = this.props.plugin.findParameter(el.name)
                     if (!selectParam) {
                         throw "Failed to find parameter " + el.name
                     }
+                    style.push("display: flex;", "justify-content: center;", "align-items: center;")
+
                     return <div style={style.join(" ")}>{this.renderSelect(el, selectParam)}</div>
                 case "label":
+                    style.push("display: flex;", "justify-content: center;", "align-items: center;")
                     return <div style={style.join(" ")}>{el.props.label ?? el.name}</div>
                 case "action":
+                    style.push("display: flex;", "justify-content: center;", "align-items: center;")
                     return <div style={style.join(" ")}>{this.renderActionButton(el)}</div>
              }
         } catch(e) {
