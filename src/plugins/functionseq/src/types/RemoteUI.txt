@@ -6,6 +6,7 @@ declare type RemoteUIElementProperties = {
     padding?: number;
     showValue?: boolean;
     horizontal?: boolean;
+    centered?: boolean;
 };
 declare type RemoteUIElement = {
     type: "action" | "toggle" | "knob" | "slider" | "select" | "label" | "col" | "row";

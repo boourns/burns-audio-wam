@@ -88,6 +88,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		if (window.WAMExtensions.runPreset) {
 			window.WAMExtensions.runPreset.register(this.instanceId, {
 				runPreset: () => {
+					this.additionalState = {}
 					this.upload()
 				}
 			})

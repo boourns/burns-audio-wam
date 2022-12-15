@@ -219,7 +219,7 @@ export class Knob extends Component<KnobProps, KnobState> {
         return (
         <div class="ComponentWrapper">
             <label>{this.props.label}</label>
-            <div ref={(ref) => this.setup(ref)} class="Knob"
+            <div ref={(ref) => this.setup(ref)} class="Knob" style={`height: ${this.props.size}px; width: ${this.props.size}px;`}
                 onMouseDown={(e) => this.onMousedown(e)}
                 onDblClick={(e) => this.onDoubleClick(e)}
                 >
