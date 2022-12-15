@@ -99,8 +99,7 @@ export class FunctionKernel {
             this.flush()
         } else if (message.data && message.data.action == "additionalState") {
             this.additionalState = message.data.state
-            this.additionalStateDirty = true
-            this.flush()
+            this.onStateChange()
         } else {
             // @ts-ignore
             super._onMessage(message)

@@ -52,7 +52,7 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
     renderKnob(element: RemoteUIElement, p: DynamicParamEntry) {
         let size = 40
         if (element.props.width && element.props.height) {
-            size = (element.props.width > element.props.height) ? element.props.height - 5 : element.props.width - 5
+            size = (element.props.width > element.props.height) ? element.props.height : element.props.width
         }
         
         switch(p.config.type) {
@@ -203,7 +203,7 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
                     if (!knobParam) {
                         throw "Failed to find parameter " + el.name
                     }
-                    return <div style={style.join(" ")}>{this.renderKnob(el, knobParam)}</div>
+                    return <div style={this.paddingStyle(el).join(" ")}>{this.renderKnob(el, knobParam)}</div>
                 case "slider":
                     const sliderParam = this.props.plugin.findParameter(el.name)
                     if (!sliderParam) {
@@ -215,7 +215,7 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
                     if (!toggleParam) {
                         throw "Failed to find parameter " + el.name
                     }
-                    return <div style={style.join(" ")}>{this.renderToggle(el, toggleParam)}</div>
+                    return <div style={this.paddingStyle(el).join(" ")}>{this.renderToggle(el, toggleParam)}</div>
                 case "select":
                     const selectParam = this.props.plugin.findParameter(el.name)
                     if (!selectParam) {
