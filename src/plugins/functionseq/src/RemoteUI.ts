@@ -91,10 +91,6 @@ export class RemoteUI {
         }
     }
 
-    Register(root: RemoteUIElement) {
-        this.#kernel.uiController.register(root)
-    }
-
     Highlight(name: string, value: boolean) {
         this.#kernel.uiController.highlight(name, value)
     }

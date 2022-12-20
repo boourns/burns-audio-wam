@@ -2,7 +2,7 @@ import { WamParameterConfiguration, WamTransportData } from "@webaudiomodules/ap
 import { AudioWorkletGlobalScope } from "@webaudiomodules/api"
 import { FunctionKernel } from "./FunctionKernel"
 import { MIDI } from "./FunctionSeqProcessor"
-import { RemoteUI } from "./RemoteUI"
+import { RemoteUI, RemoteUIElement } from "./RemoteUI"
 
 const PPQN = 96
 
@@ -147,6 +147,14 @@ export class FunctionAPI {
      */
     registerParameters(parameters: ParameterDefinition[]) {
         this.#kernel.registerParameters(parameters)
+    }
+
+    /**
+     * Register a custom UI interface.
+     * @params root {RemoteUIElement} the top-level root UI element, usually a ui.Col or ui.Row.
+     */
+    registerUI(root: RemoteUIElement) {
+        this.#kernel.uiController.register(root)
     }
 
     /**
