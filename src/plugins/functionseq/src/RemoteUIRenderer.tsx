@@ -140,7 +140,7 @@ export class RemoteUIRenderer extends Component<RemoteUIRendererProps, any> {
             case "choice":
                 return <Select onChange={(v) => this.valueChanged(p.id, parseInt(v))}
                              options={p.config.choices}
-                             value={() => this.getValue(p) == 1}
+                             value={() => this.getValue(p)}
                              label={element.props.label}
                              >
                         </Select>
