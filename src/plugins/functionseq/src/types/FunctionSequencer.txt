@@ -88,6 +88,11 @@ declare class FunctionAPI {
      */
     registerParameters(parameters: ParameterDefinition[]): void;
     /**
+     * Register a custom UI interface.
+     * @params root {RemoteUIElement} the top-level root UI element, usually a ui.Col or ui.Row.
+     */
+    registerUI(root: RemoteUIElement): void;
+    /**
      * Stores an additional variable into the patch.  This gets sent to other collaborators and will be restored after refreshing the page.
      * Be warned: this is an expensive operation as the value change is sent to the server and all other users.  Only use this function
      * to hold state that is not in a registered parameter (which are automatically synced to the server).

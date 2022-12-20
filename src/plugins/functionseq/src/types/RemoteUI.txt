@@ -25,6 +25,5 @@ declare class RemoteUI {
     Slider(name: string, properties?: RemoteUIElementProperties): RemoteUIElement;
     Label(name: string, properties?: RemoteUIElementProperties): RemoteUIElement;
     Select(name: string, properties?: RemoteUIElementProperties): RemoteUIElement;
-    Register(root: RemoteUIElement): void;
     Highlight(name: string, value: boolean): void;
 }

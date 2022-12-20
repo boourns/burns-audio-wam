@@ -154,7 +154,7 @@ class SimpleStepSequencer {
 
         // finally, register this whole tree of UI elements.  This causes the host
         // to re-render.  Try not to call this often as it is very expensive.
-        ui.Register(ui.Col("main", [ui.Row("allSteps", steps), actions]))
+        api.registerUI(ui.Col("main", [ui.Row("allSteps", steps), actions]))
     }
 
 
