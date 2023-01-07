@@ -22,9 +22,9 @@ class StepModulatorNode extends WamNode {
 	_supportedEventTypes: Set<keyof WamEventMap>
 
 	paramList?: WamParameterInfoMap
-	targetParam?: string
 
 	sequencer: StepModulator
+
 	connected: boolean
 
 	/**
@@ -47,7 +47,6 @@ class StepModulatorNode extends WamNode {
 		return {
 			params, 
 			sequencer: this.sequencer.getState(),
-			targetParam: this.targetParam
 		}
 	}
 
@@ -59,28 +58,9 @@ class StepModulatorNode extends WamNode {
 		if (state.sequencer) {
 			this.sequencer.setState(state.sequencer ? state.sequencer : {})
 		}
-
-		if (state.targetParam != this.targetParam) {
-			this.setTargetParameter(state.targetParam)
-		}
 	}
 
-	async setTargetParameter(id: string | undefined) {
-		this.targetParam = id
-
-		if (!this.paramList) {
-			console.log("param list not yet set")
-			return
-		}
-
-		// paramList is set 
-		const param = id ? this.paramList[id] : undefined
-		this.port.postMessage({action: "target", param})
-
-		let ids = id ? [id] : []
-
-		await window.WAMExtensions.modulationTarget.lockParametersForAutomation(this.instanceId, ids)
-	}
+	
 }
 
 export default class StepModulatorModule extends WebAudioModule<StepModulatorNode> {
@@ -119,7 +99,8 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 		const node: StepModulatorNode = new StepModulatorNode(this, {});
 		await node._initialize();
 
-		this.sequencer = new StepModulator(this.instanceId)
+		this.sequencer = new StepModulator(this.instanceId, node.port, () => { return node.paramList })
+
 		node.sequencer = this.sequencer
 		this.sequencerNode = node
 
@@ -135,8 +116,9 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 			window.WAMExtensions.modulationTarget.setModulationTargetDelegate(this.instanceId, {
 				connectModulation: async (params: WamParameterInfoMap) => {
 					node.paramList = params
-					if (node.targetParam) {
-						await node.setTargetParameter(node.targetParam)
+
+					if (node.sequencer.targetParam) {
+						await node.sequencer.setTargetParameter(node.sequencer.targetParam)
 					}
 
 					if (this.sequencer.renderCallback) {

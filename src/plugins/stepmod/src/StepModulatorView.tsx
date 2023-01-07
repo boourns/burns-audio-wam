@@ -83,7 +83,7 @@ export class StepModulatorView extends Component<StepModulatorViewProps, any> {
     }
 
     async targetChanged(v: string) {
-        await this.props.plugin.audioNode.setTargetParameter(v)
+        await this.props.plugin.audioNode.sequencer.setTargetParameter(v)
     }
 
     targetValueString(v: number): string {
@@ -133,7 +133,7 @@ export class StepModulatorView extends Component<StepModulatorViewProps, any> {
                 <Knob label="Gain" size={40} value={() => this.state['gain'].value} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("gain", v)}/>
                 <Knob label="Slew" size={40} value={() => this.state['slew'].value} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("slew", v)}/>
                 <Select label="Speed" options={quantizeOptions} values={quantizeValues} value={() => clip.state.speed} onChange={(e) => { clip.state.speed = parseInt(e); clip.updateProcessor(clip)}} />
-                <Select label="Param" options={paramNames} values={paramIds} value={() => this.props.plugin.audioNode.targetParam} onChange={(v) => this.targetChanged(v)}/>
+                <Select label="Param" options={paramNames} values={paramIds} value={() => this.props.plugin.audioNode.sequencer.targetParam} onChange={(v) => this.targetChanged(v)}/>
             </div>
 
             <div style="flex: 1"></div>
