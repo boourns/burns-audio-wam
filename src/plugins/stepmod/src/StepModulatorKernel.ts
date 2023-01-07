@@ -1,17 +1,26 @@
-import { AudioWorkletGlobalScope, WamParameterDataMap, WamParameterInfo, WamProcessor } from "@webaudiomodules/api";
+import { AudioWorkletGlobalScope, WamParameterDataMap } from "@webaudiomodules/api";
 import { Clip } from "./Clip";
 
 const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
 
+const moduleId = 'com.sequencerParty.stepmod'
+
+const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
+const WamProcessor = ModuleScope.WamProcessor
+const WamParameterInfo = ModuleScope.WamParameterInfo
+
 export class StepModulatorKernel {
     lastValue: number
-    targetParam?: WamParameterInfo
+    targetParam?: typeof WamParameterInfo
+    processor: typeof WamProcessor
     clips: Map<string, Clip>
-    processor: WamProcessor
+    port: MessagePort
 
     ticks: number
     
-    constructor() {
+    constructor(processor: typeof WamProcessor) {
+        this.processor = processor
+
         this.clips = new Map()
     }
 

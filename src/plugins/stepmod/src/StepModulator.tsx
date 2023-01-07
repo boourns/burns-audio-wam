@@ -1,4 +1,4 @@
-import { WamParameterInfoMap } from '@webaudiomodules/api'
+import { WamParameterInfo, WamParameterInfoMap } from '@webaudiomodules/api'
 import { Clip, ClipState } from './Clip'
 
 export type MIDIEvent = Uint8Array
@@ -21,7 +21,8 @@ export class StepModulator {
 	clips: (Clip | undefined)[]
 
 	playing: boolean;
-	targetParam?: string
+	targetId?: string
+	targetParameter?: WamParameterInfo
 	
 	port: MessagePort
 	paramList: () => (WamParameterInfoMap | undefined)
@@ -80,7 +81,7 @@ export class StepModulator {
 			if (this.updateProcessor) this.updateProcessor(c)
 		})
 
-		if (state.targetParam != this.targetParam) {
+		if (state.targetParam != this.targetId) {
 			this.setTargetParameter(state.targetParam)
 		}
 
@@ -91,8 +92,7 @@ export class StepModulator {
 	}
 
 	async setTargetParameter(id: string | undefined) {
-		this.targetParam = id
-
+		this.targetId = id
 		const paramList = this.paramList()
 		if (!paramList) {
 			return
@@ -100,6 +100,7 @@ export class StepModulator {
 
 		// paramList is set 
 		const param = id ? paramList[id] : undefined
+		this.targetParameter = param
 
 		this.port.postMessage({action: "target", param})
 

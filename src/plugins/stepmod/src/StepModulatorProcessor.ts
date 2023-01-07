@@ -22,7 +22,7 @@ class StepModulatorProcessor extends WamProcessor {
 
     // @ts-ignore
     _generateWamParameterInfo() {
-		
+		return this.sequencer.wamParameters()
 	}
 
     sequencer: StepModulatorKernel
@@ -51,7 +51,8 @@ class StepModulatorProcessor extends WamProcessor {
 		this.lastTime = null;
 		this.ticks = 0;
 
-        this.sequencer = new StepModulatorKernel()
+        /* @ts-ignore */
+        this.sequencer = new StepModulatorKernel(this)
 
         this.currentClipId = ""
         this.lastValue = 0

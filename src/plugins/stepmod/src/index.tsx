@@ -5,19 +5,19 @@ import { WebAudioModule, WamNode } from '@webaudiomodules/sdk';
 import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
-import { StepModulatorView } from './StepModulatorView';
+import { StepModulatorView } from './views/StepModulatorView';
 import { StepModulator } from './StepModulator';
 
 import { Clip } from './Clip';
 
 import {PatternDelegate} from 'wam-extensions';
 
-import styles from "./StepModulatorView.scss"
+import styles from "./views/StepModulatorView.scss"
 import { insertStyle} from "../../shared/insertStyle"
 
 var logger = console.log
 
-class StepModulatorNode extends WamNode {
+export class StepModulatorNode extends WamNode {
 	destroyed = false;
 	_supportedEventTypes: Set<keyof WamEventMap>
 
@@ -117,8 +117,8 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 				connectModulation: async (params: WamParameterInfoMap) => {
 					node.paramList = params
 
-					if (node.sequencer.targetParam) {
-						await node.sequencer.setTargetParameter(node.sequencer.targetParam)
+					if (node.sequencer.targetId) {
+						await node.sequencer.setTargetParameter(node.sequencer.targetId)
 					}
 
 					if (this.sequencer.renderCallback) {
