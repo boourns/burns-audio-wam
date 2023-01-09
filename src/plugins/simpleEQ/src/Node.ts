@@ -18,8 +18,6 @@ export default class SimpleEQNode extends CompositeAudioNode {
 	constructor(audioContext: BaseAudioContext, options={}) {
 		super(audioContext, options);
 
-        console.log("SimpleEQ constructor()")
-
 		this.createNodes();
 	}
 

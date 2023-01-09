@@ -1,0 +1,16 @@
+{
+    "identifier": "com.sequencerParty.envmod",
+    "name": "Envelope Follower",
+    "vendor": "Sequencer Party",
+    "description": "Modulate a destination parameter with an audio signal.",
+    "version": "1.0.0",
+    "sdkVersion": "1.0.0",
+    "thumbnail": "",
+    "keywords": ["modulator", "envelope", "follower"],
+    "isInstrument": false,
+    "website": "https://sequencer.party",
+    "hasMidiInput": false,
+    "hasMidiOutput": false,
+    "hasAudioInput": true,
+    "hasAudioOutput": false
+}

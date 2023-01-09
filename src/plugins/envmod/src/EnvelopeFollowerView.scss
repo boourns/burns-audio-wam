@@ -1,0 +1,8 @@
+@import "../../shared/ui/glow.scss";
+
+.module {
+    background-color: var(--var-Desktop);
+    display: flex;
+    flex-direction: row;
+    padding: 8px;
+}
