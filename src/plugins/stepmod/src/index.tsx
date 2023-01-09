@@ -23,7 +23,7 @@ export class StepModulatorNode extends WamNode {
 
 	paramList?: WamParameterInfoMap
 
-	sequencer: StepModulator
+	sequencers: StepModulator[]
 
 	connected: boolean
 
@@ -46,7 +46,7 @@ export class StepModulatorNode extends WamNode {
 		var params = await super.getState()
 		return {
 			params, 
-			sequencer: this.sequencer.getState(),
+			sequencers: this.sequencers.map(s => s.getState())
 		}
 	}
 
@@ -55,12 +55,27 @@ export class StepModulatorNode extends WamNode {
 			await super.setState(state.params)
 		}
 
-		if (state.sequencer) {
-			this.sequencer.setState(state.sequencer)
+		if (!state.sequencers) {
+			state.sequencers = []
+		}
+
+		for (let i = 0; i < state.sequencers.length; i++) {
+			if (i > this.sequencers.length) {
+				const seq = new StepModulator(this.instanceId, this.port, () => { return this.paramList})
+				seq.updateProcessor = (c: Clip) => {
+					
+				}
+				this.sequencers.push(seq)
+			}
+
+			this.sequencers[i].setState(i, state.sequencers)
+		}
+
+		for (let i = state.sequencers.length; i < this.sequencers.length; i++) {
+			const seq = this.sequencers.pop()
+			seq.destroy(i)
 		}
 	}
-
-	
 }
 
 export default class StepModulatorModule extends WebAudioModule<StepModulatorNode> {
@@ -69,8 +84,6 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
 	_processorUrl = `${this._baseURL}/StepModulatorProcessor.js`;
-
-	nonce: string | undefined;
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -81,7 +94,6 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 		return descriptor
 	}
 
-	sequencer: StepModulator
 	sequencerNode: StepModulatorNode
 	targetParam?: WamParameterInfo
 
@@ -99,16 +111,7 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 		const node: StepModulatorNode = new StepModulatorNode(this, {});
 		await node._initialize();
 
-		this.sequencer = new StepModulator(this.instanceId, node.port, () => { return node.paramList })
-
-		node.sequencer = this.sequencer
-		this.sequencerNode = node
-
 		if (initialState) node.setState(initialState);
-
-		this.sequencer.updateProcessor = (c: Clip) => {
-			this.sequencerNode.port.postMessage({source:"sequencer", action: "clip", id: c.state.id, state: c.getState()})
-		}
 
 		this.updatePatternExtension()
 

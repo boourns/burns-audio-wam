@@ -11,11 +11,13 @@ const WamParameterInfo = ModuleScope.WamParameterInfo
 
 export class StepModulatorKernel {
     lastValue: number
+
     targetParam?: typeof WamParameterInfo
+
     processor: typeof WamProcessor
     clips: Map<string, Clip>
     port: MessagePort
-
+    paramIds: Record<string, string>
     ticks: number
     
     constructor(processor: typeof WamProcessor) {
@@ -25,74 +27,46 @@ export class StepModulatorKernel {
         this.lastValue = 0
     }
 
-    wamParameters() {
-        return {
-            slew: new WamParameterInfo('slew', {
-                type: "float",
-                defaultValue: 1.0,
-                minValue: 0,
-                maxValue: 1.0,
-            }),
-            gain: new WamParameterInfo('gain', {
-                type: "float",
-                defaultValue: 1.0,
-                minValue: 0,
-                maxValue: 1.0,
-            }),
-            step1: new WamParameterInfo('step1', {
-                type: "float",
-                defaultValue: 0,
-                minValue: 0,
-                maxValue: 1,
-            }),
-            step2: new WamParameterInfo('step2', {
-                type: "float",
-                defaultValue: 0,
-                minValue: 0,
-                maxValue: 1,
-            }),
-            step3: new WamParameterInfo('step3', {
-                type: "float",
-                defaultValue: 0,
-                minValue: 0,
-                maxValue: 1,
-            }),
-            step4: new WamParameterInfo('step4', {
+    wamParameters(row: number) {
+        const prefix = `row${row+1}-`
+
+        // dynamically assign parameter names based on sequencer row
+        let parameters: Record<string, string> = {}
+
+        this.paramIds["slew"] = `${prefix}slew`
+        this.paramIds["gain"] = `${prefix}gain`
+
+        parameters[this.paramIds["slew"]] = new WamParameterInfo(this.paramIds["slew"], {
+            type: "float",
+            defaultValue: 1.0,
+            minValue: 0,
+            maxValue: 1.0,
+        })
+
+        parameters[this.paramIds["gain"]] = new WamParameterInfo(this.paramIds["gain"], {
+            type: "float",
+            defaultValue: 1.0,
+            minValue: 0,
+            maxValue: 1.0,
+        })
+
+        for (let i = 1; i < 9; i++) {
+            const rowedId = `${prefix}step${i}`
+
+            this.paramIds[`step${i}`] = rowedId
+
+            parameters[rowedId] = new WamParameterInfo(rowedId, {
                 type: "float",
                 defaultValue: 0,
                 minValue: 0,
                 maxValue: 1,
-            }),
-            step5: new WamParameterInfo('step5', {
-                type: "float",
-                defaultValue: 0,
-                minValue: 0,
-                maxValue: 1,
-            }),
-            step6: new WamParameterInfo('step6', {
-                type: "float",
-                defaultValue: 0,
-                minValue: 0,
-                maxValue: 1,
-            }),
-            step7: new WamParameterInfo('step7', {
-                type: "float",
-                defaultValue: 0,
-                minValue: 0,
-                maxValue: 1,
-            }),
-            step8: new WamParameterInfo('step8', {
-                type: "float",
-                defaultValue: 0,
-                minValue: 0,
-                maxValue: 1,
-            }),
+            })
         }
+
     }
 
     process(currentClipId: string, tickPosition: number, params: WamParameterDataMap) {
         let clip = this.clips.get(currentClipId)
-        // console.log("WOOF in sequencer process, clip ", clip, ", targetParam ", this.targetParam)
 
         if (!clip) return
 
@@ -113,34 +87,34 @@ export class StepModulatorKernel {
                 result = 0;
                 break
             case 0:
-                result = params.step1.value
+                result = params[this.paramIds["step1"]].value
                 break
             case 1:
-                result = params.step2.value
+                result = params[this.paramIds["step2"]].value
                 break
             case 2:
-                result = params.step3.value
+                result = params[this.paramIds["step3"]].value
                 break
             case 3:
-                result = params.step4.value
+                result = params[this.paramIds["step4"]].value
                 break
             case 4:
-                result = params.step5.value
+                result = params[this.paramIds["step5"]].value
                 break
             case 5:
-                result = params.step6.value
+                result = params[this.paramIds["step6"]].value
                 break
             case 6:
-                result = params.step7.value
+                result = params[this.paramIds["step7"]].value
                 break
             case 7:
-                result = params.step8.value
+                result = params[this.paramIds["step8"]].value
                 break
         }
 
         let target = (step < clip.state.steps.length) ? clip.state.steps[step] + result : result
-        let slew = params.slew.value
-        let gain = params.gain.value
+        let slew = params[this.paramIds["slew"]].value
+        let gain = params[this.paramIds["gain"]].value
 
         let value = this.lastValue + ((target - this.lastValue) * (slew) * slew * slew)
 

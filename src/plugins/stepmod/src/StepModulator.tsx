@@ -14,6 +14,8 @@ export type StepModulatorState = {
 
 export class StepModulator {
 	instanceId: string
+	index: number
+
 	ticks: number;
 	dirty: boolean;
 
@@ -28,7 +30,6 @@ export class StepModulator {
 	paramList: () => (WamParameterInfoMap | undefined)
 
 	renderCallback?: () => void
-	updateProcessor?: (c: Clip) => void
 
 	constructor(instanceId: string, port: MessagePort, paramList: () => (WamParameterInfoMap | undefined)) {
 		this.instanceId = instanceId
@@ -41,12 +42,16 @@ export class StepModulator {
 		this.port = port
 
 		this.clips.forEach(c => c.updateProcessor = (c) => {
-			if (this.updateProcessor) this.updateProcessor(c)
+			this.updateProcessor(c)
 		})
 	}
 
 	getClip(id: string) {
 		return this.clips.find(c => c.state.id == id)
+	}
+
+	destroy() {
+		
 	}
 
 	addClip(id: string) {
@@ -61,18 +66,19 @@ export class StepModulator {
 	}
 
 	getState(): StepModulatorState {
-		
 		var state: StepModulatorState = {
 			clips: this.clips.map(v => (!!v) ? v.getState() : undefined),
 			targetParam: this.targetId
 		}
 
-		console.log("getState() targetParam ", state.targetParam)
-
 		return state
 	}
 
-	async setState(state: StepModulatorState) {
+	async setState(index: number, state: StepModulatorState) {
+		if (this.index != index) {
+			
+		}
+
 		// TODO this is very shitty performance
 		// and prolly some bugs lol
 		this.clips = state.clips.map(c => new Clip(c.id, c))
@@ -84,8 +90,6 @@ export class StepModulator {
 
 			if (this.updateProcessor) this.updateProcessor(c)
 		})
-
-		console.log("setState() targetParam ", state.targetParam)
 
 		if (state.targetParam != this.targetId) {
 			await this.setTargetParameter(state.targetParam)
@@ -128,5 +132,9 @@ export class StepModulator {
 
 	needsRender() {
 		return this.dirty;
+	}
+
+	updateProcessor(c: Clip) {
+		this.port.postMessage({source:"sequencer", index: this.index, action: "clip", id: c.state.id, state: c.getState()})
 	}
 }

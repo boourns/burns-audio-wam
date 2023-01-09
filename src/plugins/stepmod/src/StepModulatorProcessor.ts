@@ -1,5 +1,4 @@
 import { AudioWorkletGlobalScope, WamTransportData } from "@webaudiomodules/api";
-import { Clip } from "./Clip";
 import { StepModulatorKernel } from "./StepModulatorKernel";
 
 const moduleId = 'com.sequencerParty.stepmod'
@@ -22,10 +21,10 @@ class StepModulatorProcessor extends WamProcessor {
 
     // @ts-ignore
     _generateWamParameterInfo() {
-		return this.sequencer.wamParameters()
+        return this.sequencers.flatMap((s, i) => s.wamParameters(i))
 	}
 
-    sequencer: StepModulatorKernel
+    sequencers: StepModulatorKernel[]
 
     lastTime: number
     lastBPM: number
@@ -52,10 +51,11 @@ class StepModulatorProcessor extends WamProcessor {
 		this.ticks = 0;
 
         /* @ts-ignore */
-        this.sequencer = new StepModulatorKernel(this)
+        this.sequencers = [
+            new StepModulatorKernel(this)
+        ]
 
         this.currentClipId = ""
-        this.lastValue = 0
 	}
 
 	/**
@@ -83,7 +83,9 @@ class StepModulatorProcessor extends WamProcessor {
             var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
             var tickPosition = Math.floor(beatPosition * PPQN)
 
-            this.sequencer.process(this.currentClipId, tickPosition, this._parameterState)
+            for (let sequencer of this.sequencers) {
+                sequencer.process(this.currentClipId, tickPosition, this._parameterState)
+            }
 		}
         
 		return
@@ -95,8 +97,7 @@ class StepModulatorProcessor extends WamProcessor {
 	 */
      async _onMessage(message: any): Promise<void> {
         if (message.data?.source == "sequencer") {
-            console.log("passing message onto sequencer: ", JSON.stringify(message.data))
-            await this.sequencer.onMessage(message)
+            await this.sequencers[message.data.index].onMessage(message)
         } else if (message.data && message.data.action == "play") {
             this.pendingClipChange = {
                 id: message.data.id,
