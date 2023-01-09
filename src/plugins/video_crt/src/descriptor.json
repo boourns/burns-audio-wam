@@ -1,0 +1,18 @@
+{
+    "identifier": "com.sequencerParty.crtVideo",
+    "name": "ISF Video Shader",
+    "vendor": "Sequencer Party",
+    "description": "Video filters simulating a variety of vintage displayes such as Cathode Ray Tube",
+    "version": "1.0.0",
+    "sdkVersion": "1.0.0",
+    "thumbnail": "",
+    "keywords": ["video", "effect", "shader", "2d"],
+    "isInstrument": false,
+    "website": "https://sequencer.party",
+    "hasVideoInput": true,
+    "hasVideoOuput": true,
+    "hasMidiInput": false,
+    "hasMidiOutput": false,
+    "hasAudioInput": false,
+    "hasAudioOutput": false
+}
