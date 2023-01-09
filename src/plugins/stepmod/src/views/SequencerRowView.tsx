@@ -5,6 +5,7 @@ import { Knob } from '../../../shared/ui/Knob'
 import { Component, h } from "preact";
 import { StepModulator } from "../StepModulator";
 import { StepModulatorNode } from '..';
+import { StepModulatorView } from './StepModulatorView';
 
 let quantizeOptions = [
     "1/32",
@@ -31,6 +32,7 @@ let quantizeValues = [
 export interface SequencerRowViewProps {
     node: StepModulatorNode
     sequencer: StepModulator
+    parent: StepModulatorView
     clipId: string
 }
 
@@ -60,8 +62,7 @@ export class SequencerRowView extends Component<SequencerRowViewProps, any> {
     }
 
     paramChanged(name: string, value: number) {
-        this.state[name].value = value
-        this.props.node.setParameterValues(this.state) 
+        this.props.parent.paramChanged(name, value)
     }
 
     render() {
@@ -84,8 +85,8 @@ export class SequencerRowView extends Component<SequencerRowViewProps, any> {
             </div>
 
             <div style="display: flex">
-                <Knob label="Gain" size={40} value={() => this.state['gain'].value} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("gain", v)}/>
-                <Knob label="Slew" size={40} value={() => this.state['slew'].value} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("slew", v)}/>
+                <Knob label="Gain" size={40} value={() => this.props.parent.state['gain'].value} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("gain", v)}/>
+                <Knob label="Slew" size={40} value={() => this.props.parent.state['slew'].value} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("slew", v)}/>
                 <Select label="Speed" options={quantizeOptions} values={quantizeValues} value={() => clip.state.speed} onChange={(e) => { clip.state.speed = parseInt(e); clip.updateProcessor(clip)}} />
                 <Select label="Param" options={paramNames} values={paramIds} value={() => this.props.sequencer.targetId} onChange={(v) => this.targetChanged(v)}/>
             </div>

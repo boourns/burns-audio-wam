@@ -56,7 +56,7 @@ export class StepModulatorNode extends WamNode {
 		}
 
 		if (state.sequencer) {
-			this.sequencer.setState(state.sequencer ? state.sequencer : {})
+			this.sequencer.setState(state.sequencer)
 		}
 	}
 
@@ -107,7 +107,7 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 		if (initialState) node.setState(initialState);
 
 		this.sequencer.updateProcessor = (c: Clip) => {
-			this.sequencerNode.port.postMessage({action: "clip", id: c.state.id, state: c.getState()})
+			this.sequencerNode.port.postMessage({source:"sequencer", action: "clip", id: c.state.id, state: c.getState()})
 		}
 
 		this.updatePatternExtension()

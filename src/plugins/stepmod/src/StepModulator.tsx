@@ -61,9 +61,13 @@ export class StepModulator {
 	}
 
 	getState(): StepModulatorState {
+		
 		var state: StepModulatorState = {
-			clips: this.clips.map(v => (!!v) ? v.getState() : undefined)
+			clips: this.clips.map(v => (!!v) ? v.getState() : undefined),
+			targetParam: this.targetId
 		}
+
+		console.log("getState() targetParam ", state.targetParam)
 
 		return state
 	}
@@ -81,8 +85,10 @@ export class StepModulator {
 			if (this.updateProcessor) this.updateProcessor(c)
 		})
 
+		console.log("setState() targetParam ", state.targetParam)
+
 		if (state.targetParam != this.targetId) {
-			this.setTargetParameter(state.targetParam)
+			await this.setTargetParameter(state.targetParam)
 		}
 
 		this.dirty = true
@@ -102,7 +108,7 @@ export class StepModulator {
 		const param = id ? paramList[id] : undefined
 		this.targetParameter = param
 
-		this.port.postMessage({action: "target", param})
+		this.port.postMessage({source:"sequencer", action: "target", param})
 
 		let ids = id ? [id] : []
 

@@ -94,21 +94,19 @@ class StepModulatorProcessor extends WamProcessor {
 	 * @param {MessageEvent} message
 	 */
      async _onMessage(message: any): Promise<void> {
-        if (message.data && message.data.action == "clip") {
-            let clip = new Clip(message.data.id, message.data.state)
-            this.clips.set(message.data.id, clip)
+        if (message.data?.source == "sequencer") {
+            console.log("passing message onto sequencer: ", JSON.stringify(message.data))
+            await this.sequencer.onMessage(message)
         } else if (message.data && message.data.action == "play") {
             this.pendingClipChange = {
                 id: message.data.id,
                 timestamp: 0,
             }
-        } else if (message.data && message.data.action == "target") {
-            this.targetParam = message.data.param
         } else {
             // @ts-ignore
-            super._onMessage(message)
+            await super._onMessage(message)
         }
-     }
+    }
 
     _onTransport(transportData: WamTransportData) {
         this.transportData = transportData

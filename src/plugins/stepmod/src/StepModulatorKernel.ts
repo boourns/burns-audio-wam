@@ -22,6 +22,7 @@ export class StepModulatorKernel {
         this.processor = processor
 
         this.clips = new Map()
+        this.lastValue = 0
     }
 
     wamParameters() {
@@ -91,6 +92,8 @@ export class StepModulatorKernel {
 
     process(currentClipId: string, tickPosition: number, params: WamParameterDataMap) {
         let clip = this.clips.get(currentClipId)
+        // console.log("WOOF in sequencer process, clip ", clip, ", targetParam ", this.targetParam)
+
         if (!clip) return
 
         if (!this.targetParam) return
@@ -164,5 +167,14 @@ export class StepModulatorKernel {
 
         this.lastValue = value
 
+    }
+
+    async onMessage(message: any): Promise<void> {
+        if (message.data && message.data.action == "clip") {
+            let clip = new Clip(message.data.id, message.data.state)
+            this.clips.set(message.data.id, clip)
+        } else if (message.data && message.data.action == "target") {
+            this.targetParam = message.data.param
+        }
     }
 }

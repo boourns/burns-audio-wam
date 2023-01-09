@@ -49,11 +49,16 @@ export class StepModulatorView extends Component<StepModulatorViewProps, any> {
         this.statePoller = window.requestAnimationFrame(this.pollState)
     }
 
+    paramChanged(name: string, value: number) {
+        this.state[name].value = value
+        this.props.plugin.audioNode.setParameterValues(this.state) 
+    }
+
     render() {
         h("div", {})
         
         const rows = [
-            <SequencerRowView clipId={this.props.clipId} node={this.props.plugin.audioNode} sequencer={this.props.sequencer}></SequencerRowView>
+            <SequencerRowView parent={this} clipId={this.props.clipId} node={this.props.plugin.audioNode} sequencer={this.props.sequencer}></SequencerRowView>
         ]
 
         return (
