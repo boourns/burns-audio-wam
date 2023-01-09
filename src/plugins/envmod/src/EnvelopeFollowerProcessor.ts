@@ -77,7 +77,7 @@ const getEnvelopeFollowerProcessor = (moduleId: string) => {
                 }
             }
 
-            const amp = max - min
+            const amp = max >= min ? max - min : 0
 
             let db = 20 * (Math.log(amp) / Math.log(10))
 
@@ -133,7 +133,6 @@ const getEnvelopeFollowerProcessor = (moduleId: string) => {
                     }
                 )
             }
-
 
             return;
         }

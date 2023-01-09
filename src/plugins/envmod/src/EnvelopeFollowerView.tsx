@@ -72,7 +72,6 @@ export interface MIDIInputProps {
           <Knob label="Base" size={40} value={() => this.state['base'].value} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("base", v)}/>
           <Knob label="Range" size={40} value={() => this.state['range'].value} minimumValue={-1} bipolar={true} maximumValue={1} onChange={(v) => this.paramChanged("range", v)}/>
           <Knob label="Slew" size={40} value={() => this.state['slew'].value} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("slew", v)}/>
-
         </div>
       </div>
     }

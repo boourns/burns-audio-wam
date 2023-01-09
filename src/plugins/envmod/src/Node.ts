@@ -28,6 +28,7 @@ export class EnvelopeFollowerNode extends WamNode {
 			numberOfInputs: 1,
 			numberOfOutputs: 0,
 			outputChannelCount: [2],
+			useSab: true
 		}});
 
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
