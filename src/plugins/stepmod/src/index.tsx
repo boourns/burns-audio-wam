@@ -6,7 +6,7 @@ import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
 import { StepModulatorView } from './views/StepModulatorView';
-import { StepModulator } from './StepModulator';
+import { StepModulator, StepModulatorState } from './StepModulator';
 
 import { Clip } from './Clip';
 
@@ -14,6 +14,9 @@ import {PatternDelegate} from 'wam-extensions';
 
 import styles from "./views/StepModulatorView.scss"
 import { insertStyle} from "../../shared/insertStyle"
+import { token } from '../../shared/util';
+
+const MAX_SEQUENCERS = 32
 
 var logger = console.log
 
@@ -23,9 +26,12 @@ export class StepModulatorNode extends WamNode {
 
 	paramList?: WamParameterInfoMap
 
-	sequencers: StepModulator[]
+	sequencers: Record<string, StepModulator>
+	sequencerOrder: string[]
+	renderCallback: () => void
 
 	connected: boolean
+	activeSteps: Float32Array
 
 	/**
 	 * @param {WebAudioModule} module
@@ -38,15 +44,36 @@ export class StepModulatorNode extends WamNode {
 			outputChannelCount: [2],
 		}});
 
+		const id = token()
+		const id2 = token()
+
+		this.sequencers = {}
+		this.sequencers[id] = new StepModulator(this.instanceId, id, this.port, () => { return this.paramList })
+		this.sequencers[id2] = new StepModulator(this.instanceId, id2, this.port, () => { return this.paramList })
+		this.sequencerOrder = [id, id2]
+
+
+		// @ts-ignore
+		const sharedBuffer = new SharedArrayBuffer(32 * 4);
+		this.activeSteps = new Float32Array(sharedBuffer);
+
+		this.port.postMessage({source:"stepBuffer", buffer: sharedBuffer})
+
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
 	}
 
 	async getState(): Promise<any> {
 		var params = await super.getState()
+		let sequencerState: Record<string, StepModulatorState> = {}
+		for (let id of this.sequencerOrder) {
+			sequencerState[id] = this.sequencers[id].getState()
+		}
+
 		return {
 			params, 
-			sequencers: this.sequencers.map(s => s.getState())
+			sequencers: sequencerState,
+			sequencerOrder: this.sequencerOrder
 		}
 	}
 
@@ -56,25 +83,33 @@ export class StepModulatorNode extends WamNode {
 		}
 
 		if (!state.sequencers) {
-			state.sequencers = []
+			state.sequencers = {}
 		}
 
-		for (let i = 0; i < state.sequencers.length; i++) {
-			if (i > this.sequencers.length) {
-				const seq = new StepModulator(this.instanceId, this.port, () => { return this.paramList})
-				seq.updateProcessor = (c: Clip) => {
-					
-				}
-				this.sequencers.push(seq)
+		if (!state.sequencerOrder) {
+			state.sequencerOrder = []
+		}
+
+		for (let i = 0; i < state.sequencerOrder.length; i++) {
+			const id = state.sequencerOrder[i]
+
+			if (!this.sequencers[id]) {
+				this.sequencers[id] = new StepModulator(this.instanceId, id, this.port, () => { return this.paramList})
 			}
 
-			this.sequencers[i].setState(i, state.sequencers)
+			this.sequencers[id].setState(state.sequencers[id])
 		}
 
-		for (let i = state.sequencers.length; i < this.sequencers.length; i++) {
-			const seq = this.sequencers.pop()
-			seq.destroy(i)
+		if (this.sequencerOrder.length != state.sequencerOrder.length || this.sequencerOrder.some((id, i) => id != state.sequencerOrder[i])) {
+			this.sequencerOrder = state.sequencerOrder
+
+			this.port.postMessage({source:"order", sequencerOrder: this.sequencerOrder})
 		}
+
+		Object.keys(this.sequencers).filter(id => this.sequencerOrder.indexOf(id) == -1).forEach(id => {
+			this.sequencers[id].destroy()
+			delete this.sequencers[id]
+		})
 	}
 }
 
@@ -94,7 +129,6 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 		return descriptor
 	}
 
-	sequencerNode: StepModulatorNode
 	targetParam?: WamParameterInfo
 
 	async initialize(state: any) {
@@ -111,7 +145,9 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 		const node: StepModulatorNode = new StepModulatorNode(this, {});
 		await node._initialize();
 
-		if (initialState) node.setState(initialState);
+		if (initialState) {
+			node.setState(initialState)
+		}
 
 		this.updatePatternExtension()
 
@@ -120,12 +156,14 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 				connectModulation: async (params: WamParameterInfoMap) => {
 					node.paramList = params
 
-					if (node.sequencer.targetId) {
-						await node.sequencer.setTargetParameter(node.sequencer.targetId)
+					for (let id of this.audioNode.sequencerOrder) {
+						if (node.sequencers[id].targetId) {
+							await node.sequencers[id].setTargetParameter(node.sequencers[id].targetId)
+						}
 					}
 
-					if (this.sequencer.renderCallback) {
-						this.sequencer.renderCallback()
+					if (node.renderCallback) {
+						node.renderCallback()
 					}
 				}
 			})
@@ -147,19 +185,13 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 
 		insertStyle(shadow, styles.toString())
 
-		if (!clipId) {
-			clipId = this.sequencer.clip().state.id
-		} else {
-			this.sequencer.addClip(clipId)
+		for (let id of this.audioNode.sequencerOrder) {
+			this.audioNode.sequencers[id].addClip(clipId)
 		}
 
-		render(<StepModulatorView plugin={this} sequencer={this.sequencer} clipId={clipId}></StepModulatorView>, shadow);
+		render(<StepModulatorView plugin={this} clipId={clipId}></StepModulatorView>, shadow);
 
 		return div;
-	}
-
-	clip(): Clip {
-		return this.sequencer.clip()
 	}
 
 	destroyGui(el: Element) {
@@ -173,46 +205,63 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 
 		let patternDelegate: PatternDelegate = {
 			getPatternList: () => {
-				return this.sequencer.clips.map(c => {
+				return this.audioNode.sequencers[this.audioNode.sequencerOrder[0]].clips.map(c => {
 					return {id: c.state.id, name: "pattern"}
 				})
 			},
-			createPattern: (id: string) => {
-				logger("createPattern(%s)", id)
-				this.sequencer.addClip(id)
-			},
-			deletePattern: (id: string) => {
-				logger("deletePattern(%s)", id)
-				this.sequencer.clips = this.sequencer.clips.filter(c => c.state.id != id)
-			},
-			playPattern: (id: string | undefined) => {
-				logger("playPattern(%s)", id)
-
-				let clip = this.sequencer.getClip(id)
-				if (!clip && id != undefined) {
-					this.sequencer.addClip(id)
-				}
-
-				this.sequencerNode.port.postMessage({action: "play", id})
-			},
-			getPatternState: (id: string) => {
-				logger("getPatternState(%s)", id)
-
-				let clip = this.sequencer.getClip(id)
-				if (clip) {
-					return clip.getState()
-				} else {
-					return undefined
+			createPattern: (clipId: string) => {
+				logger("createPattern(%s)", clipId)
+				for (let id of this.audioNode.sequencerOrder) {
+					this.audioNode.sequencers[id].addClip(clipId)
 				}
 			},
-			setPatternState: (id: string, state: any) => {
-				logger("setPatternState(%s, %o)", id, state)
-				let clip = this.sequencer.getClip(id)
-				if (clip) {
-					clip.setState(state)
-				} else {
-					let clip = new Clip(id, state)
-					this.sequencer.clips.push(clip)
+			deletePattern: (clipId: string) => {
+				logger("deletePattern(%s)", clipId)
+				for (let id of this.audioNode.sequencerOrder) {
+					this.audioNode.sequencers[id].deleteClip(clipId)
+				}
+			},
+			playPattern: (clipId: string | undefined) => {
+				logger("playPattern(%s)", clipId)
+
+				for (let id of this.audioNode.sequencerOrder) {
+					this.audioNode.sequencers[id].addClip(clipId)
+				}
+
+				this.audioNode.port.postMessage({action: "play", id: clipId})
+			},
+			getPatternState: (clipId: string) => {
+				logger("getPatternState(%s)", clipId)
+
+				let state: Record<string, any> = {
+					clips: {},
+					order: this.audioNode.sequencerOrder
+				}
+
+				for (let id of this.audioNode.sequencerOrder) {
+					let clip = this.audioNode.sequencers[id].getClip(clipId)
+					if (clip) {
+						state.clips[id] = clip.getState()
+					}
+				}
+
+				return state
+			},
+			setPatternState: (clipId: string, state: any) => {
+				logger("setPatternState(%s, %o)", clipId, state)
+
+				for (let id of this.audioNode.sequencerOrder) {
+					if (!state.clips[id]) {
+						continue
+					}
+
+					let clip = this.audioNode.sequencers[id].getClip(clipId)
+					if (clip) {
+						clip.setState(state.clips[id])
+					} else {
+						this.audioNode.sequencers[id].addClip(clipId)
+						this.audioNode.sequencers[id].getClip(clipId).setState(state.clips[id])
+					}
 				}
 			}
 		}

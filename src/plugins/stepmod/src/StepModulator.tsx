@@ -13,8 +13,8 @@ export type StepModulatorState = {
 }
 
 export class StepModulator {
+	id: string
 	instanceId: string
-	index: number
 
 	ticks: number;
 	dirty: boolean;
@@ -31,8 +31,9 @@ export class StepModulator {
 
 	renderCallback?: () => void
 
-	constructor(instanceId: string, port: MessagePort, paramList: () => (WamParameterInfoMap | undefined)) {
+	constructor(instanceId: string, id: string, port: MessagePort, paramList: () => (WamParameterInfoMap | undefined)) {
 		this.instanceId = instanceId
+		this.id = id
 		this.ticks = -1
 		this.dirty = false
 		this.playing = false
@@ -44,6 +45,8 @@ export class StepModulator {
 		this.clips.forEach(c => c.updateProcessor = (c) => {
 			this.updateProcessor(c)
 		})
+
+		this.port.postMessage({source:"add", id})
 	}
 
 	getClip(id: string) {
@@ -51,7 +54,7 @@ export class StepModulator {
 	}
 
 	destroy() {
-		
+		this.port.postMessage({source:"del", id: this.id})
 	}
 
 	addClip(id: string) {
@@ -65,6 +68,10 @@ export class StepModulator {
 		}
 	}
 
+	deleteClip(clipId: string) {
+		this.clips = this.clips.filter(c => c.state.id != clipId)
+	}
+
 	getState(): StepModulatorState {
 		var state: StepModulatorState = {
 			clips: this.clips.map(v => (!!v) ? v.getState() : undefined),
@@ -74,11 +81,7 @@ export class StepModulator {
 		return state
 	}
 
-	async setState(index: number, state: StepModulatorState) {
-		if (this.index != index) {
-			
-		}
-
+	async setState(state: StepModulatorState) {
 		// TODO this is very shitty performance
 		// and prolly some bugs lol
 		this.clips = state.clips.map(c => new Clip(c.id, c))
@@ -112,7 +115,7 @@ export class StepModulator {
 		const param = id ? paramList[id] : undefined
 		this.targetParameter = param
 
-		this.port.postMessage({source:"sequencer", action: "target", param})
+		this.port.postMessage({source:"sequencer", sequencerId: this.id, action: "target", param})
 
 		let ids = id ? [id] : []
 
@@ -135,6 +138,6 @@ export class StepModulator {
 	}
 
 	updateProcessor(c: Clip) {
-		this.port.postMessage({source:"sequencer", index: this.index, action: "clip", id: c.state.id, state: c.getState()})
+		this.port.postMessage({source:"sequencer", sequencerId: this.id, action: "clip", id: c.state.id, state: c.getState()})
 	}
 }

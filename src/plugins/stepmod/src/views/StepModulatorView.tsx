@@ -1,3 +1,4 @@
+import { WamParameterData } from '@webaudiomodules/api';
 import { Component, h } from 'preact';
 
 
@@ -12,27 +13,23 @@ let styles = styleRoot.locals as typeof styleRoot
 
 export type StepModulatorViewProps = {
     plugin: StepModulatorModule
-    sequencer: StepModulator
     clipId: string
 }
 
 export class StepModulatorView extends Component<StepModulatorViewProps, any> {
     statePoller: number
+    paramState: Record<string, WamParameterData>
 
     constructor() {
         super();
         this.pollState = this.pollState.bind(this)
-
-        this.state = {
-            "gain" : {value: 1.0},
-            "slew" : {value: 1.0},
-          }
+        this.paramState = {}
     }
 
     componentDidMount() {
         this.pollState()
 
-        this.props.sequencer.renderCallback = () => {
+        this.props.plugin.audioNode.renderCallback = () => {
             this.forceUpdate()
         }
     }
@@ -40,26 +37,34 @@ export class StepModulatorView extends Component<StepModulatorViewProps, any> {
     componentWillUnmount() {
         window.cancelAnimationFrame(this.statePoller)
 
-        this.props.sequencer.renderCallback = undefined
+        this.props.plugin.audioNode.renderCallback = undefined
     }
 
     async pollState() {
-        this.state = await this.props.plugin.audioNode.getParameterValues(false)
+        this.paramState = await this.props.plugin.audioNode.getParameterValues(false)
 
         this.statePoller = window.requestAnimationFrame(this.pollState)
     }
 
     paramChanged(name: string, value: number) {
-        this.state[name].value = value
-        this.props.plugin.audioNode.setParameterValues(this.state) 
+        if (!this.paramState[name]) {
+            this.paramState[name] = {
+                id: name, 
+                normalized: false,
+                value
+            }
+        }
+
+        this.paramState[name].value = value
+        this.props.plugin.audioNode.setParameterValues(this.paramState) 
     }
 
     render() {
         h("div", {})
         
-        const rows = [
-            <SequencerRowView parent={this} clipId={this.props.clipId} node={this.props.plugin.audioNode} sequencer={this.props.sequencer}></SequencerRowView>
-        ]
+        const rows = this.props.plugin.audioNode.sequencerOrder.map((id, index) => {
+            return <SequencerRowView row={index} parent={this} clipId={this.props.clipId} node={this.props.plugin.audioNode} sequencer={this.props.plugin.audioNode.sequencers[id]}></SequencerRowView>
+        })
 
         return (
         <div class={styles.Module}>
@@ -67,5 +72,5 @@ export class StepModulatorView extends Component<StepModulatorViewProps, any> {
 
             <div style="flex: 1"></div>
         </div>)
-    }  
+    }
 }

@@ -1,6 +1,8 @@
+@import "../../../shared/ui/glow.scss";
+
 .Module {
     flex: 1;
-    background-color: #56585b;
+    background-color: #333333;
     display: flex;
     flex-direction:column;
     justify-content:space-between;

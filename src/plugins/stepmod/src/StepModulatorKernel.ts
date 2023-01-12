@@ -10,6 +10,7 @@ const WamProcessor = ModuleScope.WamProcessor
 const WamParameterInfo = ModuleScope.WamParameterInfo
 
 export class StepModulatorKernel {
+    id: string
     lastValue: number
 
     targetParam?: typeof WamParameterInfo
@@ -19,19 +20,35 @@ export class StepModulatorKernel {
     port: MessagePort
     paramIds: Record<string, string>
     ticks: number
+    row: number
+    rowConfigured: boolean
+    activeStep: number
     
-    constructor(processor: typeof WamProcessor) {
+    constructor(id: string, row: number, processor: typeof WamProcessor) {
         this.processor = processor
+        this.id = id
+        this.paramIds = {}
+        this.rowConfigured = false
+        this.activeStep = 0
 
         this.clips = new Map()
         this.lastValue = 0
+        this.setRow(row)
     }
 
-    wamParameters(row: number) {
-        const prefix = `row${row+1}-`
+    setRow(row: number) {
+        this.row = row
+    }
+
+    wamParameters() {
+        if (this.row === undefined) {
+            throw new Error("calling wamParameters without row set!")
+        }
+
+        const prefix = `row${this.row+1}-`
 
         // dynamically assign parameter names based on sequencer row
-        let parameters: Record<string, string> = {}
+        let parameters: Record<string, typeof WamParameterInfo> = {}
 
         this.paramIds["slew"] = `${prefix}slew`
         this.paramIds["gain"] = `${prefix}gain`
@@ -63,10 +80,16 @@ export class StepModulatorKernel {
             })
         }
 
+        this.rowConfigured = true
+
+        return parameters
     }
 
     process(currentClipId: string, tickPosition: number, params: WamParameterDataMap) {
         let clip = this.clips.get(currentClipId)
+        if (!this.rowConfigured) {
+            this.wamParameters()
+        }
 
         if (!clip) return
 
@@ -78,7 +101,25 @@ export class StepModulatorKernel {
             this.ticks = clipPosition;
         }
 
-        let step = Math.floor(this.ticks/clip.state.speed)
+        this.update(clip, params)
+    }
+
+    update(clip: Clip, params: WamParameterDataMap) {
+        if (!this.rowConfigured) {
+            this.wamParameters()
+        }
+
+        if (!this.targetParam) {
+            return
+        }
+
+        let step
+        if (clip.state.speed == 0) {
+            step = this.activeStep
+        } else {
+            step = Math.floor(this.ticks/clip.state.speed)
+            this.activeStep = step
+        }
 
         var result = 0
         var i = 0
@@ -120,8 +161,10 @@ export class StepModulatorKernel {
 
         if (value != this.lastValue) {
             const { currentTime } = audioWorkletGlobalScope;
+            const min = (this.targetParam.minValue === undefined) ? 0 : this.targetParam.minValue
+            const max = (this.targetParam.maxValue === undefined) ? 1 : this.targetParam.maxValue
 
-            var output = this.targetParam.minValue + (value * (this.targetParam.maxValue - this.targetParam.minValue) * gain)
+            var output = min + (value * (max - min) * gain)
             if (this.targetParam.type == 'int' || this.targetParam.type == 'choice' || this.targetParam.type == 'boolean') {
                 output = Math.round(output)
             }

@@ -1,4 +1,4 @@
-import { AudioWorkletGlobalScope, WamTransportData } from "@webaudiomodules/api";
+import { AudioWorkletGlobalScope, WamTransportData, WamMidiData } from "@webaudiomodules/api";
 import { StepModulatorKernel } from "./StepModulatorKernel";
 
 const moduleId = 'com.sequencerParty.stepmod'
@@ -18,13 +18,21 @@ let quantizeValues = [
 ]
 
 class StepModulatorProcessor extends WamProcessor {
-
-    // @ts-ignore
     _generateWamParameterInfo() {
-        return this.sequencers.flatMap((s, i) => s.wamParameters(i))
+        let allParams = {}
+        const seqs = this.allSequencers()
+        for (let seq of seqs) {
+            allParams = {
+                ...allParams,
+                ...seq.wamParameters()
+            }
+        }
+
+        return allParams
 	}
 
-    sequencers: StepModulatorKernel[]
+    sequencers: Record<string, StepModulatorKernel>
+    sequencerOrder: string[]
 
     lastTime: number
     lastBPM: number
@@ -34,6 +42,7 @@ class StepModulatorProcessor extends WamProcessor {
 
     pendingClipChange?: {id: string, timestamp: number} 
     currentClipId: string
+    activeSteps?: Float32Array
 
 	constructor(options: any) {
         super(options);
@@ -50,10 +59,8 @@ class StepModulatorProcessor extends WamProcessor {
 		this.lastTime = null;
 		this.ticks = 0;
 
-        /* @ts-ignore */
-        this.sequencers = [
-            new StepModulatorKernel(this)
-        ]
+        this.sequencers = {}
+        this.sequencerOrder = []
 
         this.currentClipId = ""
 	}
@@ -83,9 +90,15 @@ class StepModulatorProcessor extends WamProcessor {
             var beatPosition = (this.transportData!.currentBar * this.transportData!.timeSigNumerator) + ((this.transportData!.tempo/60.0) * timeElapsed)
             var tickPosition = Math.floor(beatPosition * PPQN)
 
-            for (let sequencer of this.sequencers) {
+            const sequencers = this.allSequencers()
+
+            sequencers.forEach((sequencer, index) => {
                 sequencer.process(this.currentClipId, tickPosition, this._parameterState)
-            }
+
+                if (this.activeSteps) {
+                    this.activeSteps[index] = sequencer.activeStep
+                }
+            })
 		}
         
 		return
@@ -96,8 +109,28 @@ class StepModulatorProcessor extends WamProcessor {
 	 * @param {MessageEvent} message
 	 */
      async _onMessage(message: any): Promise<void> {
-        if (message.data?.source == "sequencer") {
-            await this.sequencers[message.data.index].onMessage(message)
+        if (message.data?.source == "stepBuffer") {
+            const sharedBuffer = message.data.buffer;
+            this.activeSteps = new Float32Array(sharedBuffer);
+
+        } else if (message.data?.source == "add") {
+            const seq = new StepModulatorKernel(message.data.id, this.sequencerOrder.length, this)
+            seq.setRow(this.sequencerOrder.length)
+
+            this.sequencers[message.data.id] = seq
+            
+            this.sequencerOrder.push(message.data.id)
+        } else if (message.data?.source == "delete") {
+            if (this.sequencers[message.data.id]) {
+                delete this.sequencers[message.data.id]
+            }
+            this.sequencerOrder = this.sequencerOrder.filter(id => id != message.data.id)
+            this.sequencerOrder.forEach((id, index) => this.sequencers[id].setRow(index))
+        } else if (message.data?.source == "order") {
+            this.sequencerOrder = message.data.sequencerOrder
+            this.sequencerOrder.forEach((id, index) => this.sequencers[id].setRow(index))
+        } else if (message.data?.source == "sequencer") {
+            await this.sequencers[message.data.sequencerId].onMessage(message)
         } else if (message.data && message.data.action == "play") {
             this.pendingClipChange = {
                 id: message.data.id,
@@ -111,6 +144,32 @@ class StepModulatorProcessor extends WamProcessor {
 
     _onTransport(transportData: WamTransportData) {
         this.transportData = transportData
+    }
+
+    _onMidi(midiData: WamMidiData) {
+        const {currentTime} = audioWorkletGlobalScope
+
+        if ((midiData.bytes[0] & 0xf0) == 0x90) {
+            // midi note on
+            const seqs = this.allSequencers()
+            for (let s of seqs) {
+                const clip = s.clips.get(this.currentClipId)
+                if (clip && clip.state.speed == 0) {
+                    s.activeStep = (s.activeStep + 1) % clip.state.length
+                    s.update(clip, this._parameterState)
+                }
+            }
+        }
+
+        this.emitEvents({
+            type:"wam-midi",
+            data: midiData,
+            time: currentTime
+        })
+    }
+
+    allSequencers(): StepModulatorKernel[] {
+        return this.sequencerOrder.map(id => this.sequencers[id])
     }
 }
 
