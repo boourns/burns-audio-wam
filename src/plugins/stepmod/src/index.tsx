@@ -8,9 +8,8 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import { StepModulatorView } from './views/StepModulatorView';
 import { StepModulator, StepModulatorState } from './StepModulator';
 
-import { Clip } from './Clip';
+import {PatternDelegate, ThemeExtension} from 'wam-extensions';
 
-import {PatternDelegate} from 'wam-extensions';
 
 import styles from "./views/StepModulatorView.scss"
 import { insertStyle} from "../../shared/insertStyle"
@@ -32,6 +31,7 @@ export class StepModulatorNode extends WamNode {
 
 	connected: boolean
 	activeSteps: Float32Array
+	themeCss: string;
 
 	/**
 	 * @param {WebAudioModule} module
@@ -47,11 +47,12 @@ export class StepModulatorNode extends WamNode {
 		const id = token()
 		const id2 = token()
 
+		this.themeCss = ""
+
 		this.sequencers = {}
 		this.sequencers[id] = new StepModulator(this.instanceId, id, this.port, () => { return this.paramList })
 		this.sequencers[id2] = new StepModulator(this.instanceId, id2, this.port, () => { return this.paramList })
 		this.sequencerOrder = [id, id2]
-
 
 		// @ts-ignore
 		const sharedBuffer = new SharedArrayBuffer(32 * 4);
@@ -170,6 +171,15 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 		} else {
 			console.log("did not find modulationTarget extension ", window.WAMExtensions)
 		}
+
+		if (window.WAMExtensions && window.WAMExtensions.theme) {
+			window.WAMExtensions.theme.addListener(this.instanceId, (themeCss: string) => {
+				node.themeCss = themeCss
+				if (node.renderCallback) {
+					node.renderCallback()
+				}
+			})
+		}
 		
 		return node
     }
@@ -181,7 +191,10 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
 
-		var shadow = div.attachShadow({mode: 'open'});
+		const shadow = div.attachShadow({mode: 'open'});
+		const root = document.createElement("div")
+		root.setAttribute("class", "width: 100%; height: 100%; display: flex; flex: 1;")
+		shadow.appendChild(root)
 
 		insertStyle(shadow, styles.toString())
 
@@ -189,7 +202,7 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 			this.audioNode.sequencers[id].addClip(clipId)
 		}
 
-		render(<StepModulatorView plugin={this} clipId={clipId}></StepModulatorView>, shadow);
+		render(<StepModulatorView plugin={this} clipId={clipId}></StepModulatorView>, root);
 
 		return div;
 	}

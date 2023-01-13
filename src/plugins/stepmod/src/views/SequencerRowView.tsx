@@ -8,6 +8,11 @@ import { StepModulatorNode } from '..';
 import { StepModulatorView } from './StepModulatorView';
 import { Clip } from '../Clip';
 
+import styleRoot from "./StepModulatorView.scss"
+
+// @ts-ignore
+let styles = styleRoot.locals as typeof styleRoot
+
 let quantizeOptions = [
     "1/32",
     "1/16",
@@ -17,7 +22,7 @@ let quantizeOptions = [
     "1 bar",
     "2 bar",
     "4 bar",
-    "Per Note"
+    "Note"
 ]
 
 let quantizeValues = [
@@ -40,7 +45,19 @@ export interface SequencerRowViewProps {
     clipId: string
 }
 
-export class SequencerRowView extends Component<SequencerRowViewProps, any> {
+type SequencerRowViewState = {
+    renderStepButtons: boolean
+}
+
+export class SequencerRowView extends Component<SequencerRowViewProps, SequencerRowViewState> {
+    constructor() {
+        super()
+
+        this.state = {
+            renderStepButtons: false
+        }
+    }
+
     targetValueString(v: number): string {
         let param = this.props.sequencer.targetParameter
 
@@ -83,6 +100,14 @@ export class SequencerRowView extends Component<SequencerRowViewProps, any> {
         }
     }
 
+    settingsButton() {
+        return <button class={styles.settingsButton}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+            </svg>
+        </button>
+    }
+
     render() {
         let clip = this.props.sequencer.getClip(this.props.clipId)
         let steps = clip.state.steps.map((step, index) => {
@@ -99,8 +124,11 @@ export class SequencerRowView extends Component<SequencerRowViewProps, any> {
 
         return <div style="display: flex; flex-direction: row">
             <div style="display: flex; width: 240px; flex-direction: column">
-                <Select label="Param" options={paramNames} values={paramIds} value={() => this.props.sequencer.targetId} onChange={(v) => this.targetChanged(v)}/>
                 <div style="display: flex; flex-direction: row">
+                    {this.settingsButton()}
+                    <Select label="Param" options={paramNames} values={paramIds} value={() => this.props.sequencer.targetId} onChange={(v) => this.targetChanged(v)}/>
+                </div>
+                  <div style="display: flex; flex-direction: row">
                     <Knob label="Gain" size={40} value={() => this.getValue("gain")} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("gain", v)}/>
                     <Knob label="Slew" size={40} value={() => this.getValue("slew")} minimumValue={0} maximumValue={1} onChange={(v) => this.paramChanged("slew", v)}/>
                     <Select label="Speed" options={quantizeOptions} values={quantizeValues} value={() => clip.state.speed} onChange={(e) => { clip.state.speed = parseInt(e); clip.updateProcessor(clip)}} />

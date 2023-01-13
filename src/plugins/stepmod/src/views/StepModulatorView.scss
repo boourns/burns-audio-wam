@@ -8,4 +8,15 @@
     justify-content:space-between;
     padding: 10px;
     color: white;
+
+    width:100%;
+}
+
+.settingsButton {
+    margin: auto;
+    margin-bottom: 2px;
+    padding: 3px 0 0 0;
+    background-color: var(--var-ButtonBackground);
+    color: var(--var-ButtonForeground);
+    border: 1px solid var(--var-ButtonForeground);
 }

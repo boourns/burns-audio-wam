@@ -1,5 +1,5 @@
 import { WamParameterData } from '@webaudiomodules/api';
-import { Component, h } from 'preact';
+import { Component, h, Fragment } from 'preact';
 
 
 import StepModulatorModule from '..';
@@ -66,11 +66,18 @@ export class StepModulatorView extends Component<StepModulatorViewProps, any> {
             return <SequencerRowView row={index} parent={this} clipId={this.props.clipId} node={this.props.plugin.audioNode} sequencer={this.props.plugin.audioNode.sequencers[id]}></SequencerRowView>
         })
 
-        return (
-        <div class={styles.Module}>
-            {rows}
+        return <>
+            <div class={styles.Module}>
+                {rows}
+                <div>
+                    <button>+ Add Row</button>
+                </div>
 
-            <div style="flex: 1"></div>
-        </div>)
+                <div style="flex: 1"></div>
+            </div>
+            <style>
+                {this.props.plugin.audioNode.themeCss}
+            </style>
+        </>
     }
 }
