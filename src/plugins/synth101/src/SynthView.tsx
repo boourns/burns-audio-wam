@@ -89,7 +89,7 @@ export interface SynthViewProps {
             <div class={styles.header}>Oscillator</div>
             <div class={styles.content}>
               <div style="display: flex; flex-direction: column">
-                <Knob label="Tune" value={() => this.value("detune")} minimumValue={-0.5} maximumValue={0.5} bipolar={true} onChange={(e) => this.parameterChanged("detune", e)}/>
+                <Knob label="Tune" value={() => this.value("detune")} minimumValue={-1.0} maximumValue={1.0} bipolar={true} onChange={(e) => this.parameterChanged("detune", e)}/>
                 <Select label="Range" options={ranges} value={() => this.value("oscRange")} onChange={(e) => this.parameterChanged("oscRange", parseInt(e))} />
               </div>
               {this.fader("Mod", "oscMod")}

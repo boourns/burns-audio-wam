@@ -70,7 +70,7 @@ export class StepModulatorView extends Component<StepModulatorViewProps, any> {
             <div class={styles.Module}>
                 {rows}
                 <div>
-                    <button>+ Add Row</button>
+                    <button onClick={() => this.props.plugin.audioNode.addRow()}>+ Add Row</button>
                 </div>
 
                 <div style="flex: 1"></div>

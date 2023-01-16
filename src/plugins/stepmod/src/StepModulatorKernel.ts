@@ -95,7 +95,7 @@ export class StepModulatorKernel {
 
         if (!this.targetParam) return
 
-        let clipPosition = tickPosition % (clip.state.length * clip.state.speed);
+        let clipPosition = tickPosition % (clip.length() * clip.state.speed);
 
         if (this.ticks != clipPosition) {
             this.ticks = clipPosition;

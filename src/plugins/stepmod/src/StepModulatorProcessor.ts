@@ -1,4 +1,4 @@
-import { AudioWorkletGlobalScope, WamTransportData, WamMidiData } from "@webaudiomodules/api";
+import { AudioWorkletGlobalScope, WamTransportData, WamMidiData, WamParameterConfiguration, WamParameterInfoMap, WamParameterData } from "@webaudiomodules/api";
 import { StepModulatorKernel } from "./StepModulatorKernel";
 
 const moduleId = 'com.sequencerParty.stepmod'
@@ -6,7 +6,9 @@ const PPQN = 24
 
 const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown as AudioWorkletGlobalScope
 const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
-const WamProcessor = ModuleScope.WamProcessor
+const {
+    WamProcessor
+ } = ModuleScope
 
 let quantizeValues = [
     1,
@@ -120,15 +122,22 @@ class StepModulatorProcessor extends WamProcessor {
             this.sequencers[message.data.id] = seq
             
             this.sequencerOrder.push(message.data.id)
+
+            this.updateParameters()
+
         } else if (message.data?.source == "delete") {
             if (this.sequencers[message.data.id]) {
                 delete this.sequencers[message.data.id]
             }
             this.sequencerOrder = this.sequencerOrder.filter(id => id != message.data.id)
             this.sequencerOrder.forEach((id, index) => this.sequencers[id].setRow(index))
+            this.updateParameters()
+
         } else if (message.data?.source == "order") {
             this.sequencerOrder = message.data.sequencerOrder
             this.sequencerOrder.forEach((id, index) => this.sequencers[id].setRow(index))
+            this.updateParameters()
+
         } else if (message.data?.source == "sequencer") {
             await this.sequencers[message.data.sequencerId].onMessage(message)
         } else if (message.data && message.data.action == "play") {
@@ -137,7 +146,6 @@ class StepModulatorProcessor extends WamProcessor {
                 timestamp: 0,
             }
         } else {
-            // @ts-ignore
             await super._onMessage(message)
         }
     }
@@ -155,7 +163,7 @@ class StepModulatorProcessor extends WamProcessor {
             for (let s of seqs) {
                 const clip = s.clips.get(this.currentClipId)
                 if (clip && clip.state.speed == 0) {
-                    s.activeStep = (s.activeStep + 1) % clip.state.length
+                    s.activeStep = (s.activeStep + 1) % clip.length()
                     s.update(clip, this._parameterState)
                 }
             }
@@ -170,6 +178,27 @@ class StepModulatorProcessor extends WamProcessor {
 
     allSequencers(): StepModulatorKernel[] {
         return this.sequencerOrder.map(id => this.sequencers[id])
+    }
+
+    updateParameters() {
+        const parameters = this._generateWamParameterInfo()
+        let oldState = this._parameterState
+
+        this._initialize()
+
+        for (let paramID of Object.keys(oldState)) {
+            if (!!this._parameterState[paramID]) {
+                let update: WamParameterData = {
+                    id: oldState[paramID].id,
+                    value: oldState[paramID].value,
+                    normalized: false,
+                }
+                this._setParameterValue(update, false)
+
+                // this is a hack and should be unnecessary.
+                this._parameterState[paramID].value = oldState[paramID].value
+            }
+        }
     }
 }
 

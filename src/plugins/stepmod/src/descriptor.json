@@ -1,6 +1,6 @@
 {
     "identifier": "com.sequencerParty.stepmod",
-    "name": "Step Sequencing Modulator",
+    "name": "Step Sequencer",
     "vendor": "Sequencer Party",
     "description": "Automation step sequencer with variable steps, speed, and slew.",
     "version": "1.0.0",

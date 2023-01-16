@@ -108,11 +108,48 @@ export class SequencerRowView extends Component<SequencerRowViewProps, Sequencer
         </button>
     }
 
-    render() {
+    addStep() {
+        debugger
+        const clip = this.clip()
+        const state = clip.getState()
+        state.steps.push(0)
+        clip.setState(state)
+        this.forceUpdate()
+    }
+
+    removeStep() {
+        const clip = this.clip()
+        if (clip.length() < 3) {
+            return
+        }
+        const state = clip.getState()
+        state.steps.pop()
+        clip.setState(state)
+        this.forceUpdate()
+    }
+
+    clip() {
         let clip = this.props.sequencer.getClip(this.props.clipId)
+        if (!clip) {
+            this.props.sequencer.addClip(this.props.clipId)
+            clip = this.props.sequencer.getClip(this.props.clipId)
+        }
+        return clip
+    }
+
+    render() {
+        const clip = this.clip()
+
         let steps = clip.state.steps.map((step, index) => {
             return <Slider color={() => this.stepColor(clip, index)} value={() => clip.state.steps[index]} valueString={v => this.targetValueString(v)} onChange={(e) => {clip.state.steps[index] = e; clip.updateProcessor(clip)}}/>
         })
+
+        steps.push(<div style="display: flex; flex-direction: column; justify-content: center">
+            <div style="display: flex; flex-direction: column;">
+                <button style="margin-bottom: 10px;" onClick={() => this.addStep()}>+</button>
+                <button onClick={() => this.removeStep()}>-</button>
+            </div>
+        </div>)
 
         let paramNames: string[] = ["--"]
         let paramIds: string[] = ["disabled"]
@@ -125,7 +162,6 @@ export class SequencerRowView extends Component<SequencerRowViewProps, Sequencer
         return <div style="display: flex; flex-direction: row">
             <div style="display: flex; width: 240px; flex-direction: column">
                 <div style="display: flex; flex-direction: row">
-                    {this.settingsButton()}
                     <Select label="Param" options={paramNames} values={paramIds} value={() => this.props.sequencer.targetId} onChange={(v) => this.targetChanged(v)}/>
                 </div>
                   <div style="display: flex; flex-direction: row">

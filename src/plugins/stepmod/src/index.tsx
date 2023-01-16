@@ -8,8 +8,7 @@ import { getBaseUrl } from '../../shared/getBaseUrl';
 import { StepModulatorView } from './views/StepModulatorView';
 import { StepModulator, StepModulatorState } from './StepModulator';
 
-import {PatternDelegate, ThemeExtension} from 'wam-extensions';
-
+import {PatternDelegate} from 'wam-extensions';
 
 import styles from "./views/StepModulatorView.scss"
 import { insertStyle} from "../../shared/insertStyle"
@@ -62,6 +61,16 @@ export class StepModulatorNode extends WamNode {
 
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
+	}
+
+	addRow() {
+		const id = token()
+		this.sequencers[id] = new StepModulator(this.instanceId, id, this.port, () => { return this.paramList })
+		this.sequencerOrder.push(id)
+
+		if (this.renderCallback) {
+			this.renderCallback()
+		}
 	}
 
 	async getState(): Promise<any> {
