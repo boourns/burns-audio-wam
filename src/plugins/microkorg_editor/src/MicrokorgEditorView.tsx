@@ -5,7 +5,7 @@ import {Select} from "../../shared/ui/Select"
 import styleRoot from "./MicrokorgEditorView.scss"
 import { WamParameterDataMap } from "@webaudiomodules/api";
 import { MicrokorgKernel } from "./MicrokorgKernel";
-import { MIDIControllerNode } from "./MIDIControllerNode";
+import { MIDIControllerNode } from "../../shared/midi/MIDIControllerNode";
 // @ts-ignore
 let styles = styleRoot.locals as typeof styleRoot
 

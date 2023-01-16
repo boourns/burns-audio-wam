@@ -12,7 +12,7 @@ import styles from "./MicrokorgEditorView.scss"
 import { insertStyle} from "../../shared/insertStyle"
 
 import { MicrokorgEditorView } from './MicrokorgEditorView';
-import { MIDIControllerNode } from './MIDIControllerNode';
+import { MIDIControllerNode } from '../../shared/midi/MIDIControllerNode';
 
 export default class MicrokorgControllerModule extends WebAudioModule<MIDIControllerNode> {
 	//@ts-ignore
