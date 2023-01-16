@@ -5,7 +5,6 @@ export const PP16 = (PPQN/4);
 
 export type ClipState = {
     id: string
-    length: number // in steps
     steps: number[]
     speed: number // in ticks
 }
@@ -20,14 +19,12 @@ export class Clip {
         if (state) {
             this.state = {
                 id: state.id,
-                length: state.length,
                 speed: state.speed,
                 steps: [...state.steps]
             }
         } else {
             this.state = {
                 id: id || token(),
-                length: 8,
                 steps: [0,0,0,0,0,0,0,0],
                 speed: 24,
             }
@@ -39,7 +36,6 @@ export class Clip {
     getState() {
         return {
             id: this.state.id,
-            length: this.state.length, 
             steps: [...this.state.steps],
             speed: this.state.speed
         }
@@ -47,12 +43,15 @@ export class Clip {
 
     async setState(state: ClipState) {
         this.state.id = state.id
-        this.state.length = state.length
         this.state.steps = [...state.steps]
         this.state.speed = state.speed
 
         this.dirty = true;
         if (this.updateProcessor) this.updateProcessor(this)
+    }
+
+    length() {
+        return this.state.steps.length
     }
 
     setRenderFlag(dirty: boolean) {

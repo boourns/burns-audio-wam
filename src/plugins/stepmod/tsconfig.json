@@ -8,7 +8,7 @@
       "preserveConstEnums": true,
       "target": "es2019",
       "sourceMap": true,
-      "lib": ["es2015", "dom", "dom.iterable"],
+      "lib": ["es2019", "dom", "dom.iterable"],
       "jsx": "react",                     /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
       "jsxFactory": "h",
       "jsxFragmentFactory": "Fragment",

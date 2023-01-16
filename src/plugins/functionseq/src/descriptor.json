@@ -11,6 +11,6 @@
     "website": "https://sequencer.party",
     "hasMidiInput": true,
     "hasMidiOutput": true,
-    "hasAudioInput": true,
+    "hasAudioInput": false,
     "hasAudioOutput": false
 }
