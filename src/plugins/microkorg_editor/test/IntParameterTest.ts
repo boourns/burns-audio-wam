@@ -1,7 +1,7 @@
 import { describe, it } from "mocha"
 import assert, { deepStrictEqual, strictEqual } from "assert"
-import {IntParameter} from "../src/IntParameter.js"
-import { ControlChangeMessager } from "../src/ControlChangeMessager.js"
+import {IntParameter} from "../../shared/midi/IntParameter.js"
+import { ControlChangeMessager } from "../../shared/midi/ControlChangeMessager.js"
 
 const MIDI_CC = 0xB0
 const MIDI_NOTE = 0x90
