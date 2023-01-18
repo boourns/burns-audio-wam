@@ -40,7 +40,7 @@ export class AudioInputView extends Component<AudioInputViewProps, any> {
 
     let node = this.props.plugin.audioNode
     if (!node || !node.stream) {
-      return <div>Loading...</div>
+      return <div>Audio device not opened.</div>
     }
     
     let tracks = node.stream.getAudioTracks().map(t => <div>{t.label}</div>)

@@ -33,17 +33,26 @@ export default class AudioInputNode extends CompositeAudioNode {
             throw new Error("browser does not support navigator.mediaDevices")
         }
 
-        let stream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-                latency: {ideal: 0.003},
-            },
-            video: false,
-        })
-        this.stream = stream
+        try {
+            let stream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    latency: {ideal: 0.003},
+                },
+                video: false,
+            })
+            this.stream = stream
+        } catch (e) {
+            console.log("getUserMedia failed: ", e)
+        }
+
+        if (!this.stream) {
+            return
+        }
         
-        console.log("stream is ", stream)
-        console.log("tracks are ", stream.getAudioTracks())
-        for (let t of stream.getAudioTracks()) {
+        console.log("stream is ", this.stream)
+        console.log("tracks are ", this.stream.getAudioTracks())
+
+        for (let t of this.stream.getAudioTracks()) {
             let constraints = t.getConstraints()
             constraints.autoGainControl = false
             constraints.echoCancellation = false
@@ -55,7 +64,7 @@ export default class AudioInputNode extends CompositeAudioNode {
 
         // Create a MediaStreamAudioSourceNode  
         // Feed the HTMLMediaElement into it
-        this.streamNode = ctx.createMediaStreamSource(stream);
+        this.streamNode = ctx.createMediaStreamSource(this.stream);
 
         console.log("AudioContext base latency is: ", ctx.baseLatency)
         // @ts-ignore
