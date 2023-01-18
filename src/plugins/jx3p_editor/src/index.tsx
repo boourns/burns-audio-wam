@@ -8,22 +8,22 @@ import { h, render } from 'preact';
 
 import { WebAudioModule } from '@webaudiomodules/sdk';
 import { getBaseUrl } from '../../shared/getBaseUrl';
-import styles from "./MicrokorgEditorView.scss"
+import styles from "./JX3PEditorView.scss"
 import { insertStyle} from "../../shared/insertStyle"
 
-import { MicrokorgEditorView } from './MicrokorgEditorView';
+import { JX3PEditorView } from './JX3PEditorView';
 import { MIDIControllerNode } from '../../shared/midi/MIDIControllerNode';
 
-export default class MicrokorgControllerModule extends WebAudioModule<MIDIControllerNode> {
+export default class JX3PControllerModule extends WebAudioModule<MIDIControllerNode> {
 	//@ts-ignore
 	_baseURL = getBaseUrl(new URL('.', __webpack_public_path__));
 
 	_descriptorUrl = `${this._baseURL}/descriptor.json`;
-	_processorUrl = `${this._baseURL}/MicrokorgProcessor.js`;
+	_processorUrl = `${this._baseURL}/JX3PProcessor.js`;
 
 	nonce: string | undefined;
 
-	get instanceId() { return "com.sequencerParty.microkorg" + this._timestamp; }
+	get instanceId() { return "com.sequencerParty.jx3p" + this._timestamp; }
 
 	async _loadDescriptor() {
 		const url = this._descriptorUrl;
@@ -66,7 +66,7 @@ export default class MicrokorgControllerModule extends WebAudioModule<MIDIContro
 		var shadow = div.attachShadow({mode: 'open'});
 		insertStyle(shadow, styles.toString())
 
-		render(<MicrokorgEditorView plugin={this.audioNode}></MicrokorgEditorView>, shadow)
+		render(<JX3PEditorView plugin={this.audioNode}></JX3PEditorView>, shadow)
 
 		return div;
 	}

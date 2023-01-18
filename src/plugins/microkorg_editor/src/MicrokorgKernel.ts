@@ -1,14 +1,12 @@
 import { WamAutomationEvent, WamMidiData, WamMidiEvent, WamParameterConfiguration, WamParameterDataMap, WamParameterInfoMap, WamSysexEvent } from "@webaudiomodules/api";
-import { AudioWorkletGlobalScope } from "@webaudiomodules/api";
 
-import { SelectOption, SelectParameter } from "./SelectParameter";
-import { IntParameter, SynthParameter } from "./IntParameter";
-import { ControlChangeMessager } from "./ControlChangeMessager";
-import { NRPNMSBMessager } from "./NRPNMSBMessager"
-import { MIDIControllerKernel } from "./MIDIControllerKernel";
-import { SysexMessager } from "./SysexMessager";
-import { BooleanParameter } from "./BooleanParameter";
-import { AssertionError } from "assert";
+import { SelectOption, SelectParameter } from "../../shared/midi/SelectParameter";
+import { IntParameter, SynthParameter } from "../../shared/midi/IntParameter";
+import { ControlChangeMessager } from "../../shared/midi/ControlChangeMessager";
+import { NRPNMSBMessager } from "../../shared/midi/NRPNMSBMessager"
+import { MIDIControllerKernel } from "../../shared/midi/MIDIControllerKernel";
+import { SysexMessager } from "../../shared/midi/SysexMessager";
+import { BooleanParameter } from "../../shared/midi/BooleanParameter";
 
 export class MicrokorgKernel implements MIDIControllerKernel {
     voiceParameters: Record<string, SynthParameter>

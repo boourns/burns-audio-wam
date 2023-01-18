@@ -21,6 +21,7 @@
   ],
   "author": "Tom Burns",
   "license": "MIT",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/boourns/burns-audio-wam/issues"
   },

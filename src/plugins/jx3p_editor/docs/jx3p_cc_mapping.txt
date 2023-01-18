@@ -1,0 +1,66 @@
+jx3p cc numbers
+for JX-3p with Organix MIDI mod
+
+26 - envelope attack
+27 - decay
+28 - sustain
+29 - release
+
+DCO1 range: 72
+values 0, 32, 64 = 16, 8, 4
+
+DCO1 wave: 73
+0: saw
+32: pulse
+64: square
+
+LFO -> DCO1 82
+0, 64 = off, on
+
+ENV -> DCO1 81
+0, 64 = off, on
+
+DCO 2
+range: 74
+0, 32, 64
+
+wave: 75
+0, 32, 64, 96: saw, pulse, square, noise
+
+cross mod: 76
+0, 32, 64 = off, sync, metal
+
+DCO2 tune: 13
+DCO2 fine: 12
+
+LFO -> DCO2 80
+Env -> DCO2 79
+
+
+Mixer / Filter:
+
+Source Mix: 16
+HPF: 17
+Cutoff: 19
+Res: 18
+LFO Mod: 21
+Env mod: 20
+
+Pitch follow: 22
+env-> filter polarity 77
+
+patch level: 23
+chorus: 85
+
+LFO->osc level: 15
+Env->osc level: 14
+Env->osc polarity: 84 (0, 64)
+
+LFO:
+wave: sine, square, random = 0, 32, 64
+delay time: 25
+rate: 24
+
+VCA mode: 78
+0, 64= gate, env
+
