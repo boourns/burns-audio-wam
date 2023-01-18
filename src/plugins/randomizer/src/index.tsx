@@ -13,6 +13,15 @@ import loadRandomizerProcessor from './RandomizerProcessor';
 
 var logger = console.log
 
+export enum RandomizerRuleType {
+	doNotRandomize = 0
+}
+
+export type RandomizerRule = {
+	target: string
+	rule: RandomizerRuleType
+}
+
 export class RandomizerNode extends DynamicParameterNode {
 	destroyed = false;
 	_supportedEventTypes: Set<keyof WamEventMap>
@@ -22,6 +31,7 @@ export class RandomizerNode extends DynamicParameterNode {
 	callback?: () => void
 
 	connected: boolean
+	rules: RandomizerRule[]
 
 	static async addModules(audioContext: BaseAudioContext, moduleId: string): Promise<void> {
 		await super.addModules(audioContext, moduleId)
@@ -41,8 +51,36 @@ export class RandomizerNode extends DynamicParameterNode {
 			outputChannelCount: [2],
 		}}, []);
 
+		this.rules = []
+
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
+	}
+
+	async getState(): Promise<any> {
+		return {
+			rules: this.rules
+		}
+	}
+
+	async setState(state: any): Promise<void> {
+		if (state.rules) {
+			this.rules = state.rules
+		} else {
+			this.rules = []
+		}
+
+		if (this.callback) {
+			this.callback()
+		}
+	}
+
+	deleteRule(index: number) {
+		this.rules = this.rules.filter((v, i) => i != index)
+
+		if (this.callback) {
+			this.callback()
+		}
 	}
 
 	async randomize() {
@@ -53,6 +91,12 @@ export class RandomizerNode extends DynamicParameterNode {
 		}
 
 		for (let id of Object.keys(this.paramList)) {
+			const rules = this.rules.filter(r => r.target == id)
+
+			if (rules.some(v => v.rule == RandomizerRuleType.doNotRandomize)) {
+				continue
+			}
+
 			let param = this.paramList[id]
 			let value = param.minValue + (Math.random() * (param.maxValue - param.minValue))
 			if (param.type != "float") {
@@ -68,8 +112,6 @@ export class RandomizerNode extends DynamicParameterNode {
 				},
 			})
 		}
-
-		console.log("Posting from node ", events)
 		
 		super.port.postMessage({
 			source: "emit",
