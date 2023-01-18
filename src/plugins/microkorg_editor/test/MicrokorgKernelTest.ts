@@ -1,7 +1,7 @@
 import { describe, it } from "mocha"
 import assert, { deepStrictEqual, strictEqual } from "assert"
-import {IntParameter} from "../src/IntParameter.js"
-import { ControlChangeMessager } from "../src/ControlChangeMessager.js"
+import {IntParameter} from "../../shared/midi/IntParameter.js"
+import { ControlChangeMessager } from "../../shared/midi/ControlChangeMessager.js"
 import {MicrokorgKernel} from "../src/MicrokorgKernel.js"
 import { parseFragment } from "lib0/dom.js"
 
