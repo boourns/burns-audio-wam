@@ -35,7 +35,7 @@ export interface MIDIInputProps {
       h("div", {})
 
       if (!this.props.plugin.midiInitialized) {
-        return <div><div class={styles.module}>MIDI not initialized</div></div>
+        return <div><div class={styles.module}>This plugin requires a browser that supports WebMIDI.</div></div>
       }
 
       if (!window.WAMExtensions.userSetting.get) {

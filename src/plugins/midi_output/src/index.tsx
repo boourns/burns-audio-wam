@@ -52,9 +52,10 @@ export default class MIDIOutputModule extends WebAudioModule<MIDIOutputNode> {
 
 		this.audioNode = synthNode
 
-		await synthNode.initializeMidi()
+		synthNode.initializeMidi()
 	  
 		if (initialState) synthNode.setState(initialState);
+		
 		return synthNode;
     }
 
