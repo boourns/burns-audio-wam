@@ -1,11 +1,10 @@
 {
   "name": "burns-audio-wam",
-  "version": "0.2.46",
+  "version": "0.2.48",
   "description": "Collection of Web Audio Modules (WAMs) by Burns Audio",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "publish": "yarn version minor && ./tools/clean.sh && ./tools/build.sh && npm publish"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
