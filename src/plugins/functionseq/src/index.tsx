@@ -69,12 +69,12 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
 	}
 
-	registerExtensions() {
+	async registerExtensions() {
 		if (window.WAMExtensions.collaboration) {
 			this.multiplayers = [new MultiplayerHandler(this.instanceId, "script", "Code")]
-			this.multiplayers[0].getDocumentFromHost(this.defaultScript())
+			await this.multiplayers[0].getDocumentFromHost(this.defaultScript())
 
-			this.upload()
+			await this.upload()
 		} else {
 			console.warn("host has not implemented collaboration WAM extension")
 		}
@@ -129,9 +129,9 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		return editor
 	}
 
-	upload() {
+	async upload() {
 		if (this.multiplayers.length > 0) {
-			let source = this.multiplayers[0].doc.toString()
+			let source = await this.multiplayers[0].doc.toString()
 			this.error = undefined
 			this.multiplayers[0].setError(undefined)
 			this.port.postMessage({source:"function", action:"function", code: source})
@@ -323,7 +323,7 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 			runCount: 0
 		});
 
-		node.registerExtensions()
+		await node.registerExtensions()
 		node.upload()
 
 		this.sequencer = node

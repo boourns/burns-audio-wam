@@ -2,7 +2,6 @@ import { CollaborationDocumentInterface } from "wam-extensions";
 import * as monaco from 'monaco-editor';
 import { createMutex } from 'lib0/mutex'
 import { CollaborationOperation } from "wam-extensions/dist/collaboration/CollaborationExtension";
-import { toChildArray } from "preact";
 
 export class MonacoBinding {
     editor: monaco.editor.ICodeEditor
@@ -15,16 +14,18 @@ export class MonacoBinding {
 
     constructor(editor: monaco.editor.ICodeEditor, document: CollaborationDocumentInterface) {
         this.editor = editor
-        this.model = editor.getModel()
+        this.model = editor.getModel()!
         this.document = document
         this.mux = createMutex()
         this.decorations = []
     }
 
-    attach() {
-        this.model.setValue(this.document.toString())
+    async attach() {
+        this.model.setValue(await this.document.toString())
         
-        this.document.onUpdate((events: CollaborationOperation[]) => {            
+        await this.document.observe(async (events: CollaborationOperation[]) => {
+            const source = await this.document.toString()
+      
             this.mux(() => {
                 let index = 0
 
@@ -41,9 +42,9 @@ export class MonacoBinding {
                     }
                 })
 
-                const source = this.document.toString()
+                const value = this.model.getValue()
 
-                if (this.model.getValue() !== source) {
+                if (value !== source) {
                     console.warn("monaco and document do not match, hard reassign!")
                     this.model.setValue(source)
                 }
@@ -96,13 +97,15 @@ export class MonacoBinding {
     detach() {
         this._monacoChangeHandler.dispose()
         
-        this.document.onUpdate(undefined)
+        this.document.observe(undefined)
     }
 
-    rerenderDecorations() {
+    async rerenderDecorations() {
         let newDecorations: monaco.editor.IModelDeltaDecoration[] = []
 
-        this.document.selections().forEach((selection, clientID) => {
+        const selections = await this.document.selections()
+
+        selections.forEach((selection, clientID) => {
             let start, end, afterContentClassName, beforeContentClassName
             if (selection.anchor < selection.head) {
                 start = this.model.getPositionAt(selection.anchor)
