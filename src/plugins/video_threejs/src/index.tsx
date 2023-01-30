@@ -74,7 +74,7 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi']);
 	}
 
-	registerExtensions() {
+	async registerExtensions() {
 		if (window.WAMExtensions.collaboration) {
 			this.multiplayers = [new MultiplayerHandler(this.instanceId, "script", "Code")]
 			this.multiplayers[0].getDocumentFromHost(defaultScript())
@@ -136,8 +136,8 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 		}
 	}
 
-	upload() {
-		let source = this.multiplayers[0].doc.toString()
+	async upload() {
+		let source = await this.multiplayers[0].doc.toString()
 
 		try {
 			let generator = new Function(source)() as ThreeJSGenerator
@@ -195,7 +195,7 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 		if (state.runCount && state.runCount != this.runCount) {
 			this.runCount = state.runCount
 
-			this.upload()
+			await this.upload()
 		}
 
 		if (state.params) {
@@ -325,8 +325,8 @@ export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {
 
 		if (initialState) node.setState(initialState);
 
-		node.registerExtensions()
-		node.upload()
+		await node.registerExtensions()
+		await node.upload()
 
 		return node
     }

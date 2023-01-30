@@ -13,7 +13,7 @@ export class MultiplayerHandler {
     instanceId: string
     editor?: monaco.editor.ICodeEditor
     doc: CollaborationDocumentInterface
-    binding: MonacoBinding
+    binding?: MonacoBinding
     error?: MultiplayerEditorError
 
     constructor(instanceId: string, docId: string, label: string) {
@@ -28,7 +28,7 @@ export class MultiplayerHandler {
     }
 
     async getDocumentFromHost(initialContent: string) {
-        let doc = window.WAMExtensions.collaboration.getDocument(this.instanceId, this.documentId, initialContent)
+        let doc = await window.WAMExtensions.collaboration!.getDocument!(this.instanceId, this.documentId, initialContent)
 
         this.doc = doc
         this.attachEditor()

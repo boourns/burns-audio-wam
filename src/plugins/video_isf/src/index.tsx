@@ -64,7 +64,7 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi']);
 	}
 
-	registerExtensions() {
+	async registerExtensions() {
 		if (window.WAMExtensions.collaboration) {
 			this.multiplayers = []
 			const fragment = new MultiplayerHandler(this.instanceId, "fragment", "Fragment Shader")
@@ -75,7 +75,7 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 			vertex.getDocumentFromHost(defaultVertexShader())
 			this.multiplayers.push(vertex)
 
-			this.upload()
+			await this.upload()
 
 			if (this.renderCallback) {
 				this.renderCallback()
@@ -123,13 +123,13 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 		}
 	}
 
-	upload() {
+	async upload() {
 		if (!this.options || !this.multiplayers || this.multiplayers.length == 0) {
 			return
 		}
 
-		let fragmentSource = this.multiplayers[0].doc.toString()
-		let vertexSource = this.multiplayers[1].doc.toString()
+		let fragmentSource = await this.multiplayers[0].doc.toString()
+		let vertexSource = await this.multiplayers[1].doc.toString()
 
 		this.error = undefined
 		this.multiplayers[0].setError(undefined)
@@ -157,18 +157,18 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 		}
 	}
 
-	initVertexShader() {
+	async initVertexShader() {
 		const doc = this.multiplayers[1].doc
 
-		const orig = doc.toString()
+		const orig = await doc.toString()
 		doc.delete(0, orig.length)
 		doc.insert(0, defaultVertexShader())
 	}
 
-	initFragmentShader() {
+	async initFragmentShader() {
 		const doc = this.multiplayers[0].doc
 
-		const orig = doc.toString()
+		const orig = await doc.toString()
 		doc.delete(0, orig.length)
 		doc.insert(0, defaultFragmentShader())
 	}
@@ -211,7 +211,7 @@ class ISFVideoNode extends DynamicParameterNode implements LiveCoderNode {
 		if (state.runCount && state.runCount != this.runCount) {
 			this.runCount = state.runCount
 
-			this.upload()
+			await this.upload()
 		}
 
 		if (state.params) {
@@ -278,7 +278,7 @@ export default class ISFVideoModule extends WebAudioModule<ISFVideoNode> {
 		const node: ISFVideoNode = new ISFVideoNode(this, {});
 		await node._initialize();
 
-		node.registerExtensions()
+		await node.registerExtensions()
 
 		if (initialState) node.setState(initialState);
 
