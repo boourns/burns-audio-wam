@@ -102,6 +102,10 @@ export class PianoRoll {
 		const oldClips = this.clips
 		this.clips = {}
 
+		if (!state.clips) {
+			state.clips = {}
+		}
+
 		for (let id of Object.keys(state.clips)) {
 			this.clips[id] = new Clip(id, state.clips[id])
 			if (oldClips[id]) {
