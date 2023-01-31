@@ -79,14 +79,14 @@ export class OB6EditorView extends Component<OB6EditorViewProps, any> {
                 return <Select onChange={(v) => this.valueChanged(id, parseInt(v))}
                                options={["off", "on"]}
                                value={() => this.getValue(id)}
-                               label={info.label || id}
+                               label={label}
                     >
                 </Select>
             case "choice":
                 return <Select onChange={(v) => this.valueChanged(id, parseInt(v))}
                                 options={info.choices}
                                 value={() => this.getValue(id)}
-                                label={info.label || id}
+                                label={label}
                     >
                 </Select>  
             default:
@@ -96,72 +96,263 @@ export class OB6EditorView extends Component<OB6EditorViewProps, any> {
 
     renderOsc1() {
         return <div class={styles.group}>
-            {this.renderParam("dco1_octave")}
-            {this.renderParam("dco1_wave")}
-            {this.renderParam("dco1_lfo")}
-            {this.renderParam("dco1_env")}
+                    <div class={styles.column}>
+                        <div class={styles.row}>
+                            Osc 1
+                        </div>
+                        <div class={styles.row}>
+                            {this.renderParam("osc1_freq", "Freq")}
+                            {this.renderParam("osc1_shape", "Shape")}
+                        </div>
+                        <div class={styles.row}>
+                            {this.renderParam("osc1_pw", "Pulse Width")}
+                            {this.renderParam("osc1_sync", "Sync")}
+                        </div>
+                    </div>
         </div>
     }
 
     renderOsc2() {
         return <div class={styles.group}>
-            {this.renderParam("dco2_octave")}
-            {this.renderParam("dco2_wave")}
-            {this.renderParam("dco2_tune")}
-            {this.renderParam("dco2_fine")}
-
-            {this.renderParam("dco2_lfo")}
-            {this.renderParam("dco2_env")}
+                    <div class={styles.column}>
+                        <div class={styles.row}>
+                            Osc 2
+                        </div>
+                        <div class={styles.row}>
+                            {this.renderParam("osc2_freq", "Freq")}
+                            <Knob onChange={(v) => this.valueChanged("osc2_detune", Math.round(v)+127)} 
+                             minimumValue={-127}
+                             maximumValue={127}
+                             value={() => this.getValue("osc2_detune") - 126}
+                             label={"Detune"}
+                             bipolar={true}
+                             integer={true}
+                             >
+                    </Knob>
+                            {this.renderParam("osc2_lo_freq", "Lo Freq")}
+                        </div>
+                        <div class={styles.row}>
+                            {this.renderParam("osc2_shape", "Shape")}
+                            {this.renderParam("osc2_pw", "Pulse Width")}
+                            {this.renderParam("osc2_key_track", "Keyboard")}
+                        </div>
+                    </div>
         </div>
     }
 
     renderOscMod() {
         return <div class={styles.group}>
-            {this.renderParam("osc_lfo")}
-            {this.renderParam("osc_env")}
-            {this.renderParam("osc_env_polarity")}
+        <div class={styles.column}>
+                <div class={styles.row}>
+                    <Knob onChange={(v) => this.valueChanged("xmod_filter_env", Math.round(v)+127)} 
+                             minimumValue={-127}
+                             maximumValue={127}
+                             value={() => this.getValue("xmod_filter_env") - 126}
+                             label={"XMod Filter Env"}
+                             bipolar={true}
+                             integer={true}
+                             >
+                    </Knob>
+                    <Knob onChange={(v) => this.valueChanged("xmod_osc2", Math.round(v)+127)} 
+                            minimumValue={-127}
+                            maximumValue={127}
+                            value={() => this.getValue("xmod_osc2") - 126}
+                            label={"XMod Osc 2"}
+                            bipolar={true}
+                            integer={true}
+                            >
+                    </Knob>
+                </div>
+                <div class={styles.row}>
+                    {this.renderParam("xmod_freq1", "Freq 1")}            
+                    {this.renderParam("xmod_shape1", "Shape 1")}
+                </div>
+                <div class={styles.row}>
+                    {this.renderParam("xmod_pw1", "PW 1")}
+                    {this.renderParam("xmod_filter", "Filter")}
+                </div>
+                <div class={styles.row}>
+                    {this.renderParam("xmod_mode", "Filter Mode")}
+                    {this.renderParam("xmod_bp", "Filter BP")}
+                </div>
+            </div>
+        </div>
+    }
+
+    renderAftertouch() {
+        return <div class={styles.group}>
+            <div class={styles.column}>
+                <div class={styles.row}>
+                    <Knob onChange={(v) => this.valueChanged("pressure_amt", Math.round(v)+127)} 
+                             minimumValue={-127}
+                             maximumValue={127}
+                             value={() => this.getValue("pressure_amt") - 126}
+                             label={"Pressure Amt"}
+                             bipolar={true}
+                             integer={true}
+                             >
+                        </Knob>
+                </div>
+                <div class={styles.row}>
+                    {this.renderParam("pressure_freq1", "Freq 1")}
+                    {this.renderParam("pressure_freq2", "Freq 2")}
+                </div>
+                <div class={styles.row}>
+                    {this.renderParam("pressure_filter", "Filter")}
+                    {this.renderParam("pressure_mode", "Filter mode")}
+                </div>
+                <div class={styles.row}>
+                    {this.renderParam("pressure_vca", "VCA")}
+                    {this.renderParam("pressure_lfo", "LFO")}
+                </div>
+            </div>
         </div>
     }
 
     renderLFO() {
         return <div class={styles.group}>
-            {this.renderParam("lfo_wave")}
-            {this.renderParam("lfo_delay")}
-            {this.renderParam("lfo_rate")}
+        <div class={styles.column}>
+            <div class={styles.row}>
+                LFO
+            </div>
+            <div class={styles.row}>
+                {this.renderParam("lfo_freq", "Frequency")}
+                {this.renderParam("lfo_amount", "Initial")}
+            </div>
+            <div class={styles.row}>
+                {this.renderParam("lfo_shape", "Shape")}
+                {this.renderParam("lfo_sync", "Sync")}
+            </div>
+            <div class={styles.row}>
+                {this.renderParam("lfo_freq1", "Freq 1")}
+                {this.renderParam("lfo_freq2", "Freq 2")}
+                {this.renderParam("lfo_pw", "PW")}
+            </div>
+            <div class={styles.row}>
+                {this.renderParam("lfo_amp", "Amp")}
+                {this.renderParam("lfo_filter", "Filter")}
+                {this.renderParam("lfo_mode", "Filter Mode")}
+            </div>
+            </div>
         </div>
     }
 
     renderMixer() {
         return <div class={styles.group}>
-            {this.renderParam("mix")}
-            {this.renderParam("hpf")}
+                    <div class={styles.column}>
+                        <div class={styles.row}>
+                            Mixer
+                        </div>
+                        <div style="flex: 1;"></div>
+                        <div class={styles.row}>
+                            {this.renderParam("mixer_osc1")}
+                            {this.renderParam("mixer_osc2")}
+                        </div>
+                        <div class={styles.row}>
+                            {this.renderParam("mixer_sub")}
+                            {this.renderParam("mixer_noise")}
+                        </div>
+                    </div>
         </div>
     }
 
     renderFilter() {
         return <div class={styles.group}>
-            {this.renderParam("cutoff")}
-            {this.renderParam("res")}
-            {this.renderParam("filter_lfo")}
-            {this.renderParam("filter_env")}
-            {this.renderParam("filter_env_polarity")}
-            {this.renderParam("filter_pitch")}
+                    <div class={styles.column}>
+                        <div class={styles.row}>
+                            Filter
+                        </div>
+                        <div class={styles.row}>
+                            {this.renderParam("filter_freq", "Freq")}
+                            {this.renderParam("filter_res", "Res")}
+                            {this.renderParam("filter_mode", "Mode")}
+                        </div>
+                        <div class={styles.row}>
+                            {this.renderParam("filter_bp", "BP")}
+                            {this.renderParam("filter_key", "Keyboard")}
+                            {this.renderParam("filter_vel", "Velocity")}
+                        </div>
+                    </div>
         </div>
     }
 
     renderEnv() {
         return <div class={styles.group}>
-            {this.renderParam("env_attack")}
-            {this.renderParam("env_decay")}
-            {this.renderParam("env_sustain")}
-            {this.renderParam("env_release")}
+            <div class={styles.column}>
+                <div class={styles.row}>
+                    Amp Env
+                </div>
+                <div class={styles.row}>
+                    {this.renderParam("env_attack", "Attack")}
+                    {this.renderParam("env_decay", "Decay")}
+                    {this.renderParam("env_sustain", "Sustain")}
+                    {this.renderParam("env_release", "Release")}
+                    {this.renderParam("env_amount", "Amount")}
+                    {this.renderParam("env_velocity", "Velocity")}
+                </div>
+            </div>
+        </div>
+    }
+
+    renderFilterEnv() {
+        return <div class={styles.group}>
+            <div class={styles.column}>
+                <div class={styles.row}>
+                    Filter Env
+                </div>
+                <div class={styles.row}>
+                    {this.renderParam("fenv_attack", "Attack")}
+                    {this.renderParam("fenv_decay", "Decay")}
+                    {this.renderParam("fenv_sustain", "Sustain")}
+                    {this.renderParam("fenv_release", "Release")}
+                    <Knob onChange={(v) => this.valueChanged("fenv_amount", Math.round(v)+63)} 
+                             minimumValue={-63}
+                             maximumValue={64}
+                             value={() => this.getValue("fenv_amount") - 63}
+                             label={"Amount"}
+                             bipolar={true}
+                             integer={true}
+                             >
+                        </Knob>
+                </div>
+            </div>
         </div>
     }
 
     renderAmp() {
         return <div class={styles.group}>
-            {this.renderParam("level")}
-            {this.renderParam("chorus")}
+            {this.renderParam("volume")}
+            {this.renderParam("distortion")}
+            {this.renderParam("pan_spread")}
+            {this.renderParam("unison")}
+            {this.renderParam("pb_range")}
+        </div>
+    }
+
+    renderArp() {
+        return <div class={styles.group}>
+            {this.renderParam("arp")}
+            {this.renderParam("arp_mode")}
+            {this.renderParam("arp_octave")}
+            {this.renderParam("arp_time_sig")}
+            {this.renderParam("bpm")}
+
+        </div>
+    }
+
+    renderFX() {
+        return <div class={styles.group}>
+            {this.renderParam("fx_enable")}
+            {this.renderParam("fx1_type")}
+            {this.renderParam("fx1_mix")}
+            {this.renderParam("fx1_param1")}
+            {this.renderParam("fx1_param2")}
+            {this.renderParam("fx1_sync")}
+            {this.renderParam("fx2_type")}
+            {this.renderParam("fx2_mix")}
+            {this.renderParam("fx2_param1")}
+            {this.renderParam("fx2_param2")}
+            {this.renderParam("fx2_sync")}
         </div>
     }
 
@@ -169,7 +360,7 @@ export class OB6EditorView extends Component<OB6EditorViewProps, any> {
         await this.props.plugin.initPressed()
     }
 
-    allNotesOff() {
+    allNotesOff() { 
         this.props.plugin.sendEventToProcessor({
             type: "wam-midi",
             data: {
@@ -211,20 +402,31 @@ export class OB6EditorView extends Component<OB6EditorViewProps, any> {
     renderPage() {
         return <div class={styles.column}>
                  <div class={styles.container}>
-                    <div class={styles.column}>
-                        {this.renderOsc1()}
-                        {this.renderOsc2()}
+                    <div class={styles.container} id="modulation">
+                        {this.renderAftertouch()}
                         {this.renderOscMod()}
                         {this.renderLFO()}
-
                     </div>
-                    <div class={styles.column}>
+                    <div class={styles.container}>
+                        {this.renderOsc1()}
+                        {this.renderOsc2()}
                         {this.renderMixer()}
                         {this.renderFilter()}
+                    </div>
+                </div>
+                <div class={styles.container}>
+                    <div class={styles.row}>
                         {this.renderEnv()}
+                        {this.renderFilterEnv()}
                         {this.renderAmp()}
                     </div>
-                  </div>
                 </div>
+                <div class={styles.container}>
+                    <div class={styles.row}>
+                        {this.renderArp()}
+                        {this.renderFX()}
+                    </div>
+                </div>
+            </div>
     }
 }

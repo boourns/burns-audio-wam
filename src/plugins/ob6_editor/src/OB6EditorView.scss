@@ -19,11 +19,17 @@
 }
 
 .plugin {
-    background-color: gray;
+    background-color: #180f04;
 }
 
 .group {
-    border: 1px solid black;
+    border: 1px solid #5158b8;
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+}
+
+.row {
     display: flex;
     flex-direction: row;
     flex: 1;

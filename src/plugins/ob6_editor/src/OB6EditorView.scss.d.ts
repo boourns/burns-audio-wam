@@ -6,6 +6,7 @@ interface CssExports {
   'group': string;
   'header': string;
   'plugin': string;
+  'row': string;
 }
 export const cssExports: CssExports;
 export default cssExports;
