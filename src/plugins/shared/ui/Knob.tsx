@@ -113,6 +113,8 @@ export class Knob extends Component<KnobProps, KnobState> {
         if (this.valueLabel) {
             if (this.props.valueString) {
                 this.valueLabel.innerText = this.props.valueString(newValue)
+            } else if (this.props.integer) {
+                this.valueLabel.innerText = `${newValue.toFixed(0)}${this.props.units}`
             } else {
                 this.valueLabel.innerText = `${newValue.toFixed(this.props.decimals)}${this.props.units}`
             }

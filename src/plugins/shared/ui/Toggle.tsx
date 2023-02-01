@@ -152,7 +152,7 @@ export class Toggle extends Component<ToggleProps, ToggleState> {
 
         return <div class="ComponentWrapper">
             {this.props.label ? <label>{this.props.label}</label> : ""}
-            <canvas style={`width: ${this.props.width}px; height: ${this.props.height}px;`} ref={(ref) => this.setup(ref)}
+            <canvas style={`width: ${this.props.width}px; height: ${this.props.height}px; margin: auto;`} ref={(ref) => this.setup(ref)}
                 onClick={(e) => this.onClick(e)}
                 ></canvas>
         </div>

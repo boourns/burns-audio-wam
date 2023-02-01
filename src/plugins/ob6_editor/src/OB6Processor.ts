@@ -7,7 +7,7 @@ const audioWorkletGlobalScope: AudioWorkletGlobalScope = globalThis as unknown a
 const scope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
 const MIDIControllerProcessor = scope.MIDIControllerProcessor
 
-class MicrokorgProcessor extends MIDIControllerProcessor {
+class OB6Processor extends MIDIControllerProcessor {
     loadKernel() {
         this.kernel = new OB6Kernel()
     }
@@ -15,6 +15,6 @@ class MicrokorgProcessor extends MIDIControllerProcessor {
 
 try {
     // @ts-ignore
-    audioWorkletGlobalScope.registerProcessor(moduleId, MicrokorgProcessor);
+    audioWorkletGlobalScope.registerProcessor(moduleId, OB6Processor);
 } catch (error) {  
 }

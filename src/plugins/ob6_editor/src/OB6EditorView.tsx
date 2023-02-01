@@ -1,6 +1,7 @@
 import { Component, h } from "preact";
 import {Knob} from "../../shared/ui/Knob"
 import {Select} from "../../shared/ui/Select"
+import {Toggle} from "../../shared/ui/Toggle"
 
 import styleRoot from "./OB6EditorView.scss"
 import { WamParameterDataMap } from "@webaudiomodules/api";
@@ -18,6 +19,7 @@ interface OB6EditorViewProps {
 
 export class OB6EditorView extends Component<OB6EditorViewProps, any> {
     kernel: OB6Kernel
+    queue: string[]
 
     constructor() {
         super()
@@ -45,6 +47,24 @@ export class OB6EditorView extends Component<OB6EditorViewProps, any> {
         }
 
         return this.kernel.parameters[id].toWAM().defaultValue
+    }
+
+    renderToggle(id: string, labelOverride?: string) {
+        if (!this.kernel.parameters[id]) {
+            console.error("Error: invalid id ", id)
+        }
+
+        const info = this.kernel.parameters[id].toWAM()
+        const label = labelOverride || info.label || id
+
+        return <Toggle onChange={(v) => this.valueChanged(id, v ? 1 : 0)} 
+            value={() => this.getValue(id) == 1}
+            width={30}
+            height={20}
+            color={() => "#aa2311"}
+            label={label}
+            >
+        </Toggle>
     }
 
     renderParam(id: string, labelOverride?: string) {
@@ -106,7 +126,7 @@ export class OB6EditorView extends Component<OB6EditorViewProps, any> {
                         </div>
                         <div class={styles.row}>
                             {this.renderParam("osc1_pw", "Pulse Width")}
-                            {this.renderParam("osc1_sync", "Sync")}
+                            {this.renderToggle("osc1_sync", "Sync")}
                         </div>
                     </div>
         </div>
@@ -129,12 +149,12 @@ export class OB6EditorView extends Component<OB6EditorViewProps, any> {
                              integer={true}
                              >
                     </Knob>
-                            {this.renderParam("osc2_lo_freq", "Lo Freq")}
+                            {this.renderToggle("osc2_lo_freq", "Lo Freq")}
                         </div>
                         <div class={styles.row}>
                             {this.renderParam("osc2_shape", "Shape")}
                             {this.renderParam("osc2_pw", "Pulse Width")}
-                            {this.renderParam("osc2_key_track", "Keyboard")}
+                            {this.renderToggle("osc2_key_track", "Keyboard")}
                         </div>
                     </div>
         </div>
@@ -164,16 +184,16 @@ export class OB6EditorView extends Component<OB6EditorViewProps, any> {
                     </Knob>
                 </div>
                 <div class={styles.row}>
-                    {this.renderParam("xmod_freq1", "Freq 1")}            
-                    {this.renderParam("xmod_shape1", "Shape 1")}
+                    {this.renderToggle("xmod_freq1", "Freq 1")}            
+                    {this.renderToggle("xmod_shape1", "Shape 1")}
                 </div>
                 <div class={styles.row}>
-                    {this.renderParam("xmod_pw1", "PW 1")}
-                    {this.renderParam("xmod_filter", "Filter")}
+                    {this.renderToggle("xmod_pw1", "PW 1")}
+                    {this.renderToggle("xmod_filter", "Filter")}
                 </div>
                 <div class={styles.row}>
-                    {this.renderParam("xmod_mode", "Filter Mode")}
-                    {this.renderParam("xmod_bp", "Filter BP")}
+                    {this.renderToggle("xmod_mode", "Filter Mode")}
+                    {this.renderToggle("xmod_bp", "Filter BP")}
                 </div>
             </div>
         </div>
@@ -194,16 +214,16 @@ export class OB6EditorView extends Component<OB6EditorViewProps, any> {
                         </Knob>
                 </div>
                 <div class={styles.row}>
-                    {this.renderParam("pressure_freq1", "Freq 1")}
-                    {this.renderParam("pressure_freq2", "Freq 2")}
+                    {this.renderToggle("pressure_freq1", "Freq 1")}
+                    {this.renderToggle("pressure_freq2", "Freq 2")}
                 </div>
                 <div class={styles.row}>
-                    {this.renderParam("pressure_filter", "Filter")}
-                    {this.renderParam("pressure_mode", "Filter mode")}
+                    {this.renderToggle("pressure_filter", "Filter")}
+                    {this.renderToggle("pressure_mode", "Filter mode")}
                 </div>
                 <div class={styles.row}>
-                    {this.renderParam("pressure_vca", "VCA")}
-                    {this.renderParam("pressure_lfo", "LFO")}
+                    {this.renderToggle("pressure_vca", "VCA")}
+                    {this.renderToggle("pressure_lfo", "LFO")}
                 </div>
             </div>
         </div>
@@ -221,17 +241,17 @@ export class OB6EditorView extends Component<OB6EditorViewProps, any> {
             </div>
             <div class={styles.row}>
                 {this.renderParam("lfo_shape", "Shape")}
-                {this.renderParam("lfo_sync", "Sync")}
+                {this.renderToggle("lfo_sync", "Sync")}
             </div>
             <div class={styles.row}>
-                {this.renderParam("lfo_freq1", "Freq 1")}
-                {this.renderParam("lfo_freq2", "Freq 2")}
+                {this.renderToggle("lfo_freq1", "Freq 1")}
+                {this.renderToggle("lfo_freq2", "Freq 2")}
                 {this.renderParam("lfo_pw", "PW")}
             </div>
             <div class={styles.row}>
-                {this.renderParam("lfo_amp", "Amp")}
-                {this.renderParam("lfo_filter", "Filter")}
-                {this.renderParam("lfo_mode", "Filter Mode")}
+                {this.renderToggle("lfo_amp", "Amp")}
+                {this.renderToggle("lfo_filter", "Filter")}
+                {this.renderToggle("lfo_mode", "Filter Mode")}
             </div>
             </div>
         </div>
@@ -268,16 +288,16 @@ export class OB6EditorView extends Component<OB6EditorViewProps, any> {
                             {this.renderParam("filter_mode", "Mode")}
                         </div>
                         <div class={styles.row}>
-                            {this.renderParam("filter_bp", "BP")}
+                            {this.renderToggle("filter_bp", "BP")}
                             {this.renderParam("filter_key", "Keyboard")}
-                            {this.renderParam("filter_vel", "Velocity")}
+                            {this.renderToggle("filter_vel", "Velocity")}
                         </div>
                     </div>
         </div>
     }
 
     renderEnv() {
-        return <div class={styles.group}>
+        return <div class={styles.group} style="flex: 6;">
             <div class={styles.column}>
                 <div class={styles.row}>
                     Amp Env
@@ -295,7 +315,7 @@ export class OB6EditorView extends Component<OB6EditorViewProps, any> {
     }
 
     renderFilterEnv() {
-        return <div class={styles.group}>
+        return <div class={styles.group} style="flex: 5;">
             <div class={styles.column}>
                 <div class={styles.row}>
                     Filter Env
@@ -320,18 +340,23 @@ export class OB6EditorView extends Component<OB6EditorViewProps, any> {
     }
 
     renderAmp() {
-        return <div class={styles.group}>
+        return <div class={styles.group} style="flex: 10;">
             {this.renderParam("volume")}
             {this.renderParam("distortion")}
             {this.renderParam("pan_spread")}
-            {this.renderParam("unison")}
+            {this.renderToggle("unison")}
+            {this.renderParam("unison_mode")}
+            {this.renderParam("detune")} 
+            {this.renderToggle("portamento")}
+            {this.renderParam("portamento_time")}
+            {this.renderParam("portamento_mode")}
             {this.renderParam("pb_range")}
         </div>
     }
 
     renderArp() {
-        return <div class={styles.group}>
-            {this.renderParam("arp")}
+        return <div class={styles.group} style="flex: 5;">
+            {this.renderToggle("arp")}
             {this.renderParam("arp_mode")}
             {this.renderParam("arp_octave")}
             {this.renderParam("arp_time_sig")}
@@ -341,18 +366,18 @@ export class OB6EditorView extends Component<OB6EditorViewProps, any> {
     }
 
     renderFX() {
-        return <div class={styles.group}>
-            {this.renderParam("fx_enable")}
+        return <div class={styles.group} style="flex: 11;">
+            {this.renderToggle("fx_enable")}
             {this.renderParam("fx1_type")}
             {this.renderParam("fx1_mix")}
             {this.renderParam("fx1_param1")}
             {this.renderParam("fx1_param2")}
-            {this.renderParam("fx1_sync")}
+            {this.renderToggle("fx1_sync")}
             {this.renderParam("fx2_type")}
             {this.renderParam("fx2_mix")}
             {this.renderParam("fx2_param1")}
             {this.renderParam("fx2_param2")}
-            {this.renderParam("fx2_sync")}
+            {this.renderToggle("fx2_sync")}
         </div>
     }
 
@@ -360,13 +385,64 @@ export class OB6EditorView extends Component<OB6EditorViewProps, any> {
         await this.props.plugin.initPressed()
     }
 
-    allNotesOff() { 
+    requestSysex() {
+        const message = [
+            0xF0,
+            0x01,
+            0x2e,
+            0x06,
+            0xF7
+        ]
+
+        this.props.plugin.sendEventToProcessor({
+            type: "wam-sysex",
+            data: {
+                bytes: new Uint8Array(message)
+            }
+        })
+    }
+    
+    allNotesOff() {
         this.props.plugin.sendEventToProcessor({
             type: "wam-midi",
             data: {
-                bytes: [0xb0, 0x78, 0]
+                bytes: [0xb0 | this.props.plugin.config.channel, 123, 0]
             }
         })
+    }
+
+    detectSysex() {
+        this.queue = Object.keys(this.kernel.parameters)
+        this.detectParameter()
+    }
+
+    detectParameter() {
+        for (let p of Object.keys(this.kernel.parameters)) {
+            this.valueChanged(p, this.kernel.parameters[p].toWAM().maxValue)
+        }
+
+        // const p = this.queue.pop()
+        // console.log("WOOF A changing ", p, "to ", this.kernel.parameters[p].toWAM().minValue)
+        // this.valueChanged(p, this.kernel.parameters[p].toWAM().minValue)
+        // setTimeout(() => {
+        //     this.requestSysex()
+
+        //     setTimeout(() => {
+        //         console.log("WOOF B changing ", p, "to ", this.kernel.parameters[p].toWAM().maxValue)
+        //         this.valueChanged(p, this.kernel.parameters[p].toWAM().maxValue)
+        //         setTimeout(() => {
+        //             this.requestSysex()
+
+        //             if (this.queue.length > 0) {
+        //                 setTimeout(this.detectParameter.bind(this), 2000)
+        //             }
+        //         }, 1000)
+        //     }, 1000)
+        // }, 1000)
+    }
+
+    sendSysex() {
+        this.props.plugin.sendSysex()
     }
 
     channelChanged(ev: any) {
@@ -387,6 +463,8 @@ export class OB6EditorView extends Component<OB6EditorViewProps, any> {
                     <div class={styles.container} style="padding: 10px">
                         <span>Channel: {channelSelector}</span>
                         <button onClick={() => this.initPressed()}>Init Patch</button>
+                        <button onClick={() => this.requestSysex()}>Request Patch</button>
+                        <button onClick={() => this.sendSysex()}>Send Patch</button>
                         <button onClick={() => this.allNotesOff()}>All Notes Off</button>
                     </div>
             </div>

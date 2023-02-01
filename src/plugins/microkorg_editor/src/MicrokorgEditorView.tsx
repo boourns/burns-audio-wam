@@ -331,7 +331,7 @@ export class MicrokorgEditorView extends Component<MicrokorgEditorViewProps, Mic
         this.props.plugin.sendEventToProcessor({
             type: "wam-midi",
             data: {
-                bytes: [0xb0, 0x78, 0]
+                bytes: [0xb0 | this.props.plugin.config.channel, 0x78, 0]
             }
         })
     }
