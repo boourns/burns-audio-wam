@@ -13,18 +13,19 @@ import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
 import { DynamicParameterNode, DynamicParamGroup } from "../../shared/DynamicParameterNode";
-import { ThreeJSGenerator, ThreeJSRunner } from './ThreeJSRunner';
+import { ThreeJSRunner } from './ThreeJSRunner';
 
 import { VideoExtensionOptions, VideoModuleConfig } from 'wam-extensions';
 import { LiveCoderNode, LiveCoderView } from '../../shared/LiveCoderView';
 
 import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
 import getThreeJSProcessor from './ThreeJSProcessor';
-import { defaultScript } from './editorDefaults';
+import { defaultScript, editorDefinition } from './editorDefaults';
 
 import styles from "./VideoThreeJS.module.scss"
 import { insertStyle} from "../../shared/insertStyle"
 import monacoStyle from "../../../../node_modules/monaco-editor/min/vs/editor/editor.main.css"
+import { ThreeJSGenerator } from './ThreeJSGenerator';
 
 type ThreeJSState = {
 	runCount: number
@@ -77,7 +78,7 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 	async registerExtensions() {
 		if (window.WAMExtensions.collaboration) {
 			this.multiplayers = [new MultiplayerHandler(this.instanceId, "script", "Code")]
-			this.multiplayers[0].getDocumentFromHost(defaultScript())
+			await this.multiplayers[0].getDocumentFromHost(defaultScript())
 
 		} else {
 			console.warn("host has not implemented collaboration WAM extension")
@@ -205,7 +206,9 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 
 	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor {
 		monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-			allowJs: true
+			allowJs: true,
+			checkJs: true,
+			alwaysStrict: true,
 		})
 	  
 		monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
@@ -213,51 +216,29 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 			noSyntaxValidation: false,
 		});
 	
-		monaco.languages.typescript.javascriptDefaults.addExtraLib(this.editorDefinition(), "")
+		const libUriString = 'ts:filename/threejsScene.d.ts'
+		const libUri = monaco.Uri.parse(libUriString)
+
+		if (!monaco.editor.getModel(libUri)) {
+			const libSource = editorDefinition()
+
+			console.log("WOOF ", libSource)
+			monaco.languages.typescript.javascriptDefaults.addExtraLib(libSource, libUriString)
+			
+			monaco.editor.createModel(libSource, 'typescript', libUri);
+		}
 	
-		return monaco.editor.create(ref, {
+		let editor = monaco.editor.create(ref, {
 			language: 'javascript',
 			automaticLayout: true
 		});
-	}
 
-	editorDefinition(): string {
-		return `
-	export type MIDINote = {
-		/** MIDI Note number, 0-127 */
-		note: number
-		/** Note velocity, 0: off, 1-127: note on strength */
-		velocity: number
-		/** Note duration, measured in sequencer ticks (24 PPQN) */
-		duration: number
+		editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
+			this.upload()
+		});
+
+		return editor
 	}
-	
-	export type WAMParameterDefinition = {
-		/** An identifier for the parameter, unique to this plugin instance */
-		id: string
-		/** The parameter's human-readable name. */
-		label?: string
-		/** The parameter's data type */
-		type?: "float" | "int"
-		/** The default value for the parameter */
-		defaultValue: number
-		/** The lowest possible value for the parameter */
-		minValue?: number
-		/** The highest possible value for the parameter */
-		maxValue?: number
-	}
-	
-	export type ParameterDefinition = {
-		id: string
-		config: WAMParameterDefinition
-	}
-	
-	export interface FunctionSequencer {
-		parameter(): ParameterDefinition[]
-		onTick(tick: number, params: Record<string, any>): MIDINote[]
-	}
-		`
-	  }
 }
 
 export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {

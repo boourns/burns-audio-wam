@@ -1,11 +1,17 @@
+import three from "./types/three.txt"
+import generator from "./types/ThreeJSGenerator.txt"
+
 export function defaultScript(): string {
     return `
     
 
-/** @implements {ThreeJSGenerator} */
+/** 
+ * @class
+ * @implements {ThreeJSGenerator} 
+ * */
 class CubeGenerator {
 	/**
-	 * @returns {WAMParameterDefinition[]}
+	 * @returns {ParameterDefinition[]}
 	 */
 	parameters() {
 		return [
@@ -69,4 +75,36 @@ class CubeGenerator {
 
 return new CubeGenerator()
 `
+}
+
+export function editorDefinition() {
+	return `
+
+	declare namespace THREE {
+	${three}
+	class SphereBufferGeometry extends SphereGeometry{}
+	class TetrahedronBufferGeometry extends TetrahedronGeometry {}
+	class TorusBufferGeometry extends TorusGeometry {}
+	class TorusKnotBufferGeometry extends TorusKnotGeometry {}
+	class TubeBufferGeometry extends TubeGeometry {}
+	class BoxBufferGeometry extends BoxGeometry {}
+	class CircleBufferGeometry extends CircleGeometry {}
+	class ConeBufferGeometry extends ConeGeometry {}
+	class CylinderBufferGeometry extends CylinderGeometry {}
+	class DodecahedronBufferGeometry extends DodecahedronGeometry {}
+	class IcosahedronBufferGeometry extends IcosahedronGeometry {}
+	class LatheBufferGeometry extends LatheGeometry {}
+	class OctahedronBufferGeometry extends OctahedronGeometry {}
+	class PlaneBufferGeometry extends PlaneGeometry {}
+	class PolyhedronBufferGeometry extends PolyhedronGeometry {}
+	class RingBufferGeometry extends RingGeometry {}
+	class ShapeBufferGeometry extends ShapeGeometry {}
+	class ExtrudeBufferGeometry extends ExtrudeGeometry {}
+
+
+	}
+
+	${generator}
+
+	`
 }

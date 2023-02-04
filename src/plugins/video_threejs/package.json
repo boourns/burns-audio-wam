@@ -8,7 +8,7 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "del dist",
-    "build": "./node_modules/.bin/webpack",
+    "build": "./tools/pre-build.sh; ./node_modules/.bin/webpack; ./tools/post-build.sh",
     "test": "echo 'no tests'"
   },
   "dependencies": {
@@ -22,6 +22,7 @@
     "copy-webpack-plugin": "^9.0.0",
     "css-loader": "^6.2.0",
     "css-modules-typescript-loader": "^4.0.1",
+    "raw-loader": "^4.0.2",
     "sass": "^1.39.2",
     "sass-loader": "^12.1.0",
     "ts-loader": "^8.0.12",

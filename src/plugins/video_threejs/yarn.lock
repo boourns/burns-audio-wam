@@ -2048,6 +2048,18 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
+"raw-loader@npm:^4.0.2":
+  version: 4.0.2
+  resolution: "raw-loader@npm:4.0.2"
+  dependencies:
+    loader-utils: ^2.0.0
+    schema-utils: ^3.0.0
+  peerDependencies:
+    webpack: ^4.0.0 || ^5.0.0
+  checksum: 51cc1b0d0e8c37c4336b5318f3b2c9c51d6998ad6f56ea09612afcfefc9c1f596341309e934a744ae907177f28efc9f1654eacd62151e82853fcc6d37450e795
+  languageName: node
+  linkType: hard
+
 "readable-stream@npm:^2.0.1, readable-stream@npm:^2.0.6":
   version: 2.3.7
   resolution: "readable-stream@npm:2.3.7"
@@ -2518,6 +2530,7 @@ resolve@^1.9.0:
     css-modules-typescript-loader: ^4.0.1
     debug: ^4.3.1
     preact: ^10.5.5
+    raw-loader: ^4.0.2
     sass: ^1.39.2
     sass-loader: ^12.1.0
     three: ^0.139.0

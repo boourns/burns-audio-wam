@@ -19,6 +19,10 @@ const WAMPlugin = {
   module: {
     rules: [
       {
+        test: /\.txt$/,
+        use: 'raw-loader'
+      },
+      {
         test: /\.tsx?$/,
         use: 'ts-loader',
         exclude: /node_modules/,

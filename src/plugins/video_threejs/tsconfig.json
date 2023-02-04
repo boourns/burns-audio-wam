@@ -4,7 +4,6 @@
       "noImplicitAny": true,
       "module": "esnext",
       "moduleResolution": "node",
-      "removeComments": true,
       "preserveConstEnums": true,
       "target": "es2019",
       "sourceMap": true,
@@ -22,7 +21,10 @@
       "noFallthroughCasesInSwitch": true,
       "allowUnreachableCode": false,
       "experimentalDecorators": true,
-      "downlevelIteration": true
+      "downlevelIteration": true,
+     // "removeComments": true,
+      "declaration": true,      
+      "removeComments": false,
     },
     "include": [
       "./src/*"
