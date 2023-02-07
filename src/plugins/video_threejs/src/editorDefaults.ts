@@ -38,7 +38,11 @@ class CubeGenerator {
 		]
 	}
 
-	initialize(THREE, options) {
+	/**
+	 * @param time {number} current time in seconds
+	 * @param options {VideoExtensionOptions}
+	 * */
+	initialize(time, options) {
 		this.THREE = THREE
 		this.options = options
 
@@ -60,7 +64,7 @@ class CubeGenerator {
 	}
 
 	/**
-	 * @param tick {number}
+	 * @param time {number}
 	 * @param params {Record<string, any>}
 	 * */
 	render(renderer, time, params) {
@@ -70,6 +74,18 @@ class CubeGenerator {
 		this.mesh.rotation.y += (params.speed / 100);
 		
 		renderer.render( this.scene, this.camera);
+	}
+
+	destroy() {
+		if (this.camera) {
+            this.camera.remove()
+        }
+        if (this.light) {
+            this.light.remove()
+        }
+        if (this.scene) {
+            this.scene.dispose()
+        }
 	}
 }
 

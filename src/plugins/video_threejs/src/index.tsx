@@ -38,6 +38,7 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 	multiplayers: MultiplayerHandler[]
 	runCount: number
 	error?: any
+	errorStack?: string
 
 	analyser: AnalyserNode
 	fftArray: Float32Array
@@ -94,7 +95,12 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 						this.runner = new ThreeJSRunner(options)
 	
 						if (this.generator) {
-							this.generator.initialize(THREE, options)
+							try {
+								this.generator.initialize(this.context.currentTime, options)
+							} catch (e) {
+								this.error = e.toString()
+								this.errorStack = e.stack
+							}
 						}
 					//}
 
@@ -118,7 +124,12 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 					}
 					this.analyser.getFloatFrequencyData(this.fftArray)
 					
-					return this.runner.render(inputs, this.generator, currentTime, params, this.fftArray)
+					try {
+						return this.runner.render(inputs, this.generator, currentTime, params, this.fftArray)
+					} catch (e) {
+						this.setError(e.toString(), e.stack)
+						return inputs
+					}
 				},
 				disconnectVideo: () => {
 					console.log("disconnectVideo")
@@ -139,9 +150,14 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 
 	async upload() {
 		let source = await this.multiplayers[0].doc.toString()
+		this.multiplayers[0].setError(undefined)
 
 		try {
-			let generator = new Function(source)() as ThreeJSGenerator
+			if (this.generator && !this.error) {
+				this.generator.destroy()
+			}
+			let generator = new Function('THREE', source)(THREE) as ThreeJSGenerator
+
 			if (!generator.render) {
 				throw new Error("render function missing")
 			}
@@ -159,15 +175,15 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 				this.updateProcessor([group])
 			}
 			if (this.options) {
-				generator.initialize(THREE, this.options)
+				generator.initialize(this.context.currentTime, this.options)
 			}
 			this.generator = generator
 			this.error = undefined
 
-		} catch(e) {
+		} catch(e: any) {
 			console.error("Error creating threejs generator: ", e)
 
-			this.error = e.toString()
+			this.setError(e.toString(), e.stack)
 		}
 
 		if (this.renderCallback) {
@@ -222,7 +238,6 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 		if (!monaco.editor.getModel(libUri)) {
 			const libSource = editorDefinition()
 
-			console.log("WOOF ", libSource)
 			monaco.languages.typescript.javascriptDefaults.addExtraLib(libSource, libUriString)
 			
 			monaco.editor.createModel(libSource, 'typescript', libUri);
@@ -234,10 +249,37 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 		});
 
 		editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
-			this.upload()
+			this.runPressed()
 		});
 
 		return editor
+	}
+
+	setError(error?: string, stack?: string) {
+		this.error = error
+		this.errorStack = stack
+		
+		if (stack) {
+			let matches = stack.match(/<anonymous>:[\d]+/g)
+			if (!matches) {
+				matches = stack.match(/ Function:[\d]+/g)
+			}
+			
+			if (matches && matches.length > 0) {
+				const rawLine = matches[0].split(":")
+				if (rawLine.length > 1) {
+					const line = parseInt(rawLine[1]) - 2
+					this.multiplayers[0].setError({message: error, line})
+				}
+			}
+		} else {
+			this.multiplayers[0].setError(undefined)
+		}
+
+		if (this.renderCallback) {
+			this.renderCallback()
+		}
+
 	}
 }
 

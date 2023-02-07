@@ -23,6 +23,7 @@ export type ParameterDefinition = {
 
 export interface ThreeJSGenerator {
     parameters(): ParameterDefinition[]
-	initialize(three: typeof THREE, options: VideoExtensionOptions): THREE.Scene
+	initialize(time: number, options: VideoExtensionOptions): THREE.Scene
 	render(renderer: THREE.Renderer, time: number, params: Record<string, any>): void
+    destroy(): void
 }

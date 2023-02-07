@@ -2,6 +2,9 @@
 
 set -e
 
+# do not auto-run, we had to manually fix up the types:
+# - remove the export { a as b}
+# - remove other import {a, b, c,} from "./constants"
 exit
 
 
