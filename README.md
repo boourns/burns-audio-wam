@@ -2,7 +2,7 @@
 
 This is the source repository for the WAM plugins I have written.  It is useful to copy my WAMs as starting points for your own plugins, or to modify and open pull requests against the plugins within.
 
-If you just want to use WebAudioModules in your own web project I suggest you start with github.com/boourns/wam-community, a prepared package of built WAMs ready for use without any build step.
+If you just want to use WebAudioModules in your own web project I suggest you start with https://github.com/boourns/wam-community, a prepared package of built WAMs ready for use without any build step.
 
 These are the "stock" WAM plugins for https://sequencer.party, but they all should work on any WAM host (assuming the host implements the required WAM extensions for the plugin).
 
