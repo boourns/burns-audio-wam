@@ -5,7 +5,7 @@
     "description": "Soundfont polyphonic instrument player.  Plays SF2 files converted to a web format.",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
-    "thumbnail": "",
+    "thumbnail": "screenshot.png",
     "keywords": ["synth"],
     "isInstrument": true,
     "website": "https://sequencer.party",

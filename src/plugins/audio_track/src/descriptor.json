@@ -5,7 +5,7 @@
     "description": "Audio file recorder, player, and looper",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
-    "thumbnail": "",
+    "thumbnail": "screenshot.png",
     "keywords": ["audio", "utility", "editor", "looper"],
     "isInstrument": false,
     "website": "https://sequencer.party",

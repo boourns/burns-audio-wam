@@ -5,7 +5,7 @@
     "description": "Patch editor and controller for the Korg Microkorg",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
-    "thumbnail": "",
+    "thumbnail": "screenshot.png",
     "keywords": ["midi", "external instrument", "korg", "microkorg"],
     "isInstrument": true,
     "website": "https://sequencer.party",

@@ -5,7 +5,7 @@
     "description": "Wrapper for Butterchurn visualizer, a rewrite of the classic WinAMP Milkdrop plugin.",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
-    "thumbnail": "",
+    "thumbnail": "screenshot.png",
     "keywords": ["video", "visualizer"],
     "isInstrument": true,
     "website": "https://sequencer.party",

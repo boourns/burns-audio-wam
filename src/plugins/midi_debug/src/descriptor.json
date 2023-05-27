@@ -5,7 +5,7 @@
     "description": "MIDI Debug tool.  Log, generate, and replay MIDI messages",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
-    "thumbnail": "",
+    "thumbnail": "screenshot.png",
     "keywords": ["utility", "midi"],
     "isInstrument": false,
     "website": "https://sequencer.party",
