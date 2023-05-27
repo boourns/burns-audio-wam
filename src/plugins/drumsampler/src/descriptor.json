@@ -5,7 +5,7 @@
     "description": "16-pad MIDI drum sampler",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
-    "thumbnail": "",
+    "thumbnail": "screenshot.png",
     "keywords": ["drum-machine", "sampler"],
     "isInstrument": true,
     "website": "https://sequencer.party",

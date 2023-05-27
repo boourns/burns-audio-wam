@@ -5,7 +5,7 @@
     "description": "Provides audio from external sound card input or microphone.",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
-    "thumbnail": "",
+    "thumbnail": "screenshot.png",
     "keywords": ["utility", "input"],
     "isInstrument": false,
     "hasAudioOutput": true,

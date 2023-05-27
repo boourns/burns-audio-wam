@@ -5,7 +5,7 @@
     "description": "Randomizer.  Connect to an automation port, click the dice, and all target parameters will be randomized.",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
-    "thumbnail": "",
+    "thumbnail": "screenshot.png",
     "keywords": ["random", "modulator"],
     "isInstrument": false,
     "website": "https://sequencer.party",

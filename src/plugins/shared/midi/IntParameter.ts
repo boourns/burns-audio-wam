@@ -82,6 +82,11 @@ export class IntParameter implements SynthParameter {
     }
 
     updateFromSysex(value: number) {
+        if (value > this.maxValue || value < this.minValue) {
+            console.error(`Param ${this.id}: updateFromSysex called with value out of range(${this.minValue}-${this.maxValue}): ${value}`)
+            return
+        } 
+
         this.value = value
         this.automationDirty = true
     }

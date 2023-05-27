@@ -108,15 +108,15 @@ export class NRPNMessager implements MIDIMessager {
             {
                 type: "wam-midi",
                 data: {
-                    bytes: [MIDI_CC+channel, 38, value&0x7f]
+                    bytes: [MIDI_CC+channel, 6, (value&0x3f80) >> 7]
                 }
             },
             {
                 type: "wam-midi",
                 data: {
-                    bytes: [MIDI_CC+channel, 6, (value&0x3f80) >> 7]
+                    bytes: [MIDI_CC+channel, 38, value&0x7f]
                 }
-            }
+            },
         ]
     }
 

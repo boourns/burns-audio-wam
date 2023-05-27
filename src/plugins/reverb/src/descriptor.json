@@ -5,7 +5,7 @@
     "description": "Convolution Reverb featuring IRs from some vintage cult-classic hardware units.",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
-    "thumbnail": "",
+    "thumbnail": "screenshot.png",
     "keywords": ["effect", "reverb"],
     "isInstrument": false,
     "website": "https://sequencer.party",

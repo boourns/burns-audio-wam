@@ -5,7 +5,7 @@
     "description": "Simple stereo filtered delay",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
-    "thumbnail": "",
+    "thumbnail": "screenshot.png",
     "keywords": ["effect", "delay"],
     "isInstrument": false,
     "website": "https://sequencer.party",

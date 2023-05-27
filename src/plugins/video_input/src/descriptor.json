@@ -5,7 +5,7 @@
     "description": "Video Input plugin.  Use to bring your external webcam, camera, or video capture device into the session.",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
-    "thumbnail": "",
+    "thumbnail": "screenshot.png",
     "keywords": ["video", "utility", "input"],
     "isInstrument": false,
     "website": "https://sequencer.party",

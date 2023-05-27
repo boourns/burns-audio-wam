@@ -56,6 +56,7 @@ const plugin = {
     new CopyWebpackPlugin({
       patterns: [
         { from: `./src/descriptor.json`, to: './' },
+        { from: `./src/screenshot.png`, to: './' },
       ]
     }),
   ]

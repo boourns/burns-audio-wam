@@ -1,7 +1,7 @@
 {
-  "name": "microkorg-editor-wam",
+  "name": "jx3p-editor-wam",
   "version": "0.0.0",
-  "description": "Microkorg Patch Editor",
+  "description": "Roland JX3p Patch Editor",
   "author": "Tom Burns <tom@burns.ca>",
   "homepage": "https://github.com/boourns/burns-audio-wam",
   "license": "MIT",

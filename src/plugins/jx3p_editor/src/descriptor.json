@@ -5,7 +5,7 @@
     "description": "Patch editor and controller for the Roland JX-3p with the third-party MIDI Mod installed",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
-    "thumbnail": "",
+    "thumbnail": "screenshot.png",
     "keywords": ["midi", "external instrument", "roland", "jx-3p", "organix"],
     "isInstrument": true,
     "website": "https://sequencer.party",

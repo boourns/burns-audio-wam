@@ -5,7 +5,7 @@
     "description": "Livecode 3d video scenes using three.js",
     "version": "1.0.0",
     "sdkVersion": "1.0.0",
-    "thumbnail": "",
+    "thumbnail": "screenshot.png",
     "keywords": ["video", "generator"],
     "isInstrument": false,
     "website": "https://sequencer.party",

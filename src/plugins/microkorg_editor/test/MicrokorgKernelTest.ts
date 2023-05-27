@@ -4,12 +4,13 @@ import {IntParameter} from "../../shared/midi/IntParameter.js"
 import { ControlChangeMessager } from "../../shared/midi/ControlChangeMessager.js"
 import {MicrokorgKernel} from "../src/MicrokorgKernel.js"
 import { parseFragment } from "lib0/dom.js"
+import { packKorg, unpackKorg } from "../../shared/midi/Korg.js"
 
 describe("MicrokorgKernel", () => {
     it("packKorg packs bytes", async() => {
         const input = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f, 0xff, 0xff, 0xff]
         const kernel = new MicrokorgKernel()
-        const packed = kernel.packKorg(input)
+        const packed = packKorg(input)
 
         deepStrictEqual(packed, [63, 127, 127, 127,
             127, 127, 127, 127,
@@ -23,7 +24,7 @@ describe("MicrokorgKernel", () => {
 
         const kernel = new MicrokorgKernel()
 
-        const unpacked = kernel.unpackKorg(new Uint8Array(input), 0)
+        const unpacked = unpackKorg(new Uint8Array(input), 0)
 
         deepStrictEqual([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f, 0xff, 0xff, 0xff], unpacked)
 
