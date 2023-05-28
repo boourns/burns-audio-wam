@@ -77,7 +77,7 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 	async registerExtensions() {
 		if (window.WAMExtensions.collaboration) {
 			this.multiplayers = [new MultiplayerHandler(this.instanceId, "script", "Code")]
-			this.multiplayers[0].getDocumentFromHost(defaultScript())
+			await this.multiplayers[0].getDocumentFromHost(defaultScript())
 
 		} else {
 			console.warn("host has not implemented collaboration WAM extension")
