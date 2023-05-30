@@ -1,11 +1,17 @@
+import three from "./types/three.txt"
+import generator from "./types/ThreeJSGenerator.txt"
+
 export function defaultScript(): string {
     return `
     
 
-/** @implements {ThreeJSGenerator} */
+/** 
+ * @class
+ * @implements {ThreeJSGenerator} 
+ * */
 class CubeGenerator {
 	/**
-	 * @returns {WAMParameterDefinition[]}
+	 * @returns {ParameterDefinition[]}
 	 */
 	parameters() {
 		return [
@@ -32,7 +38,11 @@ class CubeGenerator {
 		]
 	}
 
-	initialize(THREE, options) {
+	/**
+	 * @param time {number} current time in seconds
+	 * @param options {VideoExtensionOptions}
+	 * */
+	initialize(time, options) {
 		this.THREE = THREE
 		this.options = options
 
@@ -54,7 +64,7 @@ class CubeGenerator {
 	}
 
 	/**
-	 * @param tick {number}
+	 * @param time {number}
 	 * @param params {Record<string, any>}
 	 * */
 	render(renderer, time, params) {
@@ -65,8 +75,52 @@ class CubeGenerator {
 		
 		renderer.render( this.scene, this.camera);
 	}
+
+	destroy() {
+		if (this.camera) {
+            this.camera.remove()
+        }
+        if (this.light) {
+            this.light.remove()
+        }
+        if (this.scene) {
+            this.scene.dispose()
+        }
+	}
 }
 
 return new CubeGenerator()
 `
+}
+
+export function editorDefinition() {
+	return `
+
+	declare namespace THREE {
+	${three}
+	class SphereBufferGeometry extends SphereGeometry{}
+	class TetrahedronBufferGeometry extends TetrahedronGeometry {}
+	class TorusBufferGeometry extends TorusGeometry {}
+	class TorusKnotBufferGeometry extends TorusKnotGeometry {}
+	class TubeBufferGeometry extends TubeGeometry {}
+	class BoxBufferGeometry extends BoxGeometry {}
+	class CircleBufferGeometry extends CircleGeometry {}
+	class ConeBufferGeometry extends ConeGeometry {}
+	class CylinderBufferGeometry extends CylinderGeometry {}
+	class DodecahedronBufferGeometry extends DodecahedronGeometry {}
+	class IcosahedronBufferGeometry extends IcosahedronGeometry {}
+	class LatheBufferGeometry extends LatheGeometry {}
+	class OctahedronBufferGeometry extends OctahedronGeometry {}
+	class PlaneBufferGeometry extends PlaneGeometry {}
+	class PolyhedronBufferGeometry extends PolyhedronGeometry {}
+	class RingBufferGeometry extends RingGeometry {}
+	class ShapeBufferGeometry extends ShapeGeometry {}
+	class ExtrudeBufferGeometry extends ExtrudeGeometry {}
+
+
+	}
+
+	${generator}
+
+	`
 }

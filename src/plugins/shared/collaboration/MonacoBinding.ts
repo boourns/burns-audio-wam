@@ -11,6 +11,7 @@ export class MonacoBinding {
     _monacoChangeHandler: monaco.IDisposable;
 
     decorations: string[]
+    updating: number
 
     constructor(editor: monaco.editor.ICodeEditor, document: CollaborationDocumentInterface) {
         this.editor = editor
@@ -18,6 +19,7 @@ export class MonacoBinding {
         this.document = document
         this.mux = createMutex()
         this.decorations = []
+        this.updating = 0
     }
 
     async attach() {
@@ -55,7 +57,7 @@ export class MonacoBinding {
 
         this._monacoChangeHandler = this.model.onDidChangeContent(event => {
             // apply changes from right to left
-            this.mux(() => {
+            this.mux(async () => {
                 let operations: CollaborationOperation[] = []
                 
                 event.changes.sort((change1, change2) => change2.rangeOffset - change1.rangeOffset).forEach(change => {
@@ -71,7 +73,10 @@ export class MonacoBinding {
                     })
                 })
 
-                this.document.applyOperations(operations)
+                this.updating++
+
+                await this.document.applyOperations(operations)
+                this.updating--
             })
         })
 

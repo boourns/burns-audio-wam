@@ -13,18 +13,19 @@ import { h, render } from 'preact';
 import { getBaseUrl } from '../../shared/getBaseUrl';
 
 import { DynamicParameterNode, DynamicParamGroup } from "../../shared/DynamicParameterNode";
-import { ThreeJSGenerator, ThreeJSRunner } from './ThreeJSRunner';
+import { ThreeJSRunner } from './ThreeJSRunner';
 
 import { VideoExtensionOptions, VideoModuleConfig } from 'wam-extensions';
 import { LiveCoderNode, LiveCoderView } from '../../shared/LiveCoderView';
 
 import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
 import getThreeJSProcessor from './ThreeJSProcessor';
-import { defaultScript } from './editorDefaults';
+import { defaultScript, editorDefinition } from './editorDefaults';
 
 import styles from "./VideoThreeJS.module.scss"
 import { insertStyle} from "../../shared/insertStyle"
 import monacoStyle from "../../../../node_modules/monaco-editor/min/vs/editor/editor.main.css"
+import { ThreeJSGenerator } from './ThreeJSGenerator';
 
 type ThreeJSState = {
 	runCount: number
@@ -37,6 +38,7 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 	multiplayers: MultiplayerHandler[]
 	runCount: number
 	error?: any
+	errorStack?: string
 
 	analyser: AnalyserNode
 	fftArray: Float32Array
@@ -93,7 +95,12 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 						this.runner = new ThreeJSRunner(options)
 	
 						if (this.generator) {
-							this.generator.initialize(THREE, options)
+							try {
+								this.generator.initialize(this.context.currentTime, options)
+							} catch (e) {
+								this.error = e.toString()
+								this.errorStack = e.stack
+							}
 						}
 					//}
 
@@ -117,7 +124,12 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 					}
 					this.analyser.getFloatFrequencyData(this.fftArray)
 					
-					return this.runner.render(inputs, this.generator, currentTime, params, this.fftArray)
+					try {
+						return this.runner.render(inputs, this.generator, currentTime, params, this.fftArray)
+					} catch (e) {
+						this.setError(e.toString(), e.stack)
+						return inputs
+					}
 				},
 				disconnectVideo: () => {
 					console.log("disconnectVideo")
@@ -138,9 +150,14 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 
 	async upload() {
 		let source = await this.multiplayers[0].doc.toString()
+		this.multiplayers[0].setError(undefined)
 
 		try {
-			let generator = new Function(source)() as ThreeJSGenerator
+			if (this.generator && !this.error) {
+				this.generator.destroy()
+			}
+			let generator = new Function('THREE', source)(THREE) as ThreeJSGenerator
+
 			if (!generator.render) {
 				throw new Error("render function missing")
 			}
@@ -158,15 +175,15 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 				this.updateProcessor([group])
 			}
 			if (this.options) {
-				generator.initialize(THREE, this.options)
+				generator.initialize(this.context.currentTime, this.options)
 			}
 			this.generator = generator
 			this.error = undefined
 
-		} catch(e) {
+		} catch(e: any) {
 			console.error("Error creating threejs generator: ", e)
 
-			this.error = e.toString()
+			this.setError(e.toString(), e.stack)
 		}
 
 		if (this.renderCallback) {
@@ -205,7 +222,9 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 
 	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor {
 		monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-			allowJs: true
+			allowJs: true,
+			checkJs: true,
+			alwaysStrict: true,
 		})
 	  
 		monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
@@ -213,51 +232,55 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 			noSyntaxValidation: false,
 		});
 	
-		monaco.languages.typescript.javascriptDefaults.addExtraLib(this.editorDefinition(), "")
+		const libUriString = 'ts:filename/threejsScene.d.ts'
+		const libUri = monaco.Uri.parse(libUriString)
+
+		if (!monaco.editor.getModel(libUri)) {
+			const libSource = editorDefinition()
+
+			monaco.languages.typescript.javascriptDefaults.addExtraLib(libSource, libUriString)
+			
+			monaco.editor.createModel(libSource, 'typescript', libUri);
+		}
 	
-		return monaco.editor.create(ref, {
+		let editor = monaco.editor.create(ref, {
 			language: 'javascript',
 			automaticLayout: true
 		});
+
+		editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
+			this.runPressed()
+		});
+
+		return editor
 	}
 
-	editorDefinition(): string {
-		return `
-	export type MIDINote = {
-		/** MIDI Note number, 0-127 */
-		note: number
-		/** Note velocity, 0: off, 1-127: note on strength */
-		velocity: number
-		/** Note duration, measured in sequencer ticks (24 PPQN) */
-		duration: number
+	setError(error?: string, stack?: string) {
+		this.error = error
+		this.errorStack = stack
+		
+		if (stack) {
+			let matches = stack.match(/<anonymous>:[\d]+/g)
+			if (!matches) {
+				matches = stack.match(/ Function:[\d]+/g)
+			}
+			
+			if (matches && matches.length > 0) {
+				const rawLine = matches[0].split(":")
+				if (rawLine.length > 1) {
+					const line = parseInt(rawLine[1]) - 2
+					this.multiplayers[0].setError({message: error, line})
+				}
+			}
+		} else {
+			this.multiplayers[0].setError(undefined)
+		}
+
+		if (this.renderCallback) {
+			this.renderCallback()
+		}
+
 	}
-	
-	export type WAMParameterDefinition = {
-		/** An identifier for the parameter, unique to this plugin instance */
-		id: string
-		/** The parameter's human-readable name. */
-		label?: string
-		/** The parameter's data type */
-		type?: "float" | "int"
-		/** The default value for the parameter */
-		defaultValue: number
-		/** The lowest possible value for the parameter */
-		minValue?: number
-		/** The highest possible value for the parameter */
-		maxValue?: number
-	}
-	
-	export type ParameterDefinition = {
-		id: string
-		config: WAMParameterDefinition
-	}
-	
-	export interface FunctionSequencer {
-		parameter(): ParameterDefinition[]
-		onTick(tick: number, params: Record<string, any>): MIDINote[]
-	}
-		`
-	  }
 }
 
 export default class ThreeJSModule extends WebAudioModule<ThreeJSNode> {

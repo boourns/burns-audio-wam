@@ -123,7 +123,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		});	
 
 		editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
-			this.upload()
+			this.runPressed()
 		});
 
 		return editor
