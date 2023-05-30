@@ -153,7 +153,7 @@ class ThreeJSNode extends DynamicParameterNode implements LiveCoderNode {
 		this.multiplayers[0].setError(undefined)
 
 		try {
-			if (this.generator && !this.error) {
+			if (this.generator && !this.error && this.generator.destroy) {
 				this.generator.destroy()
 			}
 			let generator = new Function('THREE', source)(THREE) as ThreeJSGenerator
