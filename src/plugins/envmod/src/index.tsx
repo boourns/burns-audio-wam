@@ -75,6 +75,7 @@ export default class EnvelopeFollowerModule extends WebAudioModule<EnvelopeFollo
 			})
 		} else {
 			console.log("did not find modulationTarget extension ", window.WAMExtensions)
+			node.extensionMissing = true;
 		}
 
 		return node;

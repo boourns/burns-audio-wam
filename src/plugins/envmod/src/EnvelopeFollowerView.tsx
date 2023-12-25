@@ -61,6 +61,12 @@ export interface MIDIInputProps {
       let paramNames: string[] = ["--"]
       let paramIds: string[] = ["disabled"]
 
+      if (this.props.plugin.extensionMissing) {
+        return <div class={styles.module}>
+          To use this plugin, the WAM host must implement the 'modulationTarget' WAM extension.
+        </div>
+      }
+
       if (this.props.plugin.paramList) {
           paramNames.push(...Object.keys(this.props.plugin.paramList))
           paramIds.push(...Object.keys(this.props.plugin.paramList))

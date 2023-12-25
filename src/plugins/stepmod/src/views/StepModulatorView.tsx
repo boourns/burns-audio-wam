@@ -61,6 +61,12 @@ export class StepModulatorView extends Component<StepModulatorViewProps, any> {
 
     render() {
         h("div", {})
+
+        if (this.props.plugin.audioNode.extensionMissing) {
+            return <div class={styles.Module}>
+                To use this plugin, the WAM host must implement the 'modulationTarget' WAM extension.
+            </div>
+        }
         
         const rows = this.props.plugin.audioNode.sequencerOrder.map((id, index) => {
             return <SequencerRowView row={index} parent={this} clipId={this.props.clipId} node={this.props.plugin.audioNode} sequencer={this.props.plugin.audioNode.sequencers[id]}></SequencerRowView>

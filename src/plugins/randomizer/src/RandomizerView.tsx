@@ -38,6 +38,12 @@ export class RandomizerView extends Component<RandomizerViewProps, any> {
 
         let disabled = !this.props.plugin.paramList
 
+        if (this.props.plugin.extensionMissing) {
+            return <div class={styles.Module}>
+                To use this plugin, the WAM host must implement the 'modulationTarget' WAM extension.
+            </div>
+        }
+
         const rules = disabled ? [] : this.props.plugin.rules.map((r, i) => {
             return <RandomizerRuleView plugin={this.props.plugin} rule={r} index={i}></RandomizerRuleView>
         })

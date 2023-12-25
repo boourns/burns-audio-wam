@@ -24,6 +24,8 @@ export type RandomizerRule = {
 
 export class RandomizerNode extends DynamicParameterNode {
 	destroyed = false;
+	extensionMissing = false;
+
 	_supportedEventTypes: Set<keyof WamEventMap>
 
 	paramList?: WamParameterInfoMap
@@ -165,6 +167,7 @@ export default class RandomizerModule extends WebAudioModule<RandomizerNode> {
 			})
 		} else {
 			console.error("did not find modulationTarget extension ", window.WAMExtensions)
+			node.extensionMissing = true;
 		}
 		
 		return node

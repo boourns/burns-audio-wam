@@ -7,6 +7,7 @@ import getEnvelopeFollowerProcessor from './EnvelopeFollowerProcessor';
 
 export class EnvelopeFollowerNode extends WamNode {
 	destroyed = false;
+	extensionMissing = false;
 
 	renderCallback?: () => void
 	_supportedEventTypes: Set<keyof WamEventMap>

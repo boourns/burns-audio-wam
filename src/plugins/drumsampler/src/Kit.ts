@@ -73,7 +73,7 @@ export class DrumSamplerKit {
 				if (!this.state.slots[i] || slots[i].uri != this.state.slots[i].uri) {
 					// url previously didn't exist, or changed
 
-					if (window.WAMExtensions.assets) {
+					if (window.WAMExtensions && window.WAMExtensions.assets) {
 						// depend on host to load uri: might not be public URL
 						window.WAMExtensions.assets.loadAsset(this.instanceId, slots[i].uri).then(async (asset: WamAsset) => {
 							if (asset.content) {
@@ -133,7 +133,7 @@ export class DrumSamplerKit {
 
     processMIDIEvents(midiEvents: ScheduledMIDIEvent[]) {
         midiEvents.forEach ((message) => {
-			if (message.event[0] == MIDI.NOTE_ON) {
+			if (message.event[0] == MIDI.NOTE_ON && message.event[2] > 0) {
 				let midiNote = message.event[1]
 				let voices = this.noteMap.get(midiNote)
 				if (voices) {

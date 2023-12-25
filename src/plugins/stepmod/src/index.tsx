@@ -20,6 +20,7 @@ var logger = console.log
 
 export class StepModulatorNode extends WamNode {
 	destroyed = false;
+	extensionMissing = false;
 	_supportedEventTypes: Set<keyof WamEventMap>
 
 	paramList?: WamParameterInfoMap
@@ -178,6 +179,7 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 				}
 			})
 		} else {
+			node.extensionMissing = true
 			console.log("did not find modulationTarget extension ", window.WAMExtensions)
 		}
 
