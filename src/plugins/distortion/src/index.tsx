@@ -86,6 +86,8 @@ export default class Distortion extends WebAudioModule<DistortionNode> {
 		// hack because h() is getting stripped for non-use despite it being what the JSX compiles to
 		h("div", {})
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
+		div.setAttribute("width", "310")
+		div.setAttribute("height", "120")
 
 		var shadow = div.attachShadow({mode: 'open'});
 		insertStyle(shadow, styles.toString())

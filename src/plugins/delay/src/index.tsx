@@ -149,7 +149,9 @@ export default class Delay extends WebAudioModule<DelayPluginNode> {
 		h("div", {})
 
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
-
+		div.setAttribute("width", "310")
+		div.setAttribute("height", "120")
+		
 		var shadow = div.attachShadow({mode: 'open'});
 		insertStyle(shadow, styles.toString())
 

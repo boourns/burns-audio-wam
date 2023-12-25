@@ -145,7 +145,7 @@ export class Knob extends Component<KnobProps, KnobState> {
         ref.innerHTML = ""
 
         this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        this.svg.setAttribute('style', "stroke:var(--var-ControlBackground); fill:none; stroke-width:2");
+        this.svg.setAttribute('style', "stroke:var(--var-ControlBackground, black); fill:none; stroke-width:2");
         this.svg.setAttribute('width', `${this.props.size}`);
         this.svg.setAttribute('height', `${this.props.size * 4/5}`);
 
@@ -153,7 +153,7 @@ export class Knob extends Component<KnobProps, KnobState> {
         this.radii = [this.center[0] - this.props.padding, this.center[1] - this.props.padding]
 
         this.range = svg_arc (this.center, this.radii, [136, 270], 0 )
-        this.range.setAttribute('style', 'stroke:var(--var-ControlBackground);')
+        this.range.setAttribute('style', 'stroke:var(--var-ControlBackground, black);')
         this.svg.appendChild(this.range)
 
         ref.appendChild(this.svg)
