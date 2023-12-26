@@ -3,7 +3,7 @@ import * as monaco from 'monaco-editor';
 import { createMutex } from 'lib0/mutex'
 import { CollaborationOperation } from "wam-extensions/dist/collaboration/CollaborationExtension";
 
-export class MonacoBinding {
+export class MonacoMultiplayerBinding {
     editor: monaco.editor.ICodeEditor
     document: CollaborationDocumentInterface
     mux: any;

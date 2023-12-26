@@ -2,14 +2,14 @@ import { Component, h } from 'preact';
 import {DynamicParameterView} from "./DynamicParameterView"
 
 import * as monaco from 'monaco-editor';
-import { MultiplayerHandler } from './collaboration/MultiplayerHandler';
+import { DocumentHandler } from './collaboration/DocumentHandler';
 import { DynamicParameterNode } from './DynamicParameterNode';
 
 export interface LiveCoderNode extends DynamicParameterNode {
   error?: string
 
   renderCallback?: () => void
-  multiplayers: MultiplayerHandler[]
+  multiplayers: DocumentHandler[]
   runPressed(): void
 	createEditor(ref: HTMLDivElement): monaco.editor.IStandaloneCodeEditor
 }

@@ -10,7 +10,7 @@ import { h, render } from 'preact';
 import { WebAudioModule, addFunctionModule } from '@webaudiomodules/sdk';
 import {WamParameterDataMap} from '@webaudiomodules/api';
 import { getBaseUrl } from '../../shared/getBaseUrl';
-import { MultiplayerHandler } from '../../shared/collaboration/MultiplayerHandler';
+import { DocumentHandler as DocumentHandler } from '../../shared/collaboration/DocumentHandler';
 import { DynamicParameterNode } from '../../shared/DynamicParameterNode';
 import { LiveCoderNode, LiveCoderView } from "../../shared/LiveCoderView"
 
@@ -30,18 +30,20 @@ type FunctionSeqState = {
 	runCount: number
 	params: any
 	additionalState: Record<string, any>
+	singlePlayerSource?: string
 }
 
 class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	destroyed = false;
 	renderCallback?: () => void
-	multiplayers: MultiplayerHandler[]
+	multiplayers: DocumentHandler[]
 	runCount: number
 	error?: string;
 	errorStack?: string;
 
 	uiReceiver: RemoteUIReceiver;
 	additionalState: Record<string, any>
+	singlePlayerMode = false
 
 	static async addModules(audioContext: BaseAudioContext, moduleId: string) {
 		await super.addModules(audioContext, moduleId);
@@ -70,22 +72,22 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 	}
 
 	async registerExtensions() {
-		if (window.WAMExtensions.collaboration) {
-			this.multiplayers = [new MultiplayerHandler(this.instanceId, "script", "Code")]
-			await this.multiplayers[0].getDocumentFromHost(this.defaultScript())
-
-			await this.upload()
-		} else {
-			console.warn("host has not implemented collaboration WAM extension")
+		if (!window.WAMExtensions || !window.WAMExtensions.collaboration) {
+			this.singlePlayerMode = true
 		}
 
-		if (window.WAMExtensions.notes) {
+		this.multiplayers = [new DocumentHandler(this.instanceId, "script", "Code")]
+		await this.multiplayers[0].getDocumentFromHost(this.defaultScript())
+
+		await this.upload()
+
+		if (window.WAMExtensions && window.WAMExtensions.notes) {
 			window.WAMExtensions.notes.addListener(this.instanceId, (notes?: NoteDefinition[]) => {
 				this.port.postMessage({source: "function", action: "noteList", noteList: notes})
 			})
 		}
 
-		if (window.WAMExtensions.runPreset) {
+		if (window.WAMExtensions && window.WAMExtensions.runPreset) {
 			window.WAMExtensions.runPreset.register(this.instanceId, {
 				runPreset: () => {
 					this.additionalState = {}
@@ -131,7 +133,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 
 	async upload() {
 		if (this.multiplayers.length > 0) {
-			let source = await this.multiplayers[0].doc.toString()
+			let source = await this.multiplayers[0].toString()
 			this.error = undefined
 			this.multiplayers[0].setError(undefined)
 			this.port.postMessage({source:"function", action:"function", code: source})
@@ -152,7 +154,8 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		const state = {
 			runCount: this.runCount,
 			params: await super.getState(),
-			additionalState: {...this.additionalState}
+			additionalState: {...this.additionalState},
+			singlePlayerSource: this.singlePlayerMode ? await this.multiplayers[0].toString() : undefined
 		}
 		return state
 	}
@@ -162,9 +165,19 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 			return
 		}
 
+		var uploadNeeded = false
+		
+		if (this.singlePlayerMode && state.singlePlayerSource) {
+			this.multiplayers[0].setSinglePlayerDocumentSource(state.singlePlayerSource)
+			uploadNeeded = true
+		}
+
 		if (state.runCount && state.runCount != this.runCount) {
 			this.runCount = state.runCount
+			uploadNeeded = true
+		}
 
+		if (uploadNeeded) {
 			this.upload()
 		}
 
