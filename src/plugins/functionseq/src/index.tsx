@@ -67,15 +67,15 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		this.uiReceiver = new RemoteUIReceiver(this.port)
 		this.additionalState = {}
 
+		if (!window.WAMExtensions || !window.WAMExtensions.collaboration) {
+			this.singlePlayerMode = true
+		}
+
 		// 'wam-automation' | 'wam-transport' | 'wam-midi' | 'wam-sysex' | 'wam-mpe' | 'wam-osc';
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi', 'wam-transport']);
 	}
 
 	async registerExtensions() {
-		if (!window.WAMExtensions || !window.WAMExtensions.collaboration) {
-			this.singlePlayerMode = true
-		}
-
 		this.multiplayers = [new DocumentHandler(this.instanceId, "script", "Code")]
 		await this.multiplayers[0].getDocumentFromHost(this.defaultScript())
 
@@ -157,6 +157,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 			additionalState: {...this.additionalState},
 			singlePlayerSource: this.singlePlayerMode ? await this.multiplayers[0].toString() : undefined
 		}
+
 		return state
 	}
 
@@ -166,7 +167,7 @@ class FunctionSeqNode extends DynamicParameterNode implements LiveCoderNode {
 		}
 
 		var uploadNeeded = false
-		
+
 		if (this.singlePlayerMode && state.singlePlayerSource) {
 			this.multiplayers[0].setSinglePlayerDocumentSource(state.singlePlayerSource)
 			uploadNeeded = true
@@ -332,11 +333,12 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 		const node: FunctionSeqNode = new FunctionSeqNode(this, {});
 		await node._initialize();
 
+		await node.registerExtensions()
+		
 		node.setState(initialState || {
 			runCount: 0
 		});
 
-		await node.registerExtensions()
 		node.upload()
 
 		this.sequencer = node
