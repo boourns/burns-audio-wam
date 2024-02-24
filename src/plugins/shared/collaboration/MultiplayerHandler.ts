@@ -1,42 +1,36 @@
 import * as monaco from 'monaco-editor';
 import { CollaborationDocumentInterface, CollaborationExtension } from 'wam-extensions';
-import { MonacoMultiplayerBinding } from './MonacoMultiplayerBinding';
-import { MonacoSinglePlayerBinding } from './MonacoSinglePlayerBinding';
+import { MonacoBinding } from './MonacoBinding';
 
 export type MultiplayerEditorError = {
     message: string
     line: number
 }
 
-export class DocumentHandler {
+export class MultiplayerHandler {
     label: string
     documentId: string
     instanceId: string
     editor?: monaco.editor.ICodeEditor
-    _doc?: CollaborationDocumentInterface // only set if host supports collaboration document extension
-    binding?: MonacoMultiplayerBinding | MonacoSinglePlayerBinding
+    doc: CollaborationDocumentInterface
+    binding?: MonacoBinding
     error?: MultiplayerEditorError
-
-    singlePlayerDocumentSource?: string
-    documentInitialized = false
 
     constructor(instanceId: string, docId: string, label: string) {
         this.instanceId = instanceId
         this.documentId = docId
         this.label = label
+
+        if (!window.WAMExtensions.collaboration) {
+            console.error("MultiplayerHandler requires host implement Collaboration Extension")
+            return
+        }        
     }
 
     async getDocumentFromHost(initialContent: string) {
-        if (window.WAMExtensions && window.WAMExtensions.collaboration) {
-            let doc = await window.WAMExtensions.collaboration!.getDocument!(this.instanceId, this.documentId, initialContent)
+        let doc = await window.WAMExtensions.collaboration!.getDocument!(this.instanceId, this.documentId, initialContent)
 
-            this._doc = doc
-        } else {
-            this.singlePlayerDocumentSource = initialContent
-        }
-
-        this.documentInitialized = true
-
+        this.doc = doc
         this.attachEditor()
     }
 
@@ -47,20 +41,11 @@ export class DocumentHandler {
     }
 
     attachEditor() {
-        if (!this.editor || !this.documentInitialized) {
+        if (!this.editor || !this.doc) {
             return
         }
 
-        if (this._doc) {
-            this.binding = new MonacoMultiplayerBinding(this.editor, this._doc)
-        } else {
-            this.binding = new MonacoSinglePlayerBinding(this.editor, () => {
-                return this.singlePlayerDocumentSource || ""
-            },
-            (source: string) => {
-                this.singlePlayerDocumentSource = source
-            })
-        }
+        this.binding = new MonacoBinding(this.editor, this.doc)
         this.binding.attach()
         this.updateModelMarkers()
     }
@@ -96,21 +81,6 @@ export class DocumentHandler {
             }
             
             monaco.editor.setModelMarkers(this.binding.model, "owner", markers);
-        }
-    }
-
-    async toString() {
-        if (this._doc) {
-            return await this._doc.toString()
-        }
-
-        return this.singlePlayerDocumentSource
-    }
-
-    setSinglePlayerDocumentSource(source: string) {
-        this.singlePlayerDocumentSource = source
-        if (this.binding && this.binding.model) {
-            this.binding.model.setValue(source)
         }
     }
 }
