@@ -84,7 +84,8 @@ export default class SpectrumModalModule extends WebAudioModule<WamNode> {
 		h("div", {})
 
 		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
-
+		div.setAttribute("width", "520")
+		div.setAttribute("height", "370")
 		var shadow = div.attachShadow({mode: 'open'});
 
 		insertStyle(shadow, styles.toString())

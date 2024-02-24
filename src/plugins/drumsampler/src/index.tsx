@@ -154,6 +154,8 @@ export default class DrumSampler extends WebAudioModule<DrumSamplerNode> {
 		insertStyle(shadow, styles.toString())
 
 		div.setAttribute("style", "display: flex; flex-direction: column: width: 100%; height: 100%")
+		div.setAttribute("width", "780")
+		div.setAttribute("height", "380")
 
 		let initialState = this.audioNode.paramMgr.getParamsValues()
 

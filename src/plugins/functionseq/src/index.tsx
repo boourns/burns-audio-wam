@@ -367,7 +367,9 @@ export default class FunctionSeqModule extends WebAudioModule<FunctionSeqNode> {
 		var shadow = div.attachShadow({mode: 'open'});
 		insertStyle(shadow, styles.toString())
 		insertStyle(shadow, monacoStyle.toString())
-
+		
+		div.setAttribute("width", "1170")
+		div.setAttribute("height", "370")
 		render(<LiveCoderView plugin={this.audioNode} parametersView={() => this.renderParametersView()} actions={[]}></LiveCoderView>, shadow);
 
 		return div;

@@ -201,6 +201,8 @@ export default class StepModulatorModule extends WebAudioModule<StepModulatorNod
 		h("div", {})
 
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
+		div.setAttribute("width", "620")
+		div.setAttribute("height", "340")
 
 		const shadow = div.attachShadow({mode: 'open'});
 		const root = document.createElement("div")

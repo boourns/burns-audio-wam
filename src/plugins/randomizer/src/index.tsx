@@ -179,6 +179,8 @@ export default class RandomizerModule extends WebAudioModule<RandomizerNode> {
 		h("div", {})
 
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
+		div.setAttribute("width", "360")
+		div.setAttribute("height", "240")
 
 		var shadow = div.attachShadow({mode: 'open'});
 		insertStyle(shadow, styles.toString())

@@ -1,11 +1,13 @@
 .wrapper {
     display: flex;
     background-color: #2b3595;
+    width: 100%;
 }
 
 .simpleeqModule {
     display: flex;
     flex-direction: row;
+    justify-content: space-around;
     flex: 1;
     color: white;
     margin-bottom: auto;
