@@ -294,6 +294,8 @@ export default class Synth101 extends WebAudioModule<Synth101Node> {
 		h("div", {})
 
 		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
+		div.setAttribute("width", "1170")
+		div.setAttribute("height", "230")
 
 		var shadow = div.attachShadow({mode: 'open'});
 		insertStyle(shadow, styles.toString())

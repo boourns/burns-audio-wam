@@ -62,6 +62,8 @@ export default class JX3PControllerModule extends WebAudioModule<MIDIControllerN
 		h("div", {})
 
 		div.setAttribute("style", "display: flex; height: 100%; width: 100%; flex: 1;")
+		div.setAttribute("width", "1300")
+		div.setAttribute("height", "480")
 
 		var shadow = div.attachShadow({mode: 'open'});
 		insertStyle(shadow, styles.toString())

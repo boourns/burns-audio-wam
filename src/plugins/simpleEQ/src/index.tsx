@@ -100,6 +100,8 @@ export default class SimpleEQ extends WebAudioModule<SimpleEQNode> {
 		h("div", {})
 		
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
+		div.setAttribute("width", "250")
+		div.setAttribute("height", "260")
 
 		var shadow = div.attachShadow({mode: 'open'});
 

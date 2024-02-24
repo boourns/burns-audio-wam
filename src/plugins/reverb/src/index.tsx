@@ -80,6 +80,8 @@ export default class ConvolutionReverb extends WebAudioModule<ConvolutionReverbN
 		h("div", {})
 
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
+		div.setAttribute("width", "220")
+		div.setAttribute("height", "120")
 
 		var shadow = div.attachShadow({mode: 'open'});
 		insertStyle(shadow, styles.toString())

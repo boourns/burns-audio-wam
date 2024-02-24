@@ -54,6 +54,8 @@ export default class AudioRecorderModule extends WebAudioModule<AudioRecorderNod
 		insertStyle(shadow, styles.toString())
 
 		div.setAttribute("style", "display: flex; flex-direction: column: width: 100%; height: 100%")
+		div.setAttribute("width", "720")
+		div.setAttribute("height", "300")
 
 		render(<AudioRecorderView plugin={this} clipId={clipId}></AudioRecorderView>, shadow)
 

@@ -66,6 +66,8 @@ export default class SoundfontModule extends WebAudioModule<SoundfontPlayerNode>
 		h("div", {})
 
 		div.setAttribute("style", "height: 100%; width: 100%; display: flex; flex: 1;")
+		div.setAttribute("width", "260")
+		div.setAttribute("height", "75")
 
 		var shadow = div.attachShadow({mode: 'open'});
 		insertStyle(shadow, styles.toString())

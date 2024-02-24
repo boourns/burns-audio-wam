@@ -32,7 +32,7 @@ export interface ButterchurnProps {
 
       let presets = Object.keys(this.props.plugin.presets).map(p => <option value={p} selected={p == this.props.plugin.chosenPreset}>{p}</option>)
 
-      return <div style="background-color: gray">
+      return <div style="background-color: gray; width: 100%">
         <div style="display: flex; flex-direction: row; padding: 8px;">
            Preset: <select onChange={(e) => this.presetChanged(e)}>{presets}</select>
         </div>
