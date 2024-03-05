@@ -53,10 +53,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webaudiomodules/sdk-parammgr@webaudiomodules/sdk-parammgr#commit=7ac79d502cdd73209c1fab1ba194fd0f1a175c05":
-  version: 0.0.12
-  resolution: "@webaudiomodules/sdk-parammgr@https://github.com/webaudiomodules/sdk-parammgr.git#commit=7ac79d502cdd73209c1fab1ba194fd0f1a175c05"
-  checksum: 535d5788b45ef00ac6fcd7ad9fced376ebcfcfe257adc082ebc6ba4e5cd4207a740e22652c9f790e0b09fe0c1d56a717b7d526cfb6bc6317a2b9276459a010ec
+"@webaudiomodules/sdk-parammgr@webaudiomodules/sdk-parammgr#commit=c176175a7fe38844a50c967b6a74a2b6c7c24b21":
+  version: 0.0.13
+  resolution: "@webaudiomodules/sdk-parammgr@https://github.com/webaudiomodules/sdk-parammgr.git#commit=c176175a7fe38844a50c967b6a74a2b6c7c24b21"
+  checksum: c3aa1d49179c696ed54843339e6f6f1ddea3e43ec8f647990780e39154b3d0295204a4d9d1e04b879b8203c860616719df98333854d450395b9c8266def99137
   languageName: node
   linkType: hard
 
@@ -120,7 +120,7 @@ __metadata:
     "@types/dom-mediacapture-record": ^1.0.11
     "@webaudiomodules/api": "webaudiomodules/api#commit=d12879535761e27c6e475e84e799b8e43cc97e76"
     "@webaudiomodules/sdk": "webaudiomodules/sdk#commit=54ce5c93e0dea780525c79654393027cc287cb97"
-    "@webaudiomodules/sdk-parammgr": "webaudiomodules/sdk-parammgr#commit=7ac79d502cdd73209c1fab1ba194fd0f1a175c05"
+    "@webaudiomodules/sdk-parammgr": "webaudiomodules/sdk-parammgr#commit=c176175a7fe38844a50c967b6a74a2b6c7c24b21"
     copy-webpack-plugin: ^11.0.0
     lib0: ^0.2.47
     monaco-editor: ^0.25.2

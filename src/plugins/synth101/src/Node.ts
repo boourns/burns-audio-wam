@@ -42,6 +42,7 @@ export default class Synth101Node extends CompositeAudioNode {
     env!: AudioWorkletNode;
     gateSlew!: AudioWorkletNode;
     envFilter!: GainNode;
+    dummyGain: GainNode;
     envVCA!: GainNode;
     envPWM!: GainNode;
     kybdSource!: AudioBufferSourceNode | ConstantSourceNode;
@@ -153,7 +154,9 @@ export default class Synth101Node extends CompositeAudioNode {
         this.lfoOscMod.connect(this.subOsc.detune);
 
         this.env = new AudioWorkletNode(this.context, 'envelope-generator-processor')
+        this.dummyGain = this.context.createGain();
         this.gateSlew = new AudioWorkletNode(this.context, 'slew-processor')
+        this.gateSlew.connect(this.dummyGain)
         this.gateSlew.parameters.get("riseSpeed").setValueAtTime(0.1, 0)
         this.gateSlew.parameters.get("fallSpeed").setValueAtTime(0.1, 0)
 
